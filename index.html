@@ -9,6 +9,25 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- Header + hamburger (☰) kiri -->
+  <header id="app-header">
+    <div class="header-inner">
+      <button type="button" id="hamburger-btn" class="hamburger-btn" aria-label="Menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+      <a href="index.html" class="header-brand-link">
+        <img src="logo.png" alt="Logo" class="header-logo">
+        <span class="header-brand">CUFFLI <span>STORE</span></span>
+      </a>
+      <div class="online-badge">
+        <span class="online-dot"></span>
+        <span class="online-text">ONLINE</span>
+      </div>
+    </div>
+  </header>
+
   <div class="page">
     <div class="banner-wrap">
       <div class="swiper banner-swiper mySwiper">
@@ -18,7 +37,7 @@
             <div class="banner-fade"></div>
           </div>
           <div class="swiper-slide banner-slide">
-            <img src="ff.jpg" alt="Free Fire">
+            <img src="banner1.jpg" alt="Free Fire">
             <div class="banner-fade"></div>
             <div class="banner-caption">
               <div class="banner-caption-tag">Populer</div>
@@ -26,19 +45,11 @@
             </div>
           </div>
           <div class="swiper-slide banner-slide">
-            <img src="ml.jpg" alt="ML">
+            <img src="banner2.jpg" alt="ML">
             <div class="banner-fade"></div>
             <div class="banner-caption">
               <div class="banner-caption-tag" style="color:var(--violet);">Flash Sale</div>
-              <h2 class="banner-caption-title">MOBILE LEGENDS</h2>
-            </div>
-          </div>
-          <div class="swiper-slide banner-slide">
-            <img src="hok.jpg" alt="HOK">
-            <div class="banner-fade"></div>
-            <div class="banner-caption">
-              <div class="banner-caption-tag" style="color:var(--amber);">Hot</div>
-              <h2 class="banner-caption-title">HONOR OF KINGS</h2>
+              <h2 class="banner-caption-title">ALL WEBSITE CUFFLI</h2>
             </div>
           </div>
         </div>
@@ -89,6 +100,32 @@
       document.getElementById("search-empty").classList.toggle("hidden", n > 0);
     }
     renderGameGrid();
+  </script>
+
+  <script>
+    // Pastikan hamburger langsung hidup (header statis di index)
+    (function () {
+      function bind() {
+        const btn = document.getElementById("hamburger-btn");
+        if (!btn || btn.dataset.bound) return;
+        btn.dataset.bound = "1";
+        btn.addEventListener("click", function () {
+          if (typeof openDrawer === "function" && typeof closeDrawer === "function") {
+            const d = document.getElementById("side-drawer");
+            if (d && d.classList.contains("open")) closeDrawer();
+            else openDrawer();
+          } else {
+            // drawer belum di-inject: coba injectNav dulu
+            if (typeof injectNav === "function") injectNav();
+            if (typeof openDrawer === "function") openDrawer();
+          }
+        });
+      }
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+      else bind();
+      setTimeout(bind, 300);
+      setTimeout(bind, 1000);
+    })();
   </script>
 </body>
 </html>

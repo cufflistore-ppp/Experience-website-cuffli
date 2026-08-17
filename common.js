@@ -1,19 +1,19 @@
 /* ===== CUFFLI STORE — shared + Firebase ===== */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAuyTsK1jECXksJPjOZuTdKwB3_Y4_tkXI",
-  authDomain: "cufflistore-adf41.firebaseapp.com",
-  databaseURL: "https://cufflistore-adf41-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "cufflistore-adf41",
-  storageBucket: "cufflistore-adf41.firebasestorage.app",
-  messagingSenderId: "136744932448",
-  appId: "1:136744932448:web:4f8a53171bfa726c061f05",
-  measurementId: "G-QZ3QRK3MV7"
+  apiKey: "AIzaSyAV3V_2tOZQtSLpNSOB3dDiWMprXBGq2EI",
+  authDomain: "cuffli-all-game-54f30.firebaseapp.com",
+  databaseURL: "https://cuffli-all-game-54f30-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "cuffli-all-game-54f30",
+  storageBucket: "cuffli-all-game-54f30.firebasestorage.app",
+  messagingSenderId: "509183551168",
+  appId: "1:509183551168:web:27eef2c6355c43c2316f25",
+  measurementId: "G-JW00MS30TX"
 };
 
 // Telegram
-const TELEGRAM_TOKEN = "8957651122:AAEMVVIzLNj7pvlIeNVxTuDk0AsBwaFgTks";
-const TELEGRAM_CHAT_ID = "7701533150";
+const TELEGRAM_TOKEN = "8991985702:AAGicJk8zF9Md2dSbFvxzsf12BcdH1yv9QU";
+const TELEGRAM_CHAT_ID = "8817516070";
 
 // Admin password (halaman admin.html)
 const ADMIN_PASSWORD = "cuffliadmin";
@@ -353,28 +353,42 @@ function statusClass(status) {
 
 /* ---------- Nav ---------- */
 function injectNav() {
-  if (document.getElementById("app-header")) return;
   const user = getUser();
 
-  const header = document.createElement("header");
-  header.id = "app-header";
-  header.innerHTML = `
-    <div class="header-inner">
-      <button id="hamburger-btn" class="hamburger-btn" aria-label="Menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
-      <a href="index.html" class="header-inner" style="flex:1;min-width:0;padding:0;gap:10px;text-decoration:none;color:inherit;">
-        <img src="logo.png" alt="Logo" class="header-logo">
-        <span class="header-brand">CUFFLI <span>STORE</span></span>
-      </a>
-      <div class="online-badge">
-        <span class="online-dot"></span>
-        <span class="online-text">ONLINE</span>
-      </div>
-    </div>`;
-  document.body.prepend(header);
+  if (!document.getElementById("app-header")) {
+    const header = document.createElement("header");
+    header.id = "app-header";
+    header.innerHTML = `
+      <div class="header-inner">
+        <button type="button" id="hamburger-btn" class="hamburger-btn" aria-label="Menu">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+        <a href="index.html" class="header-brand-link">
+          <img src="logo.png" alt="Logo" class="header-logo">
+          <span class="header-brand">CUFFLI <span>STORE</span></span>
+        </a>
+        <div class="online-badge">
+          <span class="online-dot"></span>
+          <span class="online-text">ONLINE</span>
+        </div>
+      </div>`;
+    document.body.prepend(header);
+  }
+
+  if (document.getElementById("side-drawer")) {
+    // bind hamburger if needed
+    const btn = document.getElementById("hamburger-btn");
+    if (btn && !btn.dataset.navBound) {
+      btn.dataset.navBound = "1";
+      btn.addEventListener("click", () => {
+        if (document.getElementById("side-drawer").classList.contains("open")) closeDrawer();
+        else openDrawer();
+      });
+    }
+    return;
+  }
 
   const overlay = document.createElement("div");
   overlay.id = "drawer-overlay";
@@ -392,7 +406,9 @@ function injectNav() {
           <p class="drawer-user-label text-muted" style="font-size:var(--text-xs);margin:2px 0 0;">${user ? (user.username || user.email) : "Belum login"}</p>
         </div>
       </div>
-      <button onclick="closeDrawer()" class="hamburger-btn" style="background:var(--accent-soft);"><i class="fa-solid fa-xmark" style="color:var(--accent);"></i></button>
+      <button type="button" onclick="closeDrawer()" class="hamburger-btn" style="background:var(--accent-soft);" aria-label="Tutup">
+        <i class="fa-solid fa-xmark" style="color:var(--accent);"></i>
+      </button>
     </div>
     <nav class="drawer-nav">
       <a href="index.html" class="drawer-link">
@@ -415,10 +431,10 @@ function injectNav() {
         <span class="drawer-icon emerald"><i class="fa-solid fa-headset"></i></span>
         <div><p class="drawer-link-title">Kontak Admin</p><p class="drawer-link-sub">Hubungi kami</p></div>
       </a>
-      ${user ? `<button type="button" onclick="logoutUser()" class="drawer-link">
+      <button type="button" id="drawer-logout-btn" class="drawer-link ${user ? "" : "hidden"}" onclick="logoutUser()">
         <span class="drawer-icon red"><i class="fa-solid fa-right-from-bracket"></i></span>
         <div><p class="drawer-link-title">Logout</p><p class="drawer-link-sub">Keluar akun</p></div>
-      </button>` : ""}
+      </button>
     </nav>
     <div class="drawer-foot">&copy; 2026 CUFFLI STORE</div>`;
   document.body.appendChild(drawer);
@@ -428,6 +444,20 @@ function injectNav() {
     else openDrawer();
   });
 }
+
+function refreshNavUser() {
+  const user = getUser();
+  const label = document.querySelector(".drawer-user-label");
+  if (label) label.textContent = user ? (user.username || user.email) : "Belum login";
+  const logoutBtn = document.getElementById("drawer-logout-btn");
+  if (logoutBtn) logoutBtn.classList.toggle("hidden", !user);
+  // update login link title if present
+  const loginLink = document.querySelector('a.drawer-link[href="login.html"] .drawer-link-title');
+  const loginSub = document.querySelector('a.drawer-link[href="login.html"] .drawer-link-sub');
+  if (loginLink) loginLink.textContent = user ? "Akun Saya" : "Login Google";
+  if (loginSub) loginSub.textContent = user ? "Info akun" : "Masuk dengan Google";
+}
+
 function openDrawer() {
   document.getElementById("side-drawer")?.classList.add("open");
   document.getElementById("drawer-overlay")?.classList.add("show");
@@ -439,18 +469,22 @@ function closeDrawer() {
   document.getElementById("hamburger-btn")?.classList.remove("active");
 }
 
-/* Load Firebase SDK then init */
+/* Load Firebase SDK then init — nav TIDAK menunggu Firebase */
 (function loadFirebase() {
+  function bootNav() {
+    if (document.body && document.body.dataset.nav !== "off") {
+      injectNav();
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", bootNav);
+  } else {
+    bootNav();
+  }
+
   function done() {
     initFirebase();
-    document.addEventListener("DOMContentLoaded", () => {
-      if (document.body.dataset.nav !== "off") {
-        // nav setelah auth state pertama (atau timeout singkat)
-        authReady.then(() => injectNav()).catch(() => injectNav());
-        // fallback jika auth lambat
-        setTimeout(() => { if (!document.getElementById("app-header")) injectNav(); }, 800);
-      }
-    });
+    authReady.then(() => refreshNavUser()).catch(() => {});
   }
   if (typeof firebase !== "undefined") { done(); return; }
   const s1 = document.createElement("script");
@@ -462,9 +496,12 @@ function closeDrawer() {
       const s3 = document.createElement("script");
       s3.src = "https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js";
       s3.onload = done;
+      s3.onerror = done;
       document.head.appendChild(s3);
     };
+    s2.onerror = done;
     document.head.appendChild(s2);
   };
+  s1.onerror = done;
   document.head.appendChild(s1);
 })();

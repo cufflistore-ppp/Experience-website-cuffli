@@ -154,7 +154,17 @@ a { color: inherit; }
   flex-shrink: 0;
 }
 
+.header-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
 .header-brand {
+
   font-size: var(--text-lg);
   font-weight: 900;
   letter-spacing: 0.04em;
