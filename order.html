@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isi Data - CUFFLI STORE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="page-inner-sm fade-in">
+      <a id="back-link" href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Kembali ke Nominal</a>
+
+      <div class="card mb-5">
+        <p class="text-accent" style="font-size:var(--text-xs);font-weight:900;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 4px;">Paket Dipilih</p>
+        <h3 id="order-item-name" style="font-size:var(--text-lg);font-weight:900;margin:0;"></h3>
+        <p id="order-item-price" class="text-amber" style="font-size:var(--text-xl);font-weight:900;margin:6px 0 0;"></p>
+        <p id="order-game-label" class="text-muted mt-2" style="font-size:var(--text-sm);"></p>
+      </div>
+
+      <div class="card mb-5">
+        <h3 style="font-size:var(--text-base);font-weight:900;text-transform:uppercase;margin:0 0 16px;">1 · Data Akun Game</h3>
+        <div class="flex-col gap-3">
+          <div>
+            <label class="label">Nickname Akun</label>
+            <input type="text" id="player-nickname" class="input" placeholder="Masukkan Nickname">
+          </div>
+          <div>
+            <label class="label">User / Player ID</label>
+            <input type="text" id="player-id" class="input" placeholder="Contoh: 12345678">
+          </div>
+          <div id="zone-id-wrapper" class="hidden">
+            <label class="label">Zone ID</label>
+            <input type="text" id="zone-id" class="input" placeholder="(1234)">
+          </div>
+          <div id="choose-server-wrapper" class="hidden">
+            <label class="label">Choose Server</label>
+            <input type="text" id="choose-server" class="input" placeholder="(Asia)">
+          </div>
+          <div id="gmail-wrapper" class="hidden">
+            <label class="label">Gmail Akun (Minecraft)</label>
+            <input type="email" id="player-gmail" class="input" placeholder="contoh@gmail.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-5">
+        <h3 style="font-size:var(--text-base);font-weight:900;text-transform:uppercase;margin:0 0 16px;">2 · Metode Pembayaran</h3>
+        <div class="flex-col gap-3" id="pay-methods">
+          <div data-method="DANA" class="pay-card active"><i class="fa-solid fa-wallet"></i> DANA</div>
+          <div data-method="GOPAY" class="pay-card"><i class="fa-solid fa-money-bill-wave"></i> GOPAY</div>
+          <div data-method="QRIS" class="pay-card"><i class="fa-solid fa-qrcode"></i> QRIS</div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" onclick="lanjutBayar()">
+        <i class="fa-solid fa-receipt"></i> Lanjut ke Pembayaran
+      </button>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    const pending = getPendingOrder();
+    if (!pending) location.href = "index.html";
+
+    authReady.then((user) => {
+      if (!user) {
+        location.href = "login.html?next=" + encodeURIComponent("order.html");
+        return;
+      }
+      document.getElementById("order-item-name").textContent = pending.nominal;
+      document.getElementById("order-item-price").textContent = pending.harga;
+      document.getElementById("order-game-label").textContent = pending.gameLabel;
+      document.getElementById("back-link").href = "produk.html?game=" + pending.gameKey;
+
+      const gk = pending.gameKey;
+      if (gk === "ml" || gk === "mcg") document.getElementById("zone-id-wrapper").classList.remove("hidden");
+      if (gk === "gi") document.getElementById("choose-server-wrapper").classList.remove("hidden");
+      if (gk === "mc") document.getElementById("gmail-wrapper").classList.remove("hidden");
+    });
+
+    let selectedPay = pending.payMethod || "DANA";
+    document.querySelectorAll(".pay-card").forEach(el => {
+      el.addEventListener("click", () => {
+        selectedPay = el.dataset.method;
+        document.querySelectorAll(".pay-card").forEach(c => c.classList.remove("active"));
+        el.classList.add("active");
+      });
+    });
+
+    function lanjutBayar() {
+      const gk = pending.gameKey;
+      const nick = document.getElementById("player-nickname").value.trim();
+      const idPlayer = document.getElementById("player-id").value.trim();
+      const idZone = document.getElementById("zone-id").value.trim();
+      const server = document.getElementById("choose-server").value.trim();
+      const gmail = document.getElementById("player-gmail").value.trim();
+
+      if (!nick) return showAlert("Nickname Kosong", "Mohon masukkan Nickname akun game!", false);
+      if (!idPlayer) return showAlert("ID Kosong", "Mohon isi User / Player ID!", false);
+      if ((gk === "ml" || gk === "mcg") && !idZone) return showAlert("Zone ID Kosong", "Mohon isi Zone ID!", false);
+      if (gk === "gi" && !server) return showAlert("Server Kosong", "Mohon isi server Genshin!", false);
+      if (gk === "mc" && !gmail) return showAlert("Gmail Kosong", "Mohon isi Gmail akun Minecraft!", false);
+
+      let akunTujuan = idPlayer;
+      if (gk === "ml" || gk === "mcg") akunTujuan += ` (${idZone})`;
+      else if (gk === "gi") akunTujuan += ` (${server})`;
+      else if (gk === "mc") akunTujuan += ` | Gmail: ${gmail}`;
+
+      setPendingOrder({
+        ...pending, nickname: nick, playerId: idPlayer, zoneId: idZone,
+        server, gmail, akunTujuan, payMethod: selectedPay
+      });
+      location.href = "pembayaran.html";
+    }
+  </script>
+</body>
+</html>

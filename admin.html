@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - CUFFLI STORE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-nav="off">
+  <div class="page-inner-admin">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:12px;flex-wrap:wrap;">
+      <div>
+        <h1 style="font-size:var(--text-xl);font-weight:900;margin:0;">Admin Panel</h1>
+        <p class="text-muted mt-1" style="font-size:var(--text-sm);">Ubah status pesanan (Firebase) — riwayat user ikut update</p>
+      </div>
+      <a href="index.html" class="text-accent" style="font-size:var(--text-base);font-weight:700;text-decoration:none;">← Toko</a>
+    </div>
+
+    <div id="admin-login" class="card" style="max-width:360px;margin:0 auto;">
+      <p style="font-size:var(--text-base);font-weight:700;margin:0 0 12px;">Password Admin</p>
+      <input type="password" id="admin-pass" class="input mb-3" placeholder="Masukkan password"
+        onkeydown="if(event.key==='Enter')adminLogin()">
+      <button type="button" class="btn btn-primary" style="height:44px;font-size:var(--text-sm);" onclick="adminLogin()">Masuk</button>
+      <p class="text-muted text-center mt-3" style="font-size:var(--text-xs);">Password di common.js → ADMIN_PASSWORD</p>
+    </div>
+
+    <div id="admin-panel" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <p class="text-muted" style="font-size:var(--text-base);margin:0;">Total: <strong id="order-count" style="color:var(--text);">0</strong></p>
+        <button type="button" onclick="adminLogout()" class="text-muted" style="background:none;border:none;color:var(--red);font-size:var(--text-sm);font-weight:700;cursor:pointer;">Logout Admin</button>
+      </div>
+      <div id="admin-orders" class="flex-col gap-3"></div>
+      <p id="admin-empty" class="hidden text-center text-muted" style="padding:40px 0;font-size:var(--text-base);">Belum ada pesanan.</p>
+      <p id="admin-loading" class="text-center text-muted" style="padding:40px 0;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat...</p>
+    </div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    function isAdmin() { return sessionStorage.getItem("cuffli_admin") === "1"; }
+    function adminLogin() {
+      if (document.getElementById("admin-pass").value === ADMIN_PASSWORD) {
+        sessionStorage.setItem("cuffli_admin", "1");
+        showPanel();
+      } else showAlert("Salah", "Password admin tidak cocok.", false);
+    }
+    function adminLogout() {
+      sessionStorage.removeItem("cuffli_admin");
+      location.reload();
+    }
+    function showPanel() {
+      document.getElementById("admin-login").classList.add("hidden");
+      document.getElementById("admin-panel").classList.remove("hidden");
+      renderOrders();
+    }
+
+    async function renderOrders() {
+      const loading = document.getElementById("admin-loading");
+      const empty = document.getElementById("admin-empty");
+      const box = document.getElementById("admin-orders");
+      loading.classList.remove("hidden");
+      try {
+        const orders = await getAllOrders();
+        loading.classList.add("hidden");
+        document.getElementById("order-count").textContent = orders.length;
+        if (!orders.length) {
+          empty.classList.remove("hidden");
+          box.innerHTML = "";
+          return;
+        }
+        empty.classList.add("hidden");
+        box.innerHTML = orders.map(o => `
+          <div class="card" style="padding:16px;">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-bottom:8px;">
+              <div>
+                <p style="font-weight:900;font-size:var(--text-base);margin:0;">${o.gameLabel || "-"} · ${o.item || ""}</p>
+                <p class="font-mono text-muted mt-1" style="font-size:var(--text-xs);margin:0;">${o.orderId}</p>
+              </div>
+              <span class="status-badge ${statusClass(o.status)}">${o.status || "Menunggu"}</span>
+            </div>
+            <div class="text-muted" style="font-size:var(--text-xs);line-height:1.6;margin-bottom:12px;">
+              <p style="margin:0;">User: <span style="color:var(--text);">${o.username || "-"}</span> · ${o.userEmail || ""}</p>
+              <p style="margin:0;">UID: <span class="font-mono" style="color:var(--text);">${o.userId || ""}</span></p>
+              <p style="margin:0;">Nick: ${o.nickname || "-"} · Target: <span class="font-mono">${o.akunTujuan || "-"}</span></p>
+              ${o.gmail ? `<p style="margin:0;">Gmail: ${o.gmail}</p>` : ""}
+              <p style="margin:0;">${o.harga || ""} · ${o.method || ""} · ${o.createdAt ? new Date(o.createdAt).toLocaleString("id-ID") : ""}</p>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <button type="button" class="status-badge status-menunggu" style="cursor:pointer;border:1px solid var(--amber-border);" onclick="setStatus('${o.orderId}','Menunggu')">Menunggu</button>
+              <button type="button" class="status-badge status-diproses" style="cursor:pointer;" onclick="setStatus('${o.orderId}','Diproses')">Diproses</button>
+              <button type="button" class="status-badge status-selesai" style="cursor:pointer;" onclick="setStatus('${o.orderId}','Selesai')">Selesai</button>
+              <button type="button" class="status-badge status-gagal" style="cursor:pointer;" onclick="setStatus('${o.orderId}','Gagal')">Gagal</button>
+            </div>
+          </div>`).join("");
+      } catch (e) {
+        console.error(e);
+        loading.textContent = "Gagal memuat. Cek Firebase Database Rules.";
+      }
+    }
+
+    async function setStatus(orderId, status) {
+      try {
+        await updateOrderStatus(orderId, status);
+        showAlert("Updated", orderId + " → " + status, true);
+        renderOrders();
+      } catch (e) {
+        showAlert("Gagal", "Tidak bisa update status. Cek Rules.", false);
+      }
+    }
+
+    authReady.then(() => {
+      if (isAdmin()) showPanel();
+    });
+  </script>
+</body>
+</html>

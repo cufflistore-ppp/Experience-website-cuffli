@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pilih Nominal - CUFFLI STORE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="page-inner fade-in">
+      <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+
+      <div class="card mb-5" style="display:flex;align-items:center;gap:16px;padding:16px;">
+        <img id="prod-game-img" src="" alt="" style="width:64px;height:64px;border-radius:var(--radius-md);object-fit:cover;border:2px solid var(--accent-border);">
+        <div>
+          <h2 id="prod-game-name" style="font-size:var(--text-xl);font-weight:900;margin:0;"></h2>
+          <p class="text-muted mt-1" style="font-size:var(--text-sm);">Pilih nominal paket yang diinginkan</p>
+        </div>
+      </div>
+
+      <div id="product-list" class="product-grid"></div>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const gameKey = params.get("game") || "ff";
+    const meta = getGameMeta(gameKey);
+    if (!meta) location.href = "index.html";
+
+    document.getElementById("prod-game-img").src = meta.img;
+    document.getElementById("prod-game-name").textContent = meta.name;
+    document.title = meta.name + " - CUFFLI STORE";
+
+    const data = dataMap[gameKey] || [];
+    window._products = data;
+    document.getElementById("product-list").innerHTML = data.map((item, idx) => `
+      <div class="product-card" onclick="goOrder(${idx})">
+        <div>
+          <div class="product-icon"><i class="${meta.icon}"></i></div>
+          <div class="product-name">${item.d}</div>
+        </div>
+        <div class="product-price">${item.p}</div>
+      </div>`).join("");
+
+    function goOrder(idx) {
+      const item = window._products[idx];
+      if (!item) return;
+      setPendingOrder({
+        gameKey, gameLabel: meta.name,
+        nominal: item.d, harga: item.p, payMethod: "DANA"
+      });
+      location.href = "order.html";
+    }
+  </script>
+</body>
+</html>

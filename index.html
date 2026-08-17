@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CUFFLI STORE - Top Up Game Terpercaya</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="banner-wrap">
+      <div class="swiper banner-swiper mySwiper">
+        <div class="swiper-wrapper">
+          <div class="swiper-slide banner-slide">
+            <img src="banner.jpg" alt="Banner">
+            <div class="banner-fade"></div>
+          </div>
+          <div class="swiper-slide banner-slide">
+            <img src="ff.jpg" alt="Free Fire">
+            <div class="banner-fade"></div>
+            <div class="banner-caption">
+              <div class="banner-caption-tag">Populer</div>
+              <h2 class="banner-caption-title">FREE FIRE</h2>
+            </div>
+          </div>
+          <div class="swiper-slide banner-slide">
+            <img src="ml.jpg" alt="ML">
+            <div class="banner-fade"></div>
+            <div class="banner-caption">
+              <div class="banner-caption-tag" style="color:var(--violet);">Flash Sale</div>
+              <h2 class="banner-caption-title">MOBILE LEGENDS</h2>
+            </div>
+          </div>
+          <div class="swiper-slide banner-slide">
+            <img src="hok.jpg" alt="HOK">
+            <div class="banner-fade"></div>
+            <div class="banner-caption">
+              <div class="banner-caption-tag" style="color:var(--amber);">Hot</div>
+              <h2 class="banner-caption-title">HONOR OF KINGS</h2>
+            </div>
+          </div>
+        </div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </div>
+
+    <div class="page-inner">
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-game" class="search-input" placeholder="Cari nama game untuk top up..." oninput="filterGames(this.value)">
+      </div>
+
+      <h2 class="section-title">Pilih Game Favorit</h2>
+      <div id="game-grid" class="game-grid"></div>
+      <p id="search-empty" class="hidden text-center text-muted" style="padding:40px 0;font-size:var(--text-base);">Game tidak ditemukan.</p>
+    </div>
+  </div>
+  <footer class="site-footer">&copy; 2026 CUFFLI STORE. All rights reserved.</footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script src="common.js"></script>
+  <script>
+    new Swiper(".mySwiper", {
+      loop: true, speed: 700,
+      autoplay: { delay: 4500, disableOnInteraction: false },
+      pagination: { el: ".swiper-pagination", clickable: true }
+    });
+    function renderGameGrid() {
+      document.getElementById("game-grid").innerHTML = gamesMeta.map(g => `
+        <a href="produk.html?game=${g.key}" class="game-item" data-name="${g.name.toLowerCase()}">
+          <div class="game-card">
+            <div class="game-card-img">
+              <img src="${g.img}" alt="${g.name}" onerror="this.src='https://placehold.co/200x250/0f2137/38bdf8?text=${encodeURIComponent(g.name)}'">
+            </div>
+            <div class="game-card-name">${g.name}</div>
+          </div>
+        </a>`).join("");
+    }
+    function filterGames(q) {
+      const term = (q || "").toLowerCase().trim();
+      let n = 0;
+      document.querySelectorAll(".game-item").forEach(el => {
+        const ok = !term || (el.getAttribute("data-name") || "").includes(term);
+        el.classList.toggle("hidden-by-search", !ok);
+        if (ok) n++;
+      });
+      document.getElementById("search-empty").classList.toggle("hidden", n > 0);
+    }
+    renderGameGrid();
+  </script>
+</body>
+</html>

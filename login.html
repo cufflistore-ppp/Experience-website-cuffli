@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - CUFFLI STORE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="page-inner-sm fade-in" style="padding-top:40px;">
+      <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Beranda</a>
+
+      <div class="card text-center">
+        <img src="logo.png" alt="Logo" style="width:var(--logo-lg);height:var(--logo-lg);object-fit:contain;border-radius:var(--radius-full);border:2px solid var(--accent-border);background:var(--bg-body-1);padding:4px;margin:0 auto 12px;display:block;">
+        <h2 style="font-size:var(--text-xl);font-weight:900;margin:0;">Login Google</h2>
+        <p class="text-muted mt-1" style="font-size:var(--text-sm);">Masuk dengan akun Google untuk menyimpan riwayat</p>
+
+        <div id="already-login" class="hidden mt-5">
+          <img id="user-pic" src="logo.png" alt="" style="width:64px;height:64px;border-radius:50%;object-cover;border:2px solid var(--accent-border);margin:0 auto 12px;display:block;">
+          <p style="font-weight:900;margin:0;" id="user-name">-</p>
+          <p class="text-muted mt-1" style="font-size:var(--text-sm);" id="user-email">-</p>
+          <p class="text-muted mt-1" style="font-size:var(--text-xs);">ID: <span id="user-id" class="font-mono"></span></p>
+          <div class="flex-col gap-3 mt-5">
+            <a href="riwayat.html" class="btn btn-ghost" style="height:44px;font-size:var(--text-sm);">Lihat Riwayat</a>
+            <button type="button" class="btn btn-danger-ghost" style="height:44px;font-size:var(--text-sm);" onclick="logoutUser()">Logout</button>
+          </div>
+        </div>
+
+        <div id="login-box" class="mt-5">
+          <button type="button" id="btn-google" class="btn" style="background:#fff;color:#1f2937;height:48px;font-size:var(--text-base);text-transform:none;letter-spacing:0;font-weight:700;" onclick="doGoogleLogin()">
+            <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Lanjutkan dengan Google
+          </button>
+          <p id="login-error" class="hidden mt-3" style="color:var(--red);font-size:var(--text-sm);"></p>
+          <p class="text-muted mt-4" style="font-size:var(--text-xs);line-height:1.5;">
+            Pastikan di Firebase Console: Authentication → Sign-in method → Google = Enabled,
+            dan domain kamu ada di Authorized domains.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const nextPage = params.get("next") || "index.html";
+
+    authReady.then((user) => {
+      if (user) {
+        document.getElementById("login-box").classList.add("hidden");
+        document.getElementById("already-login").classList.remove("hidden");
+        document.getElementById("user-name").textContent = user.name || user.username || "-";
+        document.getElementById("user-email").textContent = user.email || "-";
+        document.getElementById("user-id").textContent = user.id || "-";
+        if (user.picture) document.getElementById("user-pic").src = user.picture;
+      }
+    });
+
+    async function doGoogleLogin() {
+      const btn = document.getElementById("btn-google");
+      const err = document.getElementById("login-error");
+      err.classList.add("hidden");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+      try {
+        await loginWithGoogle();
+        location.href = nextPage.includes(".html") ? nextPage : "index.html";
+      } catch (e) {
+        console.error(e);
+        err.textContent = e.message || "Gagal login Google. Cek Firebase Auth & domain.";
+        err.classList.remove("hidden");
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Lanjutkan dengan Google`;
+      }
+    }
+  </script>
+</body>
+</html>

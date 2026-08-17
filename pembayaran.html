@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran - CUFFLI STORE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="page-inner-sm fade-in">
+      <a href="order.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+
+      <div class="card-solid" style="overflow:hidden;padding:0;">
+        <div style="background:rgba(8,47,73,0.45);padding:16px 20px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <i class="fa-solid fa-file-invoice-dollar text-accent"></i>
+            <span style="font-size:var(--text-xs);font-weight:900;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);">Rincian Transaksi</span>
+          </div>
+          <span id="inv-id-label" class="font-mono text-muted" style="font-size:var(--text-xs);background:var(--bg-body-1);padding:2px 8px;border-radius:6px;border:1px solid var(--border-soft);">#...</span>
+        </div>
+
+        <div style="padding:20px;" class="flex-col gap-3">
+          <div class="text-center" style="padding:12px 0;">
+            <div style="width:48px;height:48px;margin:0 auto;position:relative;">
+              <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(245,158,11,0.15);border-top-color:var(--amber);animation:spin 1s linear infinite;"></div>
+            </div>
+            <p class="text-amber mt-3" style="font-size:var(--text-xs);font-weight:900;text-transform:uppercase;letter-spacing:0.1em;">Menunggu Pembayaran</p>
+          </div>
+
+          <div class="inv-row"><span class="inv-label"><i class="fa-solid fa-gamepad text-accent"></i> Game</span><span id="inv-game" class="inv-value">-</span></div>
+          <div class="inv-row"><span class="inv-label"><i class="fa-solid fa-box text-accent"></i> Item</span><span id="inv-item" class="inv-value text-accent">-</span></div>
+          <div class="inv-row"><span class="inv-label"><i class="fa-solid fa-id-card text-accent"></i> ID Target</span><span id="inv-target" class="inv-value font-mono" style="font-size:var(--text-sm);">-</span></div>
+          <div class="inv-row"><span class="inv-label"><i class="fa-solid fa-user-tag text-accent"></i> Nickname</span><span id="inv-nick" class="inv-value">-</span></div>
+          <div class="inv-row"><span class="inv-label"><i class="fa-solid fa-credit-card text-accent"></i> Metode</span><span id="inv-method" class="status-badge status-selesai">DANA</span></div>
+
+          <div style="border-bottom:1px dashed var(--border-soft);margin:4px 0;"></div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:var(--text-sm);font-weight:700;color:var(--text-muted);">Total Pembayaran</span>
+            <span id="inv-total" style="font-size:var(--text-xl);font-weight:900;color:var(--yellow);">Rp0</span>
+          </div>
+
+          <div class="card mt-3" style="background:rgba(6,16,31,0.6);padding:16px;">
+            <p class="text-muted" style="font-size:var(--text-xs);font-weight:900;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 10px;">
+              <i class="fa-solid fa-building-columns text-accent"></i> Transfer ke:
+            </p>
+            <div id="qris-box" class="hidden" style="background:#fff;padding:12px;border-radius:var(--radius-xl);max-width:180px;margin:0 auto 12px;">
+              <img src="qris.jpg" alt="QRIS" style="width:100%;display:block;">
+            </div>
+            <div style="background:var(--bg-drawer);padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-soft);">
+              <div id="admin-number" class="font-mono" style="font-size:var(--text-lg);font-weight:900;letter-spacing:0.06em;">-</div>
+              <div id="admin-name" class="text-muted" style="font-size:var(--text-xs);font-weight:700;margin-top:2px;text-transform:uppercase;">-</div>
+            </div>
+            <p class="text-emerald text-center mt-3" style="font-size:var(--text-xs);line-height:1.4;background:var(--emerald-soft);border:1px solid var(--emerald-border);padding:8px;border-radius:var(--radius-sm);">
+              Setelah transfer, tekan konfirmasi. Data masuk ke Telegram + riwayat akun kamu (Firebase).
+            </p>
+            <button type="button" id="btn-confirm" class="btn btn-success mt-3" onclick="konfirmasiPembayaran()">
+              <i class="fa-solid fa-paper-plane"></i> Konfirmasi Sudah Transfer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+  <script src="common.js"></script>
+  <script>
+    const pending = getPendingOrder();
+    if (!pending || !pending.nickname) location.href = "index.html";
+
+    const orderId = genOrderId();
+    document.getElementById("inv-id-label").textContent = "#" + orderId;
+    document.getElementById("inv-game").textContent = pending.gameLabel;
+    document.getElementById("inv-item").textContent = pending.nominal;
+    document.getElementById("inv-target").textContent = pending.akunTujuan;
+    document.getElementById("inv-nick").textContent = pending.nickname;
+    document.getElementById("inv-method").textContent = pending.payMethod;
+    document.getElementById("inv-total").textContent = pending.harga;
+
+    const acc = adminAccounts[pending.payMethod] || { number: "-", name: "-" };
+    document.getElementById("admin-number").textContent = acc.number;
+    document.getElementById("admin-name").textContent = acc.name;
+    if (pending.payMethod === "QRIS") document.getElementById("qris-box").classList.remove("hidden");
+
+    let alreadySent = false;
+
+    authReady.then((user) => {
+      if (!user) location.href = "login.html?next=pembayaran.html";
+    });
+
+    async function konfirmasiPembayaran() {
+      if (alreadySent) return;
+      const user = getUser();
+      if (!user) {
+        location.href = "login.html?next=pembayaran.html";
+        return;
+      }
+
+      const btn = document.getElementById("btn-confirm");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+
+      const order = {
+        orderId,
+        userId: user.id,
+        userEmail: user.email,
+        username: user.username || user.name || "",
+        gameKey: pending.gameKey,
+        gameLabel: pending.gameLabel,
+        item: pending.nominal,
+        harga: pending.harga,
+        method: pending.payMethod,
+        nickname: pending.nickname,
+        akunTujuan: pending.akunTujuan,
+        playerId: pending.playerId || "",
+        zoneId: pending.zoneId || "",
+        server: pending.server || "",
+        gmail: pending.gmail || "",
+        status: "Menunggu",
+        createdAt: Date.now()
+      };
+
+      try {
+        await addOrder(order); // Firebase RTDB
+      } catch (e) {
+        console.error(e);
+        showAlert("Gagal simpan", "Tidak bisa tulis ke Firebase. Cek Database Rules.", false);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Konfirmasi Sudah Transfer';
+        return;
+      }
+
+      const pesan = `🛒 *PESANAN BARU*\n\n` +
+        `🧾 *Order ID:* \`${orderId}\`\n` +
+        `👤 *User:* ${user.username || user.name} (${user.email})\n` +
+        `🔑 *UID:* \`${user.id}\`\n` +
+        `🎮 *Game:* ${pending.gameLabel}\n` +
+        `💎 *Paket:* ${pending.nominal}\n` +
+        `🏷 *Nickname:* ${pending.nickname}\n` +
+        `🆔 *ID Akun:* \`${pending.akunTujuan}\`\n` +
+        (pending.gmail ? `📧 *Gmail:* ${pending.gmail}\n` : "") +
+        `💳 *Metode:* ${pending.payMethod}\n` +
+        `💵 *Harga:* ${pending.harga}\n\n` +
+        `⚡ Status: Menunggu — user konfirmasi sudah transfer.`;
+
+      try {
+        await sendToTelegram(pesan);
+      } catch (e) {
+        console.warn("telegram", e);
+      }
+
+      alreadySent = true;
+      clearPendingOrder();
+      showAlert("Berhasil!", "Pesanan masuk Firebase + Telegram. Cek status di Riwayat.", true);
+      setTimeout(() => { location.href = "riwayat.html"; }, 1600);
+    }
+  </script>
+</body>
+</html>

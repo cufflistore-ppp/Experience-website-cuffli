@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat - CUFFLI STORE</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="page-inner-sm fade-in">
+      <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Beranda</a>
+
+      <div class="text-center mb-6">
+        <div style="width:56px;height:56px;margin:0 auto 12px;border-radius:var(--radius-xl);background:var(--amber-soft);border:1px solid var(--amber-border);display:flex;align-items:center;justify-content:center;color:var(--amber);font-size:var(--text-2xl);">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <h2 style="font-size:var(--text-lg);font-weight:900;margin:0;">Riwayat Pesanan</h2>
+        <p id="riwayat-sub" class="text-muted mt-1" style="font-size:var(--text-sm);">Memuat...</p>
+      </div>
+
+      <div id="riwayat-list" class="flex-col gap-3"></div>
+      <div id="riwayat-empty" class="hidden card text-center" style="padding:32px;">
+        <i class="fa-solid fa-inbox" style="font-size:32px;color:var(--text-dim);"></i>
+        <p class="text-muted mt-3" style="font-size:var(--text-base);">Belum ada riwayat.</p>
+        <p class="text-muted mt-1" style="font-size:var(--text-xs);">Muncul setelah konfirmasi pembayaran.</p>
+        <a href="index.html" class="text-accent" style="display:inline-block;margin-top:16px;font-size:var(--text-base);font-weight:700;text-decoration:none;">Top Up Sekarang →</a>
+      </div>
+      <div id="riwayat-loading" class="text-center text-muted" style="padding:40px 0;font-size:var(--text-base);">
+        <i class="fa-solid fa-spinner fa-spin"></i> Memuat riwayat...
+      </div>
+    </div>
+  </div>
+  <script src="common.js"></script>
+  <script>
+    authReady.then(async (user) => {
+      if (!user) {
+        location.href = "login.html?next=riwayat.html";
+        return;
+      }
+      document.getElementById("riwayat-sub").textContent =
+        "Akun: " + (user.username || user.name || "") + " · " + (user.email || "");
+
+      try {
+        const orders = await getUserOrders(user.id);
+        document.getElementById("riwayat-loading").classList.add("hidden");
+        if (!orders.length) {
+          document.getElementById("riwayat-empty").classList.remove("hidden");
+          return;
+        }
+        document.getElementById("riwayat-list").innerHTML = orders.map(o => `
+          <div class="card" style="padding:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;">
+              <div>
+                <p style="font-weight:900;font-size:var(--text-base);margin:0;">${o.gameLabel || "-"}</p>
+                <p class="text-accent mt-1" style="font-size:var(--text-sm);margin:0;">${o.item || "-"}</p>
+              </div>
+              <span class="status-badge ${statusClass(o.status)}">${o.status || "Menunggu"}</span>
+            </div>
+            <div class="text-muted" style="font-size:var(--text-xs);line-height:1.6;">
+              <p style="margin:0;">Order: <span class="font-mono" style="color:var(--text);">${o.orderId}</span></p>
+              <p style="margin:0;">ID: <span class="font-mono" style="color:var(--text);">${o.akunTujuan || "-"}</span></p>
+              <p style="margin:0;">Nick: ${o.nickname || "-"} · ${o.harga || ""} · ${o.method || ""}</p>
+              <p style="margin:0;">${o.createdAt ? new Date(o.createdAt).toLocaleString("id-ID") : ""}</p>
+            </div>
+          </div>`).join("");
+      } catch (e) {
+        console.error(e);
+        document.getElementById("riwayat-loading").textContent = "Gagal memuat riwayat. Cek Firebase Rules.";
+      }
+    });
+  </script>
+</body>
+</html>
