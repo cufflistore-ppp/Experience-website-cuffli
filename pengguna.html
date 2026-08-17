@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengguna — Admin CUFFLI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body data-page="pengguna">
+  <div id="loading-screen">
+    <div class="loading-logo">CUFFLI SOCIAL</div>
+    <div class="loading-text">Loading...</div>
+  </div>
+
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="logo"><i class="fa-solid fa-bolt"></i> CUFFLI ADMIN</div>
+      <ul class="admin-nav">
+        <li><a href="index.html"><i class="fa-solid fa-gauge-high"></i> Dashboard</a></li>
+        <li><a href="pesanan.html"><i class="fa-solid fa-box"></i> Pesanan</a></li>
+        <li><a href="layanan.html"><i class="fa-solid fa-list"></i> Layanan</a></li>
+        <li><a href="pengguna.html" class="active"><i class="fa-solid fa-users"></i> Pengguna</a></li>
+        <li><a href="statistik.html"><i class="fa-solid fa-chart-line"></i> Statistik</a></li>
+        <li><a href="../index.html"><i class="fa-solid fa-house"></i> Kembali ke Situs</a></li>
+        <li><a href="#" onclick="logout();return false"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+      </ul>
+    </aside>
+
+    <main class="admin-content">
+      <div class="admin-topbar">
+        <h1 style="font-size:1.4rem">Daftar Pengguna</h1>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Saldo</th>
+              <th>Pesanan</th>
+              <th>Bergabung</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/app.js"></script>
+  <script src="../js/admin.js"></script>
+</body>
+</html>

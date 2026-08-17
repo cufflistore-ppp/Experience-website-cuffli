@@ -3,117 +3,120 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Isi Data - CUFFLI STORE</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <title>Pesan Layanan — CUFFLI SOCIAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="page">
-    <div class="page-inner-sm fade-in">
-      <a id="back-link" href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Kembali ke Nominal</a>
-
-      <div class="card mb-5">
-        <p class="text-accent" style="font-size:var(--text-xs);font-weight:900;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 4px;">Paket Dipilih</p>
-        <h3 id="order-item-name" style="font-size:var(--text-lg);font-weight:900;margin:0;"></h3>
-        <p id="order-item-price" class="text-amber" style="font-size:var(--text-xl);font-weight:900;margin:6px 0 0;"></p>
-        <p id="order-game-label" class="text-muted mt-2" style="font-size:var(--text-sm);"></p>
-      </div>
-
-      <div class="card mb-5">
-        <h3 style="font-size:var(--text-base);font-weight:900;text-transform:uppercase;margin:0 0 16px;">1 · Data Akun Game</h3>
-        <div class="flex-col gap-3">
-          <div>
-            <label class="label">Nickname Akun</label>
-            <input type="text" id="player-nickname" class="input" placeholder="Masukkan Nickname">
-          </div>
-          <div>
-            <label class="label">User / Player ID</label>
-            <input type="text" id="player-id" class="input" placeholder="Contoh: 12345678">
-          </div>
-          <div id="zone-id-wrapper" class="hidden">
-            <label class="label">Zone ID</label>
-            <input type="text" id="zone-id" class="input" placeholder="(1234)">
-          </div>
-          <div id="choose-server-wrapper" class="hidden">
-            <label class="label">Choose Server</label>
-            <input type="text" id="choose-server" class="input" placeholder="(Asia)">
-          </div>
-          <div id="gmail-wrapper" class="hidden">
-            <label class="label">Gmail Akun (Minecraft)</label>
-            <input type="email" id="player-gmail" class="input" placeholder="contoh@gmail.com">
-          </div>
-        </div>
-      </div>
-
-      <div class="card mb-5">
-        <h3 style="font-size:var(--text-base);font-weight:900;text-transform:uppercase;margin:0 0 16px;">2 · Metode Pembayaran</h3>
-        <div class="flex-col gap-3" id="pay-methods">
-          <div data-method="DANA" class="pay-card active"><i class="fa-solid fa-wallet"></i> DANA</div>
-          <div data-method="GOPAY" class="pay-card"><i class="fa-solid fa-money-bill-wave"></i> GOPAY</div>
-          <div data-method="QRIS" class="pay-card"><i class="fa-solid fa-qrcode"></i> QRIS</div>
-        </div>
-      </div>
-
-      <button type="button" class="btn btn-primary" onclick="lanjutBayar()">
-        <i class="fa-solid fa-receipt"></i> Lanjut ke Pembayaran
-      </button>
-    </div>
+  <div id="loading-screen">
+    <div class="loading-logo">CUFFLI SOCIAL</div>
+    <div class="loading-text">Loading...</div>
   </div>
-  <script src="common.js"></script>
-  <script>
-    const pending = getPendingOrder();
-    if (!pending) location.href = "index.html";
 
-    authReady.then((user) => {
-      if (!user) {
-        location.href = "login.html?next=" + encodeURIComponent("order.html");
-        return;
-      }
-      document.getElementById("order-item-name").textContent = pending.nominal;
-      document.getElementById("order-item-price").textContent = pending.harga;
-      document.getElementById("order-game-label").textContent = pending.gameLabel;
-      document.getElementById("back-link").href = "produk.html?game=" + pending.gameKey;
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Beranda</a></li>
+        <li><a href="layanan.html">Layanan</a></li>
+        <li><a href="order.html" class="active">Pesanan</a></li>
+        <li><a href="riwayat.html">Riwayat</a></li>
+        <li><a href="profil.html">Profil</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login">Login</a>
+        <a href="profil.html" class="btn btn-primary btn-sm hidden" id="nav-profile">Profil</a>
+      </div>
+    </div>
+  </nav>
 
-      const gk = pending.gameKey;
-      if (gk === "ml" || gk === "mcg") document.getElementById("zone-id-wrapper").classList.remove("hidden");
-      if (gk === "gi") document.getElementById("choose-server-wrapper").classList.remove("hidden");
-      if (gk === "mc") document.getElementById("gmail-wrapper").classList.remove("hidden");
-    });
+  <div class="page-header">
+    <h1>Form <span style="color:var(--neon)">Pemesanan</span></h1>
+    <p>Isi detail pesanan. Harga dihitung otomatis.</p>
+  </div>
 
-    let selectedPay = pending.payMethod || "DANA";
-    document.querySelectorAll(".pay-card").forEach(el => {
-      el.addEventListener("click", () => {
-        selectedPay = el.dataset.method;
-        document.querySelectorAll(".pay-card").forEach(c => c.classList.remove("active"));
-        el.classList.add("active");
-      });
-    });
+  <section class="section" style="padding-top:10px">
+    <div class="container">
+      <div class="warning-box">
+        <i class="fa-solid fa-shield-halved"></i>
+        <div>
+          <strong>Keamanan:</strong> Jangan berikan password, OTP, atau PIN akun sosial media. Cukup link publik saja.
+        </div>
+      </div>
 
-    function lanjutBayar() {
-      const gk = pending.gameKey;
-      const nick = document.getElementById("player-nickname").value.trim();
-      const idPlayer = document.getElementById("player-id").value.trim();
-      const idZone = document.getElementById("zone-id").value.trim();
-      const server = document.getElementById("choose-server").value.trim();
-      const gmail = document.getElementById("player-gmail").value.trim();
+      <div class="card form-card fade-in" id="order-form-wrap">
+        <form id="order-form">
+          <div class="form-group">
+            <label>Platform *</label>
+            <select class="form-control" id="platform" required>
+              <option value="">Pilih Platform</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Jenis Layanan *</label>
+            <select class="form-control" id="service-type" required>
+              <option value="">Pilih Layanan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Link Akun / Postingan *</label>
+            <input type="url" class="form-control" id="link" placeholder="https://..." required>
+          </div>
+          <div class="form-group">
+            <label>Jumlah Pesanan *</label>
+            <input type="number" class="form-control" id="quantity" placeholder="Masukkan jumlah" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>Catatan Tambahan (opsional)</label>
+            <textarea class="form-control" id="note" placeholder="Catatan untuk admin..."></textarea>
+          </div>
 
-      if (!nick) return showAlert("Nickname Kosong", "Mohon masukkan Nickname akun game!", false);
-      if (!idPlayer) return showAlert("ID Kosong", "Mohon isi User / Player ID!", false);
-      if ((gk === "ml" || gk === "mcg") && !idZone) return showAlert("Zone ID Kosong", "Mohon isi Zone ID!", false);
-      if (gk === "gi" && !server) return showAlert("Server Kosong", "Mohon isi server Genshin!", false);
-      if (gk === "mc" && !gmail) return showAlert("Gmail Kosong", "Mohon isi Gmail akun Minecraft!", false);
+          <div class="price-box">
+            <div class="label">Harga satuan: <span id="unit-price">Rp 0</span></div>
+            <div class="total" id="total-price">Rp 0</div>
+            <div class="label" style="margin-top:4px">Total Pembayaran</div>
+          </div>
 
-      let akunTujuan = idPlayer;
-      if (gk === "ml" || gk === "mcg") akunTujuan += ` (${idZone})`;
-      else if (gk === "gi") akunTujuan += ` (${server})`;
-      else if (gk === "mc") akunTujuan += ` | Gmail: ${gmail}`;
+          <button type="submit" class="btn btn-primary btn-block">
+            <i class="fa-solid fa-eye"></i> LIHAT RINGKASAN
+          </button>
+        </form>
+      </div>
 
-      setPendingOrder({
-        ...pending, nickname: nick, playerId: idPlayer, zoneId: idZone,
-        server, gmail, akunTujuan, payMethod: selectedPay
-      });
-      location.href = "pembayaran.html";
-    }
-  </script>
+      <!-- Summary (hidden initially) -->
+      <div class="card form-card hidden fade-in" id="order-summary">
+        <h2 style="text-align:center;margin-bottom:20px">Ringkasan Pesanan</h2>
+        <div class="summary-box">
+          <div class="summary-row"><span>Platform</span><span id="sum-platform">-</span></div>
+          <div class="summary-row"><span>Layanan</span><span id="sum-service">-</span></div>
+          <div class="summary-row"><span>Link</span><span id="sum-link" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">-</span></div>
+          <div class="summary-row"><span>Jumlah</span><span id="sum-qty">-</span></div>
+          <div class="summary-row"><span>Harga Satuan</span><span id="sum-unit">-</span></div>
+          <div class="summary-row"><span>Catatan</span><span id="sum-note">-</span></div>
+          <div class="summary-row"><span>Total Pembayaran</span><span id="sum-total">-</span></div>
+        </div>
+        <div class="d-flex gap-2 mt-3" style="flex-wrap:wrap">
+          <button class="btn btn-outline" id="btn-edit" style="flex:1"><i class="fa-solid fa-pen"></i> Edit</button>
+          <button class="btn btn-primary" id="btn-confirm" style="flex:1"><i class="fa-solid fa-check"></i> KONFIRMASI PESANAN</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-bottom" style="border:none;padding-top:0">© 2026 CUFFLI SOCIAL. All Rights Reserved.</div>
+  </footer>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><i class="fa-solid fa-house"></i> Beranda</a>
+    <a href="layanan.html"><i class="fa-solid fa-store"></i> Layanan</a>
+    <a href="order.html" class="active"><i class="fa-solid fa-cart-shopping"></i> Pesanan</a>
+    <a href="profil.html"><i class="fa-solid fa-user"></i> Profil</a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script src="js/order.js"></script>
 </body>
 </html>

@@ -3,55 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kontak Admin - CUFFLI STORE</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <title>Kontak Admin — CUFFLI SOCIAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="page">
-    <div class="page-inner-sm fade-in">
-      <a href="index.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Beranda</a>
-      <div class="card">
-        <div class="text-center mb-5">
-          <div style="width:56px;height:56px;margin:0 auto 12px;border-radius:var(--radius-xl);background:var(--emerald-soft);border:1px solid var(--emerald-border);display:flex;align-items:center;justify-content:center;color:var(--emerald);font-size:var(--text-2xl);">
-            <i class="fa-solid fa-headset"></i>
-          </div>
-          <h2 style="font-size:var(--text-lg);font-weight:900;margin:0;">Kontak Admin</h2>
-          <p class="text-muted mt-1" style="font-size:var(--text-sm);">Hubungi kami jika ada kendala</p>
-        </div>
-        <div class="flex-col gap-3">
-          <a href="https://wa.me/6287722626689" target="_blank" class="card" style="display:flex;align-items:center;gap:14px;padding:14px;text-decoration:none;color:inherit;">
-            <span class="drawer-icon emerald"><i class="fa-brands fa-whatsapp" style="font-size:var(--text-lg);"></i></span>
-            <div>
-              <p style="font-weight:700;font-size:var(--text-base);margin:0;">WhatsApp Admin¹</p>
-              <p class="text-muted" style="font-size:var(--text-xs);margin:2px 0 0;">0877-2262-6689</p>
-            </div>
-        <div class="flex-col gap-3">
-          <a href="https://wa.me/62895352910438" target="_blank" class="card" style="display:flex;align-items:center;gap:14px;padding:14px;text-decoration:none;color:inherit;">
-            <span class="drawer-icon emerald"><i class="fa-brands fa-whatsapp" style="font-size:var(--text-lg);"></i></span>
-            <div>
-              <p style="font-weight:700;font-size:var(--text-base);margin:0;">WhatsApp Admin²</p>
-              <p class="text-muted" style="font-size:var(--text-xs);margin:2px 0 0;">0895-3529-10438</p>
-            </div>
-          </a>
-          <div class="card" style="display:flex;align-items:center;gap:14px;padding:14px;">
-            <span class="drawer-icon sky"><i class="fa-solid fa-clock"></i></span>
-            <div>
-              <p style="font-weight:700;font-size:var(--text-base);margin:0;">Jam Hari Biasa</p>
-              <p class="text-muted" style="font-size:var(--text-xs);margin:2px 0 0;">15.00-21.00</p>
-            </div>
-          </a>
-          <div class="card" style="display:flex;align-items:center;gap:14px;padding:14px;">
-            <span class="drawer-icon sky"><i class="fa-solid fa-clock"></i></span>
-            <div>
-              <p style="font-weight:700;font-size:var(--text-base);margin:0;">Jam Hari Libur</p>
-              <p class="text-muted" style="font-size:var(--text-xs);margin:2px 0 0;">08.00-22.00</p>
-            </div>
-          </div>
-        </div>
+  <div id="loading-screen">
+    <div class="loading-logo">CUFFLI SOCIAL</div>
+    <div class="loading-text">Loading...</div>
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Beranda</a></li>
+        <li><a href="layanan.html">Layanan</a></li>
+        <li><a href="order.html">Pesanan</a></li>
+        <li><a href="riwayat.html">Riwayat</a></li>
+        <li><a href="profil.html">Profil</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login">Login</a>
+        <a href="profil.html" class="btn btn-primary btn-sm hidden" id="nav-profile">Profil</a>
       </div>
     </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>Kontak <span style="color:var(--neon)">Admin</span></h1>
+    <p>Butuh bantuan? Tim support siap membantu 24/7.</p>
   </div>
-  <script src="common.js"></script>
+
+  <section class="section" style="padding-top:10px">
+    <div class="container" style="max-width:500px">
+      <div class="card text-center fade-in" style="padding:40px">
+        <i class="fa-brands fa-whatsapp" style="font-size:3.5rem;color:#25D366;margin-bottom:16px;filter:drop-shadow(0 0 12px rgba(37,211,102,0.4))"></i>
+        <h2>WhatsApp Admin</h2>
+        <p class="text-muted mt-1 mb-3">Respon cepat untuk konfirmasi pembayaran, status pesanan, atau pertanyaan lainnya.</p>
+        <a href="https://wa.me/6281234567890?text=Halo%20Admin%20CUFFLI%20SOCIAL" target="_blank" class="btn btn-primary btn-block">
+          <i class="fa-brands fa-whatsapp"></i> Chat via WhatsApp
+        </a>
+        <p class="text-muted mt-3" style="font-size:0.85rem">Jam operasional: 24 jam setiap hari</p>
+      </div>
+
+      <div class="warning-box mt-3">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div>Admin resmi tidak akan pernah meminta password atau OTP akun sosial media kamu.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-bottom" style="border:none">© 2026 CUFFLI SOCIAL. All Rights Reserved.</div>
+  </footer>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><i class="fa-solid fa-house"></i> Beranda</a>
+    <a href="layanan.html"><i class="fa-solid fa-store"></i> Layanan</a>
+    <a href="order.html"><i class="fa-solid fa-cart-shopping"></i> Pesanan</a>
+    <a href="profil.html"><i class="fa-solid fa-user"></i> Profil</a>
+  </nav>
+
+  <script src="js/app.js"></script>
 </body>
 </html>

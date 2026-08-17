@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil & Dashboard — CUFFLI SOCIAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="loading-screen">
+    <div class="loading-logo">CUFFLI SOCIAL</div>
+    <div class="loading-text">Loading...</div>
+  </div>
+
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Beranda</a></li>
+        <li><a href="layanan.html">Layanan</a></li>
+        <li><a href="order.html">Pesanan</a></li>
+        <li><a href="riwayat.html">Riwayat</a></li>
+        <li><a href="profil.html" class="active">Profil</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login">Login</a>
+        <a href="profil.html" class="btn btn-primary btn-sm hidden" id="nav-profile">Profil</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container" id="profile-content">
+      <!-- Filled by JS -->
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-bottom" style="border:none;padding-top:0">© 2026 CUFFLI SOCIAL. All Rights Reserved.</div>
+  </footer>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><i class="fa-solid fa-house"></i> Beranda</a>
+    <a href="layanan.html"><i class="fa-solid fa-store"></i> Layanan</a>
+    <a href="order.html"><i class="fa-solid fa-cart-shopping"></i> Pesanan</a>
+    <a href="profil.html" class="active"><i class="fa-solid fa-user"></i> Profil</a>
+  </nav>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = getCurrentUser();
+      const container = document.getElementById('profile-content');
+
+      if (!user) {
+        container.innerHTML = `
+          <div class="card text-center" style="padding:48px;max-width:420px;margin:0 auto">
+            <i class="fa-solid fa-user-lock" style="font-size:2.8rem;color:var(--neon);margin-bottom:16px"></i>
+            <h2>Belum Login</h2>
+            <p class="text-muted mt-1">Login atau daftar untuk melihat dashboard.</p>
+            <div class="d-flex gap-2 justify-between mt-3" style="flex-wrap:wrap">
+              <a href="login.html" class="btn btn-primary" style="flex:1">Login</a>
+              <a href="register.html" class="btn btn-outline" style="flex:1">Daftar</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const orders = getOrders().filter(o => o.userId === user.id);
+      const active = orders.filter(o => ['Menunggu Pembayaran','Pembayaran Diterima','Diproses'].includes(o.status)).length;
+      const done = orders.filter(o => o.status === 'Selesai').length;
+      const totalSpent = orders
+        .filter(o => ['Pembayaran Diterima','Diproses','Selesai'].includes(o.status))
+        .reduce((s, o) => s + o.total, 0);
+
+      container.innerHTML = `
+        <div class="profile-header fade-in">
+          <div class="avatar">${(user.name || user.username).charAt(0).toUpperCase()}</div>
+          <div class="profile-info">
+            <h2>${user.name || user.username}</h2>
+            <p>@${user.username} · ${user.email}</p>
+            ${user.role === 'admin' ? '<a href="admin/index.html" class="btn btn-outline btn-sm mt-1"><i class="fa-solid fa-gauge"></i> Admin Panel</a>' : ''}
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="card stat-card card-glow">
+            <div class="stat-icon"><i class="fa-solid fa-box"></i></div>
+            <div class="stat-value">${orders.length}</div>
+            <div class="stat-label">Total Pesanan</div>
+          </div>
+          <div class="card stat-card card-glow">
+            <div class="stat-icon"><i class="fa-solid fa-spinner"></i></div>
+            <div class="stat-value">${active}</div>
+            <div class="stat-label">Pesanan Aktif</div>
+          </div>
+          <div class="card stat-card card-glow">
+            <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-value">${done}</div>
+            <div class="stat-label">Selesai</div>
+          </div>
+          <div class="card stat-card card-glow">
+            <div class="stat-icon"><i class="fa-solid fa-wallet"></i></div>
+            <div class="stat-value" style="font-size:1.2rem">${formatRupiah(user.balance || 0)}</div>
+            <div class="stat-label">Saldo</div>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <h3 style="margin-bottom:12px;font-size:1rem">Ringkasan Transaksi</h3>
+          <div class="summary-row"><span>Total Pengeluaran</span><span style="color:var(--neon)">${formatRupiah(totalSpent)}</span></div>
+          <div class="summary-row"><span>Member sejak</span><span>${formatDate(user.createdAt)}</span></div>
+        </div>
+
+        <div class="d-flex gap-2" style="flex-wrap:wrap">
+          <a href="layanan.html" class="btn btn-primary"><i class="fa-solid fa-cart-plus"></i> Pesan Layanan</a>
+          <a href="riwayat.html" class="btn btn-outline"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat</a>
+          <button class="btn btn-outline" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>
