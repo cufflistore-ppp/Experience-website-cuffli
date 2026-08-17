@@ -1,131 +1,307 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CUFFLI STORE - Top Up Game Terpercaya</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+  <title>VORTEX HUB — All-in-One Digital Platform</title>
+  <meta name="description" content="Platform all-in-one dengan ratusan tools: kalkulator, converter, AI, developer tools, games, dan banyak lagi.">
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- Header + hamburger (☰) kiri -->
-  <header id="app-header">
-    <div class="header-inner">
-      <button type="button" id="hamburger-btn" class="hamburger-btn" aria-label="Menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
-      <a href="index.html" class="header-brand-link">
-        <img src="logo.png" alt="Logo" class="header-logo">
-        <span class="header-brand">CUFFLI <span>STORE</span></span>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">V</div>
+        <span>VORTEX <span class="gradient-text">HUB</span></span>
       </a>
-      <div class="online-badge">
-        <span class="online-dot"></span>
-        <span class="online-text">ONLINE</span>
+      
+      <div class="nav-links">
+        <a href="index.html" class="active">Beranda</a>
+        <a href="tools.html">Tools</a>
+        <a href="ai.html">AI</a>
+        <a href="games.html">Games</a>
+        <a href="developer.html">Developer</a>
+      </div>
+
+      <div class="nav-actions">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Cari tools..." autocomplete="off">
+          <div class="search-results"></div>
+        </div>
+        <button class="theme-toggle" title="Ganti Tema">🌙</button>
+        <button class="btn-icon menu-toggle" onclick="Search.openMobile()" title="Cari">🔍</button>
+        <div id="nav-user-area"></div>
       </div>
     </div>
-  </header>
+  </nav>
 
-  <div class="page">
-    <div class="banner-wrap">
-      <div class="swiper banner-swiper mySwiper">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide banner-slide">
-            <img src="banner.jpg" alt="Banner">
-            <div class="banner-fade"></div>
+  <!-- Mobile Search Overlay -->
+  <div class="mobile-search-overlay">
+    <div class="mobile-search-header">
+      <input type="text" placeholder="Cari tools, AI, games...">
+      <button class="btn btn-secondary btn-sm" onclick="Search.closeMobile()">Tutup</button>
+    </div>
+    <div id="mobile-search-results"></div>
+  </div>
+
+  <div class="page-wrapper">
+    <main class="main-content">
+      <!-- Hero -->
+      <section class="hero">
+        <div class="container">
+          <h1>Semua Tools Digital<br><span class="gradient-text">Dalam Satu Tempat</span></h1>
+          <p>Kalkulator, Converter, AI Assistant, Developer Tools, Mini Games, dan puluhan tools lainnya. Gratis, cepat, dan siap pakai.</p>
+          
+          <div class="hero-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Cari apa yang kamu butuhkan...">
+            <div class="search-results" id="hero-search-results" style="left:0;right:0"></div>
           </div>
-          <div class="swiper-slide banner-slide">
-            <img src="banner1.jpg" alt="Free Fire">
-            <div class="banner-fade"></div>
-            <div class="banner-caption">
-              <div class="banner-caption-tag">Populer</div>
-              <h2 class="banner-caption-title">FREE FIRE</h2>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <div class="number" id="stat-tools">50+</div>
+              <div class="label">Tools Tersedia</div>
             </div>
-          </div>
-          <div class="swiper-slide banner-slide">
-            <img src="banner2.jpg" alt="ML">
-            <div class="banner-fade"></div>
-            <div class="banner-caption">
-              <div class="banner-caption-tag" style="color:var(--violet);">Flash Sale</div>
-              <h2 class="banner-caption-title">ALL WEBSITE CUFFLI</h2>
+            <div class="stat-item">
+              <div class="number">8</div>
+              <div class="label">Kategori</div>
+            </div>
+            <div class="stat-item">
+              <div class="number" id="stat-users">128+</div>
+              <div class="label">Pengguna</div>
+            </div>
+            <div class="stat-item">
+              <div class="number">100%</div>
+              <div class="label">Gratis</div>
             </div>
           </div>
         </div>
-        <div class="swiper-pagination"></div>
-      </div>
-    </div>
+      </section>
 
-    <div class="page-inner">
-      <div class="search-wrap">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="search-game" class="search-input" placeholder="Cari nama game untuk top up..." oninput="filterGames(this.value)">
-      </div>
-
-      <h2 class="section-title">Pilih Game Favorit</h2>
-      <div id="game-grid" class="game-grid"></div>
-      <p id="search-empty" class="hidden text-center text-muted" style="padding:40px 0;font-size:var(--text-base);">Game tidak ditemukan.</p>
-    </div>
-  </div>
-  <footer class="site-footer">&copy; 2026 CUFFLI STORE. All rights reserved.</footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <script src="common.js"></script>
-  <script>
-    new Swiper(".mySwiper", {
-      loop: true, speed: 700,
-      autoplay: { delay: 4500, disableOnInteraction: false },
-      pagination: { el: ".swiper-pagination", clickable: true }
-    });
-    function renderGameGrid() {
-      document.getElementById("game-grid").innerHTML = gamesMeta.map(g => `
-        <a href="produk.html?game=${g.key}" class="game-item" data-name="${g.name.toLowerCase()}">
-          <div class="game-card">
-            <div class="game-card-img">
-              <img src="${g.img}" alt="${g.name}" onerror="this.src='https://placehold.co/200x250/0f2137/38bdf8?text=${encodeURIComponent(g.name)}'">
-            </div>
-            <div class="game-card-name">${g.name}</div>
+      <!-- Categories -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title"><span class="icon">📂</span> Kategori</h2>
+            <a href="tools.html" class="btn btn-secondary btn-sm">Lihat Semua →</a>
           </div>
-        </a>`).join("");
-    }
-    function filterGames(q) {
-      const term = (q || "").toLowerCase().trim();
-      let n = 0;
-      document.querySelectorAll(".game-item").forEach(el => {
-        const ok = !term || (el.getAttribute("data-name") || "").includes(term);
-        el.classList.toggle("hidden-by-search", !ok);
-        if (ok) n++;
-      });
-      document.getElementById("search-empty").classList.toggle("hidden", n > 0);
-    }
-    renderGameGrid();
-  </script>
+          <div class="grid grid-4">
+            <a href="calculator.html" class="card tool-card">
+              <div class="tool-icon">🔢</div>
+              <h4>Kalkulator</h4>
+              <p>Biasa, ilmiah, BMI, diskon, pajak, dan lainnya</p>
+            </a>
+            <a href="converter.html" class="card tool-card">
+              <div class="tool-icon">🔄</div>
+              <h4>Converter</h4>
+              <p>Panjang, berat, suhu, data, mata uang</p>
+            </a>
+            <a href="ai.html" class="card tool-card">
+              <div class="tool-icon">🤖</div>
+              <h4>AI Tools</h4>
+              <p>Chat, writer, translator, code assistant</p>
+            </a>
+            <a href="text-tools.html" class="card tool-card">
+              <div class="tool-icon">📝</div>
+              <h4>Text Tools</h4>
+              <p>Counter, case converter, password generator</p>
+            </a>
+            <a href="image-tools.html" class="card tool-card">
+              <div class="tool-icon">🖼️</div>
+              <h4>Image Tools</h4>
+              <p>Resize, compress, rotate (client-side)</p>
+            </a>
+            <a href="developer.html" class="card tool-card">
+              <div class="tool-icon">💻</div>
+              <h4>Developer</h4>
+              <p>JSON, Base64, Hash, Regex, UUID</p>
+            </a>
+            <a href="finance.html" class="card tool-card">
+              <div class="tool-icon">💰</div>
+              <h4>Finance</h4>
+              <p>Loan, investment, profit, currency</p>
+            </a>
+            <a href="games.html" class="card tool-card">
+              <div class="tool-icon">🎮</div>
+              <h4>Mini Games</h4>
+              <p>Tic Tac Toe, Snake, Memory, dan lebih</p>
+            </a>
+          </div>
+        </div>
+      </section>
 
+      <!-- Popular Tools -->
+      <section class="section" style="background: var(--bg-secondary); padding: 2.5rem 0;">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title"><span class="icon">🔥</span> Tools Populer</h2>
+          </div>
+          <div class="grid grid-4" id="popular-tools">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Highlight -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title"><span class="icon">🤖</span> AI Tools</h2>
+            <a href="ai.html" class="btn btn-primary btn-sm">Coba AI →</a>
+          </div>
+          <div class="grid grid-3">
+            <a href="ai.html#chat" class="card tool-card">
+              <div class="tool-icon">💬</div>
+              <h4>AI Chat</h4>
+              <p>Ngobrol dengan asisten AI pintar</p>
+              <span class="badge">Populer</span>
+            </a>
+            <a href="ai.html#writer" class="card tool-card">
+              <div class="tool-icon">✍️</div>
+              <h4>AI Writer</h4>
+              <p>Bantu tulis artikel & konten</p>
+            </a>
+            <a href="ai.html#code" class="card tool-card">
+              <div class="tool-icon">💻</div>
+              <h4>AI Code Assistant</h4>
+              <p>Bantuan menulis & debug kode</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Games Preview -->
+      <section class="section" style="background: var(--bg-secondary);">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title"><span class="icon">🎮</span> Mini Games</h2>
+            <a href="games.html" class="btn btn-secondary btn-sm">Main Semua →</a>
+          </div>
+          <div class="grid grid-3">
+            <a href="games.html#tictactoe" class="card tool-card">
+              <div class="tool-icon">⭕</div>
+              <h4>Tic Tac Toe</h4>
+              <p>Main klasik X vs O</p>
+            </a>
+            <a href="games.html#snake" class="card tool-card">
+              <div class="tool-icon">🐍</div>
+              <h4>Snake</h4>
+              <p>Game ular legendaris</p>
+            </a>
+            <a href="games.html#memory" class="card tool-card">
+              <div class="tool-icon">🧠</div>
+              <h4>Memory Game</h4>
+              <p>Uji daya ingatmu</p>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="section">
+        <div class="container" style="max-width: 800px;">
+          <div class="section-header" style="justify-content: center;">
+            <h2 class="section-title">❓ Pertanyaan Umum</h2>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Apakah VORTEX HUB gratis? <span>+</span></button>
+            <div class="faq-answer"><div class="faq-answer-inner">Ya, seluruh tools di VORTEX HUB dapat digunakan secara gratis tanpa batasan.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Apakah data saya aman? <span>+</span></button>
+            <div class="faq-answer"><div class="faq-answer-inner">Sebagian besar tools berjalan sepenuhnya di browser (client-side). Data tidak diupload ke server kecuali kamu memilih fitur yang membutuhkan akun.</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Bagaimana cara menggunakan AI Tools? <span>+</span></button>
+            <div class="faq-answer"><div class="faq-answer-inner">AI Tools tersedia dalam mode demo lokal. Untuk hasil lebih baik, kamu bisa menambahkan API key sendiri di halaman Pengaturan (opsional).</div></div>
+          </div>
+          <div class="faq-item">
+            <button class="faq-question">Bisa digunakan di HP? <span>+</span></button>
+            <div class="faq-answer"><div class="faq-answer-inner">Tentu! VORTEX HUB didesain mobile-first dan responsif di semua perangkat.</div></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <a href="index.html" class="logo" style="margin-bottom: 1rem;">
+              <div class="logo-icon">V</div>
+              <span>VORTEX HUB</span>
+            </a>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; max-width: 280px;">Platform all-in-one untuk kebutuhan digital sehari-hari. Tools, AI, games, dan lebih banyak lagi.</p>
+          </div>
+          <div>
+            <h4>Tools</h4>
+            <a href="calculator.html">Kalkulator</a>
+            <a href="converter.html">Converter</a>
+            <a href="text-tools.html">Text Tools</a>
+            <a href="image-tools.html">Image Tools</a>
+          </div>
+          <div>
+            <h4>Lainnya</h4>
+            <a href="ai.html">AI Tools</a>
+            <a href="developer.html">Developer</a>
+            <a href="finance.html">Finance</a>
+            <a href="games.html">Games</a>
+          </div>
+          <div>
+            <h4>Akun</h4>
+            <a href="login.html">Login</a>
+            <a href="register.html">Register</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="settings.html">Pengaturan</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          © 2026 VORTEX HUB. Dibuat dengan ❤️ untuk semua pengguna.
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Bottom Nav Mobile -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="active"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
   <script>
-    // Pastikan hamburger langsung hidup (header statis di index)
-    (function () {
-      function bind() {
-        const btn = document.getElementById("hamburger-btn");
-        if (!btn || btn.dataset.bound) return;
-        btn.dataset.bound = "1";
-        btn.addEventListener("click", function () {
-          if (typeof openDrawer === "function" && typeof closeDrawer === "function") {
-            const d = document.getElementById("side-drawer");
-            if (d && d.classList.contains("open")) closeDrawer();
-            else openDrawer();
-          } else {
-            // drawer belum di-inject: coba injectNav dulu
-            if (typeof injectNav === "function") injectNav();
-            if (typeof openDrawer === "function") openDrawer();
-          }
-        });
+    // Populate popular tools
+    document.addEventListener('DOMContentLoaded', () => {
+      const popular = ['calc-basic', 'ai-chat', 'text-password', 'dev-json', 'conv-currency', 'game-tictactoe', 'calc-bmi', 'text-counter'];
+      const container = document.getElementById('popular-tools');
+      if (container) {
+        container.innerHTML = popular.map(id => {
+          const t = getToolById(id);
+          if (!t) return '';
+          return `<a href="${t.page}" class="card tool-card" onclick="useTool('${t.id}')">
+            <div class="tool-icon">${t.icon}</div>
+            <h4>${t.name}</h4>
+            <p>${t.desc}</p>
+          </a>`;
+        }).join('');
       }
-      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
-      else bind();
-      setTimeout(bind, 300);
-      setTimeout(bind, 1000);
-    })();
+    });
   </script>
 </body>
 </html>

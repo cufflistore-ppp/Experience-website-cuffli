@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini Games — VORTEX HUB</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo"><div class="logo-icon">V</div><span>VORTEX <span class="gradient-text">HUB</span></span></a>
+      <div class="nav-links"><a href="index.html">Beranda</a><a href="tools.html">Tools</a><a href="ai.html">AI</a><a href="games.html" class="active">Games</a><a href="developer.html">Developer</a></div>
+      <div class="nav-actions">
+        <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Cari..."><div class="search-results"></div></div>
+        <button class="theme-toggle">🌙</button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <div class="tool-layout with-sidebar">
+          <aside class="tool-sidebar">
+            <h4>Mini Games</h4>
+            <a href="#tictactoe" class="active">⭕ Tic Tac Toe</a>
+            <a href="#rps">✊ Batu Gunting Kertas</a>
+            <a href="#guess">🎲 Number Guessing</a>
+            <a href="#reaction">⚡ Reaction Test</a>
+            <a href="#memory">🧠 Memory Game</a>
+            <a href="#snake">🐍 Snake</a>
+          </aside>
+
+          <div class="tool-panel">
+            <div id="panel-tictactoe" class="game-panel">
+              <h2>Tic Tac Toe</h2>
+              <div class="game-area">
+                <div class="game-status" id="ttt-status">Giliran: X</div>
+                <div class="game-board" style="grid-template-columns:repeat(3,1fr)">
+                  <div class="game-cell ttt-cell"></div><div class="game-cell ttt-cell"></div><div class="game-cell ttt-cell"></div>
+                  <div class="game-cell ttt-cell"></div><div class="game-cell ttt-cell"></div><div class="game-cell ttt-cell"></div>
+                  <div class="game-cell ttt-cell"></div><div class="game-cell ttt-cell"></div><div class="game-cell ttt-cell"></div>
+                </div>
+                <button class="btn btn-secondary" id="ttt-reset">Reset</button>
+              </div>
+            </div>
+
+            <div id="panel-rps" class="game-panel hidden">
+              <h2>Batu Gunting Kertas</h2>
+              <div class="game-area">
+                <div class="flex gap-2">
+                  <button class="btn btn-lg rps-btn" data-choice="0" style="font-size:2rem">✊</button>
+                  <button class="btn btn-lg rps-btn" data-choice="1" style="font-size:2rem">✋</button>
+                  <button class="btn btn-lg rps-btn" data-choice="2" style="font-size:2rem">✌️</button>
+                </div>
+                <div id="rps-result" class="game-status mt-2">Pilih salah satu!</div>
+              </div>
+            </div>
+
+            <div id="panel-guess" class="game-panel hidden">
+              <h2>Number Guessing</h2>
+              <p class="desc">Tebak angka antara 1–100</p>
+              <div class="form-group"><input type="number" class="form-control" id="guess-input" placeholder="Tebakanmu" min="1" max="100"></div>
+              <button class="btn btn-primary" id="btn-guess">Tebak</button>
+              <div class="game-status mt-2" id="guess-status">Silakan tebak!</div>
+            </div>
+
+            <div id="panel-reaction" class="game-panel hidden">
+              <h2>Reaction Test</h2>
+              <p class="desc">Klik area saat berubah hijau. Jangan klik terlalu cepat!</p>
+              <div id="reaction-area" class="game-area" style="background:var(--accent);color:white;cursor:pointer;min-height:200px;font-size:1.3rem;font-weight:700">
+                Klik untuk mulai
+              </div>
+            </div>
+
+            <div id="panel-memory" class="game-panel hidden">
+              <h2>Memory Game</h2>
+              <div class="game-status" id="memory-status">Cocokkan semua pasangan!</div>
+              <div id="memory-board" class="game-board" style="grid-template-columns:repeat(4,1fr);gap:8px;margin-top:1rem"></div>
+            </div>
+
+            <div id="panel-snake" class="game-panel hidden">
+              <h2>Snake</h2>
+              <p class="desc">Gunakan panah keyboard atau tombol di bawah</p>
+              <div class="game-status" id="snake-status">Klik Start untuk mulai</div>
+              <canvas id="snake-canvas" width="300" height="300" style="border-radius:12px;border:2px solid var(--border);display:block;margin:1rem auto"></canvas>
+              <div class="flex-center gap-1">
+                <button class="btn btn-primary" id="snake-start">Start</button>
+              </div>
+              <div class="flex-center gap-1 mt-2">
+                <button class="btn btn-secondary" data-snake="up">↑</button>
+              </div>
+              <div class="flex-center gap-1">
+                <button class="btn btn-secondary" data-snake="left">←</button>
+                <button class="btn btn-secondary" data-snake="down">↓</button>
+                <button class="btn btn-secondary" data-snake="right">→</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html" class="active"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/games.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => Games.init());</script>
+</body>
+</html>

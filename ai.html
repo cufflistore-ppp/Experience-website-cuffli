@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Tools — VORTEX HUB</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo"><div class="logo-icon">V</div><span>VORTEX <span class="gradient-text">HUB</span></span></a>
+      <div class="nav-links"><a href="index.html">Beranda</a><a href="tools.html">Tools</a><a href="ai.html" class="active">AI</a><a href="games.html">Games</a><a href="developer.html">Developer</a></div>
+      <div class="nav-actions">
+        <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Cari..."><div class="search-results"></div></div>
+        <button class="theme-toggle">🌙</button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <div class="tool-layout with-sidebar">
+          <aside class="tool-sidebar">
+            <h4>AI Tools</h4>
+            <a href="#chat" class="active">💬 AI Chat</a>
+            <a href="#writer">✍️ AI Writer</a>
+            <a href="#summarizer">📋 Summarizer</a>
+            <a href="#translator">🌐 Translator</a>
+            <a href="#idea">💡 Idea Generator</a>
+            <a href="#code">💻 Code Assistant</a>
+            <a href="#prompt">🎯 Prompt Generator</a>
+          </aside>
+
+          <div class="tool-panel">
+            <div id="panel-chat" class="ai-panel">
+              <h2>AI Chat</h2>
+              <p class="desc">Mode demo lokal. Tambahkan API key di Pengaturan untuk hasil lebih baik.</p>
+              <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                  <div class="chat-msg ai">Halo! Saya asisten AI VORTEX HUB. Ada yang bisa saya bantu?</div>
+                </div>
+                <form class="chat-input-area" id="chat-form">
+                  <input type="text" id="chat-input" placeholder="Ketik pesan..." autocomplete="off">
+                  <button type="submit" class="btn btn-primary">Kirim</button>
+                </form>
+              </div>
+            </div>
+
+            <div id="panel-writer" class="ai-panel hidden">
+              <h2>AI Writer</h2>
+              <div class="form-group"><label class="form-label">Topik</label><input type="text" class="form-control" id="writer-topic" placeholder="Contoh: Manfaat olahraga pagi"></div>
+              <button class="btn btn-primary" id="btn-writer">Tulis Konten</button>
+              <textarea class="form-control mt-2" id="writer-output" rows="12" readonly></textarea>
+            </div>
+
+            <div id="panel-summarizer" class="ai-panel hidden">
+              <h2>AI Summarizer</h2>
+              <textarea class="form-control" id="sum-input" rows="6" placeholder="Tempel teks panjang di sini..."></textarea>
+              <button class="btn btn-primary mt-2" id="btn-summarize">Ringkas</button>
+              <textarea class="form-control mt-2" id="sum-output" rows="5" readonly></textarea>
+            </div>
+
+            <div id="panel-translator" class="ai-panel hidden">
+              <h2>AI Translator</h2>
+              <textarea class="form-control" id="trans-input" rows="4" placeholder="Teks yang ingin diterjemahkan"></textarea>
+              <button class="btn btn-primary mt-2" id="btn-translate">Terjemahkan</button>
+              <textarea class="form-control mt-2" id="trans-output" rows="4" readonly></textarea>
+            </div>
+
+            <div id="panel-idea" class="ai-panel hidden">
+              <h2>AI Idea Generator</h2>
+              <div class="form-group"><label class="form-label">Topik / Bidang</label><input type="text" class="form-control" id="idea-topic" placeholder="Contoh: konten YouTube"></div>
+              <button class="btn btn-primary" id="btn-idea">Generate Ide</button>
+              <textarea class="form-control mt-2" id="idea-output" rows="8" readonly></textarea>
+            </div>
+
+            <div id="panel-code" class="ai-panel hidden">
+              <h2>AI Code Assistant</h2>
+              <textarea class="form-control" id="code-prompt" rows="3" placeholder="Jelaskan kode yang kamu butuhkan..."></textarea>
+              <button class="btn btn-primary mt-2" id="btn-code">Generate Code</button>
+              <textarea class="form-control mt-2" id="code-output" rows="10" readonly style="font-family:monospace"></textarea>
+            </div>
+
+            <div id="panel-prompt" class="ai-panel hidden">
+              <h2>AI Prompt Generator</h2>
+              <div class="form-group"><label class="form-label">Tujuan / Goal</label><input type="text" class="form-control" id="prompt-goal" placeholder="Contoh: membuat rencana belajar JavaScript"></div>
+              <button class="btn btn-primary" id="btn-prompt">Buat Prompt</button>
+              <textarea class="form-control mt-2" id="prompt-output" rows="10" readonly></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html" class="active"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ai.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => AI.init());</script>
+</body>
+</html>

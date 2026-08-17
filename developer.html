@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Tools — VORTEX HUB</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo"><div class="logo-icon">V</div><span>VORTEX <span class="gradient-text">HUB</span></span></a>
+      <div class="nav-links"><a href="index.html">Beranda</a><a href="tools.html">Tools</a><a href="ai.html">AI</a><a href="games.html">Games</a><a href="developer.html" class="active">Developer</a></div>
+      <div class="nav-actions">
+        <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Cari..."><div class="search-results"></div></div>
+        <button class="theme-toggle">🌙</button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <div class="tool-layout with-sidebar">
+          <aside class="tool-sidebar">
+            <h4>Developer</h4>
+            <a href="#json" class="active">{ } JSON</a>
+            <a href="#base64">🔡 Base64</a>
+            <a href="#url">🔗 URL Encode</a>
+            <a href="#uuid">🆔 UUID</a>
+            <a href="#timestamp">🕒 Timestamp</a>
+            <a href="#hash">#️⃣ Hash</a>
+            <a href="#regex">🔍 Regex</a>
+            <a href="#color">🎨 Color</a>
+          </aside>
+
+          <div class="tool-panel">
+            <div id="panel-json" class="dev-panel">
+              <h2>JSON Formatter & Validator</h2>
+              <textarea class="form-control" id="json-input" rows="8" placeholder='{"name": "VORTEX"}'></textarea>
+              <div class="flex gap-1 mt-2">
+                <button class="btn btn-primary" id="btn-json-format">Format</button>
+                <button class="btn btn-secondary" id="btn-json-minify">Minify</button>
+              </div>
+              <textarea class="form-control mt-2" id="json-output" rows="8" readonly></textarea>
+            </div>
+
+            <div id="panel-base64" class="dev-panel hidden">
+              <h2>Base64 Encoder / Decoder</h2>
+              <textarea class="form-control" id="b64-input" rows="4"></textarea>
+              <div class="flex gap-1 mt-2">
+                <button class="btn btn-primary" id="btn-b64-encode">Encode</button>
+                <button class="btn btn-secondary" id="btn-b64-decode">Decode</button>
+              </div>
+              <textarea class="form-control mt-2" id="b64-output" rows="4" readonly></textarea>
+            </div>
+
+            <div id="panel-url" class="dev-panel hidden">
+              <h2>URL Encoder / Decoder</h2>
+              <textarea class="form-control" id="url-input" rows="3"></textarea>
+              <div class="flex gap-1 mt-2">
+                <button class="btn btn-primary" id="btn-url-encode">Encode</button>
+                <button class="btn btn-secondary" id="btn-url-decode">Decode</button>
+              </div>
+              <textarea class="form-control mt-2" id="url-output" rows="3" readonly></textarea>
+            </div>
+
+            <div id="panel-uuid" class="dev-panel hidden">
+              <h2>UUID Generator</h2>
+              <button class="btn btn-primary" id="btn-uuid">Generate UUID v4</button>
+              <input type="text" class="form-control mt-2" id="uuid-output" readonly>
+            </div>
+
+            <div id="panel-timestamp" class="dev-panel hidden">
+              <h2>Timestamp Converter</h2>
+              <div class="form-group"><label class="form-label">Unix Timestamp</label><input type="number" class="form-control" id="ts-input"></div>
+              <div class="flex gap-1">
+                <button class="btn btn-primary" id="btn-ts-convert">Convert</button>
+                <button class="btn btn-secondary" id="btn-ts-now">Sekarang</button>
+              </div>
+              <div class="result-box mt-2" id="ts-output">-</div>
+            </div>
+
+            <div id="panel-hash" class="dev-panel hidden">
+              <h2>Hash Generator</h2>
+              <textarea class="form-control" id="hash-input" rows="3"></textarea>
+              <div class="form-group mt-2"><label class="form-label">Algoritma</label>
+                <select class="form-control" id="hash-algo"><option>SHA-256</option><option>SHA-1</option><option>Simple</option></select>
+              </div>
+              <button class="btn btn-primary" id="btn-hash">Generate Hash</button>
+              <input type="text" class="form-control mt-2" id="hash-output" readonly>
+            </div>
+
+            <div id="panel-regex" class="dev-panel hidden">
+              <h2>Regex Tester</h2>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Pattern</label><input type="text" class="form-control" id="regex-pattern" placeholder="\\d+"></div>
+                <div class="form-group"><label class="form-label">Flags</label><input type="text" class="form-control" id="regex-flags" value="g" placeholder="gi"></div>
+              </div>
+              <textarea class="form-control" id="regex-text" rows="4" placeholder="Teks untuk diuji"></textarea>
+              <button class="btn btn-primary mt-2" id="btn-regex">Test</button>
+              <textarea class="form-control mt-2" id="regex-output" rows="4" readonly></textarea>
+            </div>
+
+            <div id="panel-color" class="dev-panel hidden">
+              <h2>Color Converter</h2>
+              <div class="form-group"><label class="form-label">HEX</label><input type="text" class="form-control" id="color-hex" value="#6366f1" placeholder="#6366f1"></div>
+              <button class="btn btn-primary" id="btn-color">Convert</button>
+              <div class="form-group mt-2"><label class="form-label">RGB</label><input type="text" class="form-control" id="color-rgb" readonly></div>
+              <div id="color-preview" style="height:60px;border-radius:12px;margin-top:1rem;background:#6366f1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/developer.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => Developer.init());</script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator — VORTEX HUB</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo"><div class="logo-icon">V</div><span>VORTEX <span class="gradient-text">HUB</span></span></a>
+      <div class="nav-links">
+        <a href="index.html">Beranda</a>
+        <a href="tools.html">Tools</a>
+        <a href="ai.html">AI</a>
+        <a href="games.html">Games</a>
+        <a href="developer.html">Developer</a>
+      </div>
+      <div class="nav-actions">
+        <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Cari..."><div class="search-results"></div></div>
+        <button class="theme-toggle">🌙</button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <div class="tool-layout with-sidebar">
+          <aside class="tool-sidebar">
+            <h4>Kalkulator</h4>
+            <a href="#basic" class="active">🔢 Biasa</a>
+            <a href="#percent">📊 Persentase</a>
+            <a href="#discount">🏷️ Diskon</a>
+            <a href="#tax">🧾 Pajak</a>
+            <a href="#bmi">⚖️ BMI</a>
+            <a href="#age">🎂 Umur</a>
+            <a href="#scientific">🔬 Scientific</a>
+          </aside>
+
+          <div class="tool-panel">
+            <!-- Basic -->
+            <div id="panel-basic" class="calc-panel">
+              <h2>Kalkulator Biasa</h2>
+              <p class="desc">Operasi aritmatika dasar</p>
+              <div class="calc-display">
+                <div class="expression" id="basic-expression">0</div>
+                <div class="result" id="basic-result">0</div>
+              </div>
+              <div class="calc-buttons">
+                <button class="calc-btn" data-val="C">C</button>
+                <button class="calc-btn" data-val="CE">⌫</button>
+                <button class="calc-btn operator" data-val="%">%</button>
+                <button class="calc-btn operator" data-val="÷">÷</button>
+                <button class="calc-btn" data-val="7">7</button>
+                <button class="calc-btn" data-val="8">8</button>
+                <button class="calc-btn" data-val="9">9</button>
+                <button class="calc-btn operator" data-val="×">×</button>
+                <button class="calc-btn" data-val="4">4</button>
+                <button class="calc-btn" data-val="5">5</button>
+                <button class="calc-btn" data-val="6">6</button>
+                <button class="calc-btn operator" data-val="−">−</button>
+                <button class="calc-btn" data-val="1">1</button>
+                <button class="calc-btn" data-val="2">2</button>
+                <button class="calc-btn" data-val="3">3</button>
+                <button class="calc-btn operator" data-val="+">+</button>
+                <button class="calc-btn zero" data-val="0">0</button>
+                <button class="calc-btn" data-val=".">.</button>
+                <button class="calc-btn equals" data-val="=">=</button>
+              </div>
+            </div>
+
+            <!-- Percent -->
+            <div id="panel-percent" class="calc-panel hidden">
+              <h2>Kalkulator Persentase</h2>
+              <p class="desc">Hitung nilai persentase dari sebuah angka</p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Angka</label>
+                  <input type="number" class="form-control" id="percent-num" placeholder="100">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Persentase (%)</label>
+                  <input type="number" class="form-control" id="percent-pct" placeholder="15">
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btn-percent">Hitung</button>
+              <div class="result-box mt-2">Hasil: <strong id="percent-result">-</strong></div>
+            </div>
+
+            <!-- Discount -->
+            <div id="panel-discount" class="calc-panel hidden">
+              <h2>Kalkulator Diskon</h2>
+              <p class="desc">Hitung harga setelah diskon</p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Harga Asli (Rp)</label>
+                  <input type="number" class="form-control" id="discount-price" placeholder="100000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Diskon (%)</label>
+                  <input type="number" class="form-control" id="discount-pct" placeholder="20">
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btn-discount">Hitung</button>
+              <div class="mt-2">
+                <div>Hemat: <strong id="discount-save">-</strong></div>
+                <div>Harga Final: <strong id="discount-final" style="font-size:1.3rem;color:var(--accent)">-</strong></div>
+              </div>
+            </div>
+
+            <!-- Tax -->
+            <div id="panel-tax" class="calc-panel hidden">
+              <h2>Kalkulator Pajak</h2>
+              <p class="desc">Hitung PPN / pajak</p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Jumlah (Rp)</label>
+                  <input type="number" class="form-control" id="tax-amount" placeholder="100000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tarif Pajak (%)</label>
+                  <input type="number" class="form-control" id="tax-rate" value="11" placeholder="11">
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btn-tax">Hitung</button>
+              <div class="mt-2">
+                <div>Pajak: <strong id="tax-value">-</strong></div>
+                <div>Total: <strong id="tax-total" style="font-size:1.3rem;color:var(--accent)">-</strong></div>
+              </div>
+            </div>
+
+            <!-- BMI -->
+            <div id="panel-bmi" class="calc-panel hidden">
+              <h2>Kalkulator BMI</h2>
+              <p class="desc">Body Mass Index</p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Berat (kg)</label>
+                  <input type="number" class="form-control" id="bmi-weight" placeholder="65">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Tinggi (cm)</label>
+                  <input type="number" class="form-control" id="bmi-height" placeholder="170">
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btn-bmi">Hitung BMI</button>
+              <div class="mt-2 text-center">
+                <div style="font-size:2.5rem;font-weight:800;color:var(--accent)" id="bmi-result">-</div>
+                <div id="bmi-category" style="font-size:1.1rem;font-weight:600">-</div>
+              </div>
+            </div>
+
+            <!-- Age -->
+            <div id="panel-age" class="calc-panel hidden">
+              <h2>Kalkulator Umur</h2>
+              <p class="desc">Hitung usia dari tanggal lahir</p>
+              <div class="form-group">
+                <label class="form-label">Tanggal Lahir</label>
+                <input type="date" class="form-control" id="age-birth">
+              </div>
+              <button class="btn btn-primary" id="btn-age">Hitung Umur</button>
+              <div class="result-box mt-2" id="age-result">-</div>
+            </div>
+
+            <!-- Scientific -->
+            <div id="panel-scientific" class="calc-panel hidden">
+              <h2>Scientific Calculator</h2>
+              <p class="desc">Fungsi matematika lanjutan</p>
+              <div class="form-group">
+                <label class="form-label">Input (derajat untuk trig)</label>
+                <input type="number" class="form-control" id="sci-input" placeholder="45" step="any">
+              </div>
+              <div class="grid grid-4" style="gap:0.5rem">
+                <button class="btn btn-secondary sci-btn" data-op="sin">sin</button>
+                <button class="btn btn-secondary sci-btn" data-op="cos">cos</button>
+                <button class="btn btn-secondary sci-btn" data-op="tan">tan</button>
+                <button class="btn btn-secondary sci-btn" data-op="sqrt">√</button>
+                <button class="btn btn-secondary sci-btn" data-op="log">log</button>
+                <button class="btn btn-secondary sci-btn" data-op="ln">ln</button>
+                <button class="btn btn-secondary sci-btn" data-op="pow2">x²</button>
+                <button class="btn btn-secondary sci-btn" data-op="pow3">x³</button>
+                <button class="btn btn-secondary sci-btn" data-op="fact">n!</button>
+                <button class="btn btn-secondary sci-btn" data-op="pi">π</button>
+                <button class="btn btn-secondary sci-btn" data-op="e">e</button>
+              </div>
+              <div class="result-box mt-2">Hasil: <strong id="sci-result">-</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html" class="active"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/calculator.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => Calculator.init());</script>
+</body>
+</html>

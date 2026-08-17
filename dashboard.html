@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel — VORTEX HUB</title>
+  <title>Dashboard — VORTEX HUB</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -22,43 +22,44 @@
   <div class="page-wrapper">
     <main class="main-content">
       <div class="container">
-        <h1>🛡️ Admin Panel</h1>
-        <p class="text-muted mb-3">Kelola website VORTEX HUB</p>
+        <h1>Dashboard</h1>
+        <p class="text-muted mb-3">Selamat datang, <strong id="dash-name">User</strong> (<span id="dash-email"></span>)</p>
 
         <div class="dashboard-stats">
           <div class="stat-card">
-            <div class="icon-box">👥</div>
-            <div><div class="value" id="admin-users">0</div><div class="label">Users</div></div>
-          </div>
-          <div class="stat-card">
             <div class="icon-box">🧰</div>
-            <div><div class="value" id="admin-tools">0</div><div class="label">Tools</div></div>
+            <div><div class="value" id="stat-tools-total">0</div><div class="label">Total Tools</div></div>
           </div>
           <div class="stat-card">
-            <div class="icon-box">📋</div>
-            <div><div class="value" id="admin-activity">0</div><div class="label">Activity Logs</div></div>
+            <div class="icon-box">🕐</div>
+            <div><div class="value" id="stat-recent">0</div><div class="label">Recent</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="icon-box">⭐</div>
+            <div><div class="value" id="stat-favs">0</div><div class="label">Favorit</div></div>
           </div>
         </div>
 
-        <div class="card mt-3">
-          <h3>User Management</h3>
-          <div class="table-wrapper mt-2">
-            <table>
-              <thead>
-                <tr><th>Nama</th><th>Email</th><th>Role</th><th>Joined</th></tr>
-              </thead>
-              <tbody id="admin-users-table"></tbody>
-            </table>
-          </div>
+        <div class="section-header mt-3">
+          <h2 class="section-title">🕐 Baru Digunakan</h2>
         </div>
+        <div class="grid grid-4" id="recent-tools"></div>
 
-        <div class="card mt-3">
-          <h3>Activity Log</h3>
-          <div id="admin-activity-list" class="mt-2"></div>
+        <div class="section-header mt-3">
+          <h2 class="section-title">⭐ Favorit</h2>
         </div>
+        <div class="grid grid-4" id="fav-tools"></div>
       </div>
     </main>
   </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html" class="active"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
 
   <script src="js/storage.js"></script>
   <script src="js/theme.js"></script>
@@ -68,7 +69,7 @@
   <script src="js/auth.js"></script>
   <script src="js/navbar.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/admin.js"></script>
-  <script>document.addEventListener('DOMContentLoaded', () => Admin.init());</script>
+  <script src="js/dashboard.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => Dashboard.init());</script>
 </body>
 </html>

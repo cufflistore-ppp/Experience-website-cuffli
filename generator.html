@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator — VORTEX HUB</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo"><div class="logo-icon">V</div><span>VORTEX <span class="gradient-text">HUB</span></span></a>
+      <div class="nav-links"><a href="index.html">Beranda</a><a href="tools.html">Tools</a><a href="ai.html">AI</a><a href="games.html">Games</a><a href="developer.html">Developer</a></div>
+      <div class="nav-actions">
+        <button class="theme-toggle">🌙</button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <h1>🛠️ Generator Tools</h1>
+        <p class="text-muted mb-3">Berbagai generator praktis</p>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>🔐 Password Generator</h3>
+            <div class="form-group mt-2"><label class="form-label">Panjang</label><input type="number" class="form-control" id="gen-pass-len" value="16" min="6" max="64"></div>
+            <button class="btn btn-primary" id="gen-pass-btn">Generate</button>
+            <input type="text" class="form-control mt-2" id="gen-pass-out" readonly>
+          </div>
+
+          <div class="card">
+            <h3>🆔 UUID Generator</h3>
+            <button class="btn btn-primary mt-2" id="gen-uuid-btn">Generate UUID</button>
+            <input type="text" class="form-control mt-2" id="gen-uuid-out" readonly>
+          </div>
+
+          <div class="card">
+            <h3>📄 Lorem Ipsum</h3>
+            <div class="form-group mt-2"><label class="form-label">Paragraf</label><input type="number" class="form-control" id="gen-lorem-n" value="2" min="1" max="10"></div>
+            <button class="btn btn-primary" id="gen-lorem-btn">Generate</button>
+            <textarea class="form-control mt-2" id="gen-lorem-out" rows="5" readonly></textarea>
+          </div>
+
+          <div class="card">
+            <h3>🔗 Slug Generator</h3>
+            <input type="text" class="form-control mt-2" id="gen-slug-in" placeholder="Judul Artikel">
+            <button class="btn btn-primary mt-2" id="gen-slug-btn">Generate Slug</button>
+            <input type="text" class="form-control mt-2" id="gen-slug-out" readonly>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html" class="active"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById('gen-pass-btn').addEventListener('click', () => {
+      const len = parseInt(document.getElementById('gen-pass-len').value) || 16;
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+      let p = '';
+      const arr = new Uint32Array(len);
+      crypto.getRandomValues(arr);
+      for (let i = 0; i < len; i++) p += chars[arr[i] % chars.length];
+      document.getElementById('gen-pass-out').value = p;
+    });
+    document.getElementById('gen-uuid-btn').addEventListener('click', () => {
+      document.getElementById('gen-uuid-out').value = crypto.randomUUID();
+    });
+    document.getElementById('gen-lorem-btn').addEventListener('click', () => {
+      const n = parseInt(document.getElementById('gen-lorem-n').value) || 2;
+      const p = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+      document.getElementById('gen-lorem-out').value = Array(n).fill(p).join('\n\n');
+    });
+    document.getElementById('gen-slug-btn').addEventListener('click', () => {
+      const t = document.getElementById('gen-slug-in').value;
+      document.getElementById('gen-slug-out').value = t.toLowerCase().trim().replace(/[^\w\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance Tools — VORTEX HUB</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="logo"><div class="logo-icon">V</div><span>VORTEX <span class="gradient-text">HUB</span></span></a>
+      <div class="nav-links"><a href="index.html">Beranda</a><a href="tools.html">Tools</a><a href="ai.html">AI</a><a href="games.html">Games</a><a href="developer.html">Developer</a></div>
+      <div class="nav-actions">
+        <div class="search-box"><span class="search-icon">🔍</span><input type="text" placeholder="Cari..."><div class="search-results"></div></div>
+        <button class="theme-toggle">🌙</button>
+        <div id="nav-user-area"></div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <main class="main-content">
+      <div class="container">
+        <div class="tool-layout with-sidebar">
+          <aside class="tool-sidebar">
+            <h4>Finance</h4>
+            <a href="#currency" class="active">💱 Currency</a>
+            <a href="#discount">🏷️ Discount</a>
+            <a href="#profit">📈 Profit</a>
+            <a href="#loan">🏦 Loan</a>
+            <a href="#saving">🐷 Saving</a>
+            <a href="#invest">📊 Investment</a>
+          </aside>
+
+          <div class="tool-panel">
+            <div id="panel-currency" class="fin-panel">
+              <h2>Currency Converter</h2>
+              <p class="desc">Rate demo (bukan real-time)</p>
+              <div class="form-group"><label class="form-label">Nilai</label><input type="number" class="form-control" id="fin-cur-val" value="100"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Dari</label>
+                  <select class="form-control" id="fin-cur-from"><option>USD</option><option>IDR</option><option>EUR</option><option>GBP</option><option>SGD</option></select>
+                </div>
+                <div class="form-group"><label class="form-label">Ke</label>
+                  <select class="form-control" id="fin-cur-to"><option>IDR</option><option>USD</option><option>EUR</option></select>
+                </div>
+              </div>
+              <button class="btn btn-primary" id="btn-fin-currency">Konversi</button>
+              <div class="result-box mt-2">Hasil: <strong id="fin-cur-result">-</strong></div>
+            </div>
+
+            <div id="panel-discount" class="fin-panel hidden">
+              <h2>Discount Calculator</h2>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Harga (Rp)</label><input type="number" class="form-control" id="fin-disc-price"></div>
+                <div class="form-group"><label class="form-label">Diskon (%)</label><input type="number" class="form-control" id="fin-disc-pct"></div>
+              </div>
+              <button class="btn btn-primary" id="btn-fin-discount">Hitung</button>
+              <div class="mt-2">Hemat: <strong id="fin-disc-save">-</strong><br>Final: <strong id="fin-disc-final" style="color:var(--accent);font-size:1.2rem">-</strong></div>
+            </div>
+
+            <div id="panel-profit" class="fin-panel hidden">
+              <h2>Profit Calculator</h2>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Modal (Rp)</label><input type="number" class="form-control" id="fin-profit-cost"></div>
+                <div class="form-group"><label class="form-label">Harga Jual (Rp)</label><input type="number" class="form-control" id="fin-profit-sell"></div>
+              </div>
+              <button class="btn btn-primary" id="btn-fin-profit">Hitung</button>
+              <div class="mt-2">Profit: <strong id="fin-profit-val">-</strong><br>Margin: <strong id="fin-profit-margin">-</strong></div>
+            </div>
+
+            <div id="panel-loan" class="fin-panel hidden">
+              <h2>Loan Calculator</h2>
+              <div class="form-group"><label class="form-label">Jumlah Pinjaman (Rp)</label><input type="number" class="form-control" id="fin-loan-amount" placeholder="100000000"></div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Bunga / tahun (%)</label><input type="number" class="form-control" id="fin-loan-rate" value="10"></div>
+                <div class="form-group"><label class="form-label">Tenor (tahun)</label><input type="number" class="form-control" id="fin-loan-years" value="5"></div>
+              </div>
+              <button class="btn btn-primary" id="btn-fin-loan">Hitung Cicilan</button>
+              <div class="mt-2">Cicilan / bulan: <strong id="fin-loan-payment" style="color:var(--accent);font-size:1.2rem">-</strong><br>Total bayar: <strong id="fin-loan-total">-</strong></div>
+            </div>
+
+            <div id="panel-saving" class="fin-panel hidden">
+              <h2>Saving Calculator</h2>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Target (Rp)</label><input type="number" class="form-control" id="fin-save-target"></div>
+                <div class="form-group"><label class="form-label">Tabungan / bulan (Rp)</label><input type="number" class="form-control" id="fin-save-monthly"></div>
+              </div>
+              <button class="btn btn-primary" id="btn-fin-saving">Hitung</button>
+              <div class="result-box mt-2">Waktu yang dibutuhkan: <strong id="fin-save-result">-</strong></div>
+            </div>
+
+            <div id="panel-invest" class="fin-panel hidden">
+              <h2>Investment Calculator</h2>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Modal Awal (Rp)</label><input type="number" class="form-control" id="fin-inv-initial" value="0"></div>
+                <div class="form-group"><label class="form-label">Investasi / bulan (Rp)</label><input type="number" class="form-control" id="fin-inv-monthly"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label class="form-label">Return / tahun (%)</label><input type="number" class="form-control" id="fin-inv-rate" value="8"></div>
+                <div class="form-group"><label class="form-label">Jangka waktu (tahun)</label><input type="number" class="form-control" id="fin-inv-years" value="10"></div>
+              </div>
+              <button class="btn btn-primary" id="btn-fin-invest">Hitung Proyeksi</button>
+              <div class="result-box mt-2">Nilai masa depan: <strong id="fin-inv-result" style="color:var(--accent);font-size:1.3rem">-</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html"><span class="nav-icon">🏠</span>Home</a>
+    <a href="tools.html" class="active"><span class="nav-icon">🧰</span>Tools</a>
+    <a href="ai.html"><span class="nav-icon">🤖</span>AI</a>
+    <a href="games.html"><span class="nav-icon">🎮</span>Games</a>
+    <a href="profile.html"><span class="nav-icon">👤</span>Profil</a>
+  </nav>
+
+  <script src="js/storage.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/tools.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/navbar.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/finance.js"></script>
+  <script>document.addEventListener('DOMContentLoaded', () => Finance.init());</script>
+</body>
+</html>
