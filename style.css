@@ -137,20 +137,21 @@ body {
   padding: 16px 8px;
   text-align: center;
   text-decoration: none;
-  color: #00e5a0;
+  color: #0d47a1;
   font-size: 12px;
 }
 .menu-item i {
   display: block;
   font-size: 22px;
   margin-bottom: 6px;
+  color: #0d47a1;
 }
 
 /* Produk 2 kolom */
 .produk-section {
   padding: 0 12px 20px;
 }
-.produk-section h3 { font-size: 14px; color: #00e5a0; margin-bottom: 4px; }
+.produk-section h3 { font-size: 14px; color: #0d47a1; margin-bottom: 4px; }
 .subtitle { font-size: 12px; color: #aaa; margin-bottom: 12px; }
 
 .produk-grid {
@@ -226,8 +227,8 @@ body {
 }
 .nav-item i { font-size: 18px; }
 .nav-item.active {
-  color: #00e5a0;
-  background: #1a2e22;
+  color: #fff;
+  background: #0d47a1;
   border-radius: 12px;
   padding: 4px 12px;
 }
@@ -313,7 +314,7 @@ body {
   margin-bottom: 4px;
   color: #ccc;
 }
-.paket-card li i { color: #00e5a0; margin-right: 6px; }
+.paket-card li i { color: #0d47a1; margin-right: 6px; }
 .harga {
   font-size: 22px;
   font-weight: 800;
@@ -442,7 +443,7 @@ textarea { resize: vertical; min-height: 120px; }
   padding: 14px;
   text-align: center;
 }
-.qris-box i { font-size: 28px; color: #00e5a0; }
+.qris-box i { font-size: 28px; color: #0d47a1; }
 
 .ringkasan {
   background: #101a14;
@@ -546,7 +547,7 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .contact-item i {
   font-size: 24px;
-  color: #00e5a0;
+  color: #0d47a1;
 }
 
 /* Laporan */
@@ -815,13 +816,14 @@ textarea { resize: vertical; min-height: 120px; }
 .nav-item i { font-size: 18px; margin-bottom: 2px; }
 .nav-item.active {
   color: #0a120e;
-  background: linear-gradient(180deg, #a8ff78 0%, #39ff14 40%, #00c853 100%);
-  box-shadow: 0 0 12px rgba(57, 255, 20, 0.45);
+  background: linear-gradient(180deg, #1976d2 0%, #1565c0 40%, #0d47a1 100%);
+  box-shadow: 0 0 12px rgba(13, 71, 161, 0.45);
   border-radius: 18px;
   padding: 8px 10px;
   font-weight: 700;
+  color: #fff !important;
 }
-.nav-item.active i { color: #0a120e; }
+.nav-item.active i { color: #fff !important; }
 
 /* Banner as image */
 .banner {
@@ -840,3 +842,21 @@ textarea { resize: vertical; min-height: 120px; }
   border-radius: 14px;
 }
 .bann
+
+/* Ikon produk & menu: biru tua */
+.menu-item,
+.menu-item i {
+  color: #0d47a1 !important;
+}
+.menu-item:hover,
+.menu-item:active {
+  border-color: #1565c0 !important;
+}
+.paket-card li i,
+.fitur-list li i,
+.produk-info small {
+  color: #0d47a1 !important;
+}
+.produk-section h3 {
+  color: #0d47a1 !important;
+}

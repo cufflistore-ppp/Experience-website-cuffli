@@ -41,7 +41,7 @@
     .produk-harga-big {
       font-size: 26px;
       font-weight: 800;
-      color: #00e5a0;
+      color: #0d47a1;
       margin: 12px 0;
     }
     .fitur-list {
@@ -55,7 +55,7 @@
       color: #ccc;
     }
     .fitur-list li i {
-      color: #00e5a0;
+      color: #0d47a1;
       margin-right: 8px;
     }
     .fitur-list li:last-child { border-bottom: none; }
@@ -106,7 +106,7 @@
       const el = document.getElementById("detailProduk");
 
       if (!item) {
-        el.innerHTML = "<p style='color:#aaa;'>Produk tidak ditemukan. <a href='digital.html' style='color:#00e5a0;'>Kembali</a></p>";
+        el.innerHTML = "<p style='color:#aaa;'>Produk tidak ditemukan. <a href='digital.html' style='color:#0d47a1;'>Kembali</a></p>";
         return;
       }
 
@@ -122,7 +122,7 @@
           
           <div class="produk-harga-big">${harga}</div>
 
-          <h4 style="font-size:14px;margin-top:8px;color:#00e5a0;">Yang kamu dapat:</h4>
+          <h4 style="font-size:14px;margin-top:8px;color:#0d47a1;">Yang kamu dapat:</h4>
           <ul class="fitur-list">
             ${(item.fitur || []).map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join("")}
           </ul>

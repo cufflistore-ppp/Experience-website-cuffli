@@ -1,46 +1,40 @@
-// Daftar Produk Digital - berbeda dari paket Joki
+// Produk tampil di Home (grid 2 kolom, foto 4:5)
 const produk = [
   {
     id: 1,
     judul: "Jasa Post Akun Channel",
     harga: 1500,
     status: "TERSEDIA",
-    img: "voxyy1.png",
-    deskripsi: "Jasa post akun ke semua channel & grup terkait. Tingkatkan reach akun kamu.",
-    fitur: [
-      "Post di banyak channel + grup",
-      "Post di channel aktif",
-      "Laporan hasil post",
-      "Proses 1x24 jam"
-    ]
+    img: "logo.png",
+    deskripsi: "Jasa post akun ke channel & grup terkait.",
+    fitur: ["Post banyak channel", "Laporan hasil", "Proses 1x24 jam"]
   },
   {
     id: 2,
     judul: "Paket Views + Kontak",
     harga: 11000,
     status: "AKTIF",
-    img: "voxyy2.png",
-    deskripsi: "Paket gabungan views story + push kontak untuk meningkatkan interaksi akun.",
-    fitur: [
-      "Tambah views story",
-      "Push kontak targeted",
-      "Cocok untuk seller",
-      "Hasil terukur"
-    ]
+    img: "logo.png",
+    deskripsi: "Views story + push kontak.",
+    fitur: ["Views story", "Push kontak", "Hasil terukur"]
   },
   {
     id: 3,
     judul: "Paket Premium Kontak",
     harga: 33000,
     status: "TERSEDIA",
-    img: "voxyy3.png",
-    deskripsi: "Paket premium untuk push kontak lebih agresif dan prioritas antrian.",
-    fitur: [
-      "Prioritas antrian",
-      "Push kontak lebih banyak",
-      "Support via WA",
-      "Garansi proses"
-    ]
+    img: "logo.png",
+    deskripsi: "Push kontak prioritas.",
+    fitur: ["Prioritas antrian", "Push lebih banyak", "Support WA"]
+  },
+  {
+    id: 4,
+    judul: "Jasa Bikin Website",
+    harga: 28000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    deskripsi: "Bayar QRIS dulu, setelah TF hubungi admin WhatsApp.",
+    fitur: ["Website siap pakai", "Rp 28.000", "Setelah bayar hubungi admin WA"]
   }
 ];
 
@@ -56,24 +50,32 @@ function renderProduk() {
     const saved = localStorage.getItem("voxyy_produk");
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length) {
+      if (Array.isArray(parsed) && parsed.length >= produk.length) {
         produk.length = 0;
         parsed.forEach(p => produk.push(p));
       }
     }
   } catch (e) {}
 
-  grid.innerHTML = produk.map(p => `
+  grid.innerHTML = produk.map(p => {
+    // Website: langsung ke form order sederhana → pembayaran
+    const href = p.id === 4
+      ? "pesan.html?type=produk&id=4"
+      : (p.judul && p.judul.toLowerCase().includes("jasa post")
+          ? "pesan.html?type=jaspost"
+          : "detail-produk.html?id=" + p.id);
+    const btnText = p.id === 4 ? "Pesan & Bayar" : "Lihat Detail";
+    return `
     <div class="produk-card">
-      <img src="${p.img}" alt="${p.judul}" onerror="this.style.background='#3d3200'">
+      <img src="${p.img || "logo.png"}" alt="${p.judul}" onerror="this.src='logo.png'">
       <div class="produk-info">
-        <small style="color:#ffd700;font-size:10px;">${p.status}</small>
+        <small style="color:#0d47a1;font-size:10px;">${p.status || "TERSEDIA"}</small>
         <h4>${p.judul}</h4>
         <div class="harga">${formatRpProduk(p.harga)}</div>
-        <a href="detail-produk.html?id=${p.id}" class="btn">Lihat Detail</a>
+        <a href="${href}" class="btn">${btnText}</a>
       </div>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
 }
 
 function tambahProduk(data) {
@@ -85,7 +87,7 @@ function tambahProduk(data) {
     status: data.status || "TERSEDIA",
     img: data.img || "logo.png",
     deskripsi: data.deskripsi || "",
-    fitur: data.fitur || ["File digital", "Dikirim via WA"]
+    fitur: data.fitur || ["File digital"]
   });
   localStorage.setItem("voxyy_produk", JSON.stringify(produk));
   renderProduk();
