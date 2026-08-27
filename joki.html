@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Paket Joki Kontak - Voxyy Joki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header">
+    <div class="brand">
+      <img src="logo.png" alt="Voxyy Joki" class="logo"  >
+      <div>
+        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Pusat Layanan Voxyy Joki</p>
+      </div>
+    </div>
+  </header>
+  <!-- Notif (hanya muncul jika ada order real) -->
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
+
+
+  <div class="page-content">
+    <div class="badge">JASA JOKI KONTAK</div>
+    <h2 class="page-title">Paket Joki Kontak.</h2>
+    <p class="page-desc">Pilih paket dinamis dari admin, isi data promo, lalu bayar dari website.</p>
+
+    <div class="warning-box">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div class="marquee">
+        <span>KANG JOKI KONTAK DILARANG ORDER JOKI KONTAK DI SINI. JIKA KETAHUAN, TIDAK DILAYANI! &nbsp;&nbsp;&nbsp; KANG JOKI KONTAK DILARANG ORDER JOKI KONTAK DI SINI. JIKA KETAHUAN, TIDAK DILAYANI!</span>
+      </div>
+    </div>
+
+    <!-- Daftar Paket (diisi JS) -->
+    <div id="paketList"></div>
+  </div>
+
+  <!-- Form order pindah ke pesan.html / detail.html -->
+
+  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+
+      <nav class="bottom-nav">
+    <a href="joki.html" class="nav-item active"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item "><i class="fa-solid fa-box"></i><span>Produk Digital</span></a>
+    <a href="index.html" class="nav-item "><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item "><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item "><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+  </nav>
+
+  <script src="joki-produk.js"></script>
+  <script src="telegram.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

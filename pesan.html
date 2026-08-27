@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pesan Paket - Voxyy Joki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .jaspost-notice {
+      background: #2a2200;
+      border: 1px solid #00e5a055;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+      font-size: 12px;
+      color: #eee;
+      line-height: 1.5;
+    }
+    .jaspost-notice .title {
+      color: #00e5a0;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: block;
+    }
+    .foto-preview {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 10px;
+      margin-top: 8px;
+      display: none;
+      border: 1px solid #3d3200;
+    }
+    .field-hint {
+      font-size: 11px;
+      color: #aaa;
+      margin: -4px 0 8px;
+    }
+    #formJaspost label {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <img src="logo.png" alt="Voxyy Joki" class="logo"  >
+      <div>
+        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Form Pemesanan</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
+
+  <div class="page-content">
+    <a href="javascript:history.back()" class="back"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+
+    <div class="order-header" style="margin-bottom:16px;">
+      <img src="logo.png" class="order-logo"  >
+      <div>
+        <h3 id="paketJudul">Joki Kontak</h3>
+        <p>Voxyy Joki · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
+      </div>
+    </div>
+
+    <div class="warning-box red" id="warningJoki">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div class="marquee">
+        <span>KANG JOKI KONTAK DILARANG ORDER. JIKA KETAHUAN TIDAK DILAYANI! &nbsp;&nbsp;&nbsp; KANG JOKI KONTAK DILARANG ORDER. JIKA KETAHUAN TIDAK DILAYANI!</span>
+      </div>
+    </div>
+
+    <!-- ========== FORM STANDAR (Joki + Paket Views/Premium) ========== -->
+    <div id="formStandar">
+      <div class="form-section">
+        <h4><span class="step">1</span> Data Customer</h4>
+        
+        <label>Nama (Store/JB)</label>
+        <input type="text" id="nama" placeholder="Nama Store kamu" required>
+
+        <label>Nomor WhatsApp</label>
+        <input type="tel" id="wa" placeholder="08xxxxxxxxxx" required>
+
+        <label>Catatan (Format Teks Push Kontak)</label>
+        <p style="font-size:12px; color:#00e5a0; margin:4px 0 8px;">
+          * Tinggal ganti <b>NAMA STORE</b> dan nomor WhatsApp saja. Jangan hapus formatnya.
+        </p>
+        <textarea id="catatan" rows="7">SV BUYER FRESH VOXYY🔥
+
+SV ; NAMA STORE
+Wa.me/628…
+
+#NAMBAH VIEW SW + KONTAK + SELLER + BUYYER + DLL 🌤️🌈</textarea>
+      </div>
+
+      <div class="form-section" id="addonSection">
+        <h4><span class="step">2</span> Include Paket</h4>
+        <div class="addon" onclick="toggleAddon(this, 5000)">
+          <span>+ 1hari</span>
+          <span class="addon-price">+Rp 5.000</span>
+          <button class="btn-pilih" type="button">Pilih</button>
+        </div>
+        <div class="addon" onclick="toggleAddon(this, 10000)">
+          <span>+ 2hari</span>
+          <span class="addon-price">+Rp 10.000</span>
+          <button class="btn-pilih" type="button">Pilih</button>
+        </div>
+        <div class="addon" onclick="toggleAddon(this, 15000)">
+          <span>+ 3hari</span>
+          <span class="addon-price">+Rp 15.000</span>
+          <button class="btn-pilih" type="button">Pilih</button>
+        </div>
+        <div class="addon" onclick="toggleAddon(this, 35000)">
+          <span>Prioritas Antrian</span>
+          <span class="addon-price">+Rp 35.000</span>
+          <button class="btn-pilih" type="button">Pilih</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== FORM JASA POST ========== -->
+    <div id="formJaspost" style="display:none;">
+      <div class="form-section">
+        <h4><span class="step">1</span> Format Jasa Post</h4>
+
+        <div class="jaspost-notice">
+          <span class="title">jasa post by voxy💥</span>
+          <b>Jasa Post Voxy All Produk</b><br>
+          MC: <code>voxy stor</code> (post sini mc sini)
+        </div>
+
+        <label>nama produk👜</label>
+        <input type="text" id="jp_nama_produk" placeholder="Nama produk yang mau di-post" required>
+
+        <label>spek 📈</label>
+        <textarea id="jp_spek" rows="3" placeholder="Spesifikasi produk / akun" required></textarea>
+
+        <label>nomer wa seller</label>
+        <input type="tel" id="jp_nomer" placeholder="08xxxxxxxxxx / 62xxxxxxxxxx" required>
+
+        <label>Nama kamu (opsional)</label>
+        <input type="text" id="jp_nama" placeholder="Nama / store kamu">
+
+        <label>MC</label>
+        <input type="text" id="jp_mc" value="voxy stor (post sini mc sini)" readonly style="background:#0a120e;color:#00e5a0;">
+
+        <div class="jaspost-notice" style="margin-top:14px;">
+          💥 <b>jasa post voxy all produk</b> — isi lengkap + foto wajib, lalu bayar.
+        </div>
+
+        <label style="margin-top:14px;">Foto produk / akun (wajib) 📷</label>
+        <p class="field-hint">Wajib upload foto. Foto + data dikirim ke admin Telegram setelah kamu tekan <b>Saya Sudah Bayar</b>.</p>
+        <input type="file" id="fotoAkun" accept="image/*" required>
+        <img id="fotoPreview" class="foto-preview" alt="Preview foto">
+      </div>
+    </div>
+
+    <div class="ringkasan">
+      <h4>Ringkasan Order</h4>
+      <div class="row"><span id="namaPaketRow">Joki Kontak</span><span>Paket</span><span id="hargaPaket">Rp 5.000</span></div>
+      <div class="row total"><span>Total</span><span id="totalHarga">Rp 5.000</span></div>
+      <button class="btn-buat" id="btnSubmitOrder" onclick="buatPesanan()">Buat Pesanan</button>
+    </div>
+  </div>
+
+  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+
+      <nav class="bottom-nav">
+    <a href="joki.html" class="nav-item active"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item "><i class="fa-solid fa-box"></i><span>Produk Digital</span></a>
+    <a href="index.html" class="nav-item "><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item "><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item "><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+  </nav>
+
+  <script src="joki-produk.js"></script>
+  <script src="telegram.js"></script>
+    <script src="script.js"></script>
+  <script src="digital-produk.js"></script>
+  <script>
+    // Preview foto akun
+    document.getElementById("fotoAkun")?.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      const prev = document.getElementById("fotoPreview");
+      if (file && prev) {
+        prev.src = URL.createObjectURL(file);
+        prev.style.display = "block";
+      } else if (prev) {
+        prev.style.display = "none";
+      }
+    });
+
+    // Support Joki (default), Produk Views/Premium (sama seperti joki), dan Jasa Post (form khusus)
+    document.addEventListener("DOMContentLoaded", function() {
+      const params = new URLSearchParams(window.location.search);
+      const type = params.get("type") || "joki";
+      const id = parseInt(params.get("id") || "1", 10);
+
+      window.isJaspost = false;
+      window.orderType = "Joki Kontak";
+      window.orderPaketName = "Joki Kontak";
+
+      if (type === "jaspost") {
+        window.isJaspost = true;
+        window.orderType = "Jasa Post";
+        window.orderPaketName = "Jasa Post Voxy All Produk";
+        baseHarga = 1500;
+        document.getElementById("paketJudul").textContent = "Jasa Post by Voxy 💥";
+        document.getElementById("namaPaketRow").textContent = "Jasa Post Voxy All Produk";
+        document.getElementById("hargaPaket").textContent = "Rp 1.500";
+        if (typeof updateTotal === "function") updateTotal();
+        document.getElementById("formStandar").style.display = "none";
+        document.getElementById("formJaspost").style.display = "block";
+        const addon = document.getElementById("addonSection");
+        if (addon) addon.style.display = "none";
+      } else if (type === "produk") {
+        // Load produk digital
+        if (typeof loadProdukDigital === "function") loadProdukDigital();
+        const item = (typeof produkDigital !== "undefined") ? produkDigital.find(p => p.id === id) : null;
+        if (item) {
+          baseHarga = item.harga;
+          document.getElementById("paketJudul").textContent = item.judul;
+          document.getElementById("namaPaketRow").textContent = item.judul;
+          document.getElementById("hargaPaket").textContent = "Rp " + Number(item.harga).toLocaleString("id-ID");
+          window.orderPaketName = item.judul;
+          window.orderType = "Produk Digital";
+
+          // Cek apakah ini Jasa Post (id 1,2,3 atau judul mengandung "Jasa Post")
+          const isJasaPost = (id === 1) ||
+            (item.judul && item.judul.toLowerCase().includes("jasa post"));
+
+          if (isJasaPost) {
+            window.isJaspost = true;
+            window.orderType = "Jasa Post Akun";
+            // Tampilkan form jaspost, sembunyikan form standar
+            document.getElementById("formStandar").style.display = "none";
+            document.getElementById("formJaspost").style.display = "block";
+            document.getElementById("warningJoki").style.display = "none";
+            // Ubah tombol
+            const btn = document.getElementById("btnSubmitOrder");
+            if (btn) btn.textContent = "Bayar Sekarang";
+          } else {
+            // Paket Views + Kontak & Premium Kontak → sama seperti joki
+            // Sembunyikan addon (karena harga fixed)
+            const addonSection = document.getElementById("addonSection");
+            if (addonSection) addonSection.style.display = "none";
+            // Tombol tetap bisa "Bayar Sekarang"
+            const btn = document.getElementById("btnSubmitOrder");
+            if (btn) btn.textContent = "Bayar Sekarang";
+          }
+
+          if (typeof updateTotal === "function") updateTotal();
+        }
+      } else {
+        // Joki biasa
+        if (typeof loadPaketFromStorage === "function") loadPaketFromStorage();
+        const paket = (typeof paketJoki !== "undefined") ? paketJoki.find(p => p.id === id) : null;
+        if (paket) {
+          baseHarga = paket.harga;
+          document.getElementById("paketJudul").textContent = paket.judul;
+          document.getElementById("namaPaketRow").textContent = paket.judul;
+          document.getElementById("hargaPaket").textContent = "Rp " + Number(paket.harga).toLocaleString("id-ID");
+          if (typeof updateTotal === "function") updateTotal();
+          window.orderPaketName = paket.judul;
+          window.orderType = "Joki Kontak";
+        }
+      }
+    });
+
+    // Override / extend buatPesanan agar support form jaspost
+    // Foto + format hanya dikirim ke Telegram SETELAH konfirmasi bayar
+    const originalBuatPesanan = window.buatPesanan;
+    window.buatPesanan = async function() {
+      if (window.isJaspost) {
+        const namaProduk = document.getElementById("jp_nama_produk")?.value?.trim() || "";
+        const spek = document.getElementById("jp_spek")?.value?.trim() || "";
+        const nomer = document.getElementById("jp_nomer")?.value?.trim() || "";
+        const nama = document.getElementById("jp_nama")?.value?.trim() || namaProduk || "Customer";
+        const mc = document.getElementById("jp_mc")?.value?.trim() || "voxy stor (post sini mc sini)";
+        const fotoInput = document.getElementById("fotoAkun");
+
+        if (!namaProduk || !spek || !nomer) {
+          showNiceAlert("Lengkapi field wajib: nama produk, spek, dan nomor WA seller.");
+          return;
+        }
+        if (!fotoInput || !fotoInput.files || !fotoInput.files[0]) {
+          showNiceAlert("Wajib upload foto produk/akun terlebih dahulu.");
+          return;
+        }
+
+        const catatan = `jasa post by voxy💥
+
+nama produk👜: ${namaProduk}
+spek 📈: ${spek}
+nomer wa seller: ${nomer}
+mc: ${mc}
+
+jasa post voxy all produk`;
+
+        // Isi field agar logic lain bisa baca
+        const namaEl = document.getElementById("nama");
+        const waEl = document.getElementById("wa");
+        const catatanEl = document.getElementById("catatan");
+        if (namaEl) namaEl.value = nama;
+        if (waEl) waEl.value = nomer;
+        if (catatanEl) catatanEl.value = catatan;
+
+        const total = document.getElementById("totalHarga")?.textContent || "Rp 0";
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        const timePart = String(Date.now()).slice(-3);
+        const kode = `VJ-2026-${rand}${timePart}`;
+
+        let order = {
+          kode,
+          nama,
+          wa: nomer,
+          catatan,
+          total,
+          paket: window.orderPaketName || "Jasa Post Akun",
+          status: "Belum Bayar",
+          waktu: new Date().toLocaleString("id-ID"),
+          isJaspost: true
+        };
+
+        order.createdAt = Date.now();
+        order.finalAmount = Number(String(total).replace(/[^\d]/g, "")) || 0;
+
+        // Simpan order (belum kirim Telegram)
+        let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+        orders.unshift(order);
+        localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+
+        // Simpan foto sebagai base64 di sessionStorage agar bisa dikirim setelah bayar
+        try {
+          const file = fotoInput.files[0];
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            try {
+              sessionStorage.setItem("voxyy_jaspost_foto_" + kode, e.target.result);
+              sessionStorage.setItem("voxyy_jaspost_pending", kode);
+            } catch (err) {
+              console.warn("Foto terlalu besar untuk sessionStorage", err);
+            }
+            window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
+          };
+          reader.onerror = function() {
+            window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
+          };
+          reader.readAsDataURL(file);
+        } catch (err) {
+          window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
+        }
+        return;
+      }
+
+      // Non-jaspost → panggil original
+      if (typeof originalBuatPesanan === "function") {
+        return originalBuatPesanan();
+      }
+    };
+
+    // Nice alert helper (pakai modal animasi)
+    function showNiceAlert(msg) {
+      if (typeof window.showSiteModal === "function") {
+        window.showSiteModal(msg, "warning");
+      } else {
+        alert(msg);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antrian - Voxyy Joki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header">
+    <div class="brand">
+      <img src="logo.png" class="logo"  >
+      <div>
+        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Joki Kontak & Produk Digital</p>
+      </div>
+    </div>
+  </header>
+  <!-- Notif (hanya muncul jika ada order real) -->
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
+
+
+  <div class="page-content">
+    <h2 style="margin-bottom:6px;">ANTRIAN PESANAN</h2>
+    <p style="color:#aaa;font-size:13px;margin-bottom:16px;">Pantau antrian dan status pesanan.</p>
+
+    <div class="search-box">
+      <input type="text" id="searchOrder" placeholder="VJ-2026-xxxx">
+      <button onclick="cekStatus()"><i class="fa-solid fa-search"></i> Cek Status</button>
+    </div>
+
+    <div id="antrianList" class="antrian-list"></div>
+  </div>
+
+  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+
+      <nav class="bottom-nav">
+    <a href="joki.html" class="nav-item "><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item "><i class="fa-solid fa-box"></i><span>Produk Digital</span></a>
+    <a href="index.html" class="nav-item "><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item active"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item "><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+  </nav>
+
+  <script src="antrian.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

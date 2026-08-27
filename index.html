@@ -2,222 +2,85 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CUFFLI SOCIAL — Suntik Sosmed Cepat & Mudah</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Voxyy Joki - Pusat Layanan</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Loading Screen -->
-  <div id="loading-screen">
-    <div class="loading-logo">CUFFLI SOCIAL</div>
-    <div class="loading-text">Loading...</div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <img src="logo.png" alt="Voxyy Joki" class="logo">
+      <div>
+        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Pusat Layanan Voxyy Joki</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner (foto) -->
+  <div class="banner">
+    <img src="banner.jpg" alt="Selamat Datang di Voxyy Joki" class="banner-full">
+  </div>
+  <!-- Notif di bawah banner (hanya muncul jika ada order) -->
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
+
+  <!-- Menu Grid -->
+  <div class="menu-grid">
+    <a href="joki.html" class="menu-item">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Joki</span>
+    </a>
+    <a href="digital.html" class="menu-item">
+      <i class="fa-solid fa-box"></i>
+      <span>Produk Digital</span>
+    </a>
+    <a href="pesan.html?type=jaspost" class="menu-item">
+      <i class="fa-solid fa-paper-plane"></i>
+      <span>Jasa Post</span>
+    </a>
   </div>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</a>
-      <ul class="nav-links">
-        <li><a href="index.html" class="active">Beranda</a></li>
-        <li><a href="layanan.html">Layanan</a></li>
-        <li><a href="order.html">Pesanan</a></li>
-        <li><a href="riwayat.html">Riwayat</a></li>
-        <li><a href="profil.html">Profil</a></li>
+  <!-- Jasa Post highlight -->
+  <section class="produk-section" style="padding-top:4px;">
+    <h3>JASA POST BY VOXY 💥</h3>
+    <p class="subtitle">Post produk kamu ke channel &amp; grup. Foto wajib.</p>
+    <div class="paket-card" style="margin-top:8px;">
+      <span class="paket-label">POST</span>
+      <h3>Jasa Post Voxy All Produk</h3>
+      <p>Isi nama produk, spek, WA seller, lalu upload foto. Bayar via QRIS, konfirmasi, admin proses.</p>
+      <ul>
+        <li><i class="fa-solid fa-check"></i> Format post by Voxy</li>
+        <li><i class="fa-solid fa-check"></i> Foto wajib</li>
+        <li><i class="fa-solid fa-check"></i> Langsung ke pembayaran</li>
       </ul>
-      <div class="nav-actions">
-        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login">Login</a>
-        <a href="profil.html" class="btn btn-primary btn-sm hidden" id="nav-profile">Profil</a>
-      </div>
+      <div class="harga">Rp 1.500</div>
+      <a href="pesan.html?type=jaspost" class="btn-pesan">Pesan Jasa Post</a>
     </div>
+  </section>
+
+  <!-- Info -->
+  <div class="info-box">
+    <h4>Website jadi pusat proses order.</h4>
+    <p>Website dipakai untuk menerima order, pembayaran, data customer, antrian, dan status supaya proses tidak tercerai di chat.</p>
+  </div>
+
+  <div style="padding:0 12px 24px;">
+    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+  </div>
+
+  <!-- Bottom Nav -->
+      <nav class="bottom-nav">
+    <a href="joki.html" class="nav-item "><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item "><i class="fa-solid fa-box"></i><span>Produk Digital</span></a>
+    <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item "><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item "><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
   </nav>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-glow"></div>
-    <div class="hero-content fade-in">
-      <h1>SUNTIK SOSMED CEPAT & MUDAH</h1>
-      <p>Tingkatkan jangkauan dan performa akunmu dengan layanan sosial media yang praktis, aman, dan sesuai aturan platform.</p>
-      <div class="hero-btns">
-        <a href="order.html" class="btn btn-primary"><i class="fa-solid fa-rocket"></i> MULAI PESAN</a>
-        <a href="layanan.html" class="btn btn-outline"><i class="fa-solid fa-list"></i> LIHAT LAYANAN</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Platforms -->
-  <section class="section">
-    <div class="container">
-      <h2 class="section-title">Platform <span>Tersedia</span></h2>
-      <p class="section-sub">Kami mendukung berbagai platform sosial media populer.</p>
-      <div class="platform-grid">
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-brands fa-tiktok"></i>
-          <h3>TikTok</h3>
-        </a>
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-brands fa-instagram"></i>
-          <h3>Instagram</h3>
-        </a>
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-brands fa-youtube"></i>
-          <h3>YouTube</h3>
-        </a>
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-brands fa-facebook"></i>
-          <h3>Facebook</h3>
-        </a>
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-brands fa-x-twitter"></i>
-          <h3>X / Twitter</h3>
-        </a>
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-brands fa-telegram"></i>
-          <h3>Telegram</h3>
-        </a>
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-brands fa-threads"></i>
-          <h3>Threads</h3>
-        </a>
-        <a href="layanan.html" class="card platform-card card-glow">
-          <i class="fa-solid fa-globe"></i>
-          <h3>Lainnya</h3>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features -->
-  <section class="section" style="padding-top:20px">
-    <div class="container">
-      <h2 class="section-title">Keunggulan <span>Layanan</span></h2>
-      <p class="section-sub">Mengapa ribuan pengguna mempercayai CUFFLI SOCIAL.</p>
-      <div class="feature-grid">
-        <div class="card feature-card card-glow">
-          <div class="icon-wrap"><i class="fa-solid fa-bolt"></i></div>
-          <h3>Proses Cepat</h3>
-          <p>Pesanan diproses dalam hitungan jam, bukan hari. Real-time tracking status.</p>
-        </div>
-        <div class="card feature-card card-glow">
-          <div class="icon-wrap"><i class="fa-solid fa-shield-halved"></i></div>
-          <h3>Aman & Sesuai Aturan</h3>
-          <p>Kami tidak meminta password atau OTP. Hanya link publik yang diperlukan.</p>
-        </div>
-        <div class="card feature-card card-glow">
-          <div class="icon-wrap"><i class="fa-solid fa-tags"></i></div>
-          <h3>Harga Transparan</h3>
-          <p>Harga otomatis dihitung berdasarkan jumlah. Tidak ada biaya tersembunyi.</p>
-        </div>
-        <div class="card feature-card card-glow">
-          <div class="icon-wrap"><i class="fa-solid fa-headset"></i></div>
-          <h3>Support 24/7</h3>
-          <p>Admin siap membantu via WhatsApp kapan saja jika ada kendala.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- How to Order -->
-  <section class="section">
-    <div class="container">
-      <h2 class="section-title">Cara <span>Pemesanan</span></h2>
-      <p class="section-sub">Hanya 4 langkah mudah.</p>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <h3>Pilih Layanan</h3>
-          <p>Pilih platform dan jenis layanan yang diinginkan.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <h3>Isi Detail</h3>
-          <p>Masukkan link publik & jumlah pesanan. Harga otomatis terhitung.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <h3>Bayar</h3>
-          <p>Scan QRIS atau transfer sesuai total. Konfirmasi pembayaran.</p>
-        </div>
-        <div class="step">
-          <div class="step-num">4</div>
-          <h3>Selesai</h3>
-          <p>Pesanan diproses. Pantau status di halaman riwayat.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="section">
-    <div class="container">
-      <h2 class="section-title">FAQ</h2>
-      <p class="section-sub">Pertanyaan yang sering diajukan.</p>
-      <div class="faq-list">
-        <div class="faq-item">
-          <div class="faq-q">Apakah aman? Apakah butuh password? <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="faq-a">Sangat aman. Kami tidak pernah meminta password, OTP, atau data login akun sosial media. Cukup berikan link publik postingan atau profil.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Berapa lama prosesnya? <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="faq-a">Estimasi tergantung layanan, biasanya 1–48 jam. Status bisa dipantau real-time di halaman riwayat pesanan.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Apakah layanan sesuai aturan platform? <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="faq-a">Kami berupaya menyediakan layanan yang memperhatikan ketentuan masing-masing platform. Gunakan secara bijak.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Bagaimana cara pembayaran? <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="faq-a">Pembayaran via QRIS. Setelah transfer, klik "Saya Sudah Bayar" dan tunggu konfirmasi otomatis.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q">Bagaimana jika ada masalah? <i class="fa-solid fa-chevron-down"></i></div>
-          <div class="faq-a">Hubungi admin melalui tombol WhatsApp yang tersedia di setiap halaman. Support tersedia 24/7.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <h3><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</h3>
-        <p>Layanan sosial media digital modern. Tingkatkan jangkauan akunmu dengan mudah dan aman.</p>
-      </div>
-      <div>
-        <h4>Menu</h4>
-        <ul>
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="layanan.html">Layanan</a></li>
-          <li><a href="order.html">Pesanan</a></li>
-          <li><a href="riwayat.html">Riwayat</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Bantuan</h4>
-        <ul>
-          <li><a href="faq.html">FAQ</a></li>
-          <li><a href="kontak.html">Kontak Admin</a></li>
-          <li><a href="login.html">Login</a></li>
-          <li><a href="register.html">Daftar</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      © 2026 CUFFLI SOCIAL. All Rights Reserved.
-    </div>
-  </footer>
-
-  <!-- Bottom Nav Mobile -->
-  <nav class="bottom-nav">
-    <a href="index.html" class="active"><i class="fa-solid fa-house"></i> Beranda</a>
-    <a href="layanan.html"><i class="fa-solid fa-store"></i> Layanan</a>
-    <a href="order.html"><i class="fa-solid fa-cart-shopping"></i> Pesanan</a>
-    <a href="profil.html"><i class="fa-solid fa-user"></i> Profil</a>
-  </nav>
-
-  <script src="js/app.js"></script>
+  <script src="digital-produk.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
