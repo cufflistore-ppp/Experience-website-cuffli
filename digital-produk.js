@@ -66,8 +66,8 @@ function renderDigitalList() {
 
   list.innerHTML = produkDigital.map(p => {
     const isWeb = p.id === 4;
-    const href = isWeb ? "pesan.html?type=produk&id=4" : "detail-produk.html?id=" + p.id;
-    const btn = isWeb ? "Pesan & Bayar QRIS" : "Pesan Sekarang";
+    const href = isWeb ? "pembayaran.html?paket=website&total=28000" : "detail-produk.html?id=" + p.id;
+    const btn = isWeb ? "Bayar QRIS" : "Pesan Sekarang";
     return `
     <div class="paket-card">
       <span class="paket-label">${p.label || "DIGITAL"}</span>

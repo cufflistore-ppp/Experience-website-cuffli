@@ -79,7 +79,7 @@ function ensureModal() {
       .site-modal-box {
         position: relative;
         background: #2a2200;
-        border: 1px solid #ffd70055;
+        border: 1px solid #2196f355;
         border-radius: 16px;
         padding: 24px 20px 20px;
         width: 100%;
@@ -96,7 +96,7 @@ function ensureModal() {
       .site-modal-title {
         font-size: 17px;
         font-weight: 700;
-        color: #ffd700;
+        color: #2196f3;
         margin-bottom: 12px;
       }
       .site-modal-body {
@@ -118,12 +118,12 @@ function ensureModal() {
       }
       .site-modal-body .label:first-child { margin-top: 0; }
       .site-modal-body .val { color: #fff; font-weight: 600; }
-      .site-modal-body .val.sukses { color: #7fff00; }
-      .site-modal-body .val.proses { color: #ffd700; }
+      .site-modal-body .val.sukses { color: #64b5f6; }
+      .site-modal-body .val.proses { color: #2196f3; }
       .site-modal-body .val.belum { color: #ff9800; }
       .site-modal-btn {
         width: 100%;
-        background: linear-gradient(135deg, #ffd700, #e6b800);
+        background: linear-gradient(135deg, #2196f3, #1565c0);
         color: #1a1500;
         border: none;
         border-radius: 10px;

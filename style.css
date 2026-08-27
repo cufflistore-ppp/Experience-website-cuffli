@@ -6,11 +6,11 @@
 }
 
 body {
-  background: #0a120e;
+  background: #0a0e18;
   background-image:
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(0, 180, 100, 0.18), transparent 55%),
-    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(0, 100, 60, 0.12), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 0% 80%, rgba(0, 140, 80, 0.10), transparent 45%);
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(33, 150, 243, 0.18), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(13, 71, 161, 0.14), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 0% 80%, rgba(30, 136, 229, 0.12), transparent 45%);
   background-attachment: fixed;
   color: #fff;
   padding-bottom: 80px;
@@ -21,10 +21,10 @@ body {
 .top-notif {
   margin: 0 12px 8px;
   border-radius: 8px;
-  background: #101a14;
+  background: #10182a;
   padding: 8px 12px;
   font-size: 12px;
-  border: 1px solid #1a2e22;
+  border: 1px solid #1a2740;
   overflow: hidden;
   position: relative;
 }
@@ -40,7 +40,7 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.notif-text b { color: #00e5a0; }
+.notif-text b { color: #2196f3; }
 .time { color: #aaa; }
 .notif-close {
   position: absolute;
@@ -57,14 +57,14 @@ body {
   border-radius: 4px;
 }
 .notif-close:hover {
-  color: #00e5a0;
-  background: #1a2e22;
+  color: #2196f3;
+  background: #1a2740;
 }
 
 /* Header */
 .header {
   padding: 12px 16px;
-  background: #0d1812;
+  background: #0d1220;
   display: flex;
   align-items: center;
 }
@@ -78,22 +78,22 @@ body {
   height: 42px;
   border-radius: 10px;
   object-fit: cover;
-  background: #00e5a0;
+  background: #2196f3;
 }
 .brand h1 {
   font-size: 16px;
   font-weight: 700;
 }
-.verified { color: #00e5a0; font-size: 14px; }
+.verified { color: #2196f3; font-size: 14px; }
 .brand p { font-size: 11px; color: #bbb; }
 
 /* Banner */
 .banner {
   margin: 12px;
-  background: linear-gradient(135deg, #00e5a0, #00a86b);
+  background: linear-gradient(135deg, #2196f3, #0d47a1);
   border-radius: 12px;
   padding: 14px 16px;
-  color: #0a120e;
+  color: #0a0e18;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -131,8 +131,8 @@ body {
   padding: 0 12px 16px;
 }
 .menu-item {
-  background: #101a14;
-  border: 1px solid #1a2e22;
+  background: #10182a;
+  border: 1px solid #1a2740;
   border-radius: 12px;
   padding: 16px 8px;
   text-align: center;
@@ -160,8 +160,8 @@ body {
   gap: 10px;
 }
 .produk-card {
-  background: #101a14;
-  border: 1px solid #1a2e22;
+  background: #10182a;
+  border: 1px solid #1a2740;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -171,19 +171,19 @@ body {
   height: auto;
   object-fit: cover;
   object-position: center;
-  background: #1a2e22;
+  background: #1a2740;
   display: block;
 }
 .produk-info {
   padding: 10px;
 }
 .produk-info h4 { font-size: 13px; margin-bottom: 4px; }
-.produk-info .harga { color: #00e5a0; font-weight: 700; font-size: 14px; }
+.produk-info .harga { color: #2196f3; font-weight: 700; font-size: 14px; }
 .produk-info .btn {
   display: block;
   margin-top: 8px;
-  background: linear-gradient(90deg, #00e5a0, #00c853);
-  color: #0a120e;
+  background: linear-gradient(90deg, #2196f3, #1565c0);
+  color: #0a0e18;
   text-align: center;
   padding: 6px;
   border-radius: 8px;
@@ -195,10 +195,10 @@ body {
 /* Info box */
 .info-box {
   margin: 0 12px 20px;
-  background: #101a14;
+  background: #10182a;
   border-radius: 12px;
   padding: 14px;
-  border: 1px solid #1a2e22;
+  border: 1px solid #1a2740;
 }
 .info-box h4 { font-size: 14px; margin-bottom: 6px; }
 .info-box p { font-size: 12px; color: #bbb; }
@@ -209,11 +209,11 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #0d1812;
+  background: #0d1220;
   display: flex;
   justify-content: space-around;
   padding: 8px 0 12px;
-  border-top: 1px solid #1a2e22;
+  border-top: 1px solid #1a2740;
   z-index: 100;
 }
 .nav-item {
@@ -239,8 +239,8 @@ body {
 }
 .badge {
   display: inline-block;
-  background: #1a2e22;
-  color: #00e5a0;
+  background: #1a2740;
+  color: #2196f3;
   font-size: 11px;
   padding: 4px 10px;
   border-radius: 20px;
@@ -290,16 +290,16 @@ body {
 
 /* Paket Card */
 .paket-card {
-  background: #101a14;
-  border: 1px solid #1a2e22;
+  background: #10182a;
+  border: 1px solid #1a2740;
   border-radius: 14px;
   padding: 16px;
   margin-bottom: 14px;
 }
 .paket-label {
   display: inline-block;
-  background: #00e5a0;
-  color: #0a120e;
+  background: #2196f3;
+  color: #0a0e18;
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
@@ -318,13 +318,13 @@ body {
 .harga {
   font-size: 22px;
   font-weight: 800;
-  color: #00e5a0;
+  color: #2196f3;
   margin-bottom: 12px;
 }
 .btn-pesan {
   display: block;
-  background: linear-gradient(90deg, #00e5a0, #00c853);
-  color: #0a120e;
+  background: linear-gradient(90deg, #2196f3, #1565c0);
+  color: #0a0e18;
   text-align: center;
   padding: 12px;
   border-radius: 10px;
@@ -351,24 +351,24 @@ body {
   width: 60px;
   height: 60px;
   border-radius: 10px;
-  background: #00e5a0;
+  background: #2196f3;
   object-fit: cover;
 }
 .tag {
-  background: #1a2e22;
-  color: #00e5a0;
+  background: #1a2740;
+  color: #2196f3;
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 4px;
 }
-.tag.aman { background: #1a3d00; color: #7fff00; }
+.tag.aman { background: #0d2137; color: #64b5f6; }
 
 .form-section {
-  background: #101a14;
+  background: #10182a;
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 14px;
-  border: 1px solid #1a2e22;
+  border: 1px solid #1a2740;
 }
 .form-section h4 {
   font-size: 14px;
@@ -378,8 +378,8 @@ body {
   gap: 8px;
 }
 .step {
-  background: #00e5a0;
-  color: #0a120e;
+  background: #2196f3;
+  color: #0a0e18;
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -397,8 +397,8 @@ label {
 }
 input, textarea, select {
   width: 100%;
-  background: #0a120e;
-  border: 1px solid #1a2e22;
+  background: #0a0e18;
+  border: 1px solid #1a2740;
   border-radius: 8px;
   padding: 10px;
   color: #fff;
@@ -410,35 +410,35 @@ textarea { resize: vertical; min-height: 120px; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #0a120e;
-  border: 1px solid #1a2e22;
+  background: #0a0e18;
+  border: 1px solid #1a2740;
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 8px;
   cursor: pointer;
 }
 .addon.selected {
-  border-color: #00e5a0;
-  background: #101a14;
+  border-color: #2196f3;
+  background: #10182a;
 }
-.addon-price { color: #00e5a0; font-size: 13px; }
+.addon-price { color: #2196f3; font-size: 13px; }
 .btn-pilih {
-  background: #1a2e22;
+  background: #1a2740;
   border: none;
-  color: #00e5a0;
+  color: #2196f3;
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 12px;
   cursor: pointer;
 }
 .addon.selected .btn-pilih {
-  background: #00e5a0;
-  color: #0a120e;
+  background: #2196f3;
+  color: #0a0e18;
 }
 
 .qris-box {
-  background: #0a120e;
-  border: 1px solid #1a2e22;
+  background: #0a0e18;
+  border: 1px solid #1a2740;
   border-radius: 10px;
   padding: 14px;
   text-align: center;
@@ -446,10 +446,10 @@ textarea { resize: vertical; min-height: 120px; }
 .qris-box i { font-size: 28px; color: #0d47a1; }
 
 .ringkasan {
-  background: #101a14;
+  background: #10182a;
   border-radius: 12px;
   padding: 14px;
-  border: 1px solid #1a2e22;
+  border: 1px solid #1a2740;
 }
 .ringkasan .row {
   display: flex;
@@ -460,15 +460,15 @@ textarea { resize: vertical; min-height: 120px; }
 .ringkasan .total {
   font-weight: 700;
   font-size: 16px;
-  color: #00e5a0;
+  color: #2196f3;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #1a2e22;
+  border-top: 1px solid #1a2740;
 }
 .btn-buat {
   width: 100%;
-  background: linear-gradient(90deg, #00e5a0, #00c853);
-  color: #0a120e;
+  background: linear-gradient(90deg, #2196f3, #1565c0);
+  color: #0a0e18;
   border: none;
   padding: 14px;
   border-radius: 10px;
@@ -481,8 +481,8 @@ textarea { resize: vertical; min-height: 120px; }
 /* Antrian */
 .antrian-list { margin-top: 16px; }
 .antrian-item {
-  background: #101a14;
-  border: 1px solid #1a2e22;
+  background: #10182a;
+  border: 1px solid #1a2740;
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 10px;
@@ -491,8 +491,8 @@ textarea { resize: vertical; min-height: 120px; }
   align-items: center;
 }
 .antrian-item .num {
-  background: #00e5a0;
-  color: #0a120e;
+  background: #2196f3;
+  color: #0a0e18;
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -507,8 +507,8 @@ textarea { resize: vertical; min-height: 120px; }
 .antrian-item .info strong { font-size: 13px; }
 .antrian-item .info small { display: block; color: #aaa; font-size: 11px; }
 .status-badge {
-  background: #1a2e22;
-  color: #00e5a0;
+  background: #1a2740;
+  color: #2196f3;
   font-size: 10px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -522,8 +522,8 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .search-box input { flex: 1; }
 .search-box button {
-  background: #00e5a0;
-  color: #0a120e;
+  background: #2196f3;
+  color: #0a0e18;
   border: none;
   padding: 0 16px;
   border-radius: 8px;
@@ -537,8 +537,8 @@ textarea { resize: vertical; min-height: 120px; }
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #101a14;
-  border: 1px solid #1a2e22;
+  background: #10182a;
+  border: 1px solid #1a2740;
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 10px;
@@ -560,20 +560,20 @@ textarea { resize: vertical; min-height: 120px; }
   flex: 1;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #1a2e22;
-  background: #101a14;
+  border: 1px solid #1a2740;
+  background: #10182a;
   color: #aaa;
   cursor: pointer;
 }
 .btn-group .btn-active {
-  background: #00e5a0;
-  color: #0a120e;
-  border-color: #00e5a0;
+  background: #2196f3;
+  color: #0a0e18;
+  border-color: #2196f3;
 }
 .info-small {
   font-size: 11px;
   color: #aaa;
-  background: #101a14;
+  background: #10182a;
   padding: 10px;
   border-radius: 8px;
   margin-bottom: 16px;
@@ -588,15 +588,15 @@ textarea { resize: vertical; min-height: 120px; }
   cursor: pointer;
 }
 .btn-foto {
-  background: #1a2e22;
-  color: #00e5a0;
+  background: #1a2740;
+  color: #2196f3;
 }
 .btn-kirim {
-  background: linear-gradient(90deg, #00e5a0, #00c853);
-  color: #0a120e;
+  background: linear-gradient(90deg, #2196f3, #1565c0);
+  color: #0a0e18;
 }
 .back {
-  color: #00e5a0;
+  color: #2196f3;
   text-decoration: none;
   font-size: 13px;
   display: inline-block;
@@ -605,15 +605,15 @@ textarea { resize: vertical; min-height: 120px; }
 
 /* Admin */
 .admin-header {
-  background: #00e5a0;
-  color: #0a120e;
+  background: #2196f3;
+  color: #0a0e18;
   padding: 14px;
   text-align: center;
   font-weight: 700;
 }
 .order-card {
-  background: #101a14;
-  border: 1px solid #1a2e22;
+  background: #10182a;
+  border: 1px solid #1a2740;
   border-radius: 12px;
   padding: 14px;
   margin-bottom: 12px;
@@ -630,7 +630,7 @@ textarea { resize: vertical; min-height: 120px; }
   margin-top: 6px;
 }
 .btn-paid { background: #00aa00; color: white; }
-.btn-proses { background: #4dd0e1; color: #0a120e; }
+.btn-proses { background: #4dd0e1; color: #0a0e18; }
 .btn-unpaid { background: #aa0000; color: white; }
 .btn-delete { background: #333; color: #ff6666; }
 
@@ -646,8 +646,8 @@ textarea { resize: vertical; min-height: 120px; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(90deg, #00e5a0, #00c853);
-  color: #0a120e;
+  background: linear-gradient(90deg, #2196f3, #1565c0);
+  color: #0a0e18;
   padding: 10px 14px;
   border-radius: 20px;
   font-size: 13px;
@@ -721,8 +721,8 @@ textarea { resize: vertical; min-height: 120px; }
   visibility: visible;
 }
 .site-modal {
-  background: #101a14;
-  border: 1px solid #1a2e22;
+  background: #10182a;
+  border: 1px solid #1a2740;
   border-radius: 16px;
   width: 100%;
   max-width: 320px;
@@ -757,7 +757,7 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .site-modal-icon.info {
   background: rgba(255, 215, 0, 0.15);
-  color: #00e5a0;
+  color: #2196f3;
   animation: modalIconPulse 0.6s ease;
 }
 @keyframes modalIconPulse {
@@ -786,8 +786,8 @@ textarea { resize: vertical; min-height: 120px; }
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(90deg, #00e5a0, #00c853);
-  color: #0a120e;
+  background: linear-gradient(90deg, #2196f3, #1565c0);
+  color: #0a0e18;
   transition: transform 0.15s, opacity 0.15s;
 }
 .site-modal-btn:active {
@@ -800,8 +800,8 @@ textarea { resize: vertical; min-height: 120px; }
 
 /* Voxyy theme overrides - bottom nav like app screenshot */
 .bottom-nav {
-  background: #0c1610;
-  border-top: 1px solid #1a2e22;
+  background: #0c1218;
+  border-top: 1px solid #1a2740;
   padding: 6px 4px 10px;
   gap: 0;
 }
@@ -815,7 +815,7 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .nav-item i { font-size: 18px; margin-bottom: 2px; }
 .nav-item.active {
-  color: #0a120e;
+  color: #0a0e18;
   background: linear-gradient(180deg, #1976d2 0%, #1565c0 40%, #0d47a1 100%);
   box-shadow: 0 0 12px rgba(13, 71, 161, 0.45);
   border-radius: 18px;
@@ -859,4 +859,55 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .produk-section h3 {
   color: #0d47a1 !important;
+}
+
+
+/* FULL BLUE THEME FORCE — no green left */
+.verified,
+.notif-text b,
+.harga,
+.produk-info .harga,
+.addon-price,
+.badge,
+.brand h1,
+.page-title,
+.back,
+.menu-item,
+.menu-item i,
+.paket-card li i,
+.fitur-list li i,
+.qris-box i,
+.contact-item i {
+  color: #2196f3 !important;
+}
+.paket-label,
+.step,
+.nav-item.active,
+.btn-pesan,
+.btn-buat,
+.btn-lihat-layanan,
+.btn-kirim,
+.site-modal-btn,
+.produk-info .btn,
+.search-box button,
+.btn-pilih,
+.antrian-item .num {
+  background: linear-gradient(90deg, #2196f3, #1565c0) !important;
+  color: #fff !important;
+  border-color: #1565c0 !important;
+}
+.nav-item.active {
+  background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 40%, #0d47a1 100%) !important;
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.5) !important;
+  color: #fff !important;
+}
+.nav-item.active i {
+  color: #fff !important;
+}
+.menu-item {
+  background: #10182a !important;
+  border-color: #1a2740 !important;
+}
+.menu-item:hover, .menu-item:active {
+  border-color: #2196f3 !important;
 }

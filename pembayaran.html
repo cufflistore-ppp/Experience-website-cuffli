@@ -13,8 +13,8 @@
       padding: 16px 14px 90px;
     }
     .pay-card {
-      background: #2a2200;
-      border: 1px solid #3d3200;
+      background: #10182a;
+      border: 1px solid #1a2740;
       border-radius: 16px;
       padding: 20px 16px;
       text-align: center;
@@ -22,24 +22,24 @@
     .pay-card h2 {
       font-size: 18px;
       margin-bottom: 4px;
-      color: #00e5a0;
+      color: #2196f3;
     }
     .kode {
       background: #0a0e1a;
-      border: 1px dashed #00e5a055;
+      border: 1px dashed #2196f355;
       border-radius: 8px;
       padding: 10px;
       font-size: 15px;
       font-weight: 700;
       letter-spacing: 1px;
       margin: 12px 0;
-      color: #00e5a0;
+      color: #2196f3;
       word-break: break-all;
     }
     .total-bayar {
       font-size: 28px;
       font-weight: 800;
-      color: #00e5a0;
+      color: #2196f3;
       margin: 8px 0 4px;
     }
     .rincian {
@@ -74,7 +74,7 @@
     }
     .btn-konfirmasi {
       width: 100%;
-      background: linear-gradient(135deg, #00e5a0, #00c853);
+      background: linear-gradient(135deg, #2196f3, #1565c0);
       color: #0a0e1a;
       border: none;
       border-radius: 12px;
@@ -99,8 +99,8 @@
       border-radius: 10px;
       font-size: 13px;
       line-height: 1.5;
-      background: #1a3d00;
-      color: #7fff00;
+      background: #0d2137;
+      color: #64b5f6;
       border: 1px solid #2d5a00;
     }
     .status-box.show {
@@ -150,8 +150,8 @@
       <p class="info-bayar" id="infoBayar">
         1. Scan <b>QRIS</b> di atas pakai e-wallet / mobile banking<br>
         2. Transfer sesuai <b>nominal total</b> di atas<br>
-        3. Setelah TF, klik <b>Saya Sudah Bayar</b> (data + foto dikirim ke admin Telegram)<br>
-        4. Setelah itu hubungi admin via WhatsApp untuk proses
+        3. Setelah TF, klik <b>Saya Sudah Bayar</b><br>
+        4. Lalu <b>hubungi admin via WhatsApp</b> untuk proses (wajib)
       </p>
 
       <label style="text-align:left;display:block;margin-bottom:6px;font-size:12px;color:#aaa;">
@@ -164,8 +164,8 @@
       </button>
 
       <div class="status-box" id="statusBox">
-        ✅ Konfirmasi terkirim ke admin Telegram.<br>
-        Status: <b>Menunggu Verifikasi</b>. Pantau di Antrian.<br>
+        ✅ Konfirmasi terkirim.<br>
+        <b>Langkah terakhir:</b> hubungi admin WhatsApp dan kirim bukti TF + kode order.<br>
         <a href="https://wa.me/6285151982250?text=Halo%20admin%20Voxyy%2C%20saya%20sudah%20TF%20order" target="_blank" rel="noopener"
            style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:#25d366;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;">
           <i class="fa-brands fa-whatsapp"></i> Hubungi Admin WhatsApp
@@ -174,7 +174,7 @@
     </div>
 
     <p style="text-align:center;margin-top:16px;font-size:12px;color:#888;">
-      Ada kendala? <a href="laporan.html" style="color:#00e5a0;">Kirim Laporan</a>
+      Ada kendala? <a href="laporan.html" style="color:#2196f3;">Kirim Laporan</a>
     </p>
   </div>
 
@@ -198,6 +198,34 @@
     }
 
     function loadOrderData() {
+      // Langsung dari klik "Jasa Bikin Website" → buat order otomatis + tampil QRIS
+      const paramsEarly = new URLSearchParams(window.location.search);
+      if (paramsEarly.get("paket") === "website" && !paramsEarly.get("kode")) {
+        const totalNum = parseInt(paramsEarly.get("total") || "28000", 10) || 28000;
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        const timePart = String(Date.now()).slice(-3);
+        const kode = `VJ-2026-${rand}${timePart}`;
+        const order = {
+          kode,
+          nama: "Customer Website",
+          wa: "-",
+          catatan: "Jasa Bikin Website — bayar QRIS dulu, setelah konfirmasi hubungi admin WA",
+          total: "Rp " + totalNum.toLocaleString("id-ID"),
+          paket: "Jasa Bikin Website",
+          status: "Belum Bayar",
+          waktu: new Date().toLocaleString("id-ID"),
+          createdAt: Date.now(),
+          finalAmount: totalNum,
+          isWebsite: true
+        };
+        let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+        orders.unshift(order);
+        localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+        // redirect dengan kode agar state bersih
+        window.location.replace(`pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(order.total)}&website=1`);
+        return;
+      }
+
       const orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
       const params = new URLSearchParams(window.location.search);
       const kodeParam = params.get("kode");
@@ -221,10 +249,19 @@
         };
       }
 
+      if (params.get("website") === "1") {
+        order.isWebsite = true;
+        order.paket = order.paket || "Jasa Bikin Website";
+      }
       currentOrder = order;
       window.currentOrder = order;
 
       document.getElementById("kodeOrder").textContent = order.kode;
+      // Judul khusus website
+      if (order.isWebsite || order.paket === "Jasa Bikin Website") {
+        const h2 = document.querySelector(".pay-card h2");
+        if (h2) h2.textContent = "Bayar Jasa Bikin Website";
+      }
 
       const totalNum = order.finalAmount
         || Number(String(order.total).replace(/[^\d]/g, ""))
@@ -317,6 +354,19 @@ Customer sudah bayar & konfirmasi.
 
       document.getElementById("statusBox").classList.add("show");
       btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Terkirim';
+
+      // Setelah konfirmasi → arahkan ke WhatsApp admin
+      const waText = encodeURIComponent(
+        `Halo admin Voxyy, saya sudah TF.\nKode: ${order.kode || "-"}\nPaket: ${order.paket || "-"}\nTotal: ${formatRupiah(finalAmt)}`
+      );
+      const waBtn = document.querySelector("#statusBox a[href*='wa.me']");
+      if (waBtn) waBtn.href = `https://wa.me/6285151982250?text=${waText}`;
+      // Auto buka WA (terutama jasa website)
+      if (order.isWebsite || order.paket === "Jasa Bikin Website" || new URLSearchParams(location.search).get("website") === "1") {
+        setTimeout(function() {
+          window.open(`https://wa.me/6285151982250?text=${waText}`, "_blank");
+        }, 600);
+      }
     }
 
     document.addEventListener("DOMContentLoaded", loadOrderData);

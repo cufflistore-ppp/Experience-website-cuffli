@@ -17,7 +17,7 @@ function loadOrders() {
     return `
     <div class="order-card ${borderClass}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <strong style="color:#ffd700;">${o.kode}</strong>
+        <strong style="color:#2196f3;">${o.kode}</strong>
         <span style="font-size:12px;padding:3px 8px;border-radius:6px;background:${
           o.status === "Sukses" || o.status === "Sudah Bayar" ? "#004400" :
           o.status === "Proses" ? "#443300" : "#440000"

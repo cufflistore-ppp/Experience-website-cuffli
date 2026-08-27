@@ -58,13 +58,13 @@ function renderProduk() {
   } catch (e) {}
 
   grid.innerHTML = produk.map(p => {
-    // Website: langsung ke form order sederhana → pembayaran
+    // Website: langsung ke QRIS pembayaran
     const href = p.id === 4
-      ? "pesan.html?type=produk&id=4"
+      ? "pembayaran.html?paket=website&total=28000"
       : (p.judul && p.judul.toLowerCase().includes("jasa post")
           ? "pesan.html?type=jaspost"
           : "detail-produk.html?id=" + p.id);
-    const btnText = p.id === 4 ? "Pesan & Bayar" : "Lihat Detail";
+    const btnText = p.id === 4 ? "Bayar QRIS" : "Lihat Detail";
     return `
     <div class="produk-card">
       <img src="${p.img || "logo.png"}" alt="${p.judul}" onerror="this.src='logo.png'">
