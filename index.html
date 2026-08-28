@@ -1,70 +1,416 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Voxyy Joki - Pusat Layanan</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title></title>
+  <style>
+    :root {
+      --c1: #6d5cff;
+      --c2: #ff4d8d;
+      --c3: #22d3ee;
+      --c4: #fbbf24;
+      --c5: #34d399;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #07070c;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    body {
+      position: relative;
+    }
+
+    .stage {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .wash {
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(ellipse 70% 55% at 18% 22%, rgba(109, 92, 255, 0.55), transparent 58%),
+        radial-gradient(ellipse 60% 50% at 82% 18%, rgba(255, 77, 141, 0.42), transparent 60%),
+        radial-gradient(ellipse 65% 55% at 72% 78%, rgba(34, 211, 238, 0.28), transparent 62%),
+        radial-gradient(ellipse 50% 45% at 22% 82%, rgba(251, 191, 36, 0.22), transparent 58%),
+        linear-gradient(165deg, #0a0a12 0%, #10101c 50%, #08080f 100%);
+      filter: saturate(1.15);
+      animation: drift 22s ease-in-out infinite alternate;
+    }
+
+    @keyframes drift {
+      0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+      100% { transform: translate3d(2%, 1.5%, 0) scale(1.06); }
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      mix-blend-mode: screen;
+      opacity: 0.7;
+      will-change: transform;
+    }
+
+    .o1 {
+      width: 42vmin;
+      height: 42vmin;
+      left: 8%;
+      top: 12%;
+      background: radial-gradient(circle at 35% 35%, #a78bfa, #6d5cff 45%, transparent 70%);
+      animation: floatA 16s ease-in-out infinite;
+    }
+
+    .o2 {
+      width: 48vmin;
+      height: 48vmin;
+      right: 4%;
+      top: 6%;
+      background: radial-gradient(circle at 40% 40%, #fb7185, #ff4d8d 48%, transparent 72%);
+      animation: floatB 19s ease-in-out infinite;
+    }
+
+    .o3 {
+      width: 36vmin;
+      height: 36vmin;
+      right: 18%;
+      bottom: 8%;
+      background: radial-gradient(circle at 40% 40%, #67e8f9, #22d3ee 50%, transparent 72%);
+      animation: floatC 14s ease-in-out infinite;
+    }
+
+    .o4 {
+      width: 28vmin;
+      height: 28vmin;
+      left: 22%;
+      bottom: 14%;
+      background: radial-gradient(circle at 40% 40%, #fde68a, #fbbf24 50%, transparent 70%);
+      animation: floatA 21s ease-in-out infinite reverse;
+    }
+
+    .o5 {
+      width: 22vmin;
+      height: 22vmin;
+      left: 46%;
+      top: 38%;
+      background: radial-gradient(circle at 40% 40%, #6ee7b7, #34d399 50%, transparent 70%);
+      animation: floatB 18s ease-in-out infinite reverse;
+    }
+
+    @keyframes floatA {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(6vmin, 4vmin) scale(1.08); }
+    }
+
+    @keyframes floatB {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-7vmin, 5vmin) scale(1.12); }
+    }
+
+    @keyframes floatC {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(4vmin, -6vmin) scale(0.94); }
+    }
+
+    .grain {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.45) 100%),
+        linear-gradient(to bottom, rgba(0,0,0,0.18), transparent 18%, transparent 82%, rgba(0,0,0,0.28));
+    }
+
+    .scan {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 3px,
+        rgba(255, 255, 255, 0.012) 3px,
+        rgba(255, 255, 255, 0.012) 4px
+      );
+      opacity: 0.55;
+    }
+
+    .frame {
+      position: fixed;
+      inset: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      pointer-events: none;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    }
+
+    .corner {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: rgba(255, 255, 255, 0.28);
+      border-style: solid;
+    }
+
+    .corner.tl { top: -1px; left: -1px; border-width: 1.5px 0 0 1.5px; border-radius: 4px 0 0 0; }
+    .corner.tr { top: -1px; right: -1px; border-width: 1.5px 1.5px 0 0; border-radius: 0 4px 0 0; }
+    .corner.bl { bottom: -1px; left: -1px; border-width: 0 0 1.5px 1.5px; border-radius: 0 0 0 4px; }
+    .corner.br { bottom: -1px; right: -1px; border-width: 0 1.5px 1.5px 0; border-radius: 0 0 4px 0; }
+
+    .dots {
+      position: fixed;
+      top: 28px;
+      left: 36px;
+      display: flex;
+      gap: 7px;
+      z-index: 2;
+    }
+
+    .dots span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .dots span:nth-child(1) { background: #ff6b7a; }
+    .dots span:nth-child(2) { background: #fbbf24; }
+    .dots span:nth-child(3) { background: #34d399; }
+
+    .status {
+      position: fixed;
+      top: 28px;
+      right: 36px;
+      z-index: 2;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.38);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 10px #34d399;
+      animation: blink 1.8s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    .center {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .void {
+      text-align: center;
+      max-width: min(520px, 86vw);
+    }
+
+    .ring {
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      position: relative;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+    }
+
+    .ring::before,
+    .ring::after {
+      content: "";
+      position: absolute;
+      inset: -10px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .ring::after {
+      inset: -22px;
+      border-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .ring i {
+      position: absolute;
+      inset: 18px;
+      border-radius: 50%;
+      background: conic-gradient(from 40deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c1));
+      filter: blur(10px);
+      opacity: 0.85;
+      animation: spin 8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .line {
+      height: 1px;
+      width: 72px;
+      margin: 0 auto 18px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    }
+
+    .hint {
+      font-size: 13px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.34);
+    }
+
+    .bar {
+      margin: 22px auto 0;
+      width: 160px;
+      height: 3px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .bar b {
+      display: block;
+      height: 100%;
+      width: 38%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+      animation: load 2.8s ease-in-out infinite;
+    }
+
+    @keyframes load {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(360%); }
+    }
+
+    .foot {
+      position: fixed;
+      bottom: 28px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      z-index: 2;
+      font-size: 11px;
+      letter-spacing: 0.34em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.22);
+    }
+
+    canvas#spark {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
+  <div class="stage">
+    <div class="wash"></div>
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <div class="orb o3"></div>
+    <div class="orb o4"></div>
+    <div class="orb o5"></div>
+    <canvas id="spark"></canvas>
+    <div class="grain"></div>
+    <div class="scan"></div>
+    <div class="vignette"></div>
+  </div>
 
-  <header class="header">
-    <div class="brand">
-      <img src="logo.png" alt="Voxyy Joki" class="logo">
-      <div>
-        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pusat Layanan Voxyy Joki</p>
-      </div>
+  <div class="dots" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="status"><span class="pulse"></span> idle</div>
+
+  <div class="frame" aria-hidden="true">
+    <span class="corner tl"></span>
+    <span class="corner tr"></span>
+    <span class="corner bl"></span>
+    <span class="corner br"></span>
+  </div>
+
+  <div class="center">
+    <div class="void">
+      <div class="ring" aria-hidden="true"><i></i></div>
+      <div class="line"></div>
+      <p class="hint">belum ada apa-apa di sini</p>
+      <div class="bar"><b></b></div>
     </div>
-  </header>
-
-  <div class="banner">
-    <img src="banner.jpg" alt="Selamat Datang di Voxyy Joki" class="banner-full">
-  </div>
-  <div class="top-notif" id="topNotif" style="display:none;"></div>
-
-  <!-- Menu kecil: Joki | Produk Digital | Jasa Post -->
-  <div class="menu-grid">
-    <a href="joki.html" class="menu-item">
-      <i class="fa-solid fa-shield-halved"></i>
-      <span>Joki</span>
-    </a>
-    <a href="digital.html" class="menu-item">
-      <i class="fa-solid fa-box"></i>
-      <span>Produk Digital</span>
-    </a>
-    <a href="pesan.html?type=jaspost" class="menu-item">
-      <i class="fa-solid fa-paper-plane"></i>
-      <span>Jasa Post</span>
-    </a>
   </div>
 
-  <!-- Grid produk 2 kolom (produk.js) -->
-  <section class="produk-section">
-    <h3>PRODUK DIGITAL</h3>
-    <p class="subtitle">Jasa website. Bayar QRIS, lalu konfirmasi via WhatsApp.</p>
-    <div class="produk-grid" id="produkGrid"></div>
-  </section>
+  <div class="foot">workspace · empty</div>
 
-  <div class="info-box">
-    <h4>Website jadi pusat proses order.</h4>
-    <p>Website dipakai untuk menerima order, pembayaran, data customer, antrian, dan status supaya proses tidak tercerai di chat.</p>
-  </div>
+  <script>
+    const canvas = document.getElementById("spark");
+    const ctx = canvas.getContext("2d");
+    let w, h, dots;
 
-  <div style="padding:0 12px 24px;">
-    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
-  </div>
+    function resize() {
+      w = canvas.width = innerWidth;
+      h = canvas.height = innerHeight;
+      dots = Array.from({ length: Math.min(70, Math.floor((w * h) / 28000)) }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.6 + 0.3,
+        a: Math.random() * 0.35 + 0.05,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25
+      }));
+    }
 
-  <nav class="bottom-nav">
-    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Produk Digital</span></a>
-    <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
-    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
-  </nav>
+    function tick() {
+      ctx.clearRect(0, 0, w, h);
+      for (const d of dots) {
+        d.x += d.vx;
+        d.y += d.vy;
+        if (d.x < 0 || d.x > w) d.vx *= -1;
+        if (d.y < 0 || d.y > h) d.vy *= -1;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255,${d.a})`;
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      requestAnimationFrame(tick);
+    }
 
-  <script src="produk.js"></script>
-  <script src="script.js"></script>
+    addEventListener("resize", resize);
+    resize();
+    tick();
+  </script>
 </body>
 </html>
