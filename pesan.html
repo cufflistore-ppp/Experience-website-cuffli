@@ -147,11 +147,11 @@ Wa.me/628…
         <input type="text" id="jp_mc" value="voxy stor (post sini mc sini)" readonly style="background:#0a0e18;color:#2196f3;">
 
         <div class="jaspost-notice" style="margin-top:14px;">
-          💥 <b>jasa post voxy all produk</b> — isi lengkap + foto wajib, lalu bayar.
+          💥 <b>jasa post voxy all produk</b> — GRATIS. Isi lengkap + foto, lalu kirim. Langsung masuk ke bot Telegram.
         </div>
 
         <label style="margin-top:14px;">Foto produk / akun (wajib) 📷</label>
-        <p class="field-hint">Wajib upload foto. Foto + data dikirim ke admin Telegram setelah kamu tekan <b>Saya Sudah Bayar</b>.</p>
+        <p class="field-hint">Wajib upload foto. Data + foto langsung dikirim ke admin Telegram saat kamu tekan <b>Kirim Gratis</b>.</p>
         <input type="file" id="fotoAkun" accept="image/*" required>
         <img id="fotoPreview" class="foto-preview" alt="Preview foto">
       </div>
@@ -206,15 +206,20 @@ Wa.me/628…
         window.isJaspost = true;
         window.orderType = "Jasa Post";
         window.orderPaketName = "Jasa Post Voxy All Produk";
-        baseHarga = 1500;
+        baseHarga = 0;
         document.getElementById("paketJudul").textContent = "Jasa Post by Voxy 💥";
         document.getElementById("namaPaketRow").textContent = "Jasa Post Voxy All Produk";
-        document.getElementById("hargaPaket").textContent = "Rp 1.500";
-        if (typeof updateTotal === "function") updateTotal();
+        document.getElementById("hargaPaket").textContent = "GRATIS";
+        const totalEl = document.getElementById("totalHarga");
+        if (totalEl) totalEl.textContent = "GRATIS";
         document.getElementById("formStandar").style.display = "none";
         document.getElementById("formJaspost").style.display = "block";
+        const warn = document.getElementById("warningJoki");
+        if (warn) warn.style.display = "none";
         const addon = document.getElementById("addonSection");
         if (addon) addon.style.display = "none";
+        const btn = document.getElementById("btnSubmitOrder");
+        if (btn) btn.textContent = "Kirim Gratis";
       } else if (type === "produk") {
         // Load produk digital
         if (typeof loadProdukDigital === "function") loadProdukDigital();
@@ -233,14 +238,17 @@ Wa.me/628…
 
           if (isJasaPost) {
             window.isJaspost = true;
-            window.orderType = "Jasa Post Akun";
-            // Tampilkan form jaspost, sembunyikan form standar
+            window.orderType = "Jasa Post";
+            window.orderPaketName = "Jasa Post Voxy All Produk";
+            baseHarga = 0;
             document.getElementById("formStandar").style.display = "none";
             document.getElementById("formJaspost").style.display = "block";
             document.getElementById("warningJoki").style.display = "none";
-            // Ubah tombol
+            document.getElementById("hargaPaket").textContent = "GRATIS";
+            const totalEl = document.getElementById("totalHarga");
+            if (totalEl) totalEl.textContent = "GRATIS";
             const btn = document.getElementById("btnSubmitOrder");
-            if (btn) btn.textContent = "Bayar Sekarang";
+            if (btn) btn.textContent = "Kirim Gratis";
           } else {
             // Paket Views + Kontak & Premium Kontak → sama seperti joki
             // Sembunyikan addon (karena harga fixed)
@@ -269,8 +277,6 @@ Wa.me/628…
       }
     });
 
-    // Override / extend buatPesanan agar support form jaspost
-    // Foto + format hanya dikirim ke Telegram SETELAH konfirmasi bayar
     const originalBuatPesanan = window.buatPesanan;
     window.buatPesanan = async function() {
       if (window.isJaspost) {
@@ -280,6 +286,7 @@ Wa.me/628…
         const nama = document.getElementById("jp_nama")?.value?.trim() || namaProduk || "Customer";
         const mc = document.getElementById("jp_mc")?.value?.trim() || "voxy stor (post sini mc sini)";
         const fotoInput = document.getElementById("fotoAkun");
+        const btn = document.getElementById("btnSubmitOrder");
 
         if (!namaProduk || !spek || !nomer) {
           showNiceAlert("Lengkapi field wajib: nama produk, spek, dan nomor WA seller.");
@@ -299,60 +306,69 @@ mc: ${mc}
 
 jasa post voxy all produk`;
 
-        // Isi field agar logic lain bisa baca
-        const namaEl = document.getElementById("nama");
-        const waEl = document.getElementById("wa");
-        const catatanEl = document.getElementById("catatan");
-        if (namaEl) namaEl.value = nama;
-        if (waEl) waEl.value = nomer;
-        if (catatanEl) catatanEl.value = catatan;
-
-        const total = document.getElementById("totalHarga")?.textContent || "Rp 0";
         const rand = Math.floor(1000 + Math.random() * 9000);
         const timePart = String(Date.now()).slice(-3);
         const kode = `VJ-2026-${rand}${timePart}`;
 
-        let order = {
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Mengirim...";
+        }
+
+        const pesan = `
+📣 <b>JASA POST GRATIS - VOXYY</b>
+
+🆔 Kode: <code>${kode}</code>
+👤 Nama: <b>${nama}</b>
+👜 Produk: <b>${namaProduk}</b>
+📈 Spek: ${spek}
+📱 WA Seller: <b>${nomer}</b>
+🏷️ MC: ${mc}
+💰 Biaya: <b>GRATIS</b>
+📊 Status: <b>Masuk Antrian</b>
+⏰ ${new Date().toLocaleString("id-ID")}
+        `.trim();
+
+        try {
+          if (typeof kirimTelegram === "function") {
+            await kirimTelegram(pesan);
+          }
+          if (typeof kirimFotoTelegram === "function" && fotoInput.files[0]) {
+            await kirimFotoTelegram(
+              fotoInput.files[0],
+              `Foto Jasa Post - ${kode}\n${namaProduk}\n${nomer}`
+            );
+          }
+        } catch (e) {
+          console.warn("Gagal kirim Telegram jasa post:", e);
+        }
+
+        const order = {
           kode,
           nama,
           wa: nomer,
           catatan,
-          total,
-          paket: window.orderPaketName || "Jasa Post Akun",
-          status: "Belum Bayar",
+          total: "GRATIS",
+          paket: window.orderPaketName || "Jasa Post Voxy All Produk",
+          status: "Proses",
           waktu: new Date().toLocaleString("id-ID"),
-          isJaspost: true
+          isJaspost: true,
+          createdAt: Date.now(),
+          finalAmount: 0
         };
 
-        order.createdAt = Date.now();
-        order.finalAmount = Number(String(total).replace(/[^\d]/g, "")) || 0;
-
-        // Simpan order (belum kirim Telegram)
         let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
         orders.unshift(order);
         localStorage.setItem("voxyy_orders", JSON.stringify(orders));
-        if (kode) localStorage.setItem("voxyy_saved_kode", kode);
+        localStorage.setItem("voxyy_saved_kode", kode);
 
-        // Simpan foto sebagai base64 di sessionStorage agar bisa dikirim setelah bayar
-        try {
-          const file = fotoInput.files[0];
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            try {
-              sessionStorage.setItem("voxyy_jaspost_foto_" + kode, e.target.result);
-              sessionStorage.setItem("voxyy_jaspost_pending", kode);
-            } catch (err) {
-              console.warn("Foto terlalu besar untuk sessionStorage", err);
-            }
-            window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
-          };
-          reader.onerror = function() {
-            window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
-          };
-          reader.readAsDataURL(file);
-        } catch (err) {
-          window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
+        if (typeof window.showSiteModal === "function") {
+          window.showSiteModal("Jasa post gratis sudah dikirim ke admin Telegram.", "success");
         }
+
+        setTimeout(function() {
+          window.location.href = "antrian.html";
+        }, 900);
         return;
       }
 
