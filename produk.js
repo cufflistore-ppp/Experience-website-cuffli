@@ -1,40 +1,23 @@
-// Produk tampil di Home (grid 2 kolom, foto 4:5)
+const HOME_CATALOG_VER = "4";
+
 const produk = [
   {
     id: 1,
-    judul: "Jasa Post Akun Channel",
-    harga: 1500,
+    judul: "Jasa Bikin Website",
+    harga: 20000,
     status: "TERSEDIA",
     img: "logo.png",
-    deskripsi: "Jasa post akun ke channel & grup terkait.",
-    fitur: ["Post banyak channel", "Laporan hasil", "Proses 1x24 jam"]
+    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
+    fitur: ["Harga Rp 20.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 2,
-    judul: "Paket Views + Kontak",
-    harga: 11000,
-    status: "AKTIF",
-    img: "logo.png",
-    deskripsi: "Views story + push kontak.",
-    fitur: ["Views story", "Push kontak", "Hasil terukur"]
-  },
-  {
-    id: 3,
-    judul: "Paket Premium Kontak",
-    harga: 33000,
+    judul: "Ajarin Bikin Website",
+    harga: 35000,
     status: "TERSEDIA",
     img: "logo.png",
-    deskripsi: "Push kontak prioritas.",
-    fitur: ["Prioritas antrian", "Push lebih banyak", "Support WA"]
-  },
-  {
-    id: 4,
-    judul: "Jasa Bikin Website",
-    harga: 28000,
-    status: "TERSEDIA",
-    img: "logo.png",
-    deskripsi: "Bayar QRIS dulu, setelah TF hubungi admin WhatsApp.",
-    fitur: ["Website siap pakai", "Rp 28.000", "Setelah bayar hubungi admin WA"]
+    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
+    fitur: ["Harga Rp 35.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   }
 ];
 
@@ -47,10 +30,14 @@ function renderProduk() {
   if (!grid) return;
 
   try {
+    if (localStorage.getItem("voxyy_produk_ver") !== HOME_CATALOG_VER) {
+      localStorage.removeItem("voxyy_produk");
+      localStorage.setItem("voxyy_produk_ver", HOME_CATALOG_VER);
+    }
     const saved = localStorage.getItem("voxyy_produk");
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length >= produk.length) {
+      if (Array.isArray(parsed) && parsed.length) {
         produk.length = 0;
         parsed.forEach(p => produk.push(p));
       }
@@ -58,13 +45,7 @@ function renderProduk() {
   } catch (e) {}
 
   grid.innerHTML = produk.map(p => {
-    // Website: langsung ke QRIS pembayaran
-    const href = p.id === 4
-      ? "pembayaran.html?paket=website&total=28000"
-      : (p.judul && p.judul.toLowerCase().includes("jasa post")
-          ? "pesan.html?type=jaspost"
-          : "detail-produk.html?id=" + p.id);
-    const btnText = p.id === 4 ? "Bayar QRIS" : "Lihat Detail";
+    const href = "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
     return `
     <div class="produk-card">
       <img src="${p.img || "logo.png"}" alt="${p.judul}" onerror="this.src='logo.png'">
@@ -72,7 +53,7 @@ function renderProduk() {
         <small style="color:#0d47a1;font-size:10px;">${p.status || "TERSEDIA"}</small>
         <h4>${p.judul}</h4>
         <div class="harga">${formatRpProduk(p.harga)}</div>
-        <a href="${href}" class="btn">${btnText}</a>
+        <a href="${href}" class="btn">Bayar Sekarang</a>
       </div>
     </div>`;
   }).join("");
@@ -87,7 +68,7 @@ function tambahProduk(data) {
     status: data.status || "TERSEDIA",
     img: data.img || "logo.png",
     deskripsi: data.deskripsi || "",
-    fitur: data.fitur || ["File digital"]
+    fitur: data.fitur || ["Bayar langsung QRIS"]
   });
   localStorage.setItem("voxyy_produk", JSON.stringify(produk));
   renderProduk();

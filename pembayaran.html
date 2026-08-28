@@ -198,31 +198,35 @@
     }
 
     function loadOrderData() {
-      // Langsung dari klik "Jasa Bikin Website" → buat order otomatis + tampil QRIS
+      // Klik produk → buat order otomatis + tampil QRIS
       const paramsEarly = new URLSearchParams(window.location.search);
-      if (paramsEarly.get("paket") === "website" && !paramsEarly.get("kode")) {
-        const totalNum = parseInt(paramsEarly.get("total") || "28000", 10) || 28000;
+      const paketEarly = (paramsEarly.get("paket") || "").trim();
+      if (paketEarly && !paramsEarly.get("kode")) {
+        const totalNum = parseInt(String(paramsEarly.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
         const rand = Math.floor(1000 + Math.random() * 9000);
         const timePart = String(Date.now()).slice(-3);
         const kode = `VJ-2026-${rand}${timePart}`;
+        const isWebsite = /website/i.test(paketEarly);
         const order = {
           kode,
-          nama: "Customer Website",
+          nama: "Customer",
           wa: "-",
-          catatan: "Jasa Bikin Website — bayar QRIS dulu, setelah konfirmasi hubungi admin WA",
+          catatan: paketEarly + " — bayar QRIS dulu, setelah konfirmasi hubungi admin WA",
           total: "Rp " + totalNum.toLocaleString("id-ID"),
-          paket: "Jasa Bikin Website",
+          paket: paketEarly === "website" ? "Jasa Bikin Website" : paketEarly,
           status: "Belum Bayar",
           waktu: new Date().toLocaleString("id-ID"),
           createdAt: Date.now(),
           finalAmount: totalNum,
-          isWebsite: true
+          isWebsite: isWebsite,
+          isDigital: !isWebsite
         };
         let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
         orders.unshift(order);
         localStorage.setItem("voxyy_orders", JSON.stringify(orders));
-        // redirect dengan kode agar state bersih
-        window.location.replace(`pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(order.total)}&website=1`);
+        if (kode) localStorage.setItem("voxyy_saved_kode", kode);
+        const extra = isWebsite ? "&website=1" : "&digital=1";
+        window.location.replace(`pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(order.total)}${extra}`);
         return;
       }
 
@@ -253,14 +257,19 @@
         order.isWebsite = true;
         order.paket = order.paket || "Jasa Bikin Website";
       }
+      if (params.get("digital") === "1") {
+        order.isDigital = true;
+      }
       currentOrder = order;
       window.currentOrder = order;
 
       document.getElementById("kodeOrder").textContent = order.kode;
-      // Judul khusus website
-      if (order.isWebsite || order.paket === "Jasa Bikin Website") {
-        const h2 = document.querySelector(".pay-card h2");
-        if (h2) h2.textContent = "Bayar Jasa Bikin Website";
+      if (order.kode && order.status !== "Sukses" && order.status !== "SELESAI") {
+        localStorage.setItem("voxyy_saved_kode", order.kode);
+      }
+      const h2 = document.querySelector(".pay-card h2");
+      if (h2 && order.paket) {
+        h2.textContent = "Bayar " + order.paket;
       }
 
       const totalNum = order.finalAmount
@@ -361,12 +370,9 @@ Customer sudah bayar & konfirmasi.
       );
       const waBtn = document.querySelector("#statusBox a[href*='wa.me']");
       if (waBtn) waBtn.href = `https://wa.me/6285151982250?text=${waText}`;
-      // Auto buka WA (terutama jasa website)
-      if (order.isWebsite || order.paket === "Jasa Bikin Website" || new URLSearchParams(location.search).get("website") === "1") {
-        setTimeout(function() {
-          window.open(`https://wa.me/6285151982250?text=${waText}`, "_blank");
-        }, 600);
-      }
+      setTimeout(function() {
+        window.open(`https://wa.me/6285151982250?text=${waText}`, "_blank");
+      }, 600);
     }
 
     document.addEventListener("DOMContentLoaded", loadOrderData);

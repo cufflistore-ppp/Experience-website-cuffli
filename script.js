@@ -160,6 +160,7 @@ async function buatPesanan() {
   let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
   orders.unshift(order);
   localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+  if (kode) localStorage.setItem("voxyy_saved_kode", kode);
 
   // Reset form fields
   const namaEl = document.getElementById("nama");

@@ -331,6 +331,7 @@ jasa post voxy all produk`;
         let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
         orders.unshift(order);
         localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+        if (kode) localStorage.setItem("voxyy_saved_kode", kode);
 
         // Simpan foto sebagai base64 di sessionStorage agar bisa dikirim setelah bayar
         try {
