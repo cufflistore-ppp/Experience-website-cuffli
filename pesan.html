@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pesan Paket - Voxyy Joki</title>
+  <title>Pesan Paket - ROX</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
     .jaspost-notice {
       background: #2a2200;
-      border: 1px solid #2196f355;
+      border: 1px solid #9c27b055;
       border-radius: 10px;
       padding: 12px;
       margin: 12px 0;
@@ -18,7 +18,7 @@
       line-height: 1.5;
     }
     .jaspost-notice .title {
-      color: #2196f3;
+      color: #9c27b0;
       font-weight: 700;
       margin-bottom: 6px;
       display: block;
@@ -44,9 +44,9 @@
 <body>
   <header class="header">
     <div class="brand">
-      <img src="logo.png" alt="Voxyy Joki" class="logo"  >
+      <img src="logo.png" alt="ROX" class="logo"  >
       <div>
-        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <h1>ROX <span class="verified-wrap"><i class="fa-solid fa-check"></i></span></h1>
         <p>Form Pemesanan</p>
       </div>
     </div>
@@ -61,7 +61,7 @@
       <img src="logo.png" class="order-logo"  >
       <div>
         <h3 id="paketJudul">Joki Kontak</h3>
-        <p>Voxyy Joki · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
+        <p>ROX · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
       </div>
     </div>
 
@@ -84,10 +84,10 @@
         <input type="tel" id="wa" placeholder="08xxxxxxxxxx" required>
 
         <label>Catatan (Format Teks Push Kontak)</label>
-        <p style="font-size:12px; color:#2196f3; margin:4px 0 8px;">
+        <p style="font-size:12px; color:#9c27b0; margin:4px 0 8px;">
           * Tinggal ganti <b>NAMA STORE</b> dan nomor WhatsApp saja. Jangan hapus formatnya.
         </p>
-        <textarea id="catatan" rows="7">SV BUYER FRESH VOXYY🔥
+        <textarea id="catatan" rows="7">SV BUYER FRESH ROX🔥
 
 SV ; NAMA STORE
 Wa.me/628…
@@ -126,9 +126,9 @@ Wa.me/628…
         <h4><span class="step">1</span> Format Jasa Post</h4>
 
         <div class="jaspost-notice">
-          <span class="title">jasa post by voxy💥</span>
+          <span class="title">jasa post by ROX💥</span>
           <b>Jasa Post Voxy All Produk</b><br>
-          MC: <code>voxy stor</code> (post sini mc sini)
+          MC: <code>ROX stor</code> (post sini mc sini)
         </div>
 
         <label>nama produk👜</label>
@@ -144,10 +144,10 @@ Wa.me/628…
         <input type="text" id="jp_nama" placeholder="Nama / store kamu">
 
         <label>MC</label>
-        <input type="text" id="jp_mc" value="voxy stor (post sini mc sini)" readonly style="background:#0a0e18;color:#2196f3;">
+        <input type="text" id="jp_mc" value="ROX stor (post sini mc sini)" readonly style="background:#0a0e18;color:#9c27b0;">
 
         <div class="jaspost-notice" style="margin-top:14px;">
-          💥 <b>jasa post voxy all produk</b> — GRATIS. Isi lengkap + foto, lalu kirim. Langsung masuk ke bot Telegram.
+          💥 <b>jasa post ROX all produk</b> — GRATIS. Isi lengkap + foto, lalu kirim. Langsung masuk ke bot Telegram.
         </div>
 
         <label style="margin-top:14px;">Foto produk / akun (wajib) 📷</label>
@@ -207,7 +207,7 @@ Wa.me/628…
         window.orderType = "Jasa Post";
         window.orderPaketName = "Jasa Post Voxy All Produk";
         baseHarga = 0;
-        document.getElementById("paketJudul").textContent = "Jasa Post by Voxy 💥";
+        document.getElementById("paketJudul").textContent = "Jasa Post by ROX 💥";
         document.getElementById("namaPaketRow").textContent = "Jasa Post Voxy All Produk";
         document.getElementById("hargaPaket").textContent = "GRATIS";
         const totalEl = document.getElementById("totalHarga");
@@ -284,7 +284,7 @@ Wa.me/628…
         const spek = document.getElementById("jp_spek")?.value?.trim() || "";
         const nomer = document.getElementById("jp_nomer")?.value?.trim() || "";
         const nama = document.getElementById("jp_nama")?.value?.trim() || namaProduk || "Customer";
-        const mc = document.getElementById("jp_mc")?.value?.trim() || "voxy stor (post sini mc sini)";
+        const mc = document.getElementById("jp_mc")?.value?.trim() || "ROX stor (post sini mc sini)";
         const fotoInput = document.getElementById("fotoAkun");
         const btn = document.getElementById("btnSubmitOrder");
 
@@ -297,18 +297,18 @@ Wa.me/628…
           return;
         }
 
-        const catatan = `jasa post by voxy💥
+        const catatan = `jasa post by ROX💥
 
 nama produk👜: ${namaProduk}
 spek 📈: ${spek}
 nomer wa seller: ${nomer}
 mc: ${mc}
 
-jasa post voxy all produk`;
+jasa post ROX all produk`;
 
         const rand = Math.floor(1000 + Math.random() * 9000);
         const timePart = String(Date.now()).slice(-3);
-        const kode = `VJ-2026-${rand}${timePart}`;
+        const kode = `RJ-2026-${rand}${timePart}`;
 
         if (btn) {
           btn.disabled = true;
@@ -316,7 +316,7 @@ jasa post voxy all produk`;
         }
 
         const pesan = `
-📣 <b>JASA POST GRATIS - VOXYY</b>
+📣 <b>JASA POST GRATIS - ROX</b>
 
 🆔 Kode: <code>${kode}</code>
 👤 Nama: <b>${nama}</b>

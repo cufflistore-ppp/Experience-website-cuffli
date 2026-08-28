@@ -1,11 +1,11 @@
 ========================================
-   VOXYY JOKI - Website Package
+   ROX - Website Package
    + QRIS + Biaya Admin + Expired
 ========================================
 
 Cara pakai:
 1. Extract semua file ke folder hosting / localhost
-2. Logo: logo.png (sudah diganti logo Voxyy persegi)
+2. Logo: logo.png (sudah diganti logo ROX persegi)
 3. Banner: banner.jpg (sudah diganti)
 4. QRIS: qris.png (sudah diganti foto QRIS kamu)
 5. Buka index.html
@@ -28,7 +28,7 @@ Bottom navigation:
 Joki | Video FS | Home | Antrian | Tentang
 (ikon aktif berpindah sesuai halaman)
 
-Warna tema: dark blue + neon green (sesuai branding Voxyy Joki)
+Warna tema: dark blue + neon green (sesuai branding ROX)
 
 Ganti nomor WA di tentang.html jika perlu.
 Telegram sudah terkonfigurasi (token + chat id).

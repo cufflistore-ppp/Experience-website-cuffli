@@ -50,7 +50,7 @@ function renderProduk() {
     <div class="produk-card">
       <img src="${p.img || "logo.png"}" alt="${p.judul}" onerror="this.src='logo.png'">
       <div class="produk-info">
-        <small style="color:#0d47a1;font-size:10px;">${p.status || "TERSEDIA"}</small>
+        <small style="color:#6a1b9a;font-size:10px;">${p.status || "TERSEDIA"}</small>
         <h4>${p.judul}</h4>
         <div class="harga">${formatRpProduk(p.harga)}</div>
         <a href="${href}" class="btn">Bayar Sekarang</a>

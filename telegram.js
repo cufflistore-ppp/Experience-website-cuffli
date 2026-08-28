@@ -46,7 +46,7 @@ async function kirimFotoTelegram(file, caption = "") {
 
 async function kirimOrderKeTelegram(data) {
   const pesan = `
-🛒 <b>ORDER BARU - VOXYY JOKI</b>
+🛒 <b>ORDER BARU - ROX</b>
 
 🆔 Kode Antrian: <code>${data.kode}</code>
 👤 Nama: <b>${data.nama}</b>
@@ -85,7 +85,7 @@ ${data.deskripsi}
 
 async function kirimStatusUpdate(kode, status, nama) {
   const pesan = `
-🔄 <b>STATUS DIUBAH - VOXYY JOKI</b>
+🔄 <b>STATUS DIUBAH - ROX</b>
 
 🆔 Kode: <code>${kode}</code>
 👤 Nama: ${nama || "-"}
