@@ -1,15 +1,42 @@
 /**
- * VOXYY JOKI - Antrian Global (stabil)
- * - Order lokal TIDAK pernah dihapus oleh server kosong
- * - Local + remote selalu di-merge
- * - Backend: crudcrud.com
+ * VOXYY JOKI - Antrian & Admin Global (Firebase Realtime Database)
+ *
+ * SETUP FIREBASE (gratis, 1x):
+ * 1. https://console.firebase.google.com → Create project
+ * 2. Build → Realtime Database → Create → Test mode
+ * 3. Rules → Publish:
+ *    { "rules": { ".read": true, ".write": true } }
+ * 4. Build → Authentication → Sign-in method → Google → Enable
+ * 5. Project Settings → Your apps → Web → copy config
+ * 6. Tempel ke FIREBASE_CONFIG di bawah
+ * 7. Authentication → Settings → Authorized domains
+ *    tambah domain Vercel kamu (xxx.vercel.app)
+ * 8. Upload file ke hosting
  */
-const CRUD_BASE =
-  "https://crudcrud.com/api/bbf20bab779843cdbd4e72618f9d6d75/orders";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAx2I5hmnMBkS04tOr21B9KG4SVaVCqyQg",
+  authDomain: "voxyyjoki.firebaseapp.com",
+  databaseURL: "https://voxyyjoki-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "voxyyjoki",
+  storageBucket: "voxyyjoki.firebasestorage.app",
+  messagingSenderId: "442340334430",
+  appId: "1:442340334430:web:785c5a5f69aaf8fe8fcdcf",
+  measurementId: "G-7QTGSDR351"
+};
+
 const LOCAL_ORDERS_KEY = "voxyy_orders";
+let _db = null;
+let _ready = false;
+let _listeners = [];
+let _lastOrders = [];
 
 function isGlobalConfigured() {
-  return true;
+  return !!(
+    FIREBASE_CONFIG.apiKey &&
+    FIREBASE_CONFIG.apiKey.length > 10 &&
+    FIREBASE_CONFIG.databaseURL &&
+    String(FIREBASE_CONFIG.databaseURL).includes("http")
+  );
 }
 
 function getLocalOrders() {
@@ -29,7 +56,7 @@ function setLocalOrders(orders) {
   } catch (e) {}
 }
 
-function stripId(order) {
+function stripMeta(order) {
   if (!order || typeof order !== "object") return order;
   const copy = { ...order };
   delete copy._id;
@@ -44,8 +71,7 @@ function statusScore(st) {
   return 0;
 }
 
-/** Merge by kode — status lebih maju / createdAt lebih baru menang */
-function mergeOrders(listA, listB) {
+function mergeOrders(a, b) {
   const map = new Map();
   const absorb = (o) => {
     if (!o || !o.kode) return;
@@ -55,84 +81,102 @@ function mergeOrders(listA, listB) {
       map.set(k, { ...o });
       return;
     }
-    const merged = { ...prev, ...o };
-    // status: ambil yang lebih maju
-    if (statusScore(prev.status) > statusScore(o.status)) {
-      merged.status = prev.status;
-    }
-    // createdAt: ambil yang lebih tua (asli) kalau ada
+    const m = { ...prev, ...o };
+    if (statusScore(prev.status) > statusScore(o.status)) m.status = prev.status;
     const ca = Number(prev.createdAt) || 0;
     const cb = Number(o.createdAt) || 0;
-    if (ca && cb) merged.createdAt = Math.min(ca, cb);
-    else merged.createdAt = ca || cb || Date.now();
-    // _id dari remote kalau ada
-    if (prev._id && !merged._id) merged._id = prev._id;
-    if (o._id) merged._id = o._id;
-    map.set(k, merged);
+    m.createdAt = ca && cb ? Math.min(ca, cb) : ca || cb || Date.now();
+    map.set(k, m);
   };
-  (listA || []).forEach(absorb);
-  (listB || []).forEach(absorb);
+  (a || []).forEach(absorb);
+  (b || []).forEach(absorb);
   return Array.from(map.values()).sort(
-    (a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0)
+    (x, y) => (Number(y.createdAt) || 0) - (Number(x.createdAt) || 0)
   );
 }
 
-async function fetchRemoteOrders() {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 8000);
+function kodeKey(kode) {
+  return String(kode || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[.#$\[\]]/g, "_");
+}
+
+function initFirebase() {
+  if (_ready) return true;
+  if (!isGlobalConfigured()) return false;
+  if (typeof firebase === "undefined") {
+    console.warn("[Voxyy] Firebase SDK belum dimuat");
+    return false;
+  }
   try {
-    const res = await fetch(CRUD_BASE + "?_=" + Date.now(), {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      cache: "no-store",
-      signal: controller.signal
-    });
-    clearTimeout(timer);
-    if (!res.ok) throw new Error("GET " + res.status);
-    const data = await res.json();
-    return Array.isArray(data) ? data : [];
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    _db = firebase.database();
+    _ready = true;
+
+    _db.ref("orders").on(
+      "value",
+      (snap) => {
+        const val = snap.val() || {};
+        const list = Object.keys(val).map((k) => ({
+          ...val[k],
+          _id: k,
+          kode: val[k].kode || k
+        }));
+        list.sort(
+          (a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0)
+        );
+        _lastOrders = list;
+        setLocalOrders(list.map(stripMeta));
+        _listeners.forEach((fn) => {
+          try {
+            fn(list);
+          } catch (e) {}
+        });
+      },
+      (err) => console.error("[Voxyy] DB listener:", err)
+    );
+    return true;
   } catch (e) {
-    clearTimeout(timer);
-    throw e;
+    console.error("[Voxyy] init Firebase:", e);
+    return false;
   }
 }
 
-/**
- * Ambil orders = MERGE(remote, local)
- * JANGAN pernah timpa local dengan [] dari server.
- */
+function onOrdersChange(fn) {
+  if (typeof fn === "function") _listeners.push(fn);
+  initFirebase();
+  if (_lastOrders.length) {
+    try {
+      fn(_lastOrders);
+    } catch (e) {}
+  }
+}
+
 async function getOrders() {
   const local = getLocalOrders();
+  if (!isGlobalConfigured()) return local;
+  initFirebase();
+  if (!_db) return local;
+  if (_lastOrders.length) return mergeOrders(_lastOrders, local);
   try {
-    const remote = await fetchRemoteOrders();
-    const merged = mergeOrders(remote, local);
-    // simpan hasil merge (bukan remote mentah)
-    setLocalOrders(merged.map(stripId));
-    // push local-only items ke remote (background, jangan blok)
-    syncLocalOnlyToRemote(remote, merged).catch(() => {});
+    const snap = await _db.ref("orders").once("value");
+    const val = snap.val() || {};
+    const list = Object.keys(val).map((k) => ({
+      ...val[k],
+      _id: k,
+      kode: val[k].kode || k
+    }));
+    list.sort(
+      (a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0)
+    );
+    _lastOrders = list;
+    const merged = mergeOrders(list, local);
+    setLocalOrders(merged.map(stripMeta));
     return merged;
   } catch (e) {
-    console.warn("[Voxyy] Global GET gagal, tampilkan local:", e);
+    console.warn("[Voxyy] getOrders:", e);
     return local;
-  }
-}
-
-/** Order yang hanya ada di local → POST ke remote */
-async function syncLocalOnlyToRemote(remote, merged) {
-  const remoteKeys = new Set(
-    (remote || []).map((o) => String(o.kode || "").toUpperCase())
-  );
-  for (const o of merged || []) {
-    if (!o || !o.kode) continue;
-    const k = String(o.kode).toUpperCase();
-    if (remoteKeys.has(k)) continue;
-    try {
-      await fetch(CRUD_BASE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(stripId(o))
-      });
-    } catch (e) {}
   }
 }
 
@@ -140,54 +184,24 @@ async function addOrder(order) {
   if (!order || !order.kode) return { ok: false };
   if (!order.createdAt) order.createdAt = Date.now();
 
-  // 1) SELALU simpan local dulu
   const local = getLocalOrders();
   const t = String(order.kode).toUpperCase();
   const li = local.findIndex(
     (o) => String(o.kode || "").toUpperCase() === t
   );
-  if (li >= 0) local[li] = { ...local[li], ...stripId(order) };
-  else local.unshift(stripId(order));
+  if (li >= 0) local[li] = { ...local[li], ...stripMeta(order) };
+  else local.unshift(stripMeta(order));
   setLocalOrders(local);
 
-  // 2) push remote
+  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  initFirebase();
+  if (!_db) return { ok: true, mode: "local" };
+
   try {
-    let remote = [];
-    try {
-      remote = await fetchRemoteOrders();
-    } catch (e) {
-      remote = [];
-    }
-    const existing = remote.find(
-      (o) => String(o.kode || "").toUpperCase() === t
-    );
-    if (existing && existing._id) {
-      const body = stripId({ ...existing, ...order });
-      const res = await fetch(CRUD_BASE + "/" + existing._id, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) throw new Error("PUT " + res.status);
-      return { ok: true, mode: "global", action: "update" };
-    }
-    const res = await fetch(CRUD_BASE, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(stripId(order))
-    });
-    if (!res.ok) throw new Error("POST " + res.status);
-    // verifikasi tersimpan
-    try {
-      const check = await fetchRemoteOrders();
-      const found = check.find(
-        (o) => String(o.kode || "").toUpperCase() === t
-      );
-      if (!found) console.warn("[Voxyy] POST ok tapi belum terlihat di GET");
-    } catch (e) {}
-    return { ok: true, mode: "global", action: "create" };
+    await _db.ref("orders/" + kodeKey(order.kode)).set(stripMeta(order));
+    return { ok: true, mode: "global" };
   } catch (e) {
-    console.error("[Voxyy] addOrder remote gagal (local aman):", e);
+    console.error("[Voxyy] addOrder:", e);
     return { ok: false, mode: "local", error: String(e) };
   }
 }
@@ -195,7 +209,6 @@ async function addOrder(order) {
 async function updateOrderByKode(kode, patch) {
   if (!kode) return { ok: false };
   const t = String(kode).trim().toUpperCase();
-
   let local = getLocalOrders();
   const li = local.findIndex(
     (o) => String(o.kode || "").toUpperCase() === t
@@ -205,31 +218,24 @@ async function updateOrderByKode(kode, patch) {
     setLocalOrders(local);
   }
 
+  if (!isGlobalConfigured()) return { ok: li >= 0, mode: "local" };
+  initFirebase();
+  if (!_db) return { ok: li >= 0, mode: "local" };
+
   try {
-    const remote = await fetchRemoteOrders();
-    const existing = remote.find(
-      (o) => String(o.kode || "").toUpperCase() === t
-    );
-    if (!existing || !existing._id) {
-      const src = li >= 0 ? local[li] : { kode, ...patch, createdAt: Date.now() };
-      const res = await fetch(CRUD_BASE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(stripId(src))
-      });
-      if (!res.ok) throw new Error("POST " + res.status);
-      return { ok: true, mode: "global", action: "create" };
+    const ref = _db.ref("orders/" + kodeKey(kode));
+    const snap = await ref.once("value");
+    if (!snap.exists()) {
+      const src =
+        li >= 0
+          ? { ...local[li], ...patch }
+          : { kode, createdAt: Date.now(), ...patch };
+      await ref.set(stripMeta(src));
+    } else {
+      await ref.update(patch);
     }
-    const body = stripId({ ...existing, ...patch });
-    const res = await fetch(CRUD_BASE + "/" + existing._id, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) throw new Error("PUT " + res.status);
     return { ok: true, mode: "global" };
   } catch (e) {
-    console.error("[Voxyy] update remote gagal:", e);
     return { ok: li >= 0, mode: "local", error: String(e) };
   }
 }
@@ -243,19 +249,14 @@ async function updateOrderByIndex(index, patch) {
 async function deleteOrderByKode(kode) {
   if (!kode) return { ok: false };
   const t = String(kode).trim().toUpperCase();
-
   setLocalOrders(
     getLocalOrders().filter((o) => String(o.kode || "").toUpperCase() !== t)
   );
-
+  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  initFirebase();
+  if (!_db) return { ok: true, mode: "local" };
   try {
-    const remote = await fetchRemoteOrders();
-    const existing = remote.find(
-      (o) => String(o.kode || "").toUpperCase() === t
-    );
-    if (!existing || !existing._id) return { ok: true };
-    const res = await fetch(CRUD_BASE + "/" + existing._id, { method: "DELETE" });
-    if (!res.ok && res.status !== 404) throw new Error("DELETE " + res.status);
+    await _db.ref("orders/" + kodeKey(kode)).remove();
     return { ok: true, mode: "global" };
   } catch (e) {
     return { ok: true, mode: "local", error: String(e) };
@@ -270,7 +271,7 @@ async function deleteOrderByIndex(index) {
 
 async function saveOrders(orders) {
   const list = Array.isArray(orders) ? orders : [];
-  setLocalOrders(list.map(stripId));
+  setLocalOrders(list.map(stripMeta));
   for (const o of list) {
     if (o && o.kode) {
       try {
@@ -285,7 +286,8 @@ function findOrderByKodeInList(orders, kode) {
   if (!kode) return null;
   const t = String(kode).trim().toUpperCase();
   return (
-    (orders || []).find((o) => String(o.kode || "").toUpperCase() === t) || null
+    (orders || []).find((o) => String(o.kode || "").toUpperCase() === t) ||
+    null
   );
 }
 
@@ -300,5 +302,8 @@ window.VoxyyOrders = {
   deleteOrderByKode,
   findOrderByKodeInList,
   getLocalOrders,
-  setLocalOrders
+  setLocalOrders,
+  onOrdersChange,
+  initFirebase,
+  FIREBASE_CONFIG
 };

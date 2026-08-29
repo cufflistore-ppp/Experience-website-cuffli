@@ -22,8 +22,10 @@ async function loadOrders() {
 
   list.dataset.loaded = "1";
 
-  const modeHint =
-    '<p style="color:#66bb6a;font-size:12px;margin-bottom:10px;">🌐 Admin Global — ubah status di sini, antrian di semua HP ikut berubah</p>';
+  const configured = window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured && window.VoxyyOrders.isGlobalConfigured();
+  const modeHint = configured
+    ? '<p style="color:#66bb6a;font-size:12px;margin-bottom:10px;">🌐 Admin Global (Realtime) — ubah status, semua HP ikut berubah otomatis</p>'
+    : '<p style="color:#ffb74d;font-size:12px;margin-bottom:10px;">⚙️ Isi FIREBASE_CONFIG di global-orders.js supaya admin & antrian sinkron antar HP</p>';
 
   if (orders.length === 0) {
     list.innerHTML =
@@ -264,6 +266,11 @@ async function hapusOrder(index) {
 
 document.addEventListener("DOMContentLoaded", function () {
   loadOrders();
-  // refresh daftar admin tiap 15 detik biar ikut order baru dari HP lain
-  setInterval(loadOrders, 15000);
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
+    window.VoxyyOrders.onOrdersChange(function () {
+      loadOrders();
+    });
+  } else {
+    setInterval(loadOrders, 60000);
+  }
 });

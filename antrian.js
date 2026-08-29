@@ -118,9 +118,15 @@ async function renderAntrian() {
     }
   }
   const data = loadAntrianFromOrders(orders);
-  modeBadge.innerHTML =
-    '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global</span> <span>' +
-    (orders.length || 0) + ' pesanan · auto-refresh</span>';
+  const configured = window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured && window.VoxyyOrders.isGlobalConfigured();
+  if (configured) {
+    modeBadge.innerHTML =
+      '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global (Realtime)</span> <span>' +
+      (orders.length || 0) + ' pesanan · sinkron antar HP</span>';
+  } else {
+    modeBadge.innerHTML =
+      '<span style="background:#3d2a0d;color:#ffb74d;padding:3px 8px;border-radius:6px;font-weight:600;">⚙️ Setup Firebase</span> <span>Isi FIREBASE_CONFIG di global-orders.js (gratis) agar antar-HP sinkron</span>';
+  }
 
   if (data.length === 0) {
     list.innerHTML = `
@@ -425,7 +431,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  setInterval(function () {
-    renderAntrian();
-  }, 12000);
+  // Realtime: order baru langsung muncul tanpa refresh
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
+    window.VoxyyOrders.onOrdersChange(function () {
+      renderAntrian();
+      restoreSavedKodeToInput();
+    });
+  } else {
+    setInterval(function () {
+      renderAntrian();
+    }, 60000);
+  }
 });

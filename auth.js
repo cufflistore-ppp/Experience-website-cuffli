@@ -1,125 +1,92 @@
 /**
- * VORTEX HUB - Authentication (LocalStorage Demo)
+ * VOXYY - Login Google (Firebase Auth)
+ * Hanya Google Sign-In.
  */
+(function () {
+  let _authReady = false;
 
-const Auth = {
-  init() {
-    // Protect pages if needed
-    const protectedPages = ['dashboard.html', 'profile.html', 'admin.html'];
-    const current = window.location.pathname.split('/').pop();
-    
-    if (protectedPages.includes(current) && !this.isLoggedIn()) {
-      window.location.href = 'login.html';
-      return;
-    }
-
-    if (current === 'admin.html' && !this.isAdmin()) {
-      Toast.show('Akses ditolak. Hanya admin.', 'error');
-      setTimeout(() => window.location.href = 'dashboard.html', 1500);
-    }
-  },
-
-  isLoggedIn() {
-    return !!Storage.getUser();
-  },
-
-  isAdmin() {
-    const user = Storage.getUser();
-    return user && user.role === 'admin';
-  },
-
-  register(name, email, password) {
-    if (!name || !email || !password) {
-      return { success: false, message: 'Semua field wajib diisi' };
-    }
-    if (password.length < 6) {
-      return { success: false, message: 'Password minimal 6 karakter' };
-    }
-
-    const users = Storage.getUsers();
-    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
-      return { success: false, message: 'Email sudah terdaftar' };
-    }
-
-    const newUser = {
-      id: Date.now().toString(),
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      password: btoa(password), // simple encode for demo only
-      role: email.toLowerCase() === 'admin@vortexhub.com' ? 'admin' : 'user',
-      createdAt: new Date().toISOString(),
-      favorites: [],
-      recent: []
-    };
-
-    users.push(newUser);
-    Storage.saveUsers(users);
-    Storage.addActivity(`User registered: ${email}`);
-
-    // Auto login
-    const { password: _, ...safeUser } = newUser;
-    Storage.setUser(safeUser);
-    
-    return { success: true, message: 'Registrasi berhasil!' };
-  },
-
-  login(email, password) {
-    if (!email || !password) {
-      return { success: false, message: 'Email dan password wajib' };
-    }
-
-    const users = Storage.getUsers();
-    const user = users.find(u => u.email === email.toLowerCase() && u.password === btoa(password));
-
-    if (!user) {
-      // Create default admin if none
-      if (email.toLowerCase() === 'admin@vortexhub.com' && password === 'admin123') {
-        const admin = {
-          id: 'admin1',
-          name: 'Administrator',
-          email: 'admin@vortexhub.com',
-          password: btoa('admin123'),
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        };
-        users.push(admin);
-        Storage.saveUsers(users);
-        const { password: __, ...safe } = admin;
-        Storage.setUser(safe);
-        Storage.addActivity('Admin logged in');
-        return { success: true, message: 'Login sebagai Admin' };
+  function ensureAuth() {
+    if (typeof firebase === "undefined") return null;
+    if (!window.VoxyyOrders || !window.VoxyyOrders.isGlobalConfigured()) return null;
+    try {
+      if (!firebase.apps.length) {
+        firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG || {});
       }
-      return { success: false, message: 'Email atau password salah' };
+      if (window.VoxyyOrders.initFirebase) window.VoxyyOrders.initFirebase();
+      _authReady = true;
+      return firebase.auth();
+    } catch (e) {
+      console.error("[Voxyy Auth]", e);
+      return null;
     }
-
-    const { password: _, ...safeUser } = user;
-    Storage.setUser(safeUser);
-    Storage.addActivity(`Login: ${email}`);
-    return { success: true, message: `Selamat datang, ${user.name}!` };
-  },
-
-  logout() {
-    Storage.clearUser();
-    Storage.addActivity('Logout');
-    Toast.show('Berhasil logout', 'success');
-    setTimeout(() => window.location.href = 'index.html', 800);
-  },
-
-  updateProfile(data) {
-    const user = Storage.getUser();
-    if (!user) return { success: false, message: 'Belum login' };
-
-    const users = Storage.getUsers();
-    const idx = users.findIndex(u => u.id === user.id);
-    if (idx === -1) return { success: false, message: 'User tidak ditemukan' };
-
-    users[idx] = { ...users[idx], ...data };
-    Storage.saveUsers(users);
-    
-    const { password: _, ...safe } = users[idx];
-    Storage.setUser(safe);
-    return { success: true, message: 'Profil diperbarui' };
   }
-};
 
-window.Auth = Auth;
+  function currentUser() {
+    const auth = ensureAuth();
+    return auth ? auth.currentUser : null;
+  }
+
+  async function loginGoogle() {
+    const auth = ensureAuth();
+    if (!auth) {
+      throw new Error(
+        "Firebase belum di-setup. Isi FIREBASE_CONFIG di global-orders.js dan aktifkan Google Sign-In."
+      );
+    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+
+    try {
+      const result = await auth.signInWithPopup(provider);
+      return result.user;
+    } catch (e) {
+      // Mobile / popup diblokir → redirect
+      if (
+        e.code === "auth/popup-blocked" ||
+        e.code === "auth/popup-closed-by-user" ||
+        e.code === "auth/cancelled-popup-request" ||
+        /popup/i.test(String(e.message || ""))
+      ) {
+        await auth.signInWithRedirect(provider);
+        return null;
+      }
+      throw e;
+    }
+  }
+
+  async function handleRedirectResult() {
+    const auth = ensureAuth();
+    if (!auth) return null;
+    try {
+      const result = await auth.getRedirectResult();
+      return result && result.user ? result.user : null;
+    } catch (e) {
+      console.warn("[Voxyy Auth] redirect:", e);
+      return null;
+    }
+  }
+
+  async function logout() {
+    const auth = ensureAuth();
+    if (!auth) return;
+    await auth.signOut();
+  }
+
+  function onAuthChange(fn) {
+    const auth = ensureAuth();
+    if (!auth) {
+      fn(null);
+      return function () {};
+    }
+    return auth.onAuthStateChanged(fn);
+  }
+
+  window.VoxyyAuth = {
+    ensureAuth,
+    currentUser,
+    loginGoogle,
+    logout,
+    onAuthChange,
+    handleRedirectResult
+  };
+})();

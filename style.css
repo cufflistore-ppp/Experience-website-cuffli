@@ -950,3 +950,32 @@ textarea { resize: vertical; min-height: 120px; }
 .menu-item:hover, .menu-item:active {
   border-color: #2196f3 !important;
 }
+
+
+/* Bottom nav 6 item (Joki | Digital | Home | Antrian | Tentang | Akun) */
+.bottom-nav.nav-6 {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 0;
+  padding: 6px 2px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+.bottom-nav.nav-6 .nav-item {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 2px;
+  font-size: 9px;
+  gap: 2px;
+}
+.bottom-nav.nav-6 .nav-item i {
+  font-size: 15px;
+  margin-bottom: 1px;
+}
+.bottom-nav.nav-6 .nav-item span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  line-height: 1.15;
+}
