@@ -25,6 +25,8 @@ const FIREBASE_CONFIG = {
   measurementId: "G-7QTGSDR351"
 };
 
+const GOOGLE_WEB_CLIENT_ID = "442340334430-eomut78090vr388t13r4au4hkugknshj.apps.googleusercontent.com";
+
 const LOCAL_ORDERS_KEY = "voxyy_orders";
 let _db = null;
 let _ready = false;
