@@ -1,7 +1,5 @@
 /**
- * VOXYY - Login Google (Firebase Auth)
- * authDomain HARUS domain website (experience-website-cuffli.vercel.app)
- * + vercel.json proxy /__/auth/*
+ * VOXYY Auth - Google via Identity Services (tanpa redirect/popup blank)
  */
 (function () {
   function ensureAuth() {
@@ -28,51 +26,86 @@
     return auth ? auth.currentUser : null;
   }
 
-  function makeProvider() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
-    provider.addScope("profile");
-    provider.addScope("email");
-    return provider;
+  function getClientId() {
+    var fromOrders =
+      (window.VoxyyOrders && window.VoxyyOrders.GOOGLE_WEB_CLIENT_ID) || "";
+    var fromGlobal =
+      typeof GOOGLE_WEB_CLIENT_ID !== "undefined" ? GOOGLE_WEB_CLIENT_ID : "";
+    return String(fromOrders || fromGlobal || "").trim();
   }
 
-  async function loginGoogle() {
-    const auth = ensureAuth();
-    if (!auth) {
-      throw new Error(
-        "Firebase belum siap. Upload global-orders.js terbaru + aktifkan Google Sign-In."
-      );
-    }
-    const provider = makeProvider();
+  /** Login pakai Google Identity Services (ID token → Firebase) */
+  function loginGoogle() {
+    return new Promise(function (resolve, reject) {
+      const auth = ensureAuth();
+      if (!auth) {
+        reject(
+          new Error(
+            "Firebase belum siap. Cek global-orders.js dan koneksi internet."
+          )
+        );
+        return;
+      }
+      const clientId = getClientId();
+      if (!clientId || clientId.length < 20) {
+        reject(
+          new Error(
+            "GOOGLE_WEB_CLIENT_ID masih kosong.\n\nAmbil di:\nconsole.cloud.google.com → APIs & Services → Credentials\n→ Web client (auto created by Google Service)\n→ copy Client ID\n→ tempel di global-orders.js"
+          )
+        );
+        return;
+      }
+      if (typeof google === "undefined" || !google.accounts || !google.accounts.oauth2) {
+        reject(
+          new Error(
+            "Google script belum termuat. Refresh halaman lalu coba lagi."
+          )
+        );
+        return;
+      }
 
-    // Selalu redirect (satu tab) — lebih stabil di HP Android
-    // Jangan pakai popup (sering about:blank / keluar-masuk)
-    await auth.signInWithRedirect(provider);
-    return null;
+      const tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: "email profile openid",
+        callback: function (tokenResponse) {
+          if (!tokenResponse || tokenResponse.error) {
+            reject(
+              new Error(
+                (tokenResponse && tokenResponse.error) ||
+                  "Login Google dibatalkan"
+              )
+            );
+            return;
+          }
+          const credential = firebase.auth.GoogleAuthProvider.credential(
+            null,
+            tokenResponse.access_token
+          );
+          auth
+            .signInWithCredential(credential)
+            .then(function (result) {
+              resolve(result.user);
+            })
+            .catch(function (err) {
+              reject(err);
+            });
+        },
+        error_callback: function (err) {
+          reject(err || new Error("Gagal membuka Google login"));
+        }
+      });
+
+      try {
+        tokenClient.requestAccessToken({ prompt: "select_account" });
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 
   async function handleRedirectResult() {
-    const auth = ensureAuth();
-    if (!auth) return null;
-    try {
-      const result = await auth.getRedirectResult();
-      if (result && result.user) {
-        try {
-          sessionStorage.removeItem("voxyy_auth_err");
-        } catch (e) {}
-        return result.user;
-      }
-      return null;
-    } catch (e) {
-      console.warn("[Voxyy Auth] redirect:", e);
-      try {
-        sessionStorage.setItem(
-          "voxyy_auth_err",
-          (e && e.message) || String(e)
-        );
-      } catch (x) {}
-      return null;
-    }
+    // GIS tidak pakai redirect
+    return null;
   }
 
   async function logout() {
@@ -96,6 +129,7 @@
     loginGoogle,
     logout,
     onAuthChange,
-    handleRedirectResult
+    handleRedirectResult,
+    getClientId
   };
 })();

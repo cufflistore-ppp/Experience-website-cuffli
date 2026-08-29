@@ -1,21 +1,9 @@
 /**
- * VOXYY JOKI - Antrian & Admin Global (Firebase Realtime Database)
- *
- * SETUP FIREBASE (gratis, 1x):
- * 1. https://console.firebase.google.com → Create project
- * 2. Build → Realtime Database → Create → Test mode
- * 3. Rules → Publish:
- *    { "rules": { ".read": true, ".write": true } }
- * 4. Build → Authentication → Sign-in method → Google → Enable
- * 5. Project Settings → Your apps → Web → copy config
- * 6. Tempel ke FIREBASE_CONFIG di bawah
- * 7. Authentication → Settings → Authorized domains
- *    tambah domain Vercel kamu (xxx.vercel.app)
- * 8. Upload file ke hosting
+ * VOXYY JOKI - Antrian & Admin Global (Firebase)
+ * authDomain = firebaseapp.com (stabil). Login Google pakai GIS (tanpa redirect).
  */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAx2I5hmnMBkS04tOr21B9KG4SVaVCqyQg",
-  // Domain website sendiri (bukan firebaseapp) — wajib biar login HP tidak keluar-masuk
   authDomain: "voxyyjoki.firebaseapp.com",
   databaseURL: "https://voxyyjoki-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "voxyyjoki",
@@ -25,6 +13,21 @@ const FIREBASE_CONFIG = {
   measurementId: "G-7QTGSDR351"
 };
 
+/**
+ * Web Client ID dari Google Cloud (bukan apiKey).
+ * Cara ambil:
+ * 1. https://console.cloud.google.com/apis/credentials?project=voxyyjoki
+ * 2. OAuth 2.0 Client IDs → "Web client (auto created by Google Service)"
+ * 3. Copy Client ID (bentuk: 442340334430-xxxxx.apps.googleusercontent.com)
+ * 4. Tempel di bawah
+ *
+ * JUGA di edit client itu:
+ * Authorized JavaScript origins → Add:
+ *   https://experience-website-cuffli.vercel.app
+ * Authorized redirect URIs → Add:
+ *   https://voxyyjoki.firebaseapp.com/__/auth/handler
+ *   https://experience-website-cuffli.vercel.app
+ */
 const GOOGLE_WEB_CLIENT_ID = "442340334430-eomut78090vr388t13r4au4hkugknshj.apps.googleusercontent.com";
 
 const LOCAL_ORDERS_KEY = "voxyy_orders";
@@ -108,15 +111,11 @@ function kodeKey(kode) {
 function initFirebase() {
   if (_ready) return true;
   if (!isGlobalConfigured()) return false;
-  if (typeof firebase === "undefined") {
-    console.warn("[Voxyy] Firebase SDK belum dimuat");
-    return false;
-  }
+  if (typeof firebase === "undefined") return false;
   try {
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     _db = firebase.database();
     _ready = true;
-
     _db.ref("orders").on(
       "value",
       (snap) => {
@@ -137,11 +136,11 @@ function initFirebase() {
           } catch (e) {}
         });
       },
-      (err) => console.error("[Voxyy] DB listener:", err)
+      (err) => console.error("[Voxyy] DB:", err)
     );
     return true;
   } catch (e) {
-    console.error("[Voxyy] init Firebase:", e);
+    console.error("[Voxyy] init:", e);
     return false;
   }
 }
@@ -178,7 +177,6 @@ async function getOrders() {
     setLocalOrders(merged.map(stripMeta));
     return merged;
   } catch (e) {
-    console.warn("[Voxyy] getOrders:", e);
     return local;
   }
 }
@@ -186,7 +184,6 @@ async function getOrders() {
 async function addOrder(order) {
   if (!order || !order.kode) return { ok: false };
   if (!order.createdAt) order.createdAt = Date.now();
-
   const local = getLocalOrders();
   const t = String(order.kode).toUpperCase();
   const li = local.findIndex(
@@ -195,16 +192,13 @@ async function addOrder(order) {
   if (li >= 0) local[li] = { ...local[li], ...stripMeta(order) };
   else local.unshift(stripMeta(order));
   setLocalOrders(local);
-
   if (!isGlobalConfigured()) return { ok: true, mode: "local" };
   initFirebase();
   if (!_db) return { ok: true, mode: "local" };
-
   try {
     await _db.ref("orders/" + kodeKey(order.kode)).set(stripMeta(order));
     return { ok: true, mode: "global" };
   } catch (e) {
-    console.error("[Voxyy] addOrder:", e);
     return { ok: false, mode: "local", error: String(e) };
   }
 }
@@ -220,11 +214,9 @@ async function updateOrderByKode(kode, patch) {
     local[li] = { ...local[li], ...patch };
     setLocalOrders(local);
   }
-
   if (!isGlobalConfigured()) return { ok: li >= 0, mode: "local" };
   initFirebase();
   if (!_db) return { ok: li >= 0, mode: "local" };
-
   try {
     const ref = _db.ref("orders/" + kodeKey(kode));
     const snap = await ref.once("value");
@@ -308,5 +300,6 @@ window.VoxyyOrders = {
   setLocalOrders,
   onOrdersChange,
   initFirebase,
-  FIREBASE_CONFIG
+  FIREBASE_CONFIG,
+  GOOGLE_WEB_CLIENT_ID
 };

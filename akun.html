@@ -121,12 +121,14 @@
         <i class="fa-solid fa-right-from-bracket"></i> Keluar
       </button>
       <div class="akun-hint" id="akunHint">
-        <b>Checklist login Google:</b><br>
-        1. Authentication → Sign-in method → <b>Google = Enable</b> (isi Support email)<br>
-        2. Authentication → Settings → Authorized domains → tambah<br>
-        &nbsp;&nbsp;<code>nama-site.netlify.app</code> (domain Netlify kamu)<br>
-        3. Upload file terbaru + _redirects ke Netlify<br>
-        4. Tutup tab, buka lagi, coba login
+        <b>Setup sekali (Vercel dulu):</b><br>
+        1. Firebase → Authentication → Google → <b>Enable</b> + Support email<br>
+        2. Authorized domains → <code>experience-website-cuffli.vercel.app</code><br>
+        3. Buka <code>console.cloud.google.com</code> → project <b>voxyyjoki</b><br>
+        &nbsp;&nbsp;APIs &amp; Services → Credentials → Web client<br>
+        &nbsp;&nbsp;→ Authorized JavaScript origins tambah:<br>
+        &nbsp;&nbsp;<code>https://experience-website-cuffli.vercel.app</code><br>
+        4. Copy <b>Client ID</b> → tempel di global-orders.js → <code>GOOGLE_WEB_CLIENT_ID</code>
       </div>
     </div>
   </div>
@@ -140,6 +142,7 @@
     <a href="akun.html" class="nav-item active"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -206,18 +209,18 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menghubungkan...';
       try {
-        await window.VoxyyAuth.loginGoogle();
-        // Jika redirect, halaman akan pindah; jika popup sukses, onAuthChange update UI
+        // tunggu GSI load max 5 detik
+        for (let i = 0; i < 25; i++) {
+          if (window.google && google.accounts && google.accounts.oauth2) break;
+          await new Promise(r => setTimeout(r, 200));
+        }
+        const user = await window.VoxyyAuth.loginGoogle();
+        if (user) renderUser(user);
       } catch (e) {
         const msg = (e && e.message) ? e.message : String(e);
-        let hint = msg;
-        if (/unauthorized-domain|auth\/unauthorized/i.test(msg)) {
-          hint = "Domain belum diizinkan. Tambah domain Netlify di Firebase → Authentication → Settings → Authorized domains.";
-        } else if (/operation-not-allowed|auth\/operation-not-allowed/i.test(msg)) {
-          hint = "Google Sign-In belum diaktifkan di Firebase Authentication.";
-        }
-        alert(hint);
+        alert(msg);
         console.error(e);
+      } finally {
         btn.disabled = false;
         btn.innerHTML = G_ICON + " Masuk dengan Google";
       }
