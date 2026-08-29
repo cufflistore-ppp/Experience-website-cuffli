@@ -1,8 +1,10 @@
 /**
- * VOXYY JOKI - Antrian Global (otomatis)
- * Fix: cache-bust + merge local/global agar order tidak hilang
+ * VOXYY JOKI - Antrian Global
+ * Backend: crudcrud.com (CORS OK, data benar-benar tersimpan)
+ * Setiap order = 1 record. Semua HP share endpoint yang sama.
  */
-const GLOBAL_BIN_URL = "https://extendsclass.com/api/json-storage/bin/afbadde";
+const CRUD_BASE =
+  "https://crudcrud.com/api/bbf20bab779843cdbd4e72618f9d6d75/orders";
 const LOCAL_ORDERS_KEY = "voxyy_orders";
 
 function isGlobalConfigured() {
@@ -20,205 +22,134 @@ function getLocalOrders() {
 function setLocalOrders(orders) {
   try {
     localStorage.setItem(LOCAL_ORDERS_KEY, JSON.stringify(orders || []));
-  } catch (e) {
-    console.warn("Gagal simpan local:", e);
-  }
+  } catch (e) {}
 }
 
-function normalizeOrders(data) {
-  if (Array.isArray(data)) return data;
-  if (data && typeof data === "object") {
-    if (Array.isArray(data.data)) return data.data;
-    if (typeof data.data === "string") {
-      try {
-        const parsed = JSON.parse(data.data);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (e) {}
-    }
-    if (Array.isArray(data.record)) return data.record;
-  }
-  if (typeof data === "string") {
-    try {
-      const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) return parsed;
-    } catch (e) {}
-  }
-  return [];
+function stripId(order) {
+  if (!order || typeof order !== "object") return order;
+  const copy = { ...order };
+  delete copy._id;
+  return copy;
 }
 
-/** Gabung 2 list by kode (yang lebih baru / lebih lengkap menang) */
-function mergeOrders(primary, secondary) {
-  const map = new Map();
-  const put = (o) => {
-    if (!o || !o.kode) return;
-    const k = String(o.kode).toUpperCase();
-    const prev = map.get(k);
-    if (!prev) {
-      map.set(k, o);
-      return;
-    }
-    // prioritaskan yang punya createdAt lebih besar, atau status lebih "maju"
-    const score = (x) => {
-      let s = Number(x.createdAt) || 0;
-      const st = String(x.status || "").toLowerCase();
-      if (st.includes("sukses") || st.includes("selesai")) s += 1e15;
-      else if (st.includes("proses") || st.includes("verifikasi")) s += 1e14;
-      return s;
-    };
-    if (score(o) >= score(prev)) map.set(k, { ...prev, ...o });
-  };
-  (primary || []).forEach(put);
-  (secondary || []).forEach(put);
-  const list = Array.from(map.values());
-  list.sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
-  return list;
+function sortOrders(list) {
+  return (list || []).slice().sort((a, b) => {
+    return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+  });
 }
 
-async function fetchGlobalRaw() {
-  const url = GLOBAL_BIN_URL + "?_=" + Date.now();
-  const res = await fetch(url, {
+async function fetchRemoteOrders() {
+  const res = await fetch(CRUD_BASE + "?_=" + Date.now(), {
     method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Cache-Control": "no-cache, no-store",
-      Pragma: "no-cache"
-    },
+    headers: { Accept: "application/json" },
     cache: "no-store"
   });
   if (!res.ok) throw new Error("GET " + res.status);
-  const text = await res.text();
-  try {
-    return normalizeOrders(JSON.parse(text));
-  } catch (e) {
-    return normalizeOrders(text);
-  }
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
 }
 
-async function pushGlobal(list) {
-  const res = await fetch(GLOBAL_BIN_URL, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json"
-    },
-    body: JSON.stringify(list),
-    cache: "no-store"
-  });
-  if (!res.ok) throw new Error("PUT " + res.status);
-  // beberapa response ExtendsClass stringified
-  try {
-    await res.text();
-  } catch (e) {}
-  return true;
-}
-
-/** Ambil orders: merge global + local (jangan hapus local kalau global kosong/gagal) */
+/** Ambil semua order global */
 async function getOrders() {
-  const local = getLocalOrders();
   try {
-    const remote = await fetchGlobalRaw();
-    const merged = mergeOrders(remote, local);
-    setLocalOrders(merged);
-    return merged;
+    const remote = await fetchRemoteOrders();
+    const sorted = sortOrders(remote);
+    setLocalOrders(sorted.map(stripId));
+    return sorted;
   } catch (e) {
-    console.warn("Global fetch gagal, pakai local:", e);
-    return local;
+    console.warn("Global GET gagal, pakai local:", e);
+    return getLocalOrders();
   }
 }
 
-/** Simpan ke local dulu, lalu push global */
-async function saveOrders(orders) {
-  const list = Array.isArray(orders) ? orders : [];
-  if (list.length > 300) list.length = 300;
-  setLocalOrders(list);
-
-  try {
-    await pushGlobal(list);
-    return { ok: true, mode: "global" };
-  } catch (e) {
-    console.error("Gagal push global:", e);
-    // coba sekali lagi
-    try {
-      await new Promise((r) => setTimeout(r, 400));
-      await pushGlobal(list);
-      return { ok: true, mode: "global" };
-    } catch (e2) {
-      console.error("Retry gagal:", e2);
-      return { ok: false, mode: "local", error: String(e2) };
-    }
-  }
-}
-
+/** Tambah order baru (POST). Kalau kode sudah ada → update */
 async function addOrder(order) {
   if (!order || !order.kode) return { ok: false };
 
-  // 1) langsung taruh di local dulu biar tidak hilang
-  const localNow = getLocalOrders();
-  const target = String(order.kode).toUpperCase();
-  const li = localNow.findIndex(
-    (o) => String(o.kode || "").toUpperCase() === target
+  // local dulu
+  const local = getLocalOrders();
+  const t = String(order.kode).toUpperCase();
+  const li = local.findIndex(
+    (o) => String(o.kode || "").toUpperCase() === t
   );
-  if (li >= 0) localNow[li] = { ...localNow[li], ...order };
-  else localNow.unshift(order);
-  setLocalOrders(localNow);
+  if (li >= 0) local[li] = { ...local[li], ...stripId(order) };
+  else local.unshift(stripId(order));
+  setLocalOrders(local);
 
-  // 2) ambil remote + merge + push
   try {
-    const remote = await fetchGlobalRaw();
-    const merged = mergeOrders(remote, localNow);
-    // pastikan order ini ada
-    const mi = merged.findIndex(
-      (o) => String(o.kode || "").toUpperCase() === target
+    const remote = await fetchRemoteOrders();
+    const existing = remote.find(
+      (o) => String(o.kode || "").toUpperCase() === t
     );
-    if (mi >= 0) merged[mi] = { ...merged[mi], ...order };
-    else merged.unshift(order);
 
-    return await saveOrders(merged);
-  } catch (e) {
-    console.warn("addOrder remote gagal, local tetap aman:", e);
-    // tetap coba push local saja
-    try {
-      await pushGlobal(localNow);
-      return { ok: true, mode: "global" };
-    } catch (e2) {
-      return { ok: false, mode: "local", error: String(e2) };
+    if (existing && existing._id) {
+      const body = stripId({ ...existing, ...order });
+      const res = await fetch(CRUD_BASE + "/" + existing._id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error("PUT " + res.status);
+      return { ok: true, mode: "global", action: "update" };
     }
+
+    const res = await fetch(CRUD_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(stripId(order))
+    });
+    if (!res.ok) throw new Error("POST " + res.status);
+    return { ok: true, mode: "global", action: "create" };
+  } catch (e) {
+    console.error("addOrder global gagal:", e);
+    return { ok: false, mode: "local", error: String(e) };
   }
 }
 
 async function updateOrderByKode(kode, patch) {
   if (!kode) return { ok: false };
-  const target = String(kode).trim().toUpperCase();
+  const t = String(kode).trim().toUpperCase();
 
-  // update local dulu
+  // local
   let local = getLocalOrders();
-  let idx = local.findIndex(
-    (o) => String(o.kode || "").toUpperCase() === target
+  const li = local.findIndex(
+    (o) => String(o.kode || "").toUpperCase() === t
   );
-  if (idx >= 0) {
-    local[idx] = { ...local[idx], ...patch };
+  if (li >= 0) {
+    local[li] = { ...local[li], ...patch };
     setLocalOrders(local);
   }
 
   try {
-    const remote = await fetchGlobalRaw();
-    const merged = mergeOrders(remote, local);
-    const mi = merged.findIndex(
-      (o) => String(o.kode || "").toUpperCase() === target
+    const remote = await fetchRemoteOrders();
+    const existing = remote.find(
+      (o) => String(o.kode || "").toUpperCase() === t
     );
-    if (mi < 0) {
-      // order hanya ada di local
-      if (idx >= 0) {
-        return await saveOrders(merged.length ? mergeOrders(merged, local) : local);
+    if (!existing || !existing._id) {
+      // belum ada di remote → create
+      if (li >= 0) {
+        const res = await fetch(CRUD_BASE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(stripId(local[li]))
+        });
+        if (!res.ok) throw new Error("POST " + res.status);
+        return { ok: true, mode: "global", action: "create" };
       }
       return { ok: false, error: "not_found" };
     }
-    merged[mi] = { ...merged[mi], ...patch };
-    return await saveOrders(merged);
+
+    const body = stripId({ ...existing, ...patch });
+    const res = await fetch(CRUD_BASE + "/" + existing._id, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error("PUT " + res.status);
+    return { ok: true, mode: "global" };
   } catch (e) {
-    console.warn("update remote gagal:", e);
-    if (idx >= 0) return { ok: false, mode: "local", error: String(e) };
-    return { ok: false, error: "not_found" };
+    console.error("updateOrder gagal:", e);
+    return { ok: false, mode: "local", error: String(e) };
   }
 }
 
@@ -228,42 +159,77 @@ async function updateOrderByIndex(index, patch) {
   return updateOrderByKode(orders[index].kode, patch);
 }
 
+async function deleteOrderByKode(kode) {
+  if (!kode) return { ok: false };
+  const t = String(kode).trim().toUpperCase();
+
+  setLocalOrders(
+    getLocalOrders().filter((o) => String(o.kode || "").toUpperCase() !== t)
+  );
+
+  try {
+    const remote = await fetchRemoteOrders();
+    const existing = remote.find(
+      (o) => String(o.kode || "").toUpperCase() === t
+    );
+    if (!existing || !existing._id) return { ok: true };
+
+    const res = await fetch(CRUD_BASE + "/" + existing._id, {
+      method: "DELETE"
+    });
+    if (!res.ok && res.status !== 404) throw new Error("DELETE " + res.status);
+    return { ok: true, mode: "global" };
+  } catch (e) {
+    console.error("deleteOrder gagal:", e);
+    return { ok: false, mode: "local", error: String(e) };
+  }
+}
+
 async function deleteOrderByIndex(index) {
   const orders = await getOrders();
   if (!orders[index]) return { ok: false };
   return deleteOrderByKode(orders[index].kode);
 }
 
-async function deleteOrderByKode(kode) {
-  if (!kode) return { ok: false };
-  const target = String(kode).trim().toUpperCase();
-
-  let local = getLocalOrders().filter(
-    (o) => String(o.kode || "").toUpperCase() !== target
-  );
-  setLocalOrders(local);
-
+/** saveOrders: sync full list (jarang dipakai; push yang belum ada) */
+async function saveOrders(orders) {
+  const list = Array.isArray(orders) ? orders : [];
+  setLocalOrders(list.map(stripId));
   try {
-    const remote = await fetchGlobalRaw();
-    const merged = mergeOrders(remote, local).filter(
-      (o) => String(o.kode || "").toUpperCase() !== target
+    const remote = await fetchRemoteOrders();
+    const remoteMap = new Map(
+      remote.map((o) => [String(o.kode || "").toUpperCase(), o])
     );
-    return await saveOrders(merged);
+    for (const o of list) {
+      if (!o || !o.kode) continue;
+      const k = String(o.kode).toUpperCase();
+      const ex = remoteMap.get(k);
+      if (ex && ex._id) {
+        await fetch(CRUD_BASE + "/" + ex._id, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(stripId({ ...ex, ...o }))
+        });
+      } else {
+        await fetch(CRUD_BASE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(stripId(o))
+        });
+      }
+    }
+    return { ok: true, mode: "global" };
   } catch (e) {
-    try {
-      await pushGlobal(local);
-    } catch (e2) {}
     return { ok: false, mode: "local", error: String(e) };
   }
 }
 
 function findOrderByKodeInList(orders, kode) {
   if (!kode) return null;
-  const target = String(kode).trim().toUpperCase();
+  const t = String(kode).trim().toUpperCase();
   return (
-    (orders || []).find(
-      (o) => String(o.kode || "").toUpperCase() === target
-    ) || null
+    (orders || []).find((o) => String(o.kode || "").toUpperCase() === t) ||
+    null
   );
 }
 
