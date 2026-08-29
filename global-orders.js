@@ -16,7 +16,7 @@
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAx2I5hmnMBkS04tOr21B9KG4SVaVCqyQg",
   // Domain website sendiri (bukan firebaseapp) — wajib biar login HP tidak keluar-masuk
-  authDomain: "experience-website-cuffli.vercel.app",
+  authDomain: "voxyyjoki.firebaseapp.com",
   databaseURL: "https://voxyyjoki-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "voxyyjoki",
   storageBucket: "voxyyjoki.firebasestorage.app",
