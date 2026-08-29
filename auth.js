@@ -1,15 +1,9 @@
 /**
  * VOXYY - Login Google (Firebase Auth)
- * Mobile: pakai redirect (popup sering gagal → about:blank)
- * Desktop: coba popup, gagal → redirect
+ * authDomain HARUS domain website (experience-website-cuffli.vercel.app)
+ * + vercel.json proxy /__/auth/*
  */
 (function () {
-  function isMobile() {
-    return /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry/i.test(
-      navigator.userAgent || ""
-    );
-  }
-
   function ensureAuth() {
     if (typeof firebase === "undefined") return null;
     if (!window.VoxyyOrders || !window.VoxyyOrders.isGlobalConfigured()) return null;
@@ -18,7 +12,11 @@
         firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG || {});
       }
       if (window.VoxyyOrders.initFirebase) window.VoxyyOrders.initFirebase();
-      return firebase.auth();
+      const auth = firebase.auth();
+      try {
+        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      } catch (e) {}
+      return auth;
     } catch (e) {
       console.error("[Voxyy Auth]", e);
       return null;
@@ -42,35 +40,15 @@
     const auth = ensureAuth();
     if (!auth) {
       throw new Error(
-        "Firebase belum di-setup. Isi FIREBASE_CONFIG dan aktifkan Google Sign-In + Authorized domains."
+        "Firebase belum siap. Upload global-orders.js terbaru + aktifkan Google Sign-In."
       );
     }
     const provider = makeProvider();
 
-    // Di HP: langsung redirect (lebih stabil)
-    if (isMobile()) {
-      await auth.signInWithRedirect(provider);
-      return null;
-    }
-
-    try {
-      const result = await auth.signInWithPopup(provider);
-      return result.user;
-    } catch (e) {
-      const code = e && e.code ? e.code : "";
-      // Popup diblokir / ditutup / gagal → redirect
-      if (
-        code === "auth/popup-blocked" ||
-        code === "auth/popup-closed-by-user" ||
-        code === "auth/cancelled-popup-request" ||
-        code === "auth/operation-not-supported-in-this-environment" ||
-        /popup|blank/i.test(String(e.message || ""))
-      ) {
-        await auth.signInWithRedirect(provider);
-        return null;
-      }
-      throw e;
-    }
+    // Selalu redirect (satu tab) — lebih stabil di HP Android
+    // Jangan pakai popup (sering about:blank / keluar-masuk)
+    await auth.signInWithRedirect(provider);
+    return null;
   }
 
   async function handleRedirectResult() {
@@ -78,13 +56,20 @@
     if (!auth) return null;
     try {
       const result = await auth.getRedirectResult();
-      if (result && result.user) return result.user;
+      if (result && result.user) {
+        try {
+          sessionStorage.removeItem("voxyy_auth_err");
+        } catch (e) {}
+        return result.user;
+      }
       return null;
     } catch (e) {
-      console.warn("[Voxyy Auth] redirect result:", e);
-      // Simpan error supaya UI bisa tampilkan
+      console.warn("[Voxyy Auth] redirect:", e);
       try {
-        sessionStorage.setItem("voxyy_auth_err", e.message || String(e));
+        sessionStorage.setItem(
+          "voxyy_auth_err",
+          (e && e.message) || String(e)
+        );
       } catch (x) {}
       return null;
     }
@@ -111,7 +96,6 @@
     loginGoogle,
     logout,
     onAuthChange,
-    handleRedirectResult,
-    isMobile
+    handleRedirectResult
   };
 })();

@@ -1,0 +1,13 @@
+UPLOAD 4 FILE INI KE GITHUB (replace yang lama):
+1. vercel.json
+2. global-orders.js   ← authDomain sudah experience-website-cuffli.vercel.app
+3. auth.js
+4. akun.html
+
+JANGAN upload package.json / index.js (folder server)
+
+Firebase:
+- Authorized domains: experience-website-cuffli.vercel.app
+- Google Sign-In: Enable + Support email
+
+Setelah commit → tunggu Vercel deploy → tutup tab → buka akun.html → login

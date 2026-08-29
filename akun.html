@@ -121,7 +121,12 @@
         <i class="fa-solid fa-right-from-bracket"></i> Keluar
       </button>
       <div class="akun-hint" id="akunHint">
-        Login memakai Firebase Authentication (gratis). Pastikan Google Sign-In sudah diaktifkan di Firebase Console dan domain website sudah ditambahkan di Authorized domains.
+        <b>Checklist login Google:</b><br>
+        1. Authentication → Sign-in method → <b>Google = Enable</b> (isi Support email)<br>
+        2. Authentication → Settings → Authorized domains → tambah<br>
+        &nbsp;&nbsp;<code>nama-site.netlify.app</code> (domain Netlify kamu)<br>
+        3. Upload file terbaru + _redirects ke Netlify<br>
+        4. Tutup tab, buka lagi, coba login
       </div>
     </div>
   </div>
@@ -207,7 +212,7 @@
         const msg = (e && e.message) ? e.message : String(e);
         let hint = msg;
         if (/unauthorized-domain|auth\/unauthorized/i.test(msg)) {
-          hint = "Domain belum diizinkan. Tambah domain Vercel di Firebase → Authentication → Settings → Authorized domains.";
+          hint = "Domain belum diizinkan. Tambah domain Netlify di Firebase → Authentication → Settings → Authorized domains.";
         } else if (/operation-not-allowed|auth\/operation-not-allowed/i.test(msg)) {
           hint = "Google Sign-In belum diaktifkan di Firebase Authentication.";
         }
