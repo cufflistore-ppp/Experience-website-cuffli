@@ -95,7 +95,7 @@ async function renderAntrian() {
     <div class="antrian-empty">
       <div class="antrian-empty-icon">⏳</div>
       <strong>Memuat antrian...</strong>
-      <small>Mengambil antrian global...</small>
+      <small>Sinkron data...</small>
     </div>
   `;
 
@@ -117,17 +117,17 @@ async function renderAntrian() {
       searchBox.parentNode.insertBefore(modeBadge, searchBox.nextSibling);
     }
   }
-  modeBadge.innerHTML =
-    '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global</span> <span>Semua pesanan dari HP/browser manapun · auto-refresh</span>';
-
   const data = loadAntrianFromOrders(orders);
+  modeBadge.innerHTML =
+    '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global</span> <span>' +
+    (orders.length || 0) + ' pesanan · auto-refresh</span>';
 
   if (data.length === 0) {
     list.innerHTML = `
       <div class="antrian-empty">
         <div class="antrian-empty-icon">🕒</div>
         <strong>Antrian masih kosong</strong>
-        <small>Belum ada pesanan. Antrian baru muncul setelah ada yang order.</small>
+        <small>Belum ada pesanan global. Buat order baru, lalu tarik refresh halaman ini.</small>
       </div>
     `;
     return;
