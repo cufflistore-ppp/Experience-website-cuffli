@@ -20,7 +20,7 @@ function hideAllNotif() {
 function getRecentOrdersForNotif() {
   const orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
   // Hanya order real (punya kode NJ)
-  return orders.filter(o => o && o.kode && (String(o.kode).startsWith("RJ-") || String(o.kode).startsWith("VJ-"))).slice(0, 5);
+  return orders.filter(o => o && o.kode && String(o.kode).startsWith("VJ-")).slice(0, 5);
 }
 
 function generateNotifFromOrder(order) {
@@ -139,7 +139,7 @@ async function buatPesanan() {
   const total = document.getElementById("totalHarga")?.textContent || "Rp 5.000";
   const rand = Math.floor(1000 + Math.random() * 9000);
   const timePart = String(Date.now()).slice(-3);
-  const kode = `RJ-2026-${rand}${timePart}`;
+  const kode = `VJ-2026-${rand}${timePart}`;
 
   let order = {
     kode,

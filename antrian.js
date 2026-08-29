@@ -33,14 +33,10 @@ function getTrackedKode() {
   return (localStorage.getItem(SAVED_KODE_KEY) || "").trim();
 }
 
-function normalizeKode(kode) {
-  return String(kode || "").trim().toUpperCase().replace(/^VJ-/, "RJ-");
-}
-
 function findOrderByKode(kode) {
   if (!kode) return null;
-  const target = normalizeKode(kode);
-  return getOrders().find(o => normalizeKode(o.kode) === target) || null;
+  const target = String(kode).trim().toUpperCase();
+  return getOrders().find(o => String(o.kode || "").toUpperCase() === target) || null;
 }
 
 function loadAntrianFromStorage() {
@@ -209,10 +205,10 @@ function ensureStatusModal() {
         border: 1px solid #1a2740;
         padding: 2px 6px;
         border-radius: 6px;
-        color: #e1bee7;
+        color: #90caf9;
       }
       .status-row .v.sukses { color: #66bb6a; }
-      .status-row .v.proses { color: #ce93d8; }
+      .status-row .v.proses { color: #42a5f5; }
       .status-row .v.belum { color: #ffb74d; }
       .status-note {
         margin-top: 8px;
@@ -222,7 +218,7 @@ function ensureStatusModal() {
       }
       .status-modal-btn {
         width: 100%;
-        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+        background: linear-gradient(135deg, #2196f3, #1565c0);
         color: #fff;
         border: none;
         border-radius: 10px;
@@ -309,7 +305,7 @@ function cekStatus() {
     showStatusModal(
       "Nomor Order Kosong",
       row("Info", "Masukkan nomor order terlebih dahulu.") +
-      row("Contoh", "<code>RJ-2026-7129517</code>"),
+      row("Contoh", "<code>VJ-2026-7129517</code>"),
       "⚠️"
     );
     return;
@@ -359,7 +355,7 @@ document.addEventListener("DOMContentLoaded", function () {
   renderAntrian();
   const inp = document.getElementById("searchOrder");
   if (inp) {
-    inp.placeholder = "RJ-2026-xxxx";
+    inp.placeholder = "VJ-2026-xxxx";
     inp.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pembayaran - ROX</title>
+  <title>Pembayaran - Voxyy Joki</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -22,24 +22,24 @@
     .pay-card h2 {
       font-size: 18px;
       margin-bottom: 4px;
-      color: #9c27b0;
+      color: #2196f3;
     }
     .kode {
       background: #0a0e1a;
-      border: 1px dashed #9c27b055;
+      border: 1px dashed #2196f355;
       border-radius: 8px;
       padding: 10px;
       font-size: 15px;
       font-weight: 700;
       letter-spacing: 1px;
       margin: 12px 0;
-      color: #9c27b0;
+      color: #2196f3;
       word-break: break-all;
     }
     .total-bayar {
       font-size: 28px;
       font-weight: 800;
-      color: #9c27b0;
+      color: #2196f3;
       margin: 8px 0 4px;
     }
     .rincian {
@@ -74,7 +74,7 @@
     }
     .btn-konfirmasi {
       width: 100%;
-      background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+      background: linear-gradient(135deg, #2196f3, #1565c0);
       color: #0a0e1a;
       border: none;
       border-radius: 12px;
@@ -100,7 +100,7 @@
       font-size: 13px;
       line-height: 1.5;
       background: #0d2137;
-      color: #ce93d8;
+      color: #64b5f6;
       border: 1px solid #2d5a00;
     }
     .status-box.show {
@@ -116,9 +116,9 @@
 <body>
   <header class="header">
     <div class="brand">
-      <img src="logo.png" alt="ROX" class="logo"  >
+      <img src="logo.png" alt="Voxyy Joki" class="logo"  >
       <div>
-        <h1>ROX <span class="verified-wrap"><i class="fa-solid fa-check"></i></span></h1>
+        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
         <p>Pembayaran</p>
       </div>
     </div>
@@ -131,7 +131,7 @@
       <h2>Scan QRIS untuk Bayar</h2>
       <p style="font-size:13px;color:#aaa;">Order kamu sudah dibuat</p>
       
-      <div class="kode" id="kodeOrder">RJ-2026-0000</div>
+      <div class="kode" id="kodeOrder">VJ-2026-0000</div>
       
       <div class="total-bayar" id="totalBayar">Rp 0</div>
       <div class="rincian" id="rincianBayar" style="display:none;"></div>
@@ -166,7 +166,7 @@
       <div class="status-box" id="statusBox">
         ✅ Konfirmasi terkirim.<br>
         <b>Langkah terakhir:</b> hubungi admin WhatsApp dan kirim bukti TF + kode order.<br>
-        <a href="https://wa.me/6285182549509?text=Halo%20admin%20ROX%2C%20saya%20sudah%20TF%20order" target="_blank" rel="noopener"
+        <a href="https://wa.me/6285151982250?text=Halo%20admin%20Voxyy%2C%20saya%20sudah%20TF%20order" target="_blank" rel="noopener"
            style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:#25d366;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;">
           <i class="fa-brands fa-whatsapp"></i> Hubungi Admin WhatsApp
         </a>
@@ -174,7 +174,7 @@
     </div>
 
     <p style="text-align:center;margin-top:16px;font-size:12px;color:#888;">
-      Ada kendala? <a href="laporan.html" style="color:#9c27b0;">Kirim Laporan</a>
+      Ada kendala? <a href="laporan.html" style="color:#2196f3;">Kirim Laporan</a>
     </p>
   </div>
 
@@ -205,7 +205,7 @@
         const totalNum = parseInt(String(paramsEarly.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
         const rand = Math.floor(1000 + Math.random() * 9000);
         const timePart = String(Date.now()).slice(-3);
-        const kode = `RJ-2026-${rand}${timePart}`;
+        const kode = `VJ-2026-${rand}${timePart}`;
         const isWebsite = /website/i.test(paketEarly);
         const order = {
           kode,
@@ -245,7 +245,7 @@
       if (!order) {
         const total = params.get("total") || "Rp 5.000";
         order = {
-          kode: kodeParam || "RJ-2026-0000",
+          kode: kodeParam || "VJ-2026-0000",
           total: total,
           nama: "-",
           wa: "-",
@@ -366,12 +366,12 @@ Customer sudah bayar & konfirmasi.
 
       // Setelah konfirmasi → arahkan ke WhatsApp admin
       const waText = encodeURIComponent(
-        `Halo admin ROX, saya sudah TF.\nKode: ${order.kode || "-"}\nPaket: ${order.paket || "-"}\nTotal: ${formatRupiah(finalAmt)}`
+        `Halo admin Voxyy, saya sudah TF.\nKode: ${order.kode || "-"}\nPaket: ${order.paket || "-"}\nTotal: ${formatRupiah(finalAmt)}`
       );
       const waBtn = document.querySelector("#statusBox a[href*='wa.me']");
-      if (waBtn) waBtn.href = `https://wa.me/6285182549509?text=${waText}`;
+      if (waBtn) waBtn.href = `https://wa.me/6285151982250?text=${waText}`;
       setTimeout(function() {
-        window.open(`https://wa.me/6285182549509?text=${waText}`, "_blank");
+        window.open(`https://wa.me/6285151982250?text=${waText}`, "_blank");
       }, 600);
     }
 

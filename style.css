@@ -8,9 +8,9 @@
 body {
   background: #0a0e18;
   background-image:
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(156, 39, 176, 0.18), transparent 55%),
-    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(106, 27, 154, 0.14), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 0% 80%, rgba(171, 71, 188, 0.12), transparent 45%);
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(33, 150, 243, 0.18), transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 100%, rgba(13, 71, 161, 0.14), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 0% 80%, rgba(30, 136, 229, 0.12), transparent 45%);
   background-attachment: fixed;
   color: #fff;
   padding-bottom: 80px;
@@ -40,7 +40,7 @@ body {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.notif-text b { color: #9c27b0; }
+.notif-text b { color: #2196f3; }
 .time { color: #aaa; }
 .notif-close {
   position: absolute;
@@ -57,7 +57,7 @@ body {
   border-radius: 4px;
 }
 .notif-close:hover {
-  color: #9c27b0;
+  color: #2196f3;
   background: #1a2740;
 }
 
@@ -78,58 +78,19 @@ body {
   height: 42px;
   border-radius: 10px;
   object-fit: cover;
-  background: #9c27b0;
+  background: #2196f3;
 }
 .brand h1 {
   font-size: 16px;
   font-weight: 700;
 }
-.verified-wrap {
-  position: relative;
-  display: inline-flex;
-  width: 18px;
-  height: 18px;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  margin-left: 4px;
-}
-.verified-wrap::before,
-.verified-wrap::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 2px solid #2196f3;
-  animation: verifiedWave 1.8s ease-out infinite;
-}
-.verified-wrap::after {
-  animation-delay: 0.9s;
-}
-.verified-wrap i {
-  position: relative;
-  z-index: 1;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #2196f3;
-  color: #fff !important;
-  font-size: 9px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.25);
-}
-@keyframes verifiedWave {
-  0% { transform: scale(1); opacity: 0.7; }
-  100% { transform: scale(2.1); opacity: 0; }
-}
+.verified { color: #2196f3; font-size: 14px; }
 .brand p { font-size: 11px; color: #bbb; }
 
 /* Banner */
 .banner {
   margin: 12px;
-  background: linear-gradient(135deg, #9c27b0, #6a1b9a);
+  background: linear-gradient(135deg, #2196f3, #0d47a1);
   border-radius: 12px;
   padding: 14px 16px;
   color: #0a0e18;
@@ -176,21 +137,21 @@ body {
   padding: 16px 8px;
   text-align: center;
   text-decoration: none;
-  color: #6a1b9a;
+  color: #0d47a1;
   font-size: 12px;
 }
 .menu-item i {
   display: block;
   font-size: 22px;
   margin-bottom: 6px;
-  color: #6a1b9a;
+  color: #0d47a1;
 }
 
 /* Produk 2 kolom */
 .produk-section {
   padding: 0 12px 20px;
 }
-.produk-section h3 { font-size: 14px; color: #6a1b9a; margin-bottom: 4px; }
+.produk-section h3 { font-size: 14px; color: #0d47a1; margin-bottom: 4px; }
 .subtitle { font-size: 12px; color: #aaa; margin-bottom: 12px; }
 
 .produk-grid {
@@ -217,11 +178,11 @@ body {
   padding: 10px;
 }
 .produk-info h4 { font-size: 13px; margin-bottom: 4px; }
-.produk-info .harga { color: #9c27b0; font-weight: 700; font-size: 14px; }
+.produk-info .harga { color: #2196f3; font-weight: 700; font-size: 14px; }
 .produk-info .btn {
   display: block;
   margin-top: 8px;
-  background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(90deg, #2196f3, #1565c0);
   color: #0a0e18;
   text-align: center;
   padding: 6px;
@@ -267,7 +228,7 @@ body {
 .nav-item i { font-size: 18px; }
 .nav-item.active {
   color: #fff;
-  background: #6a1b9a;
+  background: #0d47a1;
   border-radius: 12px;
   padding: 4px 12px;
 }
@@ -279,7 +240,7 @@ body {
 .badge {
   display: inline-block;
   background: #1a2740;
-  color: #9c27b0;
+  color: #2196f3;
   font-size: 11px;
   padding: 4px 10px;
   border-radius: 20px;
@@ -337,7 +298,7 @@ body {
 }
 .paket-label {
   display: inline-block;
-  background: #9c27b0;
+  background: #2196f3;
   color: #0a0e18;
   font-size: 11px;
   font-weight: 700;
@@ -353,16 +314,16 @@ body {
   margin-bottom: 4px;
   color: #ccc;
 }
-.paket-card li i { color: #6a1b9a; margin-right: 6px; }
+.paket-card li i { color: #0d47a1; margin-right: 6px; }
 .harga {
   font-size: 22px;
   font-weight: 800;
-  color: #9c27b0;
+  color: #2196f3;
   margin-bottom: 12px;
 }
 .btn-pesan {
   display: block;
-  background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(90deg, #2196f3, #1565c0);
   color: #0a0e18;
   text-align: center;
   padding: 12px;
@@ -412,17 +373,17 @@ body {
   width: 60px;
   height: 60px;
   border-radius: 10px;
-  background: #9c27b0;
+  background: #2196f3;
   object-fit: cover;
 }
 .tag {
   background: #1a2740;
-  color: #9c27b0;
+  color: #2196f3;
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 4px;
 }
-.tag.aman { background: #0d2137; color: #ce93d8; }
+.tag.aman { background: #0d2137; color: #64b5f6; }
 
 .form-section {
   background: #10182a;
@@ -439,7 +400,7 @@ body {
   gap: 8px;
 }
 .step {
-  background: #9c27b0;
+  background: #2196f3;
   color: #0a0e18;
   width: 22px;
   height: 22px;
@@ -479,21 +440,21 @@ textarea { resize: vertical; min-height: 120px; }
   cursor: pointer;
 }
 .addon.selected {
-  border-color: #9c27b0;
+  border-color: #2196f3;
   background: #10182a;
 }
-.addon-price { color: #9c27b0; font-size: 13px; }
+.addon-price { color: #2196f3; font-size: 13px; }
 .btn-pilih {
   background: #1a2740;
   border: none;
-  color: #9c27b0;
+  color: #2196f3;
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 12px;
   cursor: pointer;
 }
 .addon.selected .btn-pilih {
-  background: #9c27b0;
+  background: #2196f3;
   color: #0a0e18;
 }
 
@@ -504,7 +465,7 @@ textarea { resize: vertical; min-height: 120px; }
   padding: 14px;
   text-align: center;
 }
-.qris-box i { font-size: 28px; color: #6a1b9a; }
+.qris-box i { font-size: 28px; color: #0d47a1; }
 
 .ringkasan {
   background: #10182a;
@@ -521,14 +482,14 @@ textarea { resize: vertical; min-height: 120px; }
 .ringkasan .total {
   font-weight: 700;
   font-size: 16px;
-  color: #9c27b0;
+  color: #2196f3;
   margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid #1a2740;
 }
 .btn-buat {
   width: 100%;
-  background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(90deg, #2196f3, #1565c0);
   color: #0a0e18;
   border: none;
   padding: 14px;
@@ -552,7 +513,7 @@ textarea { resize: vertical; min-height: 120px; }
   align-items: center;
 }
 .antrian-item .num {
-  background: #9c27b0;
+  background: #2196f3;
   color: #0a0e18;
   width: 36px;
   height: 36px;
@@ -569,7 +530,7 @@ textarea { resize: vertical; min-height: 120px; }
 .antrian-item .info small { display: block; color: #aaa; font-size: 11px; }
 .status-badge {
   background: #1a2740;
-  color: #9c27b0;
+  color: #2196f3;
   font-size: 10px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -588,7 +549,7 @@ textarea { resize: vertical; min-height: 120px; }
   text-overflow: ellipsis;
 }
 .search-box button {
-  background: #9c27b0;
+  background: #2196f3;
   color: #0a0e18;
   border: none;
   padding: 0 16px;
@@ -625,7 +586,7 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .contact-item i {
   font-size: 24px;
-  color: #6a1b9a;
+  color: #0d47a1;
 }
 
 /* Laporan */
@@ -644,9 +605,9 @@ textarea { resize: vertical; min-height: 120px; }
   cursor: pointer;
 }
 .btn-group .btn-active {
-  background: #9c27b0;
+  background: #2196f3;
   color: #0a0e18;
-  border-color: #9c27b0;
+  border-color: #2196f3;
 }
 .info-small {
   font-size: 11px;
@@ -667,14 +628,14 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .btn-foto {
   background: #1a2740;
-  color: #9c27b0;
+  color: #2196f3;
 }
 .btn-kirim {
-  background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(90deg, #2196f3, #1565c0);
   color: #0a0e18;
 }
 .back {
-  color: #9c27b0;
+  color: #2196f3;
   text-decoration: none;
   font-size: 13px;
   display: inline-block;
@@ -683,7 +644,7 @@ textarea { resize: vertical; min-height: 120px; }
 
 /* Admin */
 .admin-header {
-  background: #9c27b0;
+  background: #2196f3;
   color: #0a0e18;
   padding: 14px;
   text-align: center;
@@ -724,7 +685,7 @@ textarea { resize: vertical; min-height: 120px; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(90deg, #2196f3, #1565c0);
   color: #0a0e18;
   padding: 10px 14px;
   border-radius: 20px;
@@ -835,7 +796,7 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .site-modal-icon.info {
   background: rgba(255, 215, 0, 0.15);
-  color: #9c27b0;
+  color: #2196f3;
   animation: modalIconPulse 0.6s ease;
 }
 @keyframes modalIconPulse {
@@ -864,7 +825,7 @@ textarea { resize: vertical; min-height: 120px; }
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(90deg, #9c27b0, #7b1fa2);
+  background: linear-gradient(90deg, #2196f3, #1565c0);
   color: #0a0e18;
   transition: transform 0.15s, opacity 0.15s;
 }
@@ -876,35 +837,32 @@ textarea { resize: vertical; min-height: 120px; }
   color: #fff;
 }
 
-/* ROX theme overrides - bottom nav like app screenshot */
+/* Voxyy theme overrides - bottom nav like app screenshot */
 .bottom-nav {
   background: #0c1218;
   border-top: 1px solid #1a2740;
-  padding: 10px 6px 12px;
-  gap: 6px;
+  padding: 6px 4px 10px;
+  gap: 0;
 }
 .nav-item {
   flex: 1;
-  color: #9a8bb0;
+  color: #7a9bb0;
   font-size: 10px;
-  padding: 8px 6px;
+  padding: 6px 4px;
   border-radius: 16px;
-  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+  transition: all 0.2s;
 }
 .nav-item i { font-size: 18px; margin-bottom: 2px; }
 .nav-item.active {
-  color: #fff !important;
-  background: linear-gradient(180deg, #ab47bc 0%, #9c27b0 55%, #7b1fa2 100%);
-  box-shadow: 0 8px 16px rgba(156, 39, 176, 0.35);
-  border-radius: 16px;
-  padding: 8px 6px;
+  color: #0a0e18;
+  background: linear-gradient(180deg, #1976d2 0%, #1565c0 40%, #0d47a1 100%);
+  box-shadow: 0 0 12px rgba(13, 71, 161, 0.45);
+  border-radius: 18px;
+  padding: 8px 10px;
   font-weight: 700;
-  transform: translateY(-8px);
+  color: #fff !important;
 }
 .nav-item.active i { color: #fff !important; }
-.nav-item:active {
-  transform: translateY(-10px);
-}
 
 /* Banner as image */
 .banner {
@@ -927,23 +885,24 @@ textarea { resize: vertical; min-height: 120px; }
 /* Ikon produk & menu: biru tua */
 .menu-item,
 .menu-item i {
-  color: #6a1b9a !important;
+  color: #0d47a1 !important;
 }
 .menu-item:hover,
 .menu-item:active {
-  border-color: #7b1fa2 !important;
+  border-color: #1565c0 !important;
 }
 .paket-card li i,
 .fitur-list li i,
 .produk-info small {
-  color: #6a1b9a !important;
+  color: #0d47a1 !important;
 }
 .produk-section h3 {
-  color: #6a1b9a !important;
+  color: #0d47a1 !important;
 }
 
 
-/* FULL PURPLE THEME FORCE */
+/* FULL BLUE THEME FORCE — no green left */
+.verified,
 .notif-text b,
 .harga,
 .produk-info .harga,
@@ -958,7 +917,7 @@ textarea { resize: vertical; min-height: 120px; }
 .fitur-list li i,
 .qris-box i,
 .contact-item i {
-  color: #9c27b0 !important;
+  color: #2196f3 !important;
 }
 .paket-label,
 .step,
@@ -972,16 +931,14 @@ textarea { resize: vertical; min-height: 120px; }
 .search-box button,
 .btn-pilih,
 .antrian-item .num {
-  background: linear-gradient(90deg, #9c27b0, #7b1fa2) !important;
+  background: linear-gradient(90deg, #2196f3, #1565c0) !important;
   color: #fff !important;
-  border-color: #7b1fa2 !important;
+  border-color: #1565c0 !important;
 }
 .nav-item.active {
-  background: linear-gradient(180deg, #ce93d8 0%, #ab47bc 45%, #6a1b9a 100%) !important;
-  box-shadow: 0 8px 16px rgba(156, 39, 176, 0.4) !important;
+  background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 40%, #0d47a1 100%) !important;
+  box-shadow: 0 0 12px rgba(33, 150, 243, 0.5) !important;
   color: #fff !important;
-  border-radius: 16px !important;
-  transform: translateY(-8px);
 }
 .nav-item.active i {
   color: #fff !important;
@@ -991,5 +948,5 @@ textarea { resize: vertical; min-height: 120px; }
   border-color: #1a2740 !important;
 }
 .menu-item:hover, .menu-item:active {
-  border-color: #9c27b0 !important;
+  border-color: #2196f3 !important;
 }
