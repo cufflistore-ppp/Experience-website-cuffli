@@ -188,6 +188,7 @@
     <a href="tentang.html" class="nav-item "><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
   </nav>
 
+  <script src="global-orders.js"></script>
   <script src="telegram.js"></script>
   <script src="script.js"></script>
     <script>
@@ -197,7 +198,7 @@
       return "Rp " + Number(n).toLocaleString("id-ID");
     }
 
-    function loadOrderData() {
+    async function loadOrderData() {
       // Klik produk → buat order otomatis + tampil QRIS
       const paramsEarly = new URLSearchParams(window.location.search);
       const paketEarly = (paramsEarly.get("paket") || "").trim();
@@ -221,16 +222,25 @@
           isWebsite: isWebsite,
           isDigital: !isWebsite
         };
-        let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-        orders.unshift(order);
-        localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+        if (window.VoxyyOrders && typeof window.VoxyyOrders.addOrder === "function") {
+          await window.VoxyyOrders.addOrder(order);
+        } else {
+          let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+          orders.unshift(order);
+          localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+        }
         if (kode) localStorage.setItem("voxyy_saved_kode", kode);
         const extra = isWebsite ? "&website=1" : "&digital=1";
         window.location.replace(`pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(order.total)}${extra}`);
         return;
       }
 
-      const orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+      let orders = [];
+      if (window.VoxyyOrders && typeof window.VoxyyOrders.getOrders === "function") {
+        orders = await window.VoxyyOrders.getOrders();
+      } else {
+        orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+      }
       const params = new URLSearchParams(window.location.search);
       const kodeParam = params.get("kode");
 
@@ -353,11 +363,15 @@ Customer sudah bayar & konfirmasi.
 
       // Update status order di localStorage (opsional: tetap Belum Bayar sampai admin ubah)
       try {
-        let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-        const idx = orders.findIndex(o => o.kode === order.kode);
-        if (idx >= 0) {
-          orders[idx].status = "Menunggu Verifikasi";
-          localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+        if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrderByKode === "function") {
+          await window.VoxyyOrders.updateOrderByKode(order.kode, { status: "Menunggu Verifikasi" });
+        } else {
+          let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+          const idx = orders.findIndex(o => o.kode === order.kode);
+          if (idx >= 0) {
+            orders[idx].status = "Menunggu Verifikasi";
+            localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+          }
         }
       } catch(e) {}
 

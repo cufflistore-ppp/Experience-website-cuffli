@@ -156,10 +156,14 @@ async function buatPesanan() {
   order.createdAt = Date.now();
   order.finalAmount = Number(String(total).replace(/[^\d]/g, "")) || 0;
 
-  // Simpan ke localStorage saja (belum kirim Telegram)
-  let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-  orders.unshift(order);
-  localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+  // Simpan ke global (jika setup) + localStorage
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.addOrder === "function") {
+    await window.VoxyyOrders.addOrder(order);
+  } else {
+    let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+    orders.unshift(order);
+    localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+  }
   if (kode) localStorage.setItem("voxyy_saved_kode", kode);
 
   // Reset form fields

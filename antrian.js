@@ -1,13 +1,5 @@
 const SAVED_KODE_KEY = "voxyy_saved_kode";
 
-function getOrders() {
-  try {
-    return JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-  } catch (e) {
-    return [];
-  }
-}
-
 function isStatusSukses(status) {
   const s = String(status || "").toLowerCase();
   return s.includes("sukses") || s.includes("selesai");
@@ -33,52 +25,42 @@ function getTrackedKode() {
   return (localStorage.getItem(SAVED_KODE_KEY) || "").trim();
 }
 
-function findOrderByKode(kode) {
+async function fetchOrders() {
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.getOrders === "function") {
+    return await window.VoxyyOrders.getOrders();
+  }
+  try {
+    return JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+  } catch (e) {
+    return [];
+  }
+}
+
+function findOrderByKode(orders, kode) {
   if (!kode) return null;
   const target = String(kode).trim().toUpperCase();
-  return getOrders().find(o => String(o.kode || "").toUpperCase() === target) || null;
+  return (orders || []).find(
+    (o) => String(o.kode || "").toUpperCase() === target
+  ) || null;
 }
 
-function loadAntrianFromStorage() {
-  return getOrders().map((o, i) => ({
+function loadAntrianFromOrders(orders) {
+  return (orders || []).map((o, i) => ({
     no: i + 1,
-    nama: (o.nama || "Anonim").length > 8 ? (o.nama || "A").substring(0, 2) + "********" : (o.nama || "Anonim"),
+    nama:
+      (o.nama || "Anonim").length > 8
+        ? (o.nama || "A").substring(0, 2) + "********"
+        : o.nama || "Anonim",
     jenis: (o.paket || "Joki Kontak") + " · " + (o.status || "Belum Bayar"),
-    status: o.status === "Sukses" || o.status === "SELESAI" ? "SELESAI"
-          : (o.status === "Proses" || o.status === "PROSES" ? "PROSES"
-          : (o.status === "Menunggu Verifikasi" ? "PROSES" : "MASUK ANTRIAN"))
+    status:
+      o.status === "Sukses" || o.status === "SELESAI"
+        ? "SELESAI"
+        : o.status === "Proses" || o.status === "PROSES"
+        ? "PROSES"
+        : o.status === "Menunggu Verifikasi"
+        ? "PROSES"
+        : "MASUK ANTRIAN"
   }));
-}
-
-function renderAntrian() {
-  const list = document.getElementById("antrianList");
-  if (!list) return;
-
-  const data = loadAntrianFromStorage();
-
-  if (data.length === 0) {
-    list.innerHTML = `
-      <div class="antrian-empty">
-        <div class="antrian-empty-icon">🕒</div>
-        <strong>Antrian masih kosong</strong>
-        <small>Belum ada pesanan. Antrian baru muncul setelah ada yang order.</small>
-      </div>
-    `;
-    return;
-  }
-
-  list.innerHTML = data.map(item => `
-    <div class="antrian-item">
-      <div style="display:flex;align-items:center;">
-        <div class="num">#${item.no}</div>
-        <div class="info">
-          <strong>${escapeHtml(item.nama)}</strong>
-          <small>${escapeHtml(item.jenis)}</small>
-        </div>
-      </div>
-      <span class="status-badge">${escapeHtml(item.status)}</span>
-    </div>
-  `).join("");
 }
 
 function escapeHtml(str) {
@@ -100,6 +82,73 @@ function statusIcon(cls) {
   if (cls === "sukses") return "✅";
   if (cls === "proses") return "⏳";
   return "🛒";
+}
+
+async function renderAntrian() {
+  const list = document.getElementById("antrianList");
+  if (!list) return;
+
+  const globalOn =
+    window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured();
+
+  list.innerHTML = `
+    <div class="antrian-empty">
+      <div class="antrian-empty-icon">⏳</div>
+      <strong>Memuat antrian...</strong>
+      <small>Mengambil antrian global...</small>
+    </div>
+  `;
+
+  let orders = [];
+  try {
+    orders = await fetchOrders();
+  } catch (e) {
+    console.warn(e);
+  }
+
+  let modeBadge = document.getElementById("antrianModeBadge");
+  if (!modeBadge) {
+    modeBadge = document.createElement("div");
+    modeBadge.id = "antrianModeBadge";
+    modeBadge.style.cssText =
+      "font-size:11px;color:#8aa0b8;margin:-8px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;";
+    const searchBox = document.querySelector(".search-box");
+    if (searchBox && searchBox.parentNode) {
+      searchBox.parentNode.insertBefore(modeBadge, searchBox.nextSibling);
+    }
+  }
+  modeBadge.innerHTML =
+    '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global</span> <span>Semua pesanan dari HP/browser manapun · auto-refresh</span>';
+
+  const data = loadAntrianFromOrders(orders);
+
+  if (data.length === 0) {
+    list.innerHTML = `
+      <div class="antrian-empty">
+        <div class="antrian-empty-icon">🕒</div>
+        <strong>Antrian masih kosong</strong>
+        <small>Belum ada pesanan. Antrian baru muncul setelah ada yang order.</small>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = data
+    .map(
+      (item) => `
+    <div class="antrian-item">
+      <div style="display:flex;align-items:center;">
+        <div class="num">#${item.no}</div>
+        <div class="info">
+          <strong>${escapeHtml(item.nama)}</strong>
+          <small>${escapeHtml(item.jenis)}</small>
+        </div>
+      </div>
+      <span class="status-badge">${escapeHtml(item.status)}</span>
+    </div>
+  `
+    )
+    .join("");
 }
 
 function ensureStatusModal() {
@@ -258,8 +307,14 @@ function closeStatusModal() {
 function row(label, value, extraClass) {
   return (
     '<div class="status-row">' +
-      '<div class="k">' + escapeHtml(label) + "</div>" +
-      '<div class="v' + (extraClass ? " " + extraClass : "") + '">' + value + "</div>" +
+    '<div class="k">' +
+    escapeHtml(label) +
+    "</div>" +
+    '<div class="v' +
+    (extraClass ? " " + extraClass : "") +
+    '">' +
+    value +
+    "</div>" +
     "</div>"
   );
 }
@@ -270,14 +325,17 @@ function syncSearchInput(kode) {
   input.value = kode || "";
 }
 
-function restoreSavedKodeToInput() {
+async function restoreSavedKodeToInput() {
   const input = document.getElementById("searchOrder");
   if (!input) return;
 
   let kode = getTrackedKode();
+  const orders = await fetchOrders();
 
   if (!kode) {
-    const pending = getOrders().find(o => o && o.kode && isStatusBelumSelesai(o.status));
+    const pending = orders.find(
+      (o) => o && o.kode && isStatusBelumSelesai(o.status)
+    );
     if (pending) {
       kode = pending.kode;
       saveTrackedKode(kode);
@@ -289,7 +347,7 @@ function restoreSavedKodeToInput() {
     return;
   }
 
-  const found = findOrderByKode(kode);
+  const found = findOrderByKode(orders, kode);
   if (found && isStatusSukses(found.status)) {
     clearTrackedKode(kode);
     input.value = "";
@@ -299,20 +357,21 @@ function restoreSavedKodeToInput() {
   input.value = kode;
 }
 
-function cekStatus() {
+async function cekStatus() {
   const input = document.getElementById("searchOrder");
   if (!input || !input.value.trim()) {
     showStatusModal(
       "Nomor Order Kosong",
       row("Info", "Masukkan nomor order terlebih dahulu.") +
-      row("Contoh", "<code>VJ-2026-7129517</code>"),
+        row("Contoh", "<code>VJ-2026-7129517</code>"),
       "⚠️"
     );
     return;
   }
 
   const kode = input.value.trim().toUpperCase();
-  const found = findOrderByKode(kode);
+  const orders = await fetchOrders();
+  const found = findOrderByKode(orders, kode);
 
   if (found) {
     const st = found.status || "Belum Bayar";
@@ -324,12 +383,12 @@ function cekStatus() {
     showStatusModal(
       "Status Pesanan",
       row("Kode Antrian", "<code>" + escapeHtml(found.kode || kode) + "</code>") +
-      row("Nama", escapeHtml(found.nama || "-")) +
-      row("Paket", escapeHtml(found.paket || "-")) +
-      row("Status", escapeHtml(st), cls) +
-      row("Total", escapeHtml(found.total || "-")) +
-      row("Waktu", escapeHtml(found.waktu || "-")) +
-      note,
+        row("Nama", escapeHtml(found.nama || "-")) +
+        row("Paket", escapeHtml(found.paket || "-")) +
+        row("Status", escapeHtml(st), cls) +
+        row("Total", escapeHtml(found.total || "-")) +
+        row("Waktu", escapeHtml(found.waktu || "-")) +
+        note,
       statusIcon(cls)
     );
 
@@ -344,7 +403,7 @@ function cekStatus() {
     showStatusModal(
       "Order Tidak Ditemukan",
       row("Kode yang dicari", "<code>" + escapeHtml(kode) + "</code>") +
-      row("Info", "Nomor order tidak ditemukan di perangkat ini. Pastikan kode benar dan order dibuat dari browser yang sama."),
+        row("Info", "Nomor order tidak ditemukan di antrian global. Pastikan kode benar."),
       "❌"
     );
   }
@@ -353,6 +412,8 @@ function cekStatus() {
 document.addEventListener("DOMContentLoaded", function () {
   ensureStatusModal();
   renderAntrian();
+  restoreSavedKodeToInput();
+
   const inp = document.getElementById("searchOrder");
   if (inp) {
     inp.placeholder = "VJ-2026-xxxx";
@@ -363,5 +424,8 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
-  restoreSavedKodeToInput();
+
+  setInterval(function () {
+    renderAntrian();
+  }, 12000);
 });
