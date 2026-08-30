@@ -7,14 +7,14 @@ const produkDigital = [
     label: "APK",
     judul: "APK Bug Syam",
     deskripsi: "Pilih durasi, bayar QRIS, lalu konfirmasi ke admin WhatsApp.",
-    harga: 15000,
+    harga: 10000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
     variants: [
-      { nama: "1 Hari", harga: 15000 },
-      { nama: "1 Minggu", harga: 25000 },
-      { nama: "30 Hari", harga: 35000 },
+      { nama: "1 Hari", harga: 10000 },
+      { nama: "5 Hari", harga: 15000 },
+      { nama: "30 Hari", harga: 30000 },
       { nama: "Manen", harga: 40000 }
     ],
     fitur: ["Pilih durasi", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
