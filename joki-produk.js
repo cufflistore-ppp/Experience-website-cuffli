@@ -1,4 +1,4 @@
-const JOKI_CATALOG_VER = "6";
+const JOKI_CATALOG_VER = "7";
 
 const paketJoki = [
   {
@@ -31,6 +31,7 @@ const paketJoki = [
     judul: "Joki 2 Hari",
     deskripsi: "Layanan joki kontak selama 2 hari + SW + share all GB.",
     harga: 2000,
+    badge: "Paling Laris",
     fitur: [
       "2 hari + SW + share all GB",
       "Order langsung di web",
@@ -111,9 +112,15 @@ function renderPaketJoki() {
 
   container.innerHTML = paketJoki.map(p => {
     const href = "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
+    const badgeHtml = p.badge
+      ? `<span class="badge-laris">${p.badge}</span>`
+      : "";
     return `
-    <div class="paket-card">
-      <div class="paket-label">${p.label}</div>
+    <div class="paket-card${p.badge ? " paket-laris" : ""}">
+      <div class="paket-label-row">
+        <div class="paket-label">${p.label}</div>
+        ${badgeHtml}
+      </div>
       <h3>${p.judul}</h3>
       <p>${p.deskripsi}</p>
       <ul>

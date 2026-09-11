@@ -979,3 +979,32 @@ textarea { resize: vertical; min-height: 120px; }
   max-width: 100%;
   line-height: 1.15;
 }
+
+
+/* Badge Paling Laris */
+.paket-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.paket-label-row .paket-label {
+  margin-bottom: 0;
+}
+.badge-laris {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff6b00, #ff9800);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.35);
+}
+.paket-card.paket-laris {
+  border-color: rgba(255, 152, 0, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.15);
+}
