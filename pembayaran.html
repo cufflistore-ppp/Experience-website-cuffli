@@ -151,13 +151,8 @@
         1. Scan <b>QRIS</b> di atas pakai e-wallet / mobile banking<br>
         2. Transfer sesuai <b>nominal total</b> di atas<br>
         3. Setelah TF, klik <b>Saya Sudah Bayar</b><br>
-        4. Lalu <b>hubungi admin via WhatsApp</b> untuk proses (wajib)
+        4. Langsung <b>hubungi admin via WhatsApp</b> (kirim bukti TF di chat WA)
       </p>
-
-      <label style="text-align:left;display:block;margin-bottom:6px;font-size:12px;color:#aaa;">
-        Upload Bukti Transfer (opsional tapi disarankan)
-      </label>
-      <input type="file" id="buktiBayar" accept="image/*" style="margin-bottom:8px;width:100%;">
 
       <button class="btn-konfirmasi" id="btnKonfirmasi" onclick="konfirmasiPembayaran()">
         <i class="fa-solid fa-check-circle"></i> Saya Sudah Bayar
@@ -165,7 +160,7 @@
 
       <div class="status-box" id="statusBox">
         ✅ Konfirmasi terkirim.<br>
-        <b>Langkah terakhir:</b> hubungi admin WhatsApp dan kirim bukti TF + kode order.<br>
+        <b>Langkah terakhir:</b> hubungi admin WhatsApp, kirim bukti TF + kode order di chat.<br>
         <a href="https://wa.me/6285151982250?text=Halo%20admin%20Voxyy%2C%20saya%20sudah%20TF%20order" target="_blank" rel="noopener"
            style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:#25d366;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;">
           <i class="fa-brands fa-whatsapp"></i> Hubungi Admin WhatsApp
@@ -299,7 +294,6 @@
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
 
       const order = currentOrder || {};
-      const fileInput = document.getElementById("buktiBayar");
       const finalAmt = order.finalAmount || Number(String(order.total).replace(/[^\d]/g, "")) || 0;
 
       const isJaspost = !!order.isJaspost;
@@ -327,14 +321,6 @@ Customer sudah bayar & konfirmasi.
 
       if (typeof kirimTelegram === "function") {
         await kirimTelegram(pesan);
-      }
-
-      // Bukti transfer (opsional)
-      if (fileInput && fileInput.files[0] && typeof kirimFotoTelegram === "function") {
-        await kirimFotoTelegram(
-          fileInput.files[0],
-          `Bukti Bayar - ${order.kode}\nNama: ${order.nama || "-"}\nTotal: ${formatRupiah(finalAmt)}`
-        );
       }
 
       // Untuk Jasa Post: kirim foto akun yang disimpan di sessionStorage
