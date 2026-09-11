@@ -21,12 +21,15 @@ const FIREBASE_CONFIG = {
  * 3. Copy Client ID (bentuk: 442340334430-xxxxx.apps.googleusercontent.com)
  * 4. Tempel di bawah
  *
- * JUGA di edit client itu:
- * Authorized JavaScript origins → Add:
- *   https://experience-website-cuffli.vercel.app
+ * JUGA di edit client itu (Google Cloud Console → OAuth client):
+ * Authorized JavaScript origins → Add domain Netlify kamu, contoh:
+ *   https://NAMA-SITE-KAMU.netlify.app
  * Authorized redirect URIs → Add:
  *   https://voxyyjoki.firebaseapp.com/__/auth/handler
- *   https://experience-website-cuffli.vercel.app
+ *   https://NAMA-SITE-KAMU.netlify.app
+ *
+ * Firebase Console → Authentication → Settings → Authorized domains:
+ *   Tambah juga domain Netlify (xxx.netlify.app)
  */
 const GOOGLE_WEB_CLIENT_ID = "442340334430-eomut78090vr388t13r4au4hkugknshj.apps.googleusercontent.com";
 

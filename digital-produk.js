@@ -1,29 +1,11 @@
-const DIGITAL_CATALOG_VER = "4";
+const DIGITAL_CATALOG_VER = "5";
 
 const produkDigital = [
   {
     id: 1,
-    slug: "apk-bug-syam",
+    slug: "apk-auto-sv",
     label: "APK",
-    judul: "APK Bug Syam",
-    deskripsi: "Pilih durasi, bayar QRIS, lalu konfirmasi ke admin WhatsApp.",
-    harga: 10000,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    variants: [
-      { nama: "1 Hari", harga: 10000 },
-      { nama: "5 Hari", harga: 15000 },
-      { nama: "30 Hari", harga: 30000 },
-      { nama: "Manen", harga: 40000 }
-    ],
-    fitur: ["Pilih durasi", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 2,
-    slug: "apk-rog",
-    label: "APK",
-    judul: "APK Rog",
+    judul: "APK Auto SV Kontak",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
     harga: 2000,
     status: "TERSEDIA",
@@ -32,22 +14,10 @@ const produkDigital = [
     fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
-    id: 3,
-    slug: "jasa-bug-wa",
-    label: "JASA",
-    judul: "Jasa Bug WA",
-    deskripsi: "1 nomor. Bayar QRIS dulu, lalu konfirmasi ke admin WhatsApp.",
-    harga: 10000,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    fitur: ["Untuk 1 nomor", "Harga Rp 10.000", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 4,
-    slug: "apk-auto-sv",
+    id: 2,
+    slug: "apk-logo-prem-mod",
     label: "APK",
-    judul: "APK Auto SV Kontak",
+    judul: "APK Logo Prem/Mod",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
     harga: 3000,
     status: "TERSEDIA",
@@ -56,19 +26,19 @@ const produkDigital = [
     fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
-    id: 5,
-    slug: "panel-jasteb",
-    label: "PANEL",
-    judul: "Panel Jasteb Manen",
+    id: 3,
+    slug: "script-bot-jaga-gbxjpm",
+    label: "SCRIPT",
+    judul: "Script Bot Jaga GBXJPM",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 10000,
+    harga: 7000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Paket manen", "Harga Rp 10.000", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
-    id: 6,
+    id: 4,
     slug: "murid-logo",
     label: "MURID",
     judul: "Murid Logo",
@@ -80,16 +50,100 @@ const produkDigital = [
     fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
-    id: 7,
-    slug: "murid-push-kontak",
+    id: 5,
+    slug: "murid-nokos",
     label: "MURID",
-    judul: "Murid Push Kontak",
+    judul: "Murid Nokos",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 5000,
+    harga: 7000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 6,
+    slug: "nokos-wa-indonesia",
+    label: "NOKOS",
+    judul: "Nokos WA Indonesia",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 6000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 6.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 7,
+    slug: "nokos-shopee",
+    label: "NOKOS",
+    judul: "Nokos Shopee",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2500,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 8,
+    slug: "nokos-lazada",
+    label: "NOKOS",
+    judul: "Nokos Lazada",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2500,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 9,
+    slug: "jasa-logo-teks",
+    label: "JASA",
+    judul: "Jasa Logo Teks",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 10,
+    slug: "jasa-logo-udah-jadi",
+    label: "JASA",
+    judul: "Jasa Logo Yang Udah Jadi",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 3000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 11,
+    slug: "jasa-bikin-poster",
+    label: "JASA",
+    judul: "Jasa Bikin Poster",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 7000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 12,
+    slug: "jasa-logo-muka",
+    label: "JASA",
+    judul: "Jasa Bikin Logo Pake Muka Lu Sendiri",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 8000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 8.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   }
 ];
 

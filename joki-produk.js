@@ -1,13 +1,14 @@
-const JOKI_CATALOG_VER = "5";
+const JOKI_CATALOG_VER = "6";
 
 const paketJoki = [
   {
     id: 1,
     label: "20 JAM",
     judul: "Joki 20 Jam",
-    deskripsi: "Layanan joki kontak selama 20 jam.",
+    deskripsi: "Layanan joki kontak selama 20 jam + SW + share 10GB.",
     harga: 500,
     fitur: [
+      "20 jam + SW + share 10GB",
       "Order langsung di web",
       "Status dapat dipantau"
     ]
@@ -16,9 +17,10 @@ const paketJoki = [
     id: 2,
     label: "1 HARI",
     judul: "Joki 1 Hari",
-    deskripsi: "Layanan joki kontak selama 1 hari.",
+    deskripsi: "Layanan joki kontak selama 1 hari + SW + share all GB.",
     harga: 1000,
     fitur: [
+      "1 hari + SW + share all GB",
       "Order langsung di web",
       "Status dapat dipantau"
     ]
@@ -27,9 +29,10 @@ const paketJoki = [
     id: 3,
     label: "2 HARI",
     judul: "Joki 2 Hari",
-    deskripsi: "Layanan joki kontak selama 2 hari.",
+    deskripsi: "Layanan joki kontak selama 2 hari + SW + share all GB.",
     harga: 2000,
     fitur: [
+      "2 hari + SW + share all GB",
       "Order langsung di web",
       "Status dapat dipantau"
     ]
@@ -38,42 +41,60 @@ const paketJoki = [
     id: 4,
     label: "3 HARI",
     judul: "Joki 3 Hari",
-    deskripsi: "Layanan joki kontak selama 3 hari.",
+    deskripsi: "Layanan joki kontak selama 3 hari + SW + share all GB.",
     harga: 3000,
     fitur: [
+      "3 hari + SW + share all GB",
       "Order langsung di web",
       "Status dapat dipantau"
     ]
   },
   {
     id: 5,
-    label: "4 HARI",
-    judul: "Joki 4 Hari",
-    deskripsi: "Layanan joki kontak selama 4 hari.",
-    harga: 4000,
+    label: "5 HARI",
+    judul: "Joki 5 Hari",
+    deskripsi: "Layanan joki kontak selama 5 hari + SW + share all GB.",
+    harga: 5000,
     fitur: [
+      "5 hari + SW + share all GB",
       "Order langsung di web",
       "Status dapat dipantau"
     ]
   },
   {
     id: 6,
-    label: "5 HARI",
-    judul: "Joki 5 Hari",
-    deskripsi: "Layanan joki kontak selama 5 hari.",
-    harga: 5000,
+    label: "7 HARI",
+    judul: "Joki 7 Hari",
+    deskripsi: "Layanan joki kontak selama 7 hari + SW + share all GB.",
+    harga: 7000,
     fitur: [
+      "7 hari + SW + share all GB",
       "Order langsung di web",
       "Status dapat dipantau"
     ]
   },
   {
     id: 7,
+    label: "1 BULAN",
+    judul: "Joki 1 Bulan",
+    deskripsi: "Layanan joki kontak selama 1 bulan + SW + share all GB.",
+    harga: 10000,
+    fitur: [
+      "1 bulan + SW + share all GB",
+      "Order langsung di web",
+      "Status dapat dipantau"
+    ]
+  },
+  {
+    id: 8,
     label: "PERMANEN",
     judul: "Joki Permanen",
-    deskripsi: "Layanan joki kontak selamanya.",
-    harga: 6000,
+    deskripsi: "Permanen tempel link tree di TikTok + SW tebar. Same lu pensi JB.",
+    harga: 20000,
     fitur: [
+      "Permanen tempel link tree di TikTok",
+      "SW tebar",
+      "Same lu pensi JB",
       "Order langsung di web",
       "Status dapat dipantau"
     ]
@@ -88,7 +109,9 @@ function renderPaketJoki() {
   const container = document.getElementById("paketList");
   if (!container) return;
 
-  container.innerHTML = paketJoki.map(p => `
+  container.innerHTML = paketJoki.map(p => {
+    const href = "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
+    return `
     <div class="paket-card">
       <div class="paket-label">${p.label}</div>
       <h3>${p.judul}</h3>
@@ -97,11 +120,11 @@ function renderPaketJoki() {
         ${p.fitur.map(f => `<li><i class="fa-solid fa-circle-check"></i> ${f}</li>`).join("")}
       </ul>
       <div class="harga">${formatRp(p.harga)}</div>
-      <a href="detail.html?id=${p.id}" class="btn-pesan" style="display:block;text-align:center;text-decoration:none;">
-        Pesan Sekarang
+      <a href="${href}" class="btn-pesan" style="display:block;text-align:center;text-decoration:none;">
+        Bayar Sekarang
       </a>
-    </div>
-  `).join("");
+    </div>`;
+  }).join("");
 }
 
 function tambahPaket(data) {

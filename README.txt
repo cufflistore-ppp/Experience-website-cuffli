@@ -1,6 +1,6 @@
 ========================================
    VOXYY JOKI
-   Firebase Global + Login Google + Menu Akun
+   Firebase Global + Login Google + Menu Akun (deploy Netlify)
 ========================================
 
 MENU BAWAH:
@@ -42,9 +42,9 @@ SETUP FIREBASE (GRATIS, 1x ~5 menit)
    (apiKey, authDomain, databaseURL, projectId, ...)
 
 7. Authentication → Settings → Authorized domains
-   → Add domain Vercel kamu (contoh: xxx.vercel.app)
+   → Add domain Netlify kamu (contoh: xxx.netlify.app)
 
-8. Upload semua file ke Vercel
+8. Upload semua file ke Netlify (atau drag-drop folder)
 9. Hard refresh di HP
 
 SELESAI.

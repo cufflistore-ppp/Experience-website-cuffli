@@ -1,23 +1,68 @@
-const HOME_CATALOG_VER = "4";
+const HOME_CATALOG_VER = "5";
 
 const produk = [
   {
     id: 1,
-    judul: "Jasa Bikin Website",
-    harga: 20000,
+    judul: "Nokos WA Indonesia",
+    harga: 6000,
     status: "TERSEDIA",
     img: "logo.png",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 20.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 6.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 2,
-    judul: "Ajarin Bikin Website",
-    harga: 35000,
+    judul: "Nokos Shopee",
+    harga: 2500,
     status: "TERSEDIA",
     img: "logo.png",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 35.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 3,
+    judul: "Nokos Lazada",
+    harga: 2500,
+    status: "TERSEDIA",
+    img: "logo.png",
+    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
+    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 4,
+    judul: "Jasa Logo Teks",
+    harga: 2000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
+    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 5,
+    judul: "Jasa Logo Yang Udah Jadi",
+    harga: 3000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
+    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 6,
+    judul: "Jasa Bikin Poster",
+    harga: 7000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
+    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 7,
+    judul: "Jasa Bikin Logo Pake Muka Lu Sendiri",
+    harga: 8000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
+    fitur: ["Harga Rp 8.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   }
 ];
 
