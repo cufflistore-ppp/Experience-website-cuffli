@@ -307,10 +307,11 @@
       const frame = document.getElementById("frame");
       const nav = document.getElementById("shellNav");
 
-      let wantMusic = true;
-      let playTimer = null;
+      // Default: LAGU ON. Cuma mati kalau user klik pause.
+      let wantMusic = sessionStorage.getItem("voxyy_music_playing") !== "0";
 
       music.loop = true;
+      music.volume = 0.55;
       music.setAttribute("playsinline", "");
       music.setAttribute("webkit-playsinline", "");
 
@@ -327,53 +328,34 @@
           if (p && p.then) {
             p.then(function () {
               setIcon(true);
-              sessionStorage.setItem("voxyy_music_playing", "1");
             }).catch(function () {
-              // coba muted dulu biar "playing", lalu unmute
+              // fallback: play muted dulu, lalu unmute
               music.muted = true;
               music.play().then(function () {
-                music.muted = false;
-                music.volume = 0.55;
-                setIcon(true);
-                sessionStorage.setItem("voxyy_music_playing", "1");
+                setTimeout(function () {
+                  music.muted = false;
+                  music.volume = 0.55;
+                  setIcon(true);
+                }, 50);
               }).catch(function () {
                 setIcon(false);
               });
             });
           }
-        } catch (e) {
-          setIcon(false);
-        }
-      }
-
-      function startKeepAlive() {
-        if (playTimer) clearInterval(playTimer);
-        kickPlay();
-        // Paksa play tiap 800ms selama 12 detik pertama
-        let n = 0;
-        playTimer = setInterval(function () {
-          n++;
-          if (!wantMusic || n > 15) {
-            clearInterval(playTimer);
-            playTimer = null;
-            return;
-          }
-          if (music.paused || music.muted) kickPlay();
-        }, 800);
-      }
-
-      function pauseMusic() {
-        wantMusic = false;
-        sessionStorage.setItem("voxyy_music_playing", "0");
-        if (playTimer) { clearInterval(playTimer); playTimer = null; }
-        music.pause();
-        setIcon(false);
+        } catch (e) {}
       }
 
       function playMusic() {
         wantMusic = true;
         sessionStorage.setItem("voxyy_music_playing", "1");
-        startKeepAlive();
+        kickPlay();
+      }
+
+      function pauseMusic() {
+        wantMusic = false;
+        sessionStorage.setItem("voxyy_music_playing", "0");
+        try { music.pause(); } catch (e) {}
+        setIcon(false);
       }
 
       function navigate(page) {
@@ -382,13 +364,14 @@
           window.open(page, "_blank");
           return;
         }
-        const clean = page.split("#")[0];
-        frame.src = clean;
+        frame.src = page.split("#")[0];
         nav.querySelectorAll("a").forEach(function (a) {
           const p = (a.getAttribute("data-page") || "").split("?")[0];
-          const base = clean.split("?")[0];
+          const base = page.split("?")[0].split("#")[0];
           a.classList.toggle("active", base === p);
         });
+        // pindah halaman: lagu tetap (jangan pause)
+        if (wantMusic) kickPlay();
       }
 
       function enterApp() {
@@ -396,15 +379,21 @@
         intro.classList.add("done");
         app.classList.add("show");
         navigate("home.html");
-        // LANGSUNG BUNYI
-        if (sessionStorage.getItem("voxyy_music_playing") !== "0") {
-          playMusic();
+
+        // DEFAULT: langsung play. Jangan diem.
+        if (wantMusic) {
+          sessionStorage.setItem("voxyy_music_playing", "1");
+          kickPlay();
+          setTimeout(kickPlay, 200);
+          setTimeout(kickPlay, 600);
+          setTimeout(kickPlay, 1200);
+          setTimeout(kickPlay, 2500);
         } else {
           setIcon(false);
         }
       }
 
-      // Mulai muted play sejak awal (izin browser lebih longgar)
+      // Mulai buffering/play muted biar siap bunyi
       try {
         music.muted = true;
         music.play().catch(function () {});
@@ -430,21 +419,19 @@
         }, 65);
       }
 
-      // Setiap sentuhan/klik → pastikan lagu nyala
+      // Tap/klik di mana saja → nyalakan kalau seharusnya ON
       function unlock() {
-        if (!wantMusic) return;
-        if (sessionStorage.getItem("voxyy_music_playing") === "0") return;
-        kickPlay();
+        if (wantMusic) kickPlay();
       }
       document.addEventListener("touchstart", unlock, { passive: true });
-      document.addEventListener("touchend", unlock, { passive: true });
       document.addEventListener("click", unlock);
-      document.addEventListener("pointerdown", unlock);
 
+      // Tombol: user yang kontrol pause/play
       document.getElementById("musicToggle").addEventListener("click", function (e) {
+        e.preventDefault();
         e.stopPropagation();
-        if (music.paused || !wantMusic) playMusic();
-        else pauseMusic();
+        if (wantMusic && !music.paused) pauseMusic();
+        else playMusic();
       });
 
       music.addEventListener("ended", function () {
@@ -452,10 +439,7 @@
         if (wantMusic) music.play().catch(function () {});
       });
       music.addEventListener("play", function () {
-        if (!music.muted) setIcon(true);
-      });
-      music.addEventListener("pause", function () {
-        if (!wantMusic) setIcon(false);
+        if (wantMusic && !music.muted) setIcon(true);
       });
 
       nav.addEventListener("click", function (e) {
@@ -463,14 +447,11 @@
         if (!a) return;
         e.preventDefault();
         navigate(a.getAttribute("data-page"));
-        // jaga lagu tetap nyala saat pindah menu
-        if (wantMusic) kickPlay();
       });
 
       window.addEventListener("message", function (e) {
         if (!e.data || e.data.type !== "voxyy-nav") return;
         navigate(e.data.href);
-        if (wantMusic) kickPlay();
       });
     })();
   </script></script>
