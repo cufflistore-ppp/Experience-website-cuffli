@@ -165,14 +165,9 @@
   <script src="music.js"></script>
   <script>
     (function () {
-      // Di iframe (app shell) → biarkan
-      // Di luar iframe: belum masuk → intro; sudah masuk → app shell (lagu continuous)
-      if (window.self === window.top) {
-        if (sessionStorage.getItem("voxyy_entered") !== "1") {
-          window.location.replace("index.html");
-          return;
-        }
-        window.location.replace("app.html");
+      // Intro hanya 1x per sesi
+      if (sessionStorage.getItem("voxyy_entered") !== "1") {
+        window.location.replace("index.html");
         return;
       }
 
@@ -203,6 +198,5 @@
       });
     })();
   </script>
-<script src="iframe-nav.js"></script>
 </body>
 </html>

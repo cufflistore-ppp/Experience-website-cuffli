@@ -1,20 +1,9 @@
 /**
- * Shared background music – continues across pages
- * Saves currentTime so lagu tidak diulang dari awal saat pindah halaman
+ * Background music di semua halaman
+ * - Lanjut dari detik terakhir saat pindah halaman
+ * - Loop otomatis
  */
 (function () {
-  // Di dalam app shell, audio dikontrol parent – jangan double play
-  if (window.self !== window.top) {
-    window.VoxyyMusic = {
-      enter: function () {},
-      isEntered: function () { return true; },
-      tryPlay: function () {},
-      tryPause: function () {},
-      saveTime: function () {}
-    };
-    return;
-  }
-
   const MUSIC_KEY = "voxyy_music_playing";
   const ENTERED_KEY = "voxyy_entered";
   const TIME_KEY = "voxyy_music_time";
@@ -25,10 +14,6 @@
 
   function isEntered() {
     return sessionStorage.getItem(ENTERED_KEY) === "1";
-  }
-
-  function setEntered() {
-    sessionStorage.setItem(ENTERED_KEY, "1");
   }
 
   function isMusicWanted() {
@@ -56,7 +41,6 @@
     try {
       const t = parseFloat(sessionStorage.getItem(TIME_KEY) || "0");
       if (t > 0 && !isNaN(t)) {
-        // Tunggu metadata siap dulu
         if (music.readyState >= 1) {
           music.currentTime = t;
         } else {
@@ -109,11 +93,8 @@
     btn.addEventListener("click", function () {
       const music = getMusicEl();
       if (!music) return;
-      if (music.paused) {
-        tryPlay();
-      } else {
-        tryPause();
-      }
+      if (music.paused) tryPlay();
+      else tryPause();
     });
   }
 
@@ -123,26 +104,22 @@
     a.id = "bgMusic";
     a.loop = true;
     a.preload = "auto";
+    a.setAttribute("playsinline", "");
     a.innerHTML = '<source src="music.m4a" type="audio/mp4">';
     document.body.appendChild(a);
   }
 
-  // Simpan posisi lagu sebelum pindah halaman
   function bindSaveOnLeave() {
-    function onLeave() {
-      saveTime();
-    }
+    function onLeave() { saveTime(); }
     window.addEventListener("pagehide", onLeave);
     window.addEventListener("beforeunload", onLeave);
-    // Juga simpan berkala biar akurat
     setInterval(saveTime, 2000);
   }
 
   window.VoxyyMusic = {
     enter: function () {
-      setEntered();
+      sessionStorage.setItem(ENTERED_KEY, "1");
       setMusicWanted(true);
-      // Saat pertama masuk, mulai dari 0
       sessionStorage.setItem(TIME_KEY, "0");
       tryPlay();
     },
@@ -166,18 +143,19 @@
       });
       music.addEventListener("play", function () { updateIcon(true); });
       music.addEventListener("pause", function () { updateIcon(false); });
-      // Simpan waktu saat user seek / play
-      music.addEventListener("timeupdate", function () {
-        // throttle: timeupdate sering, interval sudah handle
-      });
     }
 
-    // Resume di halaman lain
     if (isEntered() && isMusicWanted()) {
       setTimeout(function () {
         restoreTime();
         tryPlay();
       }, 200);
+      // unlock on first touch if autoplay blocked
+      function unlock() {
+        if (music && music.paused && isMusicWanted()) tryPlay();
+      }
+      document.addEventListener("touchstart", unlock, { once: true, passive: true });
+      document.addEventListener("click", unlock, { once: true });
     } else {
       updateIcon(false);
     }
