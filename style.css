@@ -1046,3 +1046,13 @@ textarea { resize: vertical; min-height: 120px; }
   font-weight: 600;
   padding-right: 4px;
 }
+
+/* Saat di dalam app shell (iframe) – hilangkan nav & music ganda */
+html.in-iframe .bottom-nav,
+html.in-iframe .music-controls,
+html.in-iframe .music-fab {
+  display: none !important;
+}
+html.in-iframe body {
+  padding-bottom: 12px !important;
+}

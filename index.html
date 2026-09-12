@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Voxyy Joki - Selamat Datang</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -24,7 +23,6 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 10;
     }
     .intro-bg {
       position: absolute;
@@ -116,13 +114,13 @@
       font-size: 13px;
       color: #64b5f6;
       font-weight: 600;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       z-index: 2;
     }
     .status {
       font-size: 12px;
       color: #90caf9;
-      opacity: 0.8;
+      opacity: 0.85;
       z-index: 2;
       min-height: 18px;
     }
@@ -153,45 +151,35 @@
     <div class="powered">Powered by <span>Vercel</span></div>
   </div>
 
-  <audio id="bgMusic" loop preload="auto">
+  <audio id="bgMusic" loop preload="auto" autoplay playsinline>
     <source src="music.m4a" type="audio/mp4">
   </audio>
 
-  <script src="music.js"></script>
   <script>
     (function () {
-      // Sudah masuk di sesi ini → langsung home
       if (sessionStorage.getItem("voxyy_entered") === "1") {
-        window.location.replace("home.html");
+        window.location.replace("app.html");
         return;
       }
 
       const bar = document.getElementById("bar");
       const percentEl = document.getElementById("percent");
       const statusEl = document.getElementById("status");
+      const music = document.getElementById("bgMusic");
       let progress = 0;
 
-      function goHome() {
+      // Coba autoplay sejak awal (beberapa browser mengizinkan)
+      try {
+        music.volume = 0.45;
+        music.muted = false;
+        music.play().catch(function () {});
+      } catch (e) {}
+
+      function goApp() {
         sessionStorage.setItem("voxyy_entered", "1");
         sessionStorage.setItem("voxyy_music_playing", "1");
-
-        // Coba mulai lagu (beberapa browser butuh gesture; kalau gagal tetap lanjut)
-        try {
-          if (window.VoxyyMusic) {
-            window.VoxyyMusic.enter();
-          } else {
-            const m = document.getElementById("bgMusic");
-            if (m) {
-              m.volume = 0.45;
-              m.play().catch(function () {});
-            }
-          }
-        } catch (e) {}
-
         statusEl.textContent = "Memasuki...";
-        setTimeout(function () {
-          window.location.replace("home.html");
-        }, 350);
+        window.location.replace("app.html");
       }
 
       const tick = setInterval(function () {
@@ -200,8 +188,7 @@
           bar.style.width = "100%";
           percentEl.textContent = "100%";
           statusEl.textContent = "Selesai";
-          // Otomatis masuk, tanpa klik
-          setTimeout(goHome, 400);
+          setTimeout(goApp, 350);
           return;
         }
         progress += Math.random() * 5 + 2.5;

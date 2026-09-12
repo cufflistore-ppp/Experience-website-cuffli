@@ -3,6 +3,18 @@
  * Saves currentTime so lagu tidak diulang dari awal saat pindah halaman
  */
 (function () {
+  // Di dalam app shell, audio dikontrol parent – jangan double play
+  if (window.self !== window.top) {
+    window.VoxyyMusic = {
+      enter: function () {},
+      isEntered: function () { return true; },
+      tryPlay: function () {},
+      tryPause: function () {},
+      saveTime: function () {}
+    };
+    return;
+  }
+
   const MUSIC_KEY = "voxyy_music_playing";
   const ENTERED_KEY = "voxyy_entered";
   const TIME_KEY = "voxyy_music_time";
