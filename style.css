@@ -1008,3 +1008,41 @@ textarea { resize: vertical; min-height: 120px; }
   border-color: rgba(255, 152, 0, 0.45);
   box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.15);
 }
+
+/* ===== Music controls (shared) ===== */
+.header { justify-content: space-between; }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.music-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(33, 150, 243, 0.12);
+  border: 1px solid rgba(33, 150, 243, 0.3);
+  border-radius: 20px;
+  padding: 4px 8px 4px 6px;
+}
+.music-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #1976d2, #0d47a1);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+}
+.music-btn:active { transform: scale(0.92); }
+.music-label {
+  font-size: 11px;
+  color: #90caf9;
+  font-weight: 600;
+  padding-right: 4px;
+}

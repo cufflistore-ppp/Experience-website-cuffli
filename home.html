@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Voxyy Joki - Pusat Layanan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .header { justify-content: space-between; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(33, 150, 243, 0.12);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 20px;
+      padding: 4px 8px 4px 6px;
+    }
+    .music-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+    }
+    .music-btn:active { transform: scale(0.92); }
+    .music-label {
+      font-size: 11px;
+      color: #90caf9;
+      font-weight: 600;
+      padding-right: 4px;
+    }
+    .user-chip {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(33, 150, 243, 0.12);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 20px;
+      padding: 3px 10px 3px 3px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .user-chip.show { display: flex; }
+    .user-chip img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #2196f3;
+    }
+    .user-chip span {
+      font-size: 12px;
+      font-weight: 600;
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
+  <header class="header">
+    <div class="brand">
+      <img src="logo.png" alt="Voxyy Joki" class="logo">
+      <div>
+        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Pusat Layanan Voxyy Joki</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
+      <a href="akun.html" class="user-chip" id="userChip">
+        <img src="" alt="" id="userAvatar">
+        <span id="userName"></span>
+      </a>
+    </div>
+  </header>
+
+  <div class="banner">
+    <img src="banner.jpg" alt="Selamat Datang di Voxyy Joki" class="banner-full">
+  </div>
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
+
+  <div class="menu-grid">
+    <a href="joki.html" class="menu-item">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Joki</span>
+    </a>
+    <a href="digital.html" class="menu-item">
+      <i class="fa-solid fa-box"></i>
+      <span>Produk Digital</span>
+    </a>
+    <a href="pesan.html?type=jaspost" class="menu-item">
+      <i class="fa-solid fa-paper-plane"></i>
+      <span>Jasa Post</span>
+    </a>
+    <a href="https://wa.me//6285151982250" class="menu-item">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Wa Joki</span>
+    </a>
+    <a href="https://wa.me//6285706128277" class="menu-item">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Wa Backup Joki</span>
+    </a>
+    <a href="pembayaran.html?paket=Nokos%20WA%20Indonesia&total=6000" class="menu-item">
+      <i class="fa-solid fa-mobile-screen"></i>
+      <span>Nokos WA Indonesia</span>
+    </a>
+  </div>
+
+  <section class="produk-section">
+    <h3>PRODUK DIGITAL</h3>
+    <p class="subtitle">Nokos & Jasa Logo. Bayar QRIS, lalu konfirmasi via WhatsApp.</p>
+    <div class="produk-grid" id="produkGrid"></div>
+  </section>
+
+  <div class="info-box">
+    <h4>Website jadi pusat proses order.</h4>
+    <p>Website dipakai untuk menerima order, pembayaran, data customer, antrian, dan status supaya proses tidak tercerai di chat.</p>
+  </div>
+
+  <div style="padding:0 12px 24px;">
+    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+  </div>
+
+  <nav class="bottom-nav nav-6">
+    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+    <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+  </nav>
+
+  <script src="produk.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script src="script.js"></script>
+  <script src="music.js"></script>
+  <script>
+    (function () {
+      // Redirect to intro if not yet entered this session
+      if (sessionStorage.getItem("voxyy_entered") !== "1") {
+        window.location.replace("index.html");
+        return;
+      }
+
+      function updateUserChip() {
+        try {
+          if (typeof firebase === "undefined" || !firebase.apps.length) return;
+          const user = firebase.auth().currentUser;
+          const chip = document.getElementById("userChip");
+          const avatar = document.getElementById("userAvatar");
+          const name = document.getElementById("userName");
+          if (user && chip) {
+            chip.classList.add("show");
+            if (avatar) avatar.src = user.photoURL || "logo.png";
+            if (name) name.textContent = (user.displayName || "Akun").split(" ")[0];
+          } else if (chip) {
+            chip.classList.remove("show");
+          }
+        } catch (e) {}
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(updateUserChip, 800);
+        if (typeof firebase !== "undefined") {
+          try {
+            firebase.auth().onAuthStateChanged(updateUserChip);
+          } catch (e) {}
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

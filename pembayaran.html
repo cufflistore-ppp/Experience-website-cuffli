@@ -114,12 +114,26 @@
   </style>
 </head>
 <body>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
   <header class="header">
     <div class="brand">
       <img src="logo.png" alt="Voxyy Joki" class="logo"  >
       <div>
         <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
         <p>Pembayaran</p>
+      </div>
+    </div>
+  
+    <div class="header-right">
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
       </div>
     </div>
   </header>
@@ -178,7 +192,7 @@
         <nav class="bottom-nav nav-6">
     <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
-    <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
     <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
     <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
@@ -381,5 +395,6 @@ Customer sudah bayar & konfirmasi.
 
     document.addEventListener("DOMContentLoaded", loadOrderData);
   </script>
+<script src="music.js"></script>
 </body>
 </html>
