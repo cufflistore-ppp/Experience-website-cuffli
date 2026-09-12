@@ -1,48 +1,80 @@
 /**
- * Saat halaman dibuka di dalam app.html (iframe):
- * - Sembunyikan bottom-nav & music controls (punya parent)
- * - Link internal dikirim ke parent agar audio tidak putus
+ * Dipakai di halaman konten yang dibuka di dalam iframe shell.
+ * - Sembunyikan nav & music ganda
+ * - Intercept link internal → parent shell
+ * - Jangan redirect ke intro saat di iframe
  */
 (function () {
-  if (window.self === window.top) return; // bukan di iframe
+  var inFrame = false;
+  try {
+    inFrame = window.self !== window.top;
+  } catch (e) {
+    inFrame = true;
+  }
+
+  if (!inFrame) {
+    // Buka langsung halaman konten (bukan lewat shell) → arahkan ke index
+    // kecuali sudah di index
+    if (!/index\.html$/i.test(location.pathname) && location.pathname !== "/") {
+      // biarkan; user bisa buka home.html langsung
+    }
+    return;
+  }
 
   document.documentElement.classList.add("in-iframe");
 
-  function isInternal(href) {
-    if (!href) return false;
-    if (href.startsWith("#")) return false;
-    if (href.startsWith("javascript:")) return false;
-    if (href.startsWith("mailto:")) return false;
-    if (href.startsWith("tel:")) return false;
-    if (href.indexOf("wa.me") !== -1) return false;
-    if (href.indexOf("http://") === 0 || href.indexOf("https://") === 0) {
-      // external
+  // Sembunyikan chrome ganda secepat mungkin
+  var style = document.createElement("style");
+  style.textContent = [
+    "html.in-iframe .bottom-nav,",
+    "html.in-iframe .music-controls,",
+    "html.in-iframe #musicControls,",
+    "html.in-iframe .music-fab,",
+    "html.in-iframe audio#bgMusic {",
+    "  display: none !important;",
+    "  visibility: hidden !important;",
+    "  pointer-events: none !important;",
+    "}",
+    "html.in-iframe body { padding-bottom: 12px !important; }",
+    "html.in-iframe .page-content { padding-bottom: 20px !important; }"
+  ].join("\n");
+  document.documentElement.appendChild(style);
+
+  // Pause audio lokal di halaman konten (kalau ada) biar tidak dobel
+  function muteLocalAudio() {
+    var a = document.getElementById("bgMusic");
+    if (a) {
+      try { a.pause(); a.muted = true; a.volume = 0; } catch (e) {}
+    }
+  }
+  muteLocalAudio();
+  document.addEventListener("DOMContentLoaded", muteLocalAudio);
+
+  // Intercept klik link internal
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("a");
+    if (!a) return;
+    var href = a.getAttribute("href");
+    if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
+    // external / wa.me / tel → biarkan
+    if (/^(https?:|mailto:|tel:|wa\.me)/i.test(href) || href.indexOf("//") === 0) {
+      // open external in top
+      if (/^https?:/i.test(href) && href.indexOf(location.host) === -1) {
+        e.preventDefault();
+        window.open(href, "_blank");
+        return;
+      }
+      if (/wa\.me|api\.whatsapp/i.test(href)) return; // let default
+    }
+    // internal page
+    if (/\.html(\?|$)/i.test(href) || href.indexOf("?") === 0) {
+      e.preventDefault();
+      e.stopPropagation();
       try {
-        return new URL(href).origin === window.location.origin;
-      } catch (e) {
-        return false;
+        window.parent.postMessage({ type: "voxyy-nav", href: href }, "*");
+      } catch (err) {
+        location.href = href;
       }
     }
-    return true; // relative path
-  }
-
-  document.addEventListener("click", function (e) {
-    const a = e.target.closest("a");
-    if (!a) return;
-    const href = a.getAttribute("href");
-    if (!isInternal(href)) return;
-    e.preventDefault();
-    e.stopPropagation();
-    // Resolve relative
-    let path = href;
-    try {
-      path = new URL(href, window.location.href).pathname.split("/").pop();
-      if (href.indexOf("?") !== -1) {
-        path += href.substring(href.indexOf("?"));
-      } else if (new URL(href, window.location.href).search) {
-        path += new URL(href, window.location.href).search;
-      }
-    } catch (err) {}
-    window.parent.postMessage({ type: "voxyy-nav", href: path || href }, "*");
   }, true);
 })();

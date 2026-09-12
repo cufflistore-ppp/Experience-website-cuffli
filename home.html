@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Voxyy Joki - Pusat Layanan</title>
@@ -165,11 +166,15 @@
   <script src="music.js"></script>
   <script>
     (function () {
-      // Intro hanya 1x per sesi
-      if (sessionStorage.getItem("voxyy_entered") !== "1") {
-        window.location.replace("index.html");
-        return;
-      }
+      // Di iframe: jangan redirect. Di luar: belum masuk → intro
+      try {
+        if (window.self === window.top) {
+          if (sessionStorage.getItem("voxyy_entered") !== "1") {
+            window.location.replace("index.html");
+            return;
+          }
+        }
+      } catch (e) {}
 
       function updateUserChip() {
         try {
