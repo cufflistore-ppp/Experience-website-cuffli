@@ -3,199 +3,479 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Voxyy Joki - Selamat Datang</title>
+  <title>Voxyy Joki - Pusat Layanan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #050a14;
-      color: #fff;
-      min-height: 100vh;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #intro {
+    /* ===== INTRO OVERLAY (blue theme, better than video) ===== */
+    #introOverlay {
       position: fixed;
       inset: 0;
+      z-index: 99999;
+      background: #050a14;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      transition: opacity 0.7s ease, visibility 0.7s;
+    }
+    #introOverlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
     .intro-bg {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(33, 150, 243, 0.28), transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13, 71, 161, 0.22), transparent 50%),
-        radial-gradient(ellipse 50% 30% at 20% 70%, rgba(30, 136, 229, 0.18), transparent 45%);
-      animation: pulse 4s ease-in-out infinite;
+        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(33, 150, 243, 0.25), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13, 71, 161, 0.2), transparent 50%),
+        radial-gradient(ellipse 50% 30% at 20% 70%, rgba(30, 136, 229, 0.15), transparent 45%);
+      animation: introPulse 4s ease-in-out infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.85; }
+    @keyframes introPulse {
+      0%, 100% { opacity: 0.8; }
       50% { opacity: 1; }
     }
-    .logo-wrap {
+    .intro-logo-wrap {
       position: relative;
-      width: 150px;
-      height: 150px;
-      margin-bottom: 24px;
-      z-index: 2;
+      width: 160px;
+      height: 160px;
+      margin-bottom: 28px;
     }
-    .logo-ring {
+    .intro-logo-ring {
       position: absolute;
-      inset: -14px;
+      inset: -12px;
       border-radius: 28px;
-      border: 2px solid rgba(33, 150, 243, 0.45);
-      box-shadow: 0 0 36px rgba(33, 150, 243, 0.4);
-      animation: spin 8s linear infinite;
+      border: 2px solid rgba(33, 150, 243, 0.4);
+      box-shadow: 0 0 30px rgba(33, 150, 243, 0.35), inset 0 0 20px rgba(33, 150, 243, 0.1);
+      animation: ringSpin 8s linear infinite;
     }
-    .logo-ring::before {
+    .intro-logo-ring::before {
       content: "";
       position: absolute;
       inset: -8px;
       border-radius: 32px;
-      border: 1px solid rgba(100, 181, 246, 0.3);
-      animation: spin 12s linear infinite reverse;
+      border: 1px solid rgba(100, 181, 246, 0.25);
+      animation: ringSpin 12s linear infinite reverse;
     }
-    @keyframes spin {
+    @keyframes ringSpin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    .logo-img {
+    .intro-logo {
       width: 100%;
       height: 100%;
-      border-radius: 22px;
+      border-radius: 24px;
       object-fit: cover;
       background: #0d1220;
-      box-shadow: 0 0 40px rgba(33, 150, 243, 0.55);
-      animation: float 3s ease-in-out infinite;
+      box-shadow: 0 0 40px rgba(33, 150, 243, 0.5);
+      animation: logoFloat 3s ease-in-out infinite;
     }
-    @keyframes float {
+    @keyframes logoFloat {
       0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      50% { transform: translateY(-6px); }
     }
-    .title {
-      font-size: 26px;
+    .intro-title {
+      font-size: 28px;
       font-weight: 800;
       letter-spacing: 2px;
-      text-shadow: 0 0 24px rgba(33, 150, 243, 0.7);
+      color: #fff;
+      text-shadow: 0 0 20px rgba(33, 150, 243, 0.6);
       margin-bottom: 6px;
-      z-index: 2;
+      text-align: center;
     }
-    .sub {
-      font-size: 11px;
+    .intro-sub {
+      font-size: 12px;
       color: #90caf9;
-      letter-spacing: 2.5px;
+      letter-spacing: 3px;
       text-transform: uppercase;
-      margin-bottom: 28px;
-      z-index: 2;
+      margin-bottom: 32px;
+      opacity: 0.9;
     }
-    .progress-wrap {
-      width: 210px;
+    .intro-progress-wrap {
+      width: 220px;
       height: 4px;
       background: rgba(255,255,255,0.08);
       border-radius: 4px;
       overflow: hidden;
-      margin-bottom: 8px;
-      z-index: 2;
+      margin-bottom: 10px;
     }
-    .progress-bar {
+    .intro-progress-bar {
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #1565c0, #42a5f5, #90caf9);
       border-radius: 4px;
+      transition: width 0.15s linear;
       box-shadow: 0 0 12px rgba(66, 165, 245, 0.7);
-      transition: width 0.12s linear;
     }
-    .percent {
+    .intro-percent {
       font-size: 13px;
       color: #64b5f6;
+      margin-bottom: 28px;
       font-weight: 600;
-      margin-bottom: 12px;
-      z-index: 2;
     }
-    .status {
-      font-size: 12px;
-      color: #90caf9;
-      opacity: 0.85;
-      z-index: 2;
-      min-height: 18px;
+    .intro-btn {
+      display: none;
+      padding: 14px 36px;
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      box-shadow: 0 4px 24px rgba(25, 118, 210, 0.5);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .powered {
+    .intro-btn:active {
+      transform: scale(0.96);
+    }
+    .intro-btn.show {
+      display: inline-block;
+      animation: btnIn 0.5s ease;
+    }
+    @keyframes btnIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .intro-powered {
       position: absolute;
-      bottom: 22px;
+      bottom: 24px;
       font-size: 11px;
       color: #546e7a;
-      z-index: 2;
     }
-    .powered span { color: #64b5f6; }
+    .intro-powered span {
+      color: #64b5f6;
+    }
+
+    /* Music controls in header (home only) */
+    .header {
+      justify-content: space-between;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(33, 150, 243, 0.12);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 20px;
+      padding: 4px 8px 4px 6px;
+    }
+    .music-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+    }
+    .music-btn:active { transform: scale(0.92); }
+    .music-label {
+      font-size: 11px;
+      color: #90caf9;
+      font-weight: 600;
+      padding-right: 4px;
+    }
+    .user-chip {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(33, 150, 243, 0.12);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 20px;
+      padding: 3px 10px 3px 3px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .user-chip.show { display: flex; }
+    .user-chip img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #2196f3;
+    }
+    .user-chip span {
+      font-size: 12px;
+      font-weight: 600;
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
-  <div id="intro">
+
+  <!-- INTRO SPLASH (blue theme) -->
+  <div id="introOverlay">
     <div class="intro-bg"></div>
-    <div class="logo-wrap">
-      <div class="logo-ring"></div>
-      <img src="logo.png" alt="Voxyy Joki" class="logo-img">
+    <div class="intro-logo-wrap">
+      <div class="intro-logo-ring"></div>
+      <img src="logo.png" alt="Voxyy Joki" class="intro-logo" id="introLogo">
     </div>
-    <div class="title">VOXYY JOKI</div>
-    <div class="sub">Initializing Elite Service System</div>
-    <div class="progress-wrap">
-      <div class="progress-bar" id="bar"></div>
+    <div class="intro-title">VOXYY JOKI</div>
+    <div class="intro-sub">Initializing Elite Service System</div>
+    <div class="intro-progress-wrap">
+      <div class="intro-progress-bar" id="introBar"></div>
     </div>
-    <div class="percent" id="percent">0%</div>
-    <div class="status" id="status"></div>
-    <div class="powered">Powered by <span>Vercel</span></div>
+    <div class="intro-percent" id="introPercent">0%</div>
+    <button type="button" class="intro-btn" id="introBtn">KLIK UNTUK MASUK</button>
+    <div class="intro-powered">Powered by <span>Vercel</span></div>
   </div>
 
-  <audio id="bgMusic" loop preload="auto" autoplay playsinline>
+  <!-- Background music (loops) -->
+  <audio id="bgMusic" loop preload="auto">
     <source src="music.m4a" type="audio/mp4">
   </audio>
 
+  <header class="header">
+    <div class="brand">
+      <img src="logo.png" alt="Voxyy Joki" class="logo">
+      <div>
+        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Pusat Layanan Voxyy Joki</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <!-- Music controls: hanya di home -->
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
+      <!-- Profile chip jika sudah login -->
+      <a href="akun.html" class="user-chip" id="userChip">
+        <img src="" alt="" id="userAvatar">
+        <span id="userName"></span>
+      </a>
+    </div>
+  </header>
+
+  <div class="banner">
+    <img src="banner.jpg" alt="Selamat Datang di Voxyy Joki" class="banner-full">
+  </div>
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
+
+  <!-- Menu kecil: Joki | Produk Digital | Jasa Post -->
+  <div class="menu-grid">
+    <a href="joki.html" class="menu-item">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Joki</span>
+    </a>
+    <a href="digital.html" class="menu-item">
+      <i class="fa-solid fa-box"></i>
+      <span>Produk Digital</span>
+    </a>
+    <a href="pesan.html?type=jaspost" class="menu-item">
+      <i class="fa-solid fa-paper-plane"></i>
+      <span>Jasa Post</span>
+    </a>
+    <a href="https://wa.me//6285151982250" class="menu-item">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Wa Joki</span>
+    </a>
+    <a href="https://wa.me//6285706128277" class="menu-item">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Wa Backup Joki</span>
+    </a>
+    <a href="pembayaran.html?paket=Nokos%20WA%20Indonesia&total=6000" class="menu-item">
+      <i class="fa-solid fa-mobile-screen"></i>
+      <span>Nokos WA Indonesia</span>
+    </a>
+  </div>
+
+  <!-- Grid produk 2 kolom (produk.js) -->
+  <section class="produk-section">
+    <h3>PRODUK DIGITAL</h3>
+    <p class="subtitle">Nokos & Jasa Logo. Bayar QRIS, lalu konfirmasi via WhatsApp.</p>
+    <div class="produk-grid" id="produkGrid"></div>
+  </section>
+
+  <div class="info-box">
+    <h4>Website jadi pusat proses order.</h4>
+    <p>Website dipakai untuk menerima order, pembayaran, data customer, antrian, dan status supaya proses tidak tercerai di chat.</p>
+  </div>
+
+  <div style="padding:0 12px 24px;">
+    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+  </div>
+
+  <nav class="bottom-nav nav-6">
+    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+    <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+  </nav>
+
+  <script src="produk.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script src="script.js"></script>
   <script>
     (function () {
-      if (sessionStorage.getItem("voxyy_entered") === "1") {
-        window.location.replace("app.html");
-        return;
-      }
-
-      const bar = document.getElementById("bar");
-      const percentEl = document.getElementById("percent");
-      const statusEl = document.getElementById("status");
+      const overlay = document.getElementById("introOverlay");
+      const bar = document.getElementById("introBar");
+      const percentEl = document.getElementById("introPercent");
+      const btn = document.getElementById("introBtn");
       const music = document.getElementById("bgMusic");
+      const musicToggle = document.getElementById("musicToggle");
+      const musicIcon = document.getElementById("musicIcon");
+      const userChip = document.getElementById("userChip");
+      const userAvatar = document.getElementById("userAvatar");
+      const userName = document.getElementById("userName");
+
       let progress = 0;
+      let loadingDone = false;
 
-      // Coba autoplay sejak awal (beberapa browser mengizinkan)
-      try {
-        music.volume = 0.45;
-        music.muted = false;
-        music.play().catch(function () {});
-      } catch (e) {}
-
-      function goApp() {
-        sessionStorage.setItem("voxyy_entered", "1");
-        sessionStorage.setItem("voxyy_music_playing", "1");
-        statusEl.textContent = "Memasuki...";
-        window.location.replace("app.html");
-      }
-
+      // Progress animation
       const tick = setInterval(function () {
         if (progress >= 100) {
           clearInterval(tick);
-          bar.style.width = "100%";
+          loadingDone = true;
           percentEl.textContent = "100%";
-          statusEl.textContent = "Selesai";
-          setTimeout(goApp, 350);
+          bar.style.width = "100%";
+          btn.classList.add("show");
           return;
         }
-        progress += Math.random() * 5 + 2.5;
+        progress += Math.random() * 4 + 1.5;
         if (progress > 100) progress = 100;
         bar.style.width = progress + "%";
         percentEl.textContent = Math.floor(progress) + "%";
-      }, 65);
+      }, 80);
+
+      // Speak welcome with male AI voice (Web Speech API)
+      function speakWelcome(callback) {
+        if (!window.speechSynthesis) {
+          if (callback) callback();
+          return;
+        }
+        const text = "Selamat datang di website Voxyy Joki. Di sini kami menyiapkan berbagai jasa.";
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = "id-ID";
+        utter.rate = 0.95;
+        utter.pitch = 0.85;
+        utter.volume = 1;
+
+        const voices = speechSynthesis.getVoices();
+        let chosen = null;
+        for (let i = 0; i < voices.length; i++) {
+          const v = voices[i];
+          const name = (v.name || "").toLowerCase();
+          const lang = (v.lang || "").toLowerCase();
+          if (lang.indexOf("id") !== -1) {
+            if (name.indexOf("male") !== -1 || name.indexOf("pria") !== -1 || name.indexOf("andika") !== -1) {
+              chosen = v;
+              break;
+            }
+            if (!chosen) chosen = v;
+          }
+        }
+        if (!chosen) {
+          for (let i = 0; i < voices.length; i++) {
+            if ((voices[i].lang || "").toLowerCase().indexOf("id") !== -1) {
+              chosen = voices[i];
+              break;
+            }
+          }
+        }
+        if (chosen) utter.voice = chosen;
+
+        utter.onend = function () { if (callback) callback(); };
+        utter.onerror = function () { if (callback) callback(); };
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+      }
+
+      function enterSite() {
+        if (!loadingDone) return;
+        btn.disabled = true;
+        btn.textContent = "MEMASUKI...";
+
+        try {
+          music.volume = 0.45;
+          music.play().then(function () {
+            musicIcon.className = "fa-solid fa-pause";
+          }).catch(function () {
+            musicIcon.className = "fa-solid fa-play";
+          });
+        } catch (e) {}
+
+        speakWelcome(function () {
+          overlay.classList.add("hidden");
+          setTimeout(function () {
+            overlay.style.display = "none";
+          }, 750);
+        });
+      }
+
+      btn.addEventListener("click", enterSite);
+
+      musicToggle.addEventListener("click", function () {
+        if (music.paused) {
+          music.play().then(function () {
+            musicIcon.className = "fa-solid fa-pause";
+          }).catch(function () {});
+        } else {
+          music.pause();
+          musicIcon.className = "fa-solid fa-play";
+        }
+      });
+
+      music.addEventListener("ended", function () {
+        music.currentTime = 0;
+        music.play().catch(function () {});
+      });
+
+      function updateUserChip() {
+        try {
+          if (typeof firebase === "undefined" || !firebase.apps.length) return;
+          const user = firebase.auth().currentUser;
+          if (user) {
+            userChip.classList.add("show");
+            userAvatar.src = user.photoURL || "logo.png";
+            userName.textContent = (user.displayName || "Akun").split(" ")[0];
+          } else {
+            userChip.classList.remove("show");
+          }
+        } catch (e) {}
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.speechSynthesis) {
+          speechSynthesis.getVoices();
+          speechSynthesis.onvoiceschanged = function () {
+            speechSynthesis.getVoices();
+          };
+        }
+        setTimeout(updateUserChip, 1200);
+        if (typeof firebase !== "undefined") {
+          try {
+            firebase.auth().onAuthStateChanged(function () {
+              updateUserChip();
+            });
+          } catch (e) {}
+        }
+      });
     })();
   </script>
 </body>
