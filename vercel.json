@@ -1,8 +1,9 @@
 {
-  "rewrites": [
-    {
-      "source": "/__/auth/:path*",
-      "destination": "https://voxyyjoki.firebaseapp.com/__/auth/:path*"
-    }
+  "version": 2,
+  "builds": [
+    { "src": "**/*", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/$1" }
   ]
 }

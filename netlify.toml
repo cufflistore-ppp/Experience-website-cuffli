@@ -1,0 +1,10 @@
+# VOXYY JOKI - Deploy di Netlify
+[build]
+  publish = "."
+
+# Proxy Firebase Auth handler (login Google)
+[[redirects]]
+  from = "/__/auth/*"
+  to = "https://voxyyjoki.firebaseapp.com/__/auth/:splat"
+  status = 200
+  force = true
