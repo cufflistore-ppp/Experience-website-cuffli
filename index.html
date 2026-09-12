@@ -153,10 +153,10 @@
       top: 0;
       left: 0;
       right: 0;
-      bottom: 64px;
+      bottom: 58px;
       width: 100%;
-      height: calc(100% - 64px);
-      height: calc(100dvh - 64px);
+      height: calc(100% - 58px);
+      height: calc(100dvh - 58px);
       border: 0;
       background: #0a0e18;
     }
@@ -201,27 +201,55 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 64px;
-      background: #0d1220;
+      background: #0c1218;
       border-top: 1px solid #1a2740;
       display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 0;
       z-index: 9998;
-      padding-bottom: env(safe-area-inset-bottom, 0);
+      padding: 6px 2px calc(6px + env(safe-area-inset-bottom, 0px));
     }
     .shell-nav a {
       flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      color: #8aa0b8;
+      gap: 2px;
+      color: #7a9bb0;
       text-decoration: none;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 600;
+      padding: 6px 2px;
+      border-radius: 16px;
+      transition: all 0.2s;
     }
-    .shell-nav a i { font-size: 18px; }
-    .shell-nav a.active { color: #2196f3; }
+    .shell-nav a i {
+      font-size: 15px;
+      margin-bottom: 1px;
+      color: inherit;
+    }
+    .shell-nav a span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      line-height: 1.15;
+    }
+    .shell-nav a.active {
+      color: #fff !important;
+      font-weight: 700;
+      background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 40%, #0d47a1 100%) !important;
+      box-shadow: 0 0 12px rgba(33, 150, 243, 0.5) !important;
+      border-radius: 18px;
+      padding: 8px 6px;
+    }
+    .shell-nav a.active i {
+      color: #fff !important;
+    }
   </style>
 </head>
 <body>
