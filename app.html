@@ -8,20 +8,25 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
+      width: 100%;
       height: 100%;
+      height: 100dvh;
       background: #0a0e18;
       overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
     #frame {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 64px;
       width: 100%;
-      border: none;
+      height: calc(100% - 64px);
+      height: calc(100dvh - 64px);
+      border: 0;
       background: #0a0e18;
+      display: block;
     }
     .music-fab {
       position: fixed;
@@ -144,17 +149,14 @@
         setIcon(false);
       }
 
-      // Auto play segera
       if (sessionStorage.getItem("voxyy_music_playing") !== "0") {
         playMusic();
-        // Retry beberapa kali (kadang browser butuh delay)
         setTimeout(function () { if (music.paused) playMusic(); }, 400);
         setTimeout(function () { if (music.paused) playMusic(); }, 1200);
       } else {
         setIcon(false);
       }
 
-      // Jika autoplay diblokir: sentuhan pertama di mana saja → nyalakan lagu
       function unlockOnce() {
         if (sessionStorage.getItem("voxyy_music_playing") === "0") return;
         if (!music.paused) return;
@@ -189,7 +191,9 @@
         frame.src = page;
         nav.querySelectorAll("a").forEach(function (a) {
           const p = a.getAttribute("data-page") || "";
-          a.classList.toggle("active", page === p || page.indexOf(p.split("?")[0]) === 0);
+          const base = p.split("?")[0];
+          const pageBase = page.split("?")[0];
+          a.classList.toggle("active", pageBase === base);
         });
       }
 
