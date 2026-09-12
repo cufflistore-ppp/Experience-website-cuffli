@@ -116,31 +116,15 @@
       font-size: 13px;
       color: #64b5f6;
       font-weight: 600;
-      margin-bottom: 26px;
+      margin-bottom: 16px;
       z-index: 2;
     }
-    .btn-enter {
-      display: none;
-      padding: 14px 40px;
-      background: linear-gradient(135deg, #1976d2, #0d47a1);
-      color: #fff;
-      border: none;
-      border-radius: 50px;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      cursor: pointer;
-      box-shadow: 0 4px 28px rgba(25, 118, 210, 0.55);
+    .status {
+      font-size: 12px;
+      color: #90caf9;
+      opacity: 0.8;
       z-index: 2;
-    }
-    .btn-enter.show {
-      display: inline-block;
-      animation: fadeUp 0.45s ease;
-    }
-    .btn-enter:active { transform: scale(0.96); }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
+      min-height: 18px;
     }
     .powered {
       position: absolute;
@@ -150,47 +134,6 @@
       z-index: 2;
     }
     .powered span { color: #64b5f6; }
-
-    /* Welcome text layer after click */
-    #welcomeLayer {
-      position: fixed;
-      inset: 0;
-      background: rgba(5, 10, 20, 0.92);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-      padding: 24px;
-      text-align: center;
-    }
-    #welcomeLayer.show {
-      display: flex;
-      animation: fadeIn 0.5s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .welcome-title {
-      font-size: 22px;
-      font-weight: 800;
-      color: #fff;
-      margin-bottom: 14px;
-      text-shadow: 0 0 20px rgba(33, 150, 243, 0.5);
-    }
-    .welcome-text {
-      font-size: 16px;
-      line-height: 1.6;
-      color: #bbdefb;
-      max-width: 320px;
-      margin-bottom: 20px;
-    }
-    .welcome-hint {
-      font-size: 12px;
-      color: #64b5f6;
-      opacity: 0.85;
-    }
   </style>
 </head>
 <body>
@@ -206,18 +149,8 @@
       <div class="progress-bar" id="bar"></div>
     </div>
     <div class="percent" id="percent">0%</div>
-    <button type="button" class="btn-enter" id="btnEnter">KLIK UNTUK MASUK</button>
+    <div class="status" id="status"></div>
     <div class="powered">Powered by <span>Vercel</span></div>
-  </div>
-
-  <!-- Layer teks selamat datang (muncul setelah klik) -->
-  <div id="welcomeLayer">
-    <div class="welcome-title">Selamat Datang</div>
-    <div class="welcome-text" id="welcomeText">
-      Selamat datang di website Voxyy Joki.<br>
-      Di sini kami menyiapkan berbagai jasa.
-    </div>
-    <div class="welcome-hint"><i class="fa-solid fa-volume-high"></i> Memutar suara...</div>
   </div>
 
   <audio id="bgMusic" loop preload="auto">
@@ -227,7 +160,7 @@
   <script src="music.js"></script>
   <script>
     (function () {
-      // Jika sudah pernah masuk di sesi ini → langsung ke home
+      // Sudah masuk di sesi ini → langsung home
       if (sessionStorage.getItem("voxyy_entered") === "1") {
         window.location.replace("home.html");
         return;
@@ -235,96 +168,47 @@
 
       const bar = document.getElementById("bar");
       const percentEl = document.getElementById("percent");
-      const btn = document.getElementById("btnEnter");
-      const welcomeLayer = document.getElementById("welcomeLayer");
+      const statusEl = document.getElementById("status");
       let progress = 0;
-      let ready = false;
+
+      function goHome() {
+        sessionStorage.setItem("voxyy_entered", "1");
+        sessionStorage.setItem("voxyy_music_playing", "1");
+
+        // Coba mulai lagu (beberapa browser butuh gesture; kalau gagal tetap lanjut)
+        try {
+          if (window.VoxyyMusic) {
+            window.VoxyyMusic.enter();
+          } else {
+            const m = document.getElementById("bgMusic");
+            if (m) {
+              m.volume = 0.45;
+              m.play().catch(function () {});
+            }
+          }
+        } catch (e) {}
+
+        statusEl.textContent = "Memasuki...";
+        setTimeout(function () {
+          window.location.replace("home.html");
+        }, 350);
+      }
 
       const tick = setInterval(function () {
         if (progress >= 100) {
           clearInterval(tick);
-          ready = true;
           bar.style.width = "100%";
           percentEl.textContent = "100%";
-          btn.classList.add("show");
+          statusEl.textContent = "Selesai";
+          // Otomatis masuk, tanpa klik
+          setTimeout(goHome, 400);
           return;
         }
-        progress += Math.random() * 5 + 2;
+        progress += Math.random() * 5 + 2.5;
         if (progress > 100) progress = 100;
         bar.style.width = progress + "%";
         percentEl.textContent = Math.floor(progress) + "%";
-      }, 70);
-
-      function speakWelcome(done) {
-        if (!window.speechSynthesis) {
-          if (done) done();
-          return;
-        }
-        const text = "Selamat datang di website Voxyy Joki. Di sini kami menyiapkan berbagai jasa.";
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = "id-ID";
-        u.rate = 0.95;
-        u.pitch = 0.85;
-        u.volume = 1;
-
-        const voices = speechSynthesis.getVoices();
-        let chosen = null;
-        for (let i = 0; i < voices.length; i++) {
-          const v = voices[i];
-          const lang = (v.lang || "").toLowerCase();
-          const name = (v.name || "").toLowerCase();
-          if (lang.indexOf("id") !== -1) {
-            if (name.indexOf("male") !== -1 || name.indexOf("pria") !== -1 || name.indexOf("andika") !== -1) {
-              chosen = v;
-              break;
-            }
-            if (!chosen) chosen = v;
-          }
-        }
-        if (chosen) u.voice = chosen;
-
-        u.onend = function () { if (done) done(); };
-        u.onerror = function () { if (done) done(); };
-        speechSynthesis.cancel();
-        speechSynthesis.speak(u);
-      }
-
-      // Preload voices
-      if (window.speechSynthesis) {
-        speechSynthesis.getVoices();
-        speechSynthesis.onvoiceschanged = function () {
-          speechSynthesis.getVoices();
-        };
-      }
-
-      btn.addEventListener("click", function () {
-        if (!ready) return;
-        btn.disabled = true;
-        btn.textContent = "MEMASUKI...";
-
-        // Mulai musik
-        if (window.VoxyyMusic) {
-          window.VoxyyMusic.enter();
-        } else {
-          const m = document.getElementById("bgMusic");
-          if (m) {
-            m.volume = 0.45;
-            m.play().catch(function () {});
-          }
-          sessionStorage.setItem("voxyy_entered", "1");
-          sessionStorage.setItem("voxyy_music_playing", "1");
-        }
-
-        // Tampilkan layer selamat datang + AI bicara
-        welcomeLayer.classList.add("show");
-
-        speakWelcome(function () {
-          // Setelah AI selesai → ke home
-          setTimeout(function () {
-            window.location.href = "home.html";
-          }, 400);
-        });
-      });
+      }, 65);
     })();
   </script>
 </body>
