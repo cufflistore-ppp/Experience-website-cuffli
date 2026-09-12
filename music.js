@@ -1,11 +1,11 @@
 /**
- * Shared background music for all pages
- * - Continues across pages via sessionStorage
- * - Controls in header (if present)
+ * Shared background music – continues across pages
+ * Saves currentTime so lagu tidak diulang dari awal saat pindah halaman
  */
 (function () {
   const MUSIC_KEY = "voxyy_music_playing";
   const ENTERED_KEY = "voxyy_entered";
+  const TIME_KEY = "voxyy_music_time";
 
   function getMusicEl() {
     return document.getElementById("bgMusic");
@@ -20,13 +20,41 @@
   }
 
   function isMusicWanted() {
-    // default on after enter
     const v = sessionStorage.getItem(MUSIC_KEY);
     return v === null || v === "1";
   }
 
   function setMusicWanted(on) {
     sessionStorage.setItem(MUSIC_KEY, on ? "1" : "0");
+  }
+
+  function saveTime() {
+    const music = getMusicEl();
+    if (!music) return;
+    try {
+      if (!isNaN(music.currentTime) && music.currentTime > 0) {
+        sessionStorage.setItem(TIME_KEY, String(music.currentTime));
+      }
+    } catch (e) {}
+  }
+
+  function restoreTime() {
+    const music = getMusicEl();
+    if (!music) return;
+    try {
+      const t = parseFloat(sessionStorage.getItem(TIME_KEY) || "0");
+      if (t > 0 && !isNaN(t)) {
+        // Tunggu metadata siap dulu
+        if (music.readyState >= 1) {
+          music.currentTime = t;
+        } else {
+          music.addEventListener("loadedmetadata", function once() {
+            music.removeEventListener("loadedmetadata", once);
+            try { music.currentTime = t; } catch (e) {}
+          });
+        }
+      }
+    } catch (e) {}
   }
 
   function updateIcon(playing) {
@@ -41,6 +69,7 @@
     if (!music) return;
     music.volume = 0.45;
     music.loop = true;
+    restoreTime();
     const p = music.play();
     if (p && p.then) {
       p.then(function () {
@@ -55,6 +84,7 @@
   function tryPause() {
     const music = getMusicEl();
     if (!music) return;
+    saveTime();
     music.pause();
     setMusicWanted(false);
     updateIcon(false);
@@ -62,7 +92,8 @@
 
   function bindToggle() {
     const btn = document.getElementById("musicToggle");
-    if (!btn) return;
+    if (!btn || btn._voxyyBound) return;
+    btn._voxyyBound = true;
     btn.addEventListener("click", function () {
       const music = getMusicEl();
       if (!music) return;
@@ -84,38 +115,59 @@
     document.body.appendChild(a);
   }
 
-  // Public API
+  // Simpan posisi lagu sebelum pindah halaman
+  function bindSaveOnLeave() {
+    function onLeave() {
+      saveTime();
+    }
+    window.addEventListener("pagehide", onLeave);
+    window.addEventListener("beforeunload", onLeave);
+    // Juga simpan berkala biar akurat
+    setInterval(saveTime, 2000);
+  }
+
   window.VoxyyMusic = {
     enter: function () {
       setEntered();
       setMusicWanted(true);
+      // Saat pertama masuk, mulai dari 0
+      sessionStorage.setItem(TIME_KEY, "0");
       tryPlay();
     },
     isEntered: isEntered,
     tryPlay: tryPlay,
-    tryPause: tryPause
+    tryPause: tryPause,
+    saveTime: saveTime
   };
 
   document.addEventListener("DOMContentLoaded", function () {
     ensureAudio();
     bindToggle();
-
-    // On other pages: if already entered and music wanted, try resume
-    if (isEntered() && isMusicWanted()) {
-      // slight delay helps some mobile browsers
-      setTimeout(tryPlay, 300);
-    } else {
-      updateIcon(false);
-    }
+    bindSaveOnLeave();
 
     const music = getMusicEl();
     if (music) {
       music.addEventListener("ended", function () {
         music.currentTime = 0;
+        sessionStorage.setItem(TIME_KEY, "0");
         if (isMusicWanted()) music.play().catch(function () {});
       });
       music.addEventListener("play", function () { updateIcon(true); });
       music.addEventListener("pause", function () { updateIcon(false); });
+      // Simpan waktu saat user seek / play
+      music.addEventListener("timeupdate", function () {
+        // throttle: timeupdate sering, interval sudah handle
+      });
+    }
+
+    // Resume di halaman lain
+    if (isEntered() && isMusicWanted()) {
+      setTimeout(function () {
+        restoreTime();
+        tryPlay();
+      }, 200);
+    } else {
+      updateIcon(false);
     }
   });
 })();
