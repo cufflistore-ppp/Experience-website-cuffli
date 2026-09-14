@@ -1,459 +1,105 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Voxyy Joki</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      background: #050a14;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      color: #fff;
-    }
-
-    /* ===== INTRO ===== */
-    #intro {
-      position: fixed;
-      inset: 0;
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #050a14;
-    }
-    #intro.done { display: none; }
-    .intro-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(33, 150, 243, 0.28), transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13, 71, 161, 0.22), transparent 50%),
-        radial-gradient(ellipse 50% 30% at 20% 70%, rgba(30, 136, 229, 0.18), transparent 45%);
-      animation: pulse 4s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 0.85; }
-      50% { opacity: 1; }
-    }
-    .logo-wrap {
-      position: relative;
-      width: 150px;
-      height: 150px;
-      margin-bottom: 24px;
-      z-index: 2;
-    }
-    .logo-ring {
-      position: absolute;
-      inset: -14px;
-      border-radius: 28px;
-      border: 2px solid rgba(33, 150, 243, 0.45);
-      box-shadow: 0 0 36px rgba(33, 150, 243, 0.4);
-      animation: spin 8s linear infinite;
-    }
-    .logo-ring::before {
-      content: "";
-      position: absolute;
-      inset: -8px;
-      border-radius: 32px;
-      border: 1px solid rgba(100, 181, 246, 0.3);
-      animation: spin 12s linear infinite reverse;
-    }
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .logo-img {
-      width: 100%;
-      height: 100%;
-      border-radius: 22px;
-      object-fit: cover;
-      background: #0d1220;
-      box-shadow: 0 0 40px rgba(33, 150, 243, 0.55);
-      animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    .title {
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-shadow: 0 0 24px rgba(33, 150, 243, 0.7);
-      margin-bottom: 6px;
-      z-index: 2;
-    }
-    .sub {
-      font-size: 11px;
-      color: #90caf9;
-      letter-spacing: 2.5px;
-      text-transform: uppercase;
-      margin-bottom: 28px;
-      z-index: 2;
-    }
-    .progress-wrap {
-      width: 210px;
-      height: 4px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 8px;
-      z-index: 2;
-    }
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #1565c0, #42a5f5, #90caf9);
-      border-radius: 4px;
-      box-shadow: 0 0 12px rgba(66, 165, 245, 0.7);
-      transition: width 0.12s linear;
-    }
-    .percent {
-      font-size: 13px;
-      color: #64b5f6;
-      font-weight: 600;
-      margin-bottom: 12px;
-      z-index: 2;
-    }
-    .status {
-      font-size: 12px;
-      color: #90caf9;
-      opacity: 0.85;
-      z-index: 2;
-      min-height: 18px;
-    }
-    .powered {
-      position: absolute;
-      bottom: 22px;
-      font-size: 11px;
-      color: #546e7a;
-      z-index: 2;
-    }
-    .powered span { color: #64b5f6; }
-
-    /* ===== APP SHELL ===== */
-    #app {
-      display: none;
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      position: relative;
-    }
-    #app.show { display: block; }
-
-    #frame {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 58px;
-      width: 100%;
-      height: calc(100% - 58px);
-      height: calc(100dvh - 58px);
-      border: 0;
-      background: #0a0e18;
-    }
-
-    .music-fab {
-      position: fixed;
-      top: 12px;
-      right: 12px;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(13, 18, 32, 0.92);
-      border: 1px solid rgba(33, 150, 243, 0.45);
-      border-radius: 24px;
-      padding: 4px 10px 4px 4px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      backdrop-filter: blur(8px);
-    }
-    .music-fab button {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, #1976d2, #0d47a1);
-      color: #fff;
-      font-size: 13px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .music-fab span {
-      font-size: 12px;
-      color: #90caf9;
-      font-weight: 600;
-      padding-right: 4px;
-    }
-
-    .shell-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #0c1218;
-      border-top: 1px solid #1a2740;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      gap: 0;
-      z-index: 9998;
-      padding: 6px 2px calc(6px + env(safe-area-inset-bottom, 0px));
-    }
-    .shell-nav a {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      color: #7a9bb0;
-      text-decoration: none;
-      font-size: 9px;
-      font-weight: 600;
-      padding: 6px 2px;
-      border-radius: 16px;
-      transition: all 0.2s;
-    }
-    .shell-nav a i {
-      font-size: 15px;
-      margin-bottom: 1px;
-      color: inherit;
-    }
-    .shell-nav a span {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 100%;
-      line-height: 1.15;
-    }
-    .shell-nav a.active {
-      color: #fff !important;
-      font-weight: 700;
-      background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 40%, #0d47a1 100%) !important;
-      box-shadow: 0 0 12px rgba(33, 150, 243, 0.5) !important;
-      border-radius: 18px;
-      padding: 8px 6px;
-    }
-    .shell-nav a.active i {
-      color: #fff !important;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NAILONG — All Tools Portal</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/icons/logo.svg" type="image/svg+xml" />
 </head>
 <body>
-  <!-- INTRO -->
-  <div id="intro">
-    <div class="intro-bg"></div>
-    <div class="logo-wrap">
-      <div class="logo-ring"></div>
-      <img src="logo.png" alt="Voxyy Joki" class="logo-img">
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- Header -->
+  <header class="topbar">
+    <div class="menu-info">Menu Informasi · About · Report · Saluran</div>
+    <div class="status-pill">
+      <span class="dot online"></span> NAILONG SYSTEM · ONLINE
     </div>
-    <div class="title">VOXYY JOKI</div>
-    <div class="sub">Initializing Elite Service System</div>
-    <div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
-    <div class="percent" id="percent">0%</div>
-    <div class="status" id="status"></div>
-    <div class="powered">Powered by <span>Vercel</span></div>
+    <button class="btn-menu" id="menuBtn">☰</button>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="system-label">SYSTEM INITIALIZING</p>
+      <h1 class="logo-title">
+        <span class="bolt">⚡</span> NAILONG
+      </h1>
+      <p class="byline">by Nailong Dev</p>
+      <div class="online-bar">
+        <span class="dot online"></span> NEXUS ONLINE
+      </div>
+    </div>
+  </section>
+
+  <!-- User bar -->
+  <div class="user-bar">
+    <div class="avatar">N</div>
+    <div class="meta">
+      <span>NEGARA 🇮🇩 Indonesia</span>
+      <span>DEVICE Desktop</span>
+      <span>BROWSER Chrome</span>
+      <span class="online">STATUS Online</span>
+      <span>🔋 100%</span>
+    </div>
+    <div class="roles">
+      <span class="badge member">Role: member</span>
+      <span class="badge vvip">VVIP ↑</span>
+    </div>
   </div>
 
-  <!-- PERSISTENT AUDIO (never reloads) -->
-  <audio id="bgMusic" loop preload="auto" autoplay muted playsinline>
-    <source src="music.mp3" type="audio/mpeg">
-    <source src="music.m4a" type="audio/mp4">
-  </audio>
+  <!-- Category tabs -->
+  <nav class="tabs">
+    <button class="tab active" data-cat="all">⊞ All</button>
+    <button class="tab" data-cat="downloader">↓ Downloader</button>
+    <button class="tab" data-cat="maker">✦ Maker</button>
+    <button class="tab" data-cat="tools">⚒ Tools</button>
+    <button class="tab" data-cat="vault">🗄 Vault</button>
+    <button class="tab" data-cat="external">🔗 External</button>
+    <button class="tab" data-cat="vvip">👑 VVIP</button>
+  </nav>
 
-  <!-- APP SHELL -->
-  <div id="app">
-    <div class="music-fab">
-      <button type="button" id="musicToggle" title="Pause / Play">
-        <i class="fa-solid fa-pause" id="musicIcon"></i>
-      </button>
-      <span>Lagu</span>
+  <!-- Tools grid -->
+  <main class="tools-section">
+    <h2 class="section-title">⊞ Semua Tools</h2>
+    <div class="tools-grid" id="toolsGrid">
+      <!-- Generated by JS -->
     </div>
+  </main>
 
-    <iframe id="frame" src="about:blank" title="Voxyy Joki" allow="autoplay"></iframe>
+  <!-- Mock files / history panel -->
+  <section class="history-panel">
+    <div class="history-header">
+      <h3>History Download</h3>
+      <span class="count" id="histCount">0</span>
+      <button class="btn-clear" id="clearHist">Bersihkan</button>
+    </div>
+    <div class="filter-chips">
+      <button class="chip active">Semua</button>
+      <button class="chip">MP3</button>
+      <button class="chip">MP4</button>
+      <button class="chip">JPG</button>
+      <button class="chip">FILE</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <p class="empty">Belum ada riwayat. Download berhasil akan muncul di sini.</p>
+    </div>
+  </section>
 
-    <nav class="shell-nav" id="shellNav">
-      <a href="#" data-page="joki.html"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
-      <a href="#" data-page="digital.html"><i class="fa-solid fa-box"></i><span>Digital</span></a>
-      <a href="#" data-page="home.html" class="active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-      <a href="#" data-page="antrian.html"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
-      <a href="#" data-page="tentang.html"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
-      <a href="#" data-page="akun.html"><i class="fa-solid fa-user"></i><span>Akun</span></a>
-    </nav>
-  </div>
+  <!-- Mock file explorer -->
+  <section class="file-explorer">
+    <h3>📁 Mock Files & Assets</h3>
+    <div class="file-list" id="fileList"></div>
+  </section>
 
-  <script>
-    (function () {
-      const intro = document.getElementById("intro");
-      const app = document.getElementById("app");
-      const bar = document.getElementById("bar");
-      const percentEl = document.getElementById("percent");
-      const statusEl = document.getElementById("status");
-      const music = document.getElementById("bgMusic");
-      const icon = document.getElementById("musicIcon");
-      const frame = document.getElementById("frame");
-      const nav = document.getElementById("shellNav");
+  <!-- Footer -->
+  <footer>
+    <p>NAILONG Tools Portal · Mock Demo · 2026</p>
+    <p>Inspired by public tools portals · For educational / demo purposes only</p>
+  </footer>
 
-      // Default: LAGU ON. Cuma mati kalau user klik pause.
-      let wantMusic = sessionStorage.getItem("voxyy_music_playing") !== "0";
-
-      music.loop = true;
-      music.volume = 0.55;
-      music.setAttribute("playsinline", "");
-      music.setAttribute("webkit-playsinline", "");
-
-      function setIcon(playing) {
-        if (icon) icon.className = playing ? "fa-solid fa-pause" : "fa-solid fa-play";
-      }
-
-      function kickPlay() {
-        if (!wantMusic) return;
-        try {
-          music.muted = false;
-          music.volume = 0.55;
-          const p = music.play();
-          if (p && p.then) {
-            p.then(function () {
-              setIcon(true);
-            }).catch(function () {
-              // fallback: play muted dulu, lalu unmute
-              music.muted = true;
-              music.play().then(function () {
-                setTimeout(function () {
-                  music.muted = false;
-                  music.volume = 0.55;
-                  setIcon(true);
-                }, 50);
-              }).catch(function () {
-                setIcon(false);
-              });
-            });
-          }
-        } catch (e) {}
-      }
-
-      function playMusic() {
-        wantMusic = true;
-        sessionStorage.setItem("voxyy_music_playing", "1");
-        kickPlay();
-      }
-
-      function pauseMusic() {
-        wantMusic = false;
-        sessionStorage.setItem("voxyy_music_playing", "0");
-        try { music.pause(); } catch (e) {}
-        setIcon(false);
-      }
-
-      function navigate(page) {
-        if (!page) return;
-        if (page.indexOf("http") === 0) {
-          window.open(page, "_blank");
-          return;
-        }
-        frame.src = page.split("#")[0];
-        nav.querySelectorAll("a").forEach(function (a) {
-          const p = (a.getAttribute("data-page") || "").split("?")[0];
-          const base = page.split("?")[0].split("#")[0];
-          a.classList.toggle("active", base === p);
-        });
-        // pindah halaman: lagu tetap (jangan pause)
-        if (wantMusic) kickPlay();
-      }
-
-      function enterApp() {
-        sessionStorage.setItem("voxyy_entered", "1");
-        intro.classList.add("done");
-        app.classList.add("show");
-        navigate("home.html");
-
-        // DEFAULT: langsung play. Jangan diem.
-        if (wantMusic) {
-          sessionStorage.setItem("voxyy_music_playing", "1");
-          kickPlay();
-          setTimeout(kickPlay, 200);
-          setTimeout(kickPlay, 600);
-          setTimeout(kickPlay, 1200);
-          setTimeout(kickPlay, 2500);
-        } else {
-          setIcon(false);
-        }
-      }
-
-      // Mulai buffering/play muted biar siap bunyi
-      try {
-        music.muted = true;
-        music.play().catch(function () {});
-      } catch (e) {}
-
-      if (sessionStorage.getItem("voxyy_entered") === "1") {
-        enterApp();
-      } else {
-        let progress = 0;
-        const tick = setInterval(function () {
-          if (progress >= 100) {
-            clearInterval(tick);
-            bar.style.width = "100%";
-            percentEl.textContent = "100%";
-            statusEl.textContent = "Selesai";
-            setTimeout(enterApp, 200);
-            return;
-          }
-          progress += Math.random() * 5 + 2.5;
-          if (progress > 100) progress = 100;
-          bar.style.width = progress + "%";
-          percentEl.textContent = Math.floor(progress) + "%";
-        }, 65);
-      }
-
-      // Tap/klik di mana saja → nyalakan kalau seharusnya ON
-      function unlock() {
-        if (wantMusic) kickPlay();
-      }
-      document.addEventListener("touchstart", unlock, { passive: true });
-      document.addEventListener("click", unlock);
-
-      // Tombol: user yang kontrol pause/play
-      document.getElementById("musicToggle").addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (wantMusic && !music.paused) pauseMusic();
-        else playMusic();
-      });
-
-      music.addEventListener("ended", function () {
-        music.currentTime = 0;
-        if (wantMusic) music.play().catch(function () {});
-      });
-      music.addEventListener("play", function () {
-        if (wantMusic && !music.muted) setIcon(true);
-      });
-
-      nav.addEventListener("click", function (e) {
-        const a = e.target.closest("a");
-        if (!a) return;
-        e.preventDefault();
-        navigate(a.getAttribute("data-page"));
-      });
-
-      window.addEventListener("message", function (e) {
-        if (!e.data || e.data.type !== "voxyy-nav") return;
-        navigate(e.data.href);
-      });
-    })();
-  </script></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
