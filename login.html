@@ -1,79 +1,12 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — CUFFLI SOCIAL</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <meta http-equiv="refresh" content="0;url=index.html#/login">
+  <title>NAILONG TOOLS</title>
+  <script>location.replace("index.html#/login");</script>
 </head>
 <body>
-  <div id="loading-screen">
-    <div class="loading-logo">CUFFLI SOCIAL</div>
-    <div class="loading-text">Loading...</div>
-  </div>
-
-  <div class="auth-page">
-    <div class="card auth-card fade-in">
-      <div class="logo" style="justify-content:center;margin-bottom:8px;font-size:1.4rem">
-        <i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL
-      </div>
-      <h1>Masuk</h1>
-      <p class="subtitle">Login untuk mengelola pesanan & riwayat</p>
-
-      <form id="login-form">
-        <div class="form-group">
-          <label>Username / Email</label>
-          <input type="text" class="form-control" id="login-user" placeholder="demo atau admin" required>
-        </div>
-        <div class="form-group">
-          <label>Password</label>
-          <input type="password" class="form-control" id="login-pass" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">
-          <i class="fa-solid fa-right-to-bracket"></i> LOGIN
-        </button>
-      </form>
-
-      <div class="auth-footer">
-        Belum punya akun? <a href="register.html">Daftar sekarang</a>
-      </div>
-      <div class="auth-footer" style="margin-top:12px;font-size:0.8rem">
-        Demo: <code>demo / demo123</code> · Admin: <code>admin / admin123</code>
-      </div>
-    </div>
-  </div>
-
-  <script src="js/app.js"></script>
-  <script>
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      const userInput = document.getElementById('login-user').value.trim();
-      const pass = document.getElementById('login-pass').value;
-
-      const users = getUsers();
-      const found = users.find(u => 
-        (u.username === userInput || u.email === userInput) && u.password === pass
-      );
-
-      if (!found) {
-        showToast('Username atau password salah', 'error');
-        return;
-      }
-
-      setCurrentUser(found);
-      showToast('Login berhasil! Selamat datang, ' + (found.name || found.username), 'success');
-      
-      setTimeout(() => {
-        if (found.role === 'admin') {
-          window.location.href = 'admin/index.html';
-        } else {
-          window.location.href = 'profil.html';
-        }
-      }, 900);
-    });
-  </script>
+  <a href="index.html#/login">Continue to NAILONG TOOLS</a>
 </body>
 </html>

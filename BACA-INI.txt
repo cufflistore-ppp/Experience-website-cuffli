@@ -1,13 +1,13 @@
-UPLOAD 4 FILE INI KE GITHUB (replace yang lama):
-1. vercel.json
-2. global-orders.js   ← authDomain sudah experience-website-cuffli.vercel.app
-3. auth.js
-4. akun.html
+NAILONG TOOLS v148.027.00
 
-JANGAN upload package.json / index.js (folder server)
+Isi cuma 3 folder:
 
-Firebase:
-- Authorized domains: experience-website-cuffli.vercel.app
-- Google Sign-In: Enable + Support email
+1. website  = semua kode (js, css, halaman)
+2. assets   = video, QRIS, icon
+3. bantuan  = catatan
 
-Setelah commit → tunggu Vercel deploy → tutup tab → buka akun.html → login
+Yang di-upload ke Vercel: SELURUH folder NAILONG-TOOLS.
+Yang dibuka di HP/laptop: file index.html yang di luar folder.
+
+Jangan pindah-pindah file antar folder.
+Jangan rename file di assets.
