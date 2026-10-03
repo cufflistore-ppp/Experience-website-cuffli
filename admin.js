@@ -449,11 +449,109 @@ async function loadKeuntungan() {
 /* ========== TAMPILAN ========== */
 function loadTampilan() {
   const s = getSettings();
-  document.getElementById("logoUrl").value = s.logoUrl || "logo.png";
-  document.getElementById("bannerUrl").value = s.bannerUrl || "banner.jpg";
+  const logo = s.logoUrl || "logo.png";
+  const banner = s.bannerUrl || "banner.jpg";
+  document.getElementById("logoUrl").value = logo;
+  document.getElementById("bannerUrl").value = banner;
+  const logoText = document.getElementById("logoUrlText");
+  const bannerText = document.getElementById("bannerUrlText");
+  if (logoText) logoText.value = logo.startsWith("data:") ? "" : (logo === "logo.png" ? "" : logo);
+  if (bannerText) bannerText.value = banner.startsWith("data:") ? "" : (banner === "banner.jpg" ? "" : banner);
+  const pl = document.getElementById("previewLogo");
+  const pb = document.getElementById("previewBanner");
+  if (pl) pl.src = logo;
+  if (pb) pb.src = banner;
   document.getElementById("bgColorHex").value = s.bgColor || "#0a0e18";
   document.getElementById("bgColorCustom").value = s.bgColor || "#0a0e18";
 }
+
+/** Kompres foto ke JPEG base64 agar muat di Firebase */
+function fileToDataUrl(file, maxW, maxKB) {
+  return new Promise(function (resolve, reject) {
+    if (!file || !file.type || !file.type.startsWith("image/")) {
+      reject(new Error("File harus gambar"));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = new Image();
+      img.onload = function () {
+        let w = img.width;
+        let h = img.height;
+        const max = maxW || 1200;
+        if (w > max) {
+          h = Math.round((h * max) / w);
+          w = max;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        let quality = 0.85;
+        let data = canvas.toDataURL("image/jpeg", quality);
+        const limit = (maxKB || 400) * 1024;
+        while (data.length > limit && quality > 0.4) {
+          quality -= 0.1;
+          data = canvas.toDataURL("image/jpeg", quality);
+        }
+        resolve(data);
+      };
+      img.onerror = function () { reject(new Error("Gagal baca gambar")); };
+      img.src = reader.result;
+    };
+    reader.onerror = function () { reject(new Error("Gagal baca file")); };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function onPickLogo(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  try {
+    const data = await fileToDataUrl(file, 400, 150);
+    document.getElementById("logoUrl").value = data;
+    document.getElementById("previewLogo").src = data;
+    const t = document.getElementById("logoUrlText");
+    if (t) t.value = "";
+  } catch (e) {
+    alert(e.message || "Gagal upload logo");
+  }
+}
+
+async function onPickBanner(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  try {
+    const data = await fileToDataUrl(file, 1200, 350);
+    document.getElementById("bannerUrl").value = data;
+    document.getElementById("previewBanner").src = data;
+    const t = document.getElementById("bannerUrlText");
+    if (t) t.value = "";
+  } catch (e) {
+    alert(e.message || "Gagal upload banner");
+  }
+}
+
+function onLogoUrlText(v) {
+  v = (v || "").trim();
+  if (!v) return;
+  document.getElementById("logoUrl").value = v;
+  document.getElementById("previewLogo").src = v;
+}
+
+function onBannerUrlText(v) {
+  v = (v || "").trim();
+  if (!v) return;
+  document.getElementById("bannerUrl").value = v;
+  document.getElementById("previewBanner").src = v;
+}
+
+window.onPickLogo = onPickLogo;
+window.onPickBanner = onPickBanner;
+window.onLogoUrlText = onLogoUrlText;
+window.onBannerUrlText = onBannerUrlText;
+
 
 function pilihWarna(el) {
   document.querySelectorAll(".color-swatch").forEach((e) => e.classList.remove("active"));
@@ -465,14 +563,24 @@ function pilihWarna(el) {
 
 function simpanTampilan() {
   const bg = document.getElementById("bgColorHex").value.trim() || "#0a0e18";
+  let logo = document.getElementById("logoUrl").value.trim() || "logo.png";
+  let banner = document.getElementById("bannerUrl").value.trim() || "banner.jpg";
+  const logoText = (document.getElementById("logoUrlText") || {}).value;
+  const bannerText = (document.getElementById("bannerUrlText") || {}).value;
+  if (logoText && String(logoText).trim()) logo = String(logoText).trim();
+  if (bannerText && String(bannerText).trim()) banner = String(bannerText).trim();
   saveSettings({
-    logoUrl: document.getElementById("logoUrl").value.trim() || "logo.png",
-    bannerUrl: document.getElementById("bannerUrl").value.trim() || "banner.jpg",
+    logoUrl: logo,
+    bannerUrl: banner,
     bgColor: bg,
   });
   document.body.style.background = bg;
   localStorage.setItem("voxyy_bg_color", bg);
-  alert("Tampilan disimpan! Logo, banner & warna langsung aktif di semua halaman.");
+  const pl = document.getElementById("previewLogo");
+  const pb = document.getElementById("previewBanner");
+  if (pl) pl.src = logo;
+  if (pb) pb.src = banner;
+  alert("Foto logo & banner disimpan! Muncul di semua halaman & device.");
 }
 
 /* ========== PENGATURAN ========== */
@@ -591,24 +699,92 @@ function seedProdukIfEmpty() {
 }
 
 /* ========== INIT ========== */
-document.addEventListener("DOMContentLoaded", () => {
-  // simple password gate
-  const savedPass = localStorage.getItem(ADMIN_PASS_KEY);
-  if (savedPass) {
-    const input = prompt("Password Admin:");
-    if (input !== savedPass) {
-      alert("Password salah!");
-      window.location.href = "index.html";
-      return;
+
+
+const ADMIN_EMAILS = [
+  "emailwebvixy@gmail.com",
+  "voxymarket98@gmail.com"
+];
+
+function isAdminEmail(email) {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(String(email).trim().toLowerCase());
+}
+
+function showAdminApp() {
+  const gate = document.getElementById("adminLoginGate");
+  const app = document.getElementById("adminApp");
+  if (gate) gate.style.display = "none";
+  if (app) app.style.display = "flex";
+}
+
+function showAdminGate(msg) {
+  const gate = document.getElementById("adminLoginGate");
+  const app = document.getElementById("adminApp");
+  if (gate) gate.style.display = "flex";
+  if (app) app.style.display = "none";
+  const err = document.getElementById("adminLoginError");
+  if (err) {
+    if (msg) {
+      err.style.display = "block";
+      err.textContent = msg;
+    } else {
+      err.style.display = "none";
+      err.textContent = "";
     }
   }
-  // apply saved bg
-  const bg = localStorage.getItem("voxyy_bg_color");
-  if (bg) document.body.style.background = bg;
+}
 
-  loadDashboard();
+async function loginAdminGoogle() {
+  const err = document.getElementById("adminLoginError");
+  if (err) { err.style.display = "none"; err.textContent = ""; }
+  try {
+    if (!window.VoxyyAuth || typeof window.VoxyyAuth.loginGoogle !== "function") {
+      showAdminGate("Auth belum siap. Refresh halaman.");
+      return;
+    }
+    const user = await window.VoxyyAuth.loginGoogle();
+    const email = (user && user.email) ? user.email.toLowerCase() : "";
+    if (!isAdminEmail(email)) {
+      if (window.VoxyyAuth.logout) await window.VoxyyAuth.logout();
+      showAdminGate("Akses ditolak. Email " + email + " tidak diizinkan sebagai admin.");
+      return;
+    }
+    localStorage.setItem("voxyy_admin_email", email);
+    showAdminApp();
+    bootAdminData();
+  } catch (e) {
+    showAdminGate("Gagal login: " + (e && e.message ? e.message : String(e)));
+  }
+}
+window.loginAdminGoogle = loginAdminGoogle;
 
-  // Realtime: setiap order baru langsung muncul di admin (tanpa Telegram)
+let _adminBooted = false;
+function bootAdminData() {
+  if (_adminBooted) {
+    loadDashboard();
+    return;
+  }
+  _adminBooted = true;
+
+  (async function () {
+    try {
+      if (window.VoxyyOrders) {
+        window.VoxyyOrders.initFirebase && window.VoxyyOrders.initFirebase();
+        if (window.VoxyyOrders.getSettings) {
+          const s = await window.VoxyyOrders.getSettings();
+          if (s) localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+        }
+        if (window.VoxyyOrders.getProdukGlobal) {
+          const list = await window.VoxyyOrders.getProdukGlobal();
+          if (list && list.length) localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
+        }
+      }
+    } catch (e) {}
+    seedProdukIfEmpty();
+    loadDashboard();
+  })();
+
   let _lastOrderCount = 0;
   if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
     window.VoxyyOrders.onOrdersChange(function (list) {
@@ -617,20 +793,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const s = String(o.status || "").toLowerCase();
         return !s.includes("sukses") && !s.includes("selesai") && !s.includes("tolak");
       }).length;
-
-      // Badge di menu Pesanan
       const navPesanan = document.querySelector('.admin-nav a[data-panel="pesanan"] span');
       if (navPesanan) {
         navPesanan.innerHTML = pending > 0
           ? 'Pesanan <span style="background:#e53935;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;">' + pending + "</span>"
           : "Pesanan";
       }
-
-      // Notifikasi title browser jika order baru
       if (_lastOrderCount && orders.length > _lastOrderCount) {
         const baru = orders.length - _lastOrderCount;
         document.title = "(" + baru + " order baru) VOXY ADMIN";
-        // optional sound-free alert once
         try {
           if (document.hidden && Notification && Notification.permission === "granted") {
             new Notification("VOXY MARKET", { body: baru + " pesanan baru masuk", icon: "logo.png" });
@@ -638,7 +809,6 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) {}
       }
       _lastOrderCount = orders.length;
-
       const active = document.querySelector(".panel-section.active");
       if (!active || active.id === "panel-dashboard") loadDashboard();
       if (active && active.id === "panel-pesanan") loadPesanan();
@@ -646,17 +816,64 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Minta izin notifikasi browser (opsional)
   try {
     if (window.Notification && Notification.permission === "default") {
       Notification.requestPermission();
     }
   } catch (e) {}
 
-  // Auto-refresh cadangan tiap 15 detik
   setInterval(function () {
+    if (!_adminBooted) return;
     const active = document.querySelector(".panel-section.active");
     if (!active || active.id === "panel-dashboard") loadDashboard();
     if (active && active.id === "panel-pesanan") loadPesanan();
   }, 15000);
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const bg = localStorage.getItem("voxyy_bg_color");
+  if (bg) document.body.style.background = bg;
+
+  showAdminGate();
+
+  try {
+    if (window.VoxyyOrders) window.VoxyyOrders.initFirebase && window.VoxyyOrders.initFirebase();
+  } catch (e) {}
+
+  if (window.VoxyyAuth && typeof window.VoxyyAuth.onAuthStateChanged === "function") {
+    window.VoxyyAuth.onAuthStateChanged(function (user) {
+      const email = user && user.email ? user.email.toLowerCase() : "";
+      if (user && isAdminEmail(email)) {
+        localStorage.setItem("voxyy_admin_email", email);
+        showAdminApp();
+        bootAdminData();
+      } else if (user && !isAdminEmail(email)) {
+        if (window.VoxyyAuth.logout) window.VoxyyAuth.logout();
+        showAdminGate("Akses ditolak untuk " + email);
+      } else {
+        showAdminGate();
+      }
+    });
+  } else {
+    // Auth script belum ready — tunggu sebentar
+    let tries = 0;
+    const wait = setInterval(function () {
+      tries++;
+      if (window.VoxyyAuth && window.VoxyyAuth.onAuthStateChanged) {
+        clearInterval(wait);
+        window.VoxyyAuth.onAuthStateChanged(function (user) {
+          const email = user && user.email ? user.email.toLowerCase() : "";
+          if (user && isAdminEmail(email)) {
+            showAdminApp();
+            bootAdminData();
+          } else {
+            showAdminGate(user ? ("Akses ditolak untuk " + email) : "");
+          }
+        });
+      } else if (tries > 30) {
+        clearInterval(wait);
+        showAdminGate("Auth belum termuat. Refresh halaman.");
+      }
+    }, 200);
+  }
 });
