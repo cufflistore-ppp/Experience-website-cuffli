@@ -93,15 +93,13 @@ function renderKatalog(gridId, mode) {
   }
   box.innerHTML = list
     .map((p) => {
-      const isJaspost = /jasa\s*post/i.test(p.judul || "") || /jasa\s*post/i.test(p.kategori || "") || /jasa\s*post/i.test(p.label || "");
-      const href = isJaspost
-        ? "pesan.html?type=jaspost"
-        : ("pembayaran.html?paket=" +
+      const href =
+        "pembayaran.html?paket=" +
         encodeURIComponent(p.judul) +
         "&total=" +
         encodeURIComponent(String(p.harga)) +
         "&pid=" +
-        encodeURIComponent(p.id || ""));
+        encodeURIComponent(p.id || "");
       const stok = p.stok < 0 ? "∞" : p.stok;
       const icon = iconFor(p);
       const imgHtml = p.img

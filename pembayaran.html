@@ -183,7 +183,7 @@
     <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
     <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-circle-user"></i><span>Akun</span></a>
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -267,7 +267,8 @@
       if (!order) {
         const total = params.get("total") || "Rp 5.000";
         order = {
-          kode: kodeParam || "VJ-2026-0000",
+          userEmail: (function(){ try { var u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser(); return u && u.email ? u.email : ''; } catch(e){ return ''; } })(),
+      kode: kodeParam || "VJ-2026-0000",
           total: total,
           nama: "-",
           wa: "-",
@@ -341,7 +342,8 @@ Customer sudah bayar & konfirmasi.
       `.trim();
 
       if (typeof kirimTelegram === "function") {
-        await kirimTelegram(pesan);
+        // disabled telegram
+          // await kirimTelegram(pesan);
       }
 
       // Untuk Jasa Post: kirim foto akun yang disimpan di sessionStorage
@@ -359,7 +361,8 @@ Customer sudah bayar & konfirmasi.
             while (n--) u8[n] = bstr.charCodeAt(n);
             const blob = new Blob([u8], { type: mime });
             const file = new File([blob], "foto-akun.jpg", { type: mime });
-            await kirimFotoTelegram(
+            // disabled telegram
+          // await kirimFotoTelegram(
               file,
               `Foto Akun - ${order.kode}\n${order.nama || "-"} | ${order.wa || "-"}\n${order.paket || "Jasa Post"}`
             );
@@ -389,16 +392,25 @@ Customer sudah bayar & konfirmasi.
       document.getElementById("statusBox").classList.add("show");
       btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Terkirim';
 
-      // Setelah konfirmasi → arahkan ke WhatsApp admin
-      const waText = encodeURIComponent(
-        `Halo admin Voxyy, saya sudah TF.\nKode: ${order.kode || "-"}\nPaket: ${order.paket || "-"}\nTotal: ${formatRupiah(finalAmt)}`
-      );
-      const waBtn = document.querySelector("#statusBox a[href*='wa.me']");
-      const waNum = window._waAdmin || (getPaySettings().waAdmin || "6285151982250").replace(/\D/g, "");
-      if (waBtn) waBtn.href = `https://wa.me/${waNum}?text=${waText}`;
-      setTimeout(function() {
-        window.open(`https://wa.me/${waNum}?text=${waText}`, "_blank");
-      }, 600);
+      // Simpan kode di device + arahkan ke halaman Pesanan (admin panel realtime)
+      try {
+        if (order.kode) {
+          localStorage.setItem("voxyy_saved_kode", order.kode);
+          var arr = [];
+          try { arr = JSON.parse(localStorage.getItem("voxyy_saved_kodes") || "[]"); } catch(e) {}
+          arr = [order.kode].concat((arr || []).filter(function(x){ return String(x).toUpperCase() !== String(order.kode).toUpperCase(); })).slice(0, 30);
+          localStorage.setItem("voxyy_saved_kodes", JSON.stringify(arr));
+        }
+      } catch (e) {}
+      // Update status box text
+      var sb = document.getElementById("statusBox");
+      if (sb) {
+        sb.innerHTML = '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
+          '<b>Pesanan masuk ke admin</b><br>Kode: <b>' + (order.kode || "-") + '</b><br>' +
+          'Cek status & unduh produk di menu <b>Pesanan</b>. Admin akan proses tanpa bot Telegram.</div>' +
+          '<a href="antrian.html" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Lihat Pesanan Saya</a>';
+      }
+      setTimeout(function(){ location.href = "antrian.html"; }, 1800);
     }
 
     

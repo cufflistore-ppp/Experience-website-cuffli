@@ -1,28 +1,35 @@
 const SAVED_KODE_KEY = "voxyy_saved_kode";
+const SAVED_KODES_KEY = "voxyy_saved_kodes";
 
-function isStatusSukses(status) {
-  const s = String(status || "").toLowerCase();
-  return s.includes("sukses") || s.includes("selesai");
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function isStatusBelumSelesai(status) {
-  return !isStatusSukses(status);
+function getTrackedKodes() {
+  const set = new Set();
+  try {
+    const one = localStorage.getItem(SAVED_KODE_KEY);
+    if (one) set.add(String(one).trim().toUpperCase());
+    const arr = JSON.parse(localStorage.getItem(SAVED_KODES_KEY) || "[]");
+    (arr || []).forEach((k) => set.add(String(k).trim().toUpperCase()));
+  } catch (e) {}
+  return set;
 }
 
 function saveTrackedKode(kode) {
   if (!kode) return;
-  localStorage.setItem(SAVED_KODE_KEY, String(kode).trim());
-}
-
-function clearTrackedKode(kode) {
-  const saved = localStorage.getItem(SAVED_KODE_KEY);
-  if (!kode || !saved || saved.toUpperCase() === String(kode).toUpperCase()) {
-    localStorage.removeItem(SAVED_KODE_KEY);
-  }
-}
-
-function getTrackedKode() {
-  return (localStorage.getItem(SAVED_KODE_KEY) || "").trim();
+  const k = String(kode).trim();
+  localStorage.setItem(SAVED_KODE_KEY, k);
+  try {
+    const arr = JSON.parse(localStorage.getItem(SAVED_KODES_KEY) || "[]");
+    const up = k.toUpperCase();
+    const next = [k].concat((arr || []).filter((x) => String(x).toUpperCase() !== up)).slice(0, 30);
+    localStorage.setItem(SAVED_KODES_KEY, JSON.stringify(next));
+  } catch (e) {}
 }
 
 async function fetchOrders() {
@@ -36,71 +43,77 @@ async function fetchOrders() {
   }
 }
 
-function findOrderByKode(orders, kode) {
-  if (!kode) return null;
-  const target = String(kode).trim().toUpperCase();
-  return (orders || []).find(
-    (o) => String(o.kode || "").toUpperCase() === target
-  ) || null;
+function statusMeta(status) {
+  const s = String(status || "").toLowerCase();
+  if (s.includes("sukses") || s.includes("selesai")) {
+    return { label: "Selesai / Siap Diambil", cls: "sukses", color: "#66bb6a", bg: "#0d3d1a" };
+  }
+  if (s.includes("tolak")) {
+    return { label: "Ditolak", cls: "tolak", color: "#ef9a9a", bg: "#3d1515" };
+  }
+  if (s.includes("proses") || s.includes("verifikasi")) {
+    return { label: "Diproses Admin", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
+  }
+  if (s.includes("bayar") || s.includes("menunggu")) {
+    return { label: "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
+  }
+  return { label: status || "Pesanan Masuk", cls: "belum", color: "#90a4ae", bg: "#1a2433" };
 }
 
-function loadAntrianFromOrders(orders) {
-  return (orders || []).map((o, i) => ({
-    no: i + 1,
-    nama:
-      (o.nama || "Anonim").length > 8
-        ? (o.nama || "A").substring(0, 2) + "********"
-        : o.nama || "Anonim",
-    jenis: (o.paket || "Joki Kontak") + " · " + (o.status || "Belum Bayar"),
-    status:
-      o.status === "Sukses" || o.status === "SELESAI"
-        ? "SELESAI"
-        : o.status === "Proses" || o.status === "PROSES"
-        ? "PROSES"
-        : o.status === "Menunggu Verifikasi"
-        ? "PROSES"
-        : "MASUK PESANAN"
-  }));
+function filterMyOrders(orders) {
+  const tracked = getTrackedKodes();
+  let email = "";
+  try {
+    const u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser();
+    if (u && u.email) email = String(u.email).toLowerCase();
+  } catch (e) {}
+
+  return (orders || []).filter((o) => {
+    const kode = String(o.kode || "").toUpperCase();
+    if (tracked.has(kode)) return true;
+    if (email && String(o.email || "").toLowerCase() === email) return true;
+    if (email && String(o.userEmail || "").toLowerCase() === email) return true;
+    return false;
+  });
 }
 
-function escapeHtml(str) {
-  return String(str ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
+function renderOrderCard(o) {
+  const st = statusMeta(o.status);
+  const file = o.file || o.download || "";
+  const fileName = o.fileName || "Produk";
+  const kode = o.kode || "-";
+  const paket = o.paket || o.judul || "Produk";
+  const total = o.total != null ? Number(o.total).toLocaleString("id-ID") : "-";
+  const waktu = o.waktu || o.createdAt || o.dikirimAt || "";
+  const catatan = o.catatanAdmin || "";
 
-function statusClass(status) {
-  const s = (status || "").toLowerCase();
-  if (s.includes("sukses") || s.includes("selesai")) return "sukses";
-  if (s.includes("proses") || s.includes("verifikasi")) return "proses";
-  return "belum";
-}
-
-function statusIcon(cls) {
-  if (cls === "sukses") return "✅";
-  if (cls === "proses") return "⏳";
-  return "🛒";
+  return `
+  <div class="order-status-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:14px;padding:14px;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:12px;color:#8aa0b8;">Kode</div>
+        <div style="font-weight:800;color:#fff;letter-spacing:0.3px;">${escapeHtml(kode)}</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:${st.bg};color:${st.color};white-space:nowrap;">${escapeHtml(st.label)}</span>
+    </div>
+    <div style="font-size:14px;font-weight:700;color:#e3eaf2;margin-bottom:4px;">${escapeHtml(paket)}</div>
+    <div style="font-size:12px;color:#8aa0b8;margin-bottom:8px;">Total Rp ${escapeHtml(String(total))}${waktu ? " · " + escapeHtml(String(waktu)) : ""}</div>
+    ${catatan ? `<div style="font-size:12px;color:#cfd8e3;background:#0a0e18;border-radius:8px;padding:8px 10px;margin-bottom:8px;">${escapeHtml(catatan)}</div>` : ""}
+    ${
+      file
+        ? `<a href="${escapeHtml(file)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:9px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh ${escapeHtml(fileName)}</a>`
+        : st.cls === "sukses"
+        ? `<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Menunggu file dari admin...</div>`
+        : `<div style="font-size:12px;color:#6a7a90;margin-top:4px;">Produk dikirim admin setelah pesanan diproses.</div>`
+    }
+  </div>`;
 }
 
 async function renderAntrian() {
   const list = document.getElementById("antrianList");
   if (!list) return;
 
-  const globalOn =
-    window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured();
-
-  // Riwayat personal: prioritaskan kode yang tersimpan di device
-  const tracked = getTrackedKode();
-
-  list.innerHTML = `
-    <div class="antrian-empty">
-      <div class="antrian-empty-icon">⏳</div>
-      <strong>Memuat antrian...</strong>
-      <small>Sinkron data...</small>
-    </div>
-  `;
+  list.innerHTML = `<div style="text-align:center;color:#8aa0b8;padding:24px 12px;">Memuat pesanan...</div>`;
 
   let orders = [];
   try {
@@ -109,424 +122,63 @@ async function renderAntrian() {
     console.warn(e);
   }
 
-  let modeBadge = document.getElementById("antrianModeBadge");
-  if (!modeBadge) {
-    modeBadge = document.createElement("div");
-    modeBadge.id = "antrianModeBadge";
-    modeBadge.style.cssText =
-      "font-size:11px;color:#8aa0b8;margin:-8px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;";
-    const searchBox = document.querySelector(".search-box");
-    if (searchBox && searchBox.parentNode) {
-      searchBox.parentNode.insertBefore(modeBadge, searchBox.nextSibling);
-    }
-  }
-  const data = loadAntrianFromOrders(orders);
-  const configured = window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured && window.VoxyyOrders.isGlobalConfigured();
-  if (configured) {
-    modeBadge.innerHTML =
-      '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global (Realtime)</span> <span>' +
-      (orders.length || 0) + ' pesanan · sinkron antar HP</span>';
-  } else {
-    modeBadge.innerHTML =
-      '<span style="background:#3d2a0d;color:#ffb74d;padding:3px 8px;border-radius:6px;font-weight:600;">⚙️ Setup Firebase</span> <span>Isi FIREBASE_CONFIG di global-orders.js (gratis) agar antar-HP sinkron</span>';
-  }
-
-  if (data.length === 0) {
-    list.innerHTML = `
-      <div class="antrian-empty">
-        <div class="antrian-empty-icon">🕒</div>
-        <strong>Antrian masih kosong</strong>
-        <small>Belum ada pesanan global. Buat order baru, lalu tarik refresh halaman ini.</small>
-      </div>
-    `;
-    return;
-  }
-
-  list.innerHTML = data
-    .map(
-      (item) => `
-    <div class="antrian-item">
-      <div style="display:flex;align-items:center;">
-        <div class="num">#${item.no}</div>
-        <div class="info">
-          <strong>${escapeHtml(item.nama)}</strong>
-          <small>${escapeHtml(item.jenis)}</small>
-        </div>
-      </div>
-      <span class="status-badge">${escapeHtml(item.status)}</span>
-    </div>
-  `
-    )
-    .join("");
-}
-
-function ensureStatusModal() {
-  if (document.getElementById("statusCheckModal")) return;
-
-  const wrap = document.createElement("div");
-  wrap.id = "statusCheckModal";
-  wrap.innerHTML = `
-    <div class="status-modal-backdrop" data-close="1"></div>
-    <div class="status-modal-box" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
-      <div class="status-modal-icon" id="statusModalIcon">📋</div>
-      <div class="status-modal-title" id="statusModalTitle">Status Pesanan</div>
-      <div class="status-modal-body" id="statusModalBody"></div>
-      <button type="button" class="status-modal-btn" data-close="1">Oke</button>
-    </div>
-  `;
-  document.body.appendChild(wrap);
-
-  wrap.addEventListener("click", function (e) {
-    if (e.target && e.target.getAttribute("data-close") === "1") closeStatusModal();
+  const mine = filterMyOrders(orders);
+  // terbaru dulu
+  mine.sort((a, b) => {
+    const ta = Date.parse(a.createdAt || a.waktu || 0) || 0;
+    const tb = Date.parse(b.createdAt || b.waktu || 0) || 0;
+    return tb - ta;
   });
 
-  if (!document.getElementById("statusCheckModalStyle")) {
-    const style = document.createElement("style");
-    style.id = "statusCheckModalStyle";
-    style.textContent = `
-      #statusCheckModal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 10000;
-        align-items: center;
-        justify-content: center;
-        padding: 18px;
-      }
-      #statusCheckModal.show { display: flex; }
-      .status-modal-backdrop {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,0.72);
-        backdrop-filter: blur(5px);
-      }
-      .status-modal-box {
-        position: relative;
-        background: #10182a;
-        border: 1px solid #1a2740;
-        border-radius: 16px;
-        padding: 22px 16px 16px;
-        width: 100%;
-        max-width: 340px;
-        max-height: calc(100vh - 36px);
-        overflow: auto;
-        text-align: center;
-        box-shadow: 0 12px 40px rgba(0,0,0,0.55);
-        animation: statusModalIn 0.22s ease;
-      }
-      @keyframes statusModalIn {
-        from { opacity: 0; transform: scale(0.94) translateY(8px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-      }
-      .status-modal-icon { font-size: 30px; margin-bottom: 6px; line-height: 1; }
-      .status-modal-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #fff;
-        margin-bottom: 12px;
-      }
-      .status-modal-body {
-        text-align: left;
-        background: #0a0e18;
-        border: 1px solid #1a2740;
-        border-radius: 12px;
-        padding: 10px 12px;
-        margin-bottom: 14px;
-        overflow: hidden;
-      }
-      .status-row {
-        display: grid;
-        grid-template-columns: 92px 1fr;
-        gap: 8px;
-        align-items: start;
-        padding: 7px 0;
-        border-bottom: 1px solid #1a2740;
-      }
-      .status-row:last-child { border-bottom: none; }
-      .status-row .k {
-        color: #8aa0b8;
-        font-size: 11px;
-        padding-top: 2px;
-      }
-      .status-row .v {
-        color: #fff;
-        font-size: 13px;
-        font-weight: 600;
-        word-break: break-word;
-        overflow-wrap: anywhere;
-        line-height: 1.4;
-      }
-      .status-row .v code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-        font-size: 12px;
-        background: #10182a;
-        border: 1px solid #1a2740;
-        padding: 2px 6px;
-        border-radius: 6px;
-        color: #90caf9;
-      }
-      .status-row .v.sukses { color: #66bb6a; }
-      .status-row .v.proses { color: #42a5f5; }
-      .status-row .v.belum { color: #ffb74d; }
-      .status-note {
-        margin-top: 8px;
-        font-size: 11px;
-        color: #9bb0c4;
-        line-height: 1.45;
-      }
-      .status-modal-btn {
-        width: 100%;
-        background: linear-gradient(135deg, #2196f3, #1565c0);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        padding: 12px;
-        font-size: 15px;
-        font-weight: 700;
-        cursor: pointer;
-      }
-      .antrian-empty {
-        background: #10182a;
-        border: 1px dashed #1a2740;
-        border-radius: 14px;
-        padding: 28px 16px;
-        text-align: center;
-      }
-      .antrian-empty-icon { font-size: 28px; margin-bottom: 8px; }
-      .antrian-empty strong { display: block; font-size: 14px; margin-bottom: 6px; }
-      .antrian-empty small { display: block; color: #8aa0b8; font-size: 12px; line-height: 1.45; }
-    `;
-    document.head.appendChild(style);
-  }
-}
-
-function showStatusModal(title, bodyHtml, icon) {
-  ensureStatusModal();
-  document.getElementById("statusModalTitle").textContent = title || "Status Pesanan";
-  document.getElementById("statusModalBody").innerHTML = bodyHtml || "";
-  document.getElementById("statusModalIcon").textContent = icon || "📋";
-  document.getElementById("statusCheckModal").classList.add("show");
-}
-
-function closeStatusModal() {
-  const el = document.getElementById("statusCheckModal");
-  if (el) el.classList.remove("show");
-}
-
-function row(label, value, extraClass) {
-  return (
-    '<div class="status-row">' +
-    '<div class="k">' +
-    escapeHtml(label) +
-    "</div>" +
-    '<div class="v' +
-    (extraClass ? " " + extraClass : "") +
-    '">' +
-    value +
-    "</div>" +
-    "</div>"
-  );
-}
-
-function syncSearchInput(kode) {
-  const input = document.getElementById("searchOrder");
-  if (!input) return;
-  input.value = kode || "";
-}
-
-async function restoreSavedKodeToInput() {
-  const input = document.getElementById("searchOrder");
-  if (!input) return;
-
-  let kode = getTrackedKode();
-  const orders = await fetchOrders();
-
-  if (!kode) {
-    const pending = orders.find(
-      (o) => o && o.kode && isStatusBelumSelesai(o.status)
-    );
-    if (pending) {
-      kode = pending.kode;
-      saveTrackedKode(kode);
-    }
-  }
-
-  if (!kode) {
-    input.value = "";
+  if (!mine.length) {
+    list.innerHTML = `
+      <div style="text-align:center;padding:28px 16px;background:#12182a;border-radius:14px;border:1px solid #1e2a45;">
+        <div style="font-size:28px;margin-bottom:8px;">📋</div>
+        <strong style="color:#fff;">Belum ada pesanan</strong>
+        <p style="font-size:13px;color:#8aa0b8;margin-top:6px;line-height:1.45;">Order produk dari Home/Produk. Status & file unduhan muncul di sini otomatis.</p>
+        <a href="digital.html" style="display:inline-block;margin-top:12px;padding:10px 18px;background:#1565c0;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px;">Lihat Produk</a>
+      </div>`;
     return;
   }
 
-  const found = findOrderByKode(orders, kode);
-  if (found && isStatusSukses(found.status)) {
-    clearTrackedKode(kode);
-    input.value = "";
-    return;
-  }
-
-  input.value = kode;
+  list.innerHTML =
+    `<div style="font-size:12px;color:#8aa0b8;margin-bottom:10px;">${mine.length} pesanan · status realtime</div>` +
+    mine.map(renderOrderCard).join("");
 }
 
 async function cekStatus() {
-  const input = document.getElementById("searchOrder");
-  if (!input || !input.value.trim()) {
-    showStatusModal(
-      "Nomor Order Kosong",
-      row("Info", "Masukkan nomor order terlebih dahulu.") +
-        row("Contoh", "<code>VJ-2026-7129517</code>"),
-      "⚠️"
-    );
+  const input = document.getElementById("kodeInput");
+  const kode = (input && input.value ? input.value : "").trim();
+  const box = document.getElementById("detailPesanan");
+  if (!kode) {
+    if (box) {
+      box.style.display = "block";
+      box.innerHTML = `<div style="color:#ef9a9a;font-size:13px;">Masukkan kode pesanan.</div>`;
+    }
     return;
   }
-
-  const kode = input.value.trim().toUpperCase();
+  saveTrackedKode(kode);
   const orders = await fetchOrders();
-  const found = findOrderByKode(orders, kode);
-
-  if (found) {
-    const st = found.status || "Belum Bayar";
-    const cls = statusClass(st);
-    const note = isStatusSukses(st)
-      ? '<div class="status-note">Pesanan sudah sukses. Kode antrian di kolom pencarian dihapus otomatis.</div>'
-      : '<div class="status-note">Kode antrian disimpan di kolom pencarian sampai status menjadi Sukses.</div>';
-
-    // Isi panel detail di halaman
-    const detailBox = document.getElementById("detailPesanan");
-    if (detailBox) {
-      detailBox.style.display = "block";
-      detailBox.innerHTML = `
-        <div class="order-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:12px;padding:16px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <strong style="font-size:15px;">${escapeHtml(found.kode || kode)}</strong>
-            <span class="badge-st ${cls}" style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">${escapeHtml(st)}</span>
-          </div>
-          <div style="font-size:13px;line-height:1.7;color:#ccc;">
-            <div><b style="color:#2196f3;">Produk / Paket:</b> ${escapeHtml(found.paket || "-")}</div>
-            <div><b style="color:#2196f3;">Nama:</b> ${escapeHtml(found.nama || "-")}</div>
-            <div><b style="color:#2196f3;">Total:</b> ${escapeHtml(found.total || "-")}</div>
-            <div><b style="color:#2196f3;">Waktu:</b> ${escapeHtml(found.waktu || found.createdAt || "-")}</div>
-            ${found.file || found.download ? `<div style="margin-top:8px;"><a href="${escapeHtml(found.file || found.download)}" target="_blank" class="btn-adm" style="display:inline-flex;padding:8px 14px;background:#43a047;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;"><i class="fa-solid fa-download"></i> Ambil Produk</a></div>` : ""}
-            ${isStatusSukses(st) ? '<div style="margin-top:8px;color:#a5d6a7;font-size:12px;">✅ Pesanan selesai. Produk siap diambil / sudah dikirim.</div>' : '<div style="margin-top:8px;color:#90caf9;font-size:12px;">⏳ Menunggu proses admin. Hubungi WA Admin jika sudah transfer.</div>'}
-          </div>
-        </div>`;
-    }
-
-    showStatusModal(
-      "Status Pesanan",
-      row("Kode Antrian", "<code>" + escapeHtml(found.kode || kode) + "</code>") +
-        row("Nama", escapeHtml(found.nama || "-")) +
-        row("Paket / Produk", escapeHtml(found.paket || "-")) +
-        row("Status", escapeHtml(st), cls) +
-        row("Total", escapeHtml(found.total || "-")) +
-        row("Waktu", escapeHtml(found.waktu || "-")) +
-        note,
-      statusIcon(cls)
-    );
-
-    if (isStatusSukses(st)) {
-      clearTrackedKode(found.kode || kode);
-      syncSearchInput("");
-    } else {
-      saveMyOrderKode(found.kode || kode);
-      syncSearchInput(found.kode || kode);
-    }
-  } else {
-    showStatusModal(
-      "Order Tidak Ditemukan",
-      row("Kode yang dicari", "<code>" + escapeHtml(kode) + "</code>") +
-        row("Info", "Nomor order tidak ditemukan di daftar pesanan. Pastikan kode benar."),
-      "❌"
-    );
+  const found = (orders || []).find((o) => String(o.kode || "").toUpperCase() === kode.toUpperCase());
+  if (!box) return;
+  box.style.display = "block";
+  if (!found) {
+    box.innerHTML = `<div style="color:#ffb74d;font-size:13px;">Kode <b>${escapeHtml(kode)}</b> belum ditemukan. Pastikan sudah order & bayar.</div>`;
+    return;
   }
+  box.innerHTML = renderOrderCard(found);
+  renderAntrian();
 }
 
+window.cekStatus = cekStatus;
+window.saveTrackedKode = saveTrackedKode;
+
 document.addEventListener("DOMContentLoaded", function () {
-  ensureStatusModal();
   renderAntrian();
-  restoreSavedKodeToInput();
-
-  const inp = document.getElementById("searchOrder");
-  if (inp) {
-    inp.placeholder = "VJ-2026-xxxx";
-    inp.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        cekStatus();
-      }
-    });
-  }
-
-  // Realtime: order baru langsung muncul tanpa refresh
   if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
     window.VoxyyOrders.onOrdersChange(function () {
       renderAntrian();
-      restoreSavedKodeToInput();
     });
-  } else {
-    setInterval(function () {
-      renderAntrian();
-    }, 60000);
   }
+  setInterval(renderAntrian, 20000);
 });
-
-
-// Simpan beberapa kode order di device (riwayat personal)
-const SAVED_CODES_KEY = "voxyy_my_orders";
-function saveMyOrderKode(kode) {
-  if (!kode) return;
-  try {
-    let arr = JSON.parse(localStorage.getItem(SAVED_CODES_KEY) || "[]");
-    if (!Array.isArray(arr)) arr = [];
-    const k = String(kode).trim().toUpperCase();
-    if (!arr.includes(k)) arr.unshift(k);
-    localStorage.setItem(SAVED_CODES_KEY, JSON.stringify(arr.slice(0, 30)));
-  } catch (e) {}
-  saveTrackedKode(kode);
-}
-function getMyOrderKodes() {
-  try {
-    const arr = JSON.parse(localStorage.getItem(SAVED_CODES_KEY) || "[]");
-    const single = getTrackedKode();
-    if (single && !arr.includes(single.toUpperCase())) arr.unshift(single.toUpperCase());
-    return arr;
-  } catch (e) {
-    const s = getTrackedKode();
-    return s ? [s] : [];
-  }
-}
-
-
-// Override render: tampilkan hanya pesanan milik user (kode tersimpan)
-async function renderAntrian() {
-  const list = document.getElementById("antrianList");
-  if (!list) return;
-  const orders = await fetchOrders();
-  const myKodes = (typeof getMyOrderKodes === "function" ? getMyOrderKodes() : []).map(k => String(k).toUpperCase());
-  let mine = [];
-  if (myKodes.length) {
-    mine = orders.filter(o => myKodes.includes(String(o.kode || "").toUpperCase()));
-  }
-  if (!mine.length) {
-    list.innerHTML = `<div style="text-align:center;padding:28px 12px;color:#6a7a90;font-size:13px;">
-      <i class="fa-solid fa-receipt" style="font-size:28px;display:block;margin-bottom:8px;"></i>
-      Belum ada pesanan di perangkat ini.<br>Masukkan kode order di atas untuk melihat produk yang kamu beli.
-    </div>`;
-    return;
-  }
-  list.innerHTML = mine.slice().reverse().map(o => {
-    const st = o.status || "Belum Bayar";
-    const cls = statusClass(st);
-    const file = o.file || o.download || "";
-    return `<div class="order-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:12px;padding:14px;margin-bottom:10px;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-        <div>
-          <strong style="color:#fff;">${escapeHtml(o.kode || "-")}</strong>
-          <div style="font-size:13px;color:#ccc;margin-top:4px;">${escapeHtml(o.paket || "-")}</div>
-          <div style="font-size:12px;color:#6a7a90;margin-top:2px;">${escapeHtml(o.total || "")} · ${escapeHtml(o.waktu || "")}</div>
-          ${file ? `<a href="${escapeHtml(file)}" target="_blank" download style="display:inline-block;margin-top:8px;padding:6px 12px;background:#43a047;color:#fff;border-radius:8px;font-size:12px;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh ${escapeHtml(o.fileName || "Produk")}</a>` : ""}
-          ${o.catatanAdmin ? `<div style="font-size:11px;color:#90caf9;margin-top:6px;">${escapeHtml(o.catatanAdmin)}</div>` : ""}
-        </div>
-        <span class="badge-st ${cls}">${escapeHtml(st)}</span>
-      </div>
-    </div>`;
-  }).join("");
-}

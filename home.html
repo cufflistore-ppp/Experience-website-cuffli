@@ -8,77 +8,55 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="market-page">
 
-  <header class="header">
-    <div class="brand">
-      <img src="logo.png" alt="VOXY MARKET" class="logo">
-      <div>
-        <h1>VOXY <span style="color:#2196f3">MARKET</span> <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pusat Layanan Digital & Jasa</p>
-      </div>
+  <header class="market-header">
+    <div class="market-brand">
+      <img src="logo.png" alt="Logo" class="logo brand-logo">
+      <div class="market-title">VOXY <span>MARKET</span> <i class="fa-solid fa-circle-check verified"></i></div>
     </div>
+    <a href="akun.html" class="market-user" title="Profil Akun"><i class="fa-solid fa-circle-user"></i></a>
   </header>
 
-  <!-- Banner (bisa diganti dari Admin → Tampilan) -->
-  <div class="banner">
-    <img src="banner.jpg" alt="Selamat Datang di VOXY MARKET" class="banner-full">
+  <div class="banner" style="margin:0;border-radius:0;">
+    <img src="banner.jpg" alt="Banner" class="banner-full" style="width:100%;max-height:140px;object-fit:cover;display:block;">
   </div>
   <div class="top-notif" id="topNotif" style="display:none;"></div>
 
-  <!-- Menu pintasan -->
-  <div class="menu-grid">
-    <a href="digital.html" class="menu-item">
-      <i class="fa-solid fa-bag-shopping"></i>
-      <span>Lihat Produk</span>
-    </a>
-    <a href="pesan.html?type=jaspost" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>Jasa Post</span>
-    </a>
-    <a href="https://wa.me/6285151982250?text=Halo%20Admin%2C%20saya%20minta%20ACC%20pesanan" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>WA Minta ACC</span>
-    </a>
-    <a href="antrian.html" class="menu-item">
-      <i class="fa-solid fa-receipt"></i>
-      <span>Pesanan Saya</span>
-    </a>
-    <a href="https://wa.me/6285151982250" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>WA Admin</span>
-    </a>
-    <a href="tentang.html" class="menu-item">
-      <i class="fa-solid fa-circle-info"></i>
-      <span>Tentang</span>
-    </a>
-  </div>
+  <div class="market-content">
+    <h1 class="market-heading" style="font-size:18px;margin-bottom:4px;">Cari Produk</h1>
+    <p class="market-sub">Ketik nama produk yang kamu cari.</p>
 
-  <!-- Preview produk (bukan full catalog) -->
-  <section class="produk-section">
-    <h3>PRODUK UNGGULAN</h3>
-    <p class="subtitle">Beberapa produk pilihan. Lihat semua di menu Produk.</p>
-    <div class="produk-grid" id="produkGrid"></div>
-    <div style="padding:8px 0 16px;text-align:center;">
-      <a href="digital.html" class="m-card-btn" style="display:inline-block;width:auto;padding:10px 24px;text-decoration:none;">Lihat Semua Produk</a>
+    <div class="market-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchHome" placeholder="Cari produk..." autocomplete="off" oninput="onSearchHome()">
     </div>
-  </section>
 
-  <div class="info-box">
-    <h4>Order & bayar di website</h4>
-    <p>Pilih produk, bayar QRIS, lalu status & file produk bisa dicek di menu Pesanan. Admin mengelola semua dari panel admin.</p>
+    <div class="market-cats" id="homeCats">
+      <button class="cat-chip active" data-cat="all" onclick="filterHome('all')">Semua</button>
+      <button class="cat-chip" data-cat="digital" onclick="filterHome('digital')">Digital</button>
+      <button class="cat-chip" data-cat="apk" onclick="filterHome('apk')">Aplikasi</button>
+      <button class="cat-chip" data-cat="jasa" onclick="filterHome('jasa')">Jasa</button>
+      <button class="cat-chip" data-cat="lainnya" onclick="filterHome('lainnya')">Lainnya</button>
+    </div>
+
+    <div class="menu-grid" style="margin:14px 0 18px;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <a href="digital.html" class="menu-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
+      <a href="kategori.html" class="menu-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
+      <a href="antrian.html" class="menu-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
+      <a href="akun.html" class="menu-item"><i class="fa-solid fa-circle-user"></i><span>Akun</span></a>
+    </div>
+
+    <h3 style="font-size:14px;margin:0 0 10px;color:#cfd8e3;">Produk</h3>
+    <div class="market-grid" id="homeGrid"></div>
   </div>
 
-  <div style="padding:0 12px 24px;">
-    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
-  </div>
-
-    <nav class="bottom-nav nav-5">
+  <nav class="bottom-nav nav-5">
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
     <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
     <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-circle-user"></i><span>Akun</span></a>
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -89,36 +67,10 @@
   <script src="auth.js"></script>
   <script src="branding.js"></script>
   <script src="katalog.js"></script>
-  <script src="produk.js"></script>
   <script src="script.js"></script>
   <script>
-    // Home: tampilkan max 4 produk unggulan saja
     document.addEventListener("DOMContentLoaded", function () {
-      setTimeout(function () {
-        var grid = document.getElementById("produkGrid");
-        if (!grid) return;
-        // Jika produk.js sudah isi, potong jadi 4
-        var cards = grid.children;
-        if (cards.length > 4) {
-          while (grid.children.length > 4) grid.removeChild(grid.lastChild);
-        }
-        // Atau pakai katalog market style ringkas
-        if (!cards.length && typeof getCatalog === "function") {
-          var list = getCatalog().slice(0, 4);
-          grid.className = "market-grid";
-          grid.innerHTML = list.map(function (p) {
-            var href = /jasa\s*post/i.test(p.judul || "")
-              ? "pesan.html?type=jaspost"
-              : "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
-            var stok = p.stok < 0 ? "∞" : p.stok;
-            return '<div class="m-card"><div class="m-card-icon"><i class="fa-solid fa-box"></i></div>' +
-              '<div class="m-card-title">' + (p.judul || "") + '</div>' +
-              '<div class="m-card-desc">' + (p.deskripsi || "").substring(0, 50) + '</div>' +
-              '<div class="m-card-meta"><span class="stok">Stok ' + stok + '</span><span class="harga">Rp' + Number(p.harga).toLocaleString("id-ID") + '</span></div>' +
-              '<a href="' + href + '" class="m-card-btn">Beli Sekarang</a></div>';
-          }).join("");
-        }
-      }, 400);
+      renderKatalog("homeGrid", "home");
     });
   </script>
 </body>
