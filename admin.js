@@ -987,3 +987,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 200);
   }
 });
+
+
+async function adminLogout() {
+  try {
+    if (window.VoxyyAuth && window.VoxyyAuth.logout) await window.VoxyyAuth.logout();
+  } catch (e) {}
+  try {
+    localStorage.removeItem("voxyy_admin_email");
+  } catch (e) {}
+  location.replace("login.html");
+}
+window.adminLogout = adminLogout;

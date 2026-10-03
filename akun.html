@@ -235,9 +235,9 @@
     document.getElementById("btnLogout").addEventListener("click", async function () {
       try {
         await window.VoxyyAuth.logout();
-      } catch (e) {
-        alert("Gagal keluar");
-      }
+      } catch (e) {}
+      try { localStorage.removeItem("voxyy_admin_email"); } catch (e) {}
+      location.replace("login.html");
     });
 
     document.addEventListener("DOMContentLoaded", async function () {
@@ -286,6 +286,24 @@
   if (!bind()) {
     var n = 0, t = setInterval(function(){ if (bind() || ++n > 25) clearInterval(t); }, 200);
   }
+})();
+</script>
+
+
+<script>
+(function(){
+  var btn = document.getElementById("btnLogout");
+  if (!btn) return;
+  btn.addEventListener("click", async function(e) {
+    e.preventDefault();
+    try {
+      if (window.VoxyyAuth && window.VoxyyAuth.logout) await window.VoxyyAuth.logout();
+    } catch (err) {}
+    try {
+      localStorage.removeItem("voxyy_admin_email");
+    } catch (err) {}
+    location.replace("login.html");
+  }, true);
 })();
 </script>
 
