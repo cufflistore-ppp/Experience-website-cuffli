@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Login - VOXY MARKET</title>
+  <title>Daftar - VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -16,7 +16,6 @@
       align-items: center;
       justify-content: center;
       padding: 24px 16px 40px;
-      padding-bottom: 40px;
     }
     .auth-logo-wrap { text-align: center; margin-bottom: 28px; }
     .auth-logo {
@@ -29,7 +28,7 @@
       font-weight: 800; font-size: 20px; color: #fff;
       background: linear-gradient(145deg, #8b5cf6, #6d28d9);
     }
-    .auth-brand { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 0.3px; }
+    .auth-brand { font-size: 22px; font-weight: 800; color: #fff; }
     .auth-sub { font-size: 13px; color: #7a7a8c; margin-top: 4px; }
     .auth-card {
       width: 100%; max-width: 380px;
@@ -71,7 +70,6 @@
       font-size: 14px; font-weight: 600; cursor: pointer;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
-    .btn-google:active { background: #f3f3f3; }
     .btn-google img { width: 20px; height: 20px; }
     .auth-divider {
       display: flex; align-items: center; gap: 10px;
@@ -97,27 +95,33 @@
   </div>
 
   <div class="auth-card">
-    <h2>Login</h2>
-    <p class="hint">Masuk ke akun VOXY MARKET kamu.</p>
+    <h2>Buat Akun</h2>
+    <p class="hint">Daftar untuk mulai membeli produk digital.</p>
+
+    <label>Nama</label>
+    <input type="text" id="regNama" placeholder="Masukkan nama" autocomplete="name">
 
     <label>Email</label>
-    <input type="email" id="loginEmail" placeholder="Masukkan email" autocomplete="email">
+    <input type="email" id="regEmail" placeholder="contoh@email.com" autocomplete="email">
 
     <label>Password</label>
-    <input type="password" id="loginPass" placeholder="Masukkan password" autocomplete="current-password">
+    <input type="password" id="regPass" placeholder="Minimal 6 karakter" autocomplete="new-password">
 
-    <button type="button" class="btn-auth" id="btnLogin" onclick="doLogin()">LOGIN</button>
+    <label>Ulangi Password</label>
+    <input type="password" id="regPass2" placeholder="Masukkan password lagi" autocomplete="new-password">
+
+    <button type="button" class="btn-auth" id="btnDaftar" onclick="doDaftar()">DAFTAR</button>
 
     <div class="auth-divider">atau</div>
 
     <button type="button" class="btn-google" id="btnGoogle" onclick="doGoogle()">
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-      <span>Masuk dengan Google</span>
+      <span>Daftar dengan Google</span>
     </button>
 
     <div class="auth-err" id="authErr"></div>
 
-    <p class="auth-footer">Belum punya akun? <a href="daftar.html">Daftar</a></p>
+    <p class="auth-footer">Sudah punya akun? <a href="login.html">Login</a></p>
   </div>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -148,51 +152,40 @@
       el.textContent = msg || "";
       el.classList.toggle("show", !!msg);
     }
-    async function doLogin() {
-      var email = (document.getElementById("loginEmail").value || "").trim();
-      var pass = document.getElementById("loginPass").value || "";
-      if (!email || !pass) { showErr("Isi email dan password."); return; }
-      var btn = document.getElementById("btnLogin");
-      btn.disabled = true; btn.textContent = "Memproses...";
+    async function doDaftar() {
+      var nama = (document.getElementById("regNama").value || "").trim();
+      var email = (document.getElementById("regEmail").value || "").trim();
+      var pass = document.getElementById("regPass").value || "";
+      var pass2 = document.getElementById("regPass2").value || "";
+      if (!nama) { showErr("Isi nama."); return; }
+      if (!email) { showErr("Isi email."); return; }
+      if (pass.length < 6) { showErr("Password minimal 6 karakter."); return; }
+      if (pass !== pass2) { showErr("Password tidak sama."); return; }
+      var btn = document.getElementById("btnDaftar");
+      btn.disabled = true; btn.textContent = "Mendaftar...";
       showErr("");
       try {
-        await window.VoxyyAuth.loginEmail(email, pass);
+        await window.VoxyyAuth.registerEmail(email, pass, nama);
         afterLoginRedirect();
       } catch (e) {
         var m = (e && e.message) ? e.message : String(e);
-        if (/user-not-found|invalid-credential|wrong-password/i.test(m)) m = "Email atau password salah.";
-        else if (/too-many/i.test(m)) m = "Terlalu banyak percobaan. Coba lagi nanti.";
+        if (/email-already/i.test(m)) m = "Email sudah terdaftar. Silakan login.";
+        else if (/weak-password/i.test(m)) m = "Password terlalu lemah.";
+        else if (/invalid-email/i.test(m)) m = "Format email tidak valid.";
         showErr(m);
       }
-      btn.disabled = false; btn.textContent = "LOGIN";
+      btn.disabled = false; btn.textContent = "DAFTAR";
     }
     async function doGoogle() {
       showErr("");
-      var btn = document.getElementById("btnGoogle");
-      btn.disabled = true;
       try {
         await window.VoxyyAuth.loginGoogle();
         afterLoginRedirect();
       } catch (e) {
         showErr((e && e.message) ? e.message : String(e));
       }
-      btn.disabled = false;
     }
-    document.getElementById("loginPass").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") doLogin();
-    });
-    // Sudah login? ke akun
     document.addEventListener("DOMContentLoaded", function () {
-      var n = 0;
-      var t = setInterval(function () {
-        if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
-          clearInterval(t);
-          window.VoxyyAuth.onAuthChange(function (u) {
-            if (u) afterLoginRedirect();
-          });
-        } else if (++n > 30) clearInterval(t);
-      }, 150);
-      // logo dari settings
       try {
         var s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
         if (s.logoUrl) {

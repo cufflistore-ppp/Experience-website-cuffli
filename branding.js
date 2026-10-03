@@ -81,6 +81,28 @@
       });
     }
 
+
+    // Samakan logo di header market (Produk/Kategori) dengan Home
+    document.querySelectorAll(".market-brand").forEach((brand) => {
+      let img = brand.querySelector("img.logo, img.brand-logo");
+      if (!img) {
+        img = document.createElement("img");
+        img.className = "logo brand-logo";
+        img.alt = "Logo";
+        brand.insertBefore(img, brand.firstChild);
+      }
+      img.src = logo;
+      img.onerror = function () { this.src = "logo.png"; };
+      const badge = brand.querySelector(".vx-badge");
+      if (badge) badge.style.display = "none";
+    });
+    // Centang biru di judul
+    document.querySelectorAll(".market-title").forEach((el) => {
+      if (!el.querySelector(".verified")) {
+        el.insertAdjacentHTML("beforeend", ' <i class="fa-solid fa-circle-check verified"></i>');
+      }
+    });
+
     if (s.waAdmin) {
       const wa = String(s.waAdmin).replace(/\D/g, "");
       document.querySelectorAll('a[href*="wa.me"]').forEach((a) => {

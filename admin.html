@@ -269,14 +269,17 @@
           </div>
           <label>Warna Background (pilih atau custom)</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;">
-            <div class="color-swatch active" style="background:#0a0e18;" data-color="#0a0e18" onclick="pilihWarna(this)"></div>
-            <div class="color-swatch" style="background:#0d1b2a;" data-color="#0d1b2a" onclick="pilihWarna(this)"></div>
-            <div class="color-swatch" style="background:#1a0a2e;" data-color="#1a0a2e" onclick="pilihWarna(this)"></div>
-            <div class="color-swatch" style="background:#0a1f1a;" data-color="#0a1f1a" onclick="pilihWarna(this)"></div>
-            <div class="color-swatch" style="background:#1a1a0a;" data-color="#1a1a0a" onclick="pilihWarna(this)"></div>
-            <div class="color-swatch" style="background:#1a0a0a;" data-color="#1a0a0a" onclick="pilihWarna(this)"></div>
+            <div class="color-swatch active" style="background:#0a0e18;" data-color="#0a0e18" onclick="pilihWarna(this)" title="Hitam biru"></div>
+            <div class="color-swatch" style="background:#0d1b2a;" data-color="#0d1b2a" onclick="pilihWarna(this)" title="Navy"></div>
+            <div class="color-swatch" style="background:#0a1929;" data-color="#0a1929" onclick="pilihWarna(this)" title="Biru gelap"></div>
+            <div class="color-swatch" style="background:#0d47a1;" data-color="#0d47a1" onclick="pilihWarna(this)" title="Biru tua"></div>
+            <div class="color-swatch" style="background:#1565c0;" data-color="#1565c0" onclick="pilihWarna(this)" title="Biru"></div>
+            <div class="color-swatch" style="background:#1a237e;" data-color="#1a237e" onclick="pilihWarna(this)" title="Indigo"></div>
+            <div class="color-swatch" style="background:#01579b;" data-color="#01579b" onclick="pilihWarna(this)" title="Light blue dark"></div>
+            <div class="color-swatch" style="background:#004d40;" data-color="#004d40" onclick="pilihWarna(this)" title="Teal"></div>
           </div>
-          <input type="color" id="bgColorCustom" value="#0a0e18" style="width:60px;height:36px;border:none;cursor:pointer;" onchange="document.getElementById('bgColorHex').value=this.value">
+          <p style="font-size:11px;color:#6a7a90;margin:0 0 8px;">Klik warna → langsung terpasang. Tekan Simpan agar semua device ikut.</p>
+          <input type="color" id="bgColorCustom" value="#0a0e18" style="width:60px;height:36px;border:none;cursor:pointer;" onchange="document.getElementById('bgColorHex').value=this.value;document.body.style.background=this.value;document.body.style.backgroundImage='';localStorage.setItem('voxyy_bg_color',this.value)">
           <input type="text" id="bgColorHex" value="#0a0e18" placeholder="#0a0e18" style="width:120px;display:inline-block;margin-left:8px;">
           <br>
           <button class="btn-adm success" onclick="simpanTampilan()"><i class="fa-solid fa-save"></i> Simpan Tampilan</button>

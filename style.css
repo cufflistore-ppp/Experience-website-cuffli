@@ -1320,3 +1320,73 @@ textarea { resize: vertical; min-height: 120px; }
   color: #6a7a90;
   font-size: 14px;
 }
+
+/* Verified checklist biru di samping judul */
+.market-title .verified,
+.brand h1 .verified,
+h1 .verified {
+  color: #2196f3 !important;
+  font-size: 0.85em;
+  margin-left: 4px;
+}
+
+.market-brand .logo.brand-logo,
+.market-header .logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #12182a;
+}
+
+/* Halaman Kategori — list berbeda dari Produk */
+.kat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.kat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 14px;
+  background: #12182a;
+  border: 1px solid #1a2740;
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .15s, background .15s;
+}
+.kat-card:active {
+  background: #1a2740;
+  border-color: #2196f3;
+}
+.kat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(33,150,243,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.kat-icon i {
+  color: #42a5f5;
+  font-size: 18px;
+}
+.kat-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.kat-desc {
+  font-size: 11px;
+  color: #6a7a90;
+  margin-top: 2px;
+}
+.kat-arrow {
+  margin-left: auto;
+  color: #4a5a70;
+  font-size: 12px;
+}

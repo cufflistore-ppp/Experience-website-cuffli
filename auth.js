@@ -123,10 +123,57 @@
     return auth.onAuthStateChanged(fn);
   }
 
+
+  function loginEmail(email, password) {
+    return new Promise(function (resolve, reject) {
+      const auth = ensureAuth();
+      if (!auth) {
+        reject(new Error("Firebase belum siap."));
+        return;
+      }
+      auth
+        .signInWithEmailAndPassword(email, password)
+        .then(function (cred) {
+          resolve(cred.user);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    });
+  }
+
+  function registerEmail(email, password, displayName) {
+    return new Promise(function (resolve, reject) {
+      const auth = ensureAuth();
+      if (!auth) {
+        reject(new Error("Firebase belum siap."));
+        return;
+      }
+      auth
+        .createUserWithEmailAndPassword(email, password)
+        .then(function (cred) {
+          const user = cred.user;
+          if (displayName && user.updateProfile) {
+            return user
+              .updateProfile({ displayName: displayName })
+              .then(function () {
+                resolve(user);
+              });
+          }
+          resolve(user);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
+    });
+  }
+
   window.VoxyyAuth = {
     ensureAuth,
     currentUser,
     loginGoogle,
+    loginEmail,
+    registerEmail,
     logout,
     onAuthChange,
     handleRedirectResult,

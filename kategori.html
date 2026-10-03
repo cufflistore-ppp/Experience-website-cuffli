@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="auth-guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kategori - VOXY MARKET</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="market-page">
+
+  <header class="market-header">
+    <div class="market-brand">
+      <img src="logo.png" alt="Logo" class="logo brand-logo" style="width:38px;height:38px;border-radius:12px;object-fit:cover;">
+      <div class="market-title">VOXY <span>MARKET</span> <i class="fa-solid fa-circle-check verified"></i></div>
+    </div>
+    <a href="akun.html" class="market-user"><i class="fa-solid fa-user"></i></a>
+  </header>
+
+  <div class="market-content">
+    <h1 class="market-heading">Kategori</h1>
+    <p class="market-sub">Pilih kategori untuk melihat produk.</p>
+
+    <div class="kat-list" id="katList">
+      <a href="digital.html?cat=all" class="kat-card">
+        <div class="kat-icon"><i class="fa-solid fa-border-all"></i></div>
+        <div>
+          <div class="kat-name">Semua Produk</div>
+          <div class="kat-desc">Lihat seluruh katalog</div>
+        </div>
+        <i class="fa-solid fa-chevron-right kat-arrow"></i>
+      </a>
+      <a href="digital.html?cat=digital" class="kat-card">
+        <div class="kat-icon"><i class="fa-solid fa-code"></i></div>
+        <div>
+          <div class="kat-name">Digital</div>
+          <div class="kat-desc">Script, nokos, file digital</div>
+        </div>
+        <i class="fa-solid fa-chevron-right kat-arrow"></i>
+      </a>
+      <a href="digital.html?cat=apk" class="kat-card">
+        <div class="kat-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+        <div>
+          <div class="kat-name">Aplikasi</div>
+          <div class="kat-desc">APK & aplikasi</div>
+        </div>
+        <i class="fa-solid fa-chevron-right kat-arrow"></i>
+      </a>
+      <a href="digital.html?cat=jasa" class="kat-card">
+        <div class="kat-icon"><i class="fa-solid fa-pen-ruler"></i></div>
+        <div>
+          <div class="kat-name">Jasa</div>
+          <div class="kat-desc">Logo, desain, jasa lainnya</div>
+        </div>
+        <i class="fa-solid fa-chevron-right kat-arrow"></i>
+      </a>
+      <a href="pesan.html?type=jaspost" class="kat-card">
+        <div class="kat-icon"><i class="fa-brands fa-whatsapp"></i></div>
+        <div>
+          <div class="kat-name">Jasa Post</div>
+          <div class="kat-desc">Langsung chat admin WhatsApp</div>
+        </div>
+        <i class="fa-solid fa-chevron-right kat-arrow"></i>
+      </a>
+      <a href="digital.html?cat=lainnya" class="kat-card">
+        <div class="kat-icon"><i class="fa-solid fa-ellipsis"></i></div>
+        <div>
+          <div class="kat-name">Lainnya</div>
+          <div class="kat-desc">Produk & layanan lain</div>
+        </div>
+        <i class="fa-solid fa-chevron-right kat-arrow"></i>
+      </a>
+    </div>
+  </div>
+
+  <nav class="bottom-nav nav-5">
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
+    <a href="kategori.html" class="nav-item active"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
+    <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+  </nav>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="auth.js"></script>
+  <script src="branding.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

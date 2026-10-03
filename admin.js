@@ -559,6 +559,10 @@ function pilihWarna(el) {
   const c = el.getAttribute("data-color");
   document.getElementById("bgColorHex").value = c;
   document.getElementById("bgColorCustom").value = c;
+  // Langsung terapkan di admin + simpan sementara
+  document.body.style.background = c;
+  document.body.style.backgroundImage = "none";
+  localStorage.setItem("voxyy_bg_color", c);
 }
 
 function simpanTampilan() {
