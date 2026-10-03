@@ -1,12 +1,283 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=index.html#/admin">
-  <title>NAILONG TOOLS</title>
-  <script>location.replace("index.html#/admin");</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOXY ADMIN</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { padding-bottom: 0; background: #0a0e18; }
+    .admin-layout { display: flex; min-height: 100vh; }
+    .admin-sidebar {
+      width: 220px; background: #0d1220; border-right: 1px solid #1a2740;
+      padding: 16px 0; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 50;
+    }
+    .admin-sidebar .logo-area {
+      padding: 0 16px 16px; border-bottom: 1px solid #1a2740; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .admin-sidebar .logo-area img { width: 36px; height: 36px; border-radius: 8px; }
+    .admin-sidebar .logo-area h2 { font-size: 14px; color: #2196f3; margin: 0; }
+    .admin-nav { list-style: none; padding: 0; margin: 0; }
+    .admin-nav li a {
+      display: flex; align-items: center; gap: 10px; padding: 11px 16px;
+      color: #aaa; text-decoration: none; font-size: 13px; transition: all .15s;
+    }
+    .admin-nav li a:hover, .admin-nav li a.active {
+      background: rgba(33,150,243,.12); color: #2196f3;
+    }
+    .admin-nav li a i { width: 18px; text-align: center; }
+    .admin-main { margin-left: 220px; flex: 1; padding: 20px; min-height: 100vh; }
+    .admin-topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; flex-wrap: wrap; gap: 10px;
+    }
+    .admin-topbar h1 { font-size: 18px; margin: 0; color: #fff; }
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #12182a; border: 1px solid #1e2a45; border-radius: 12px;
+      padding: 16px; text-align: center;
+    }
+    .stat-card .val { font-size: 22px; font-weight: 700; color: #2196f3; }
+    .stat-card .lbl { font-size: 11px; color: #888; margin-top: 4px; }
+    .panel-section { display: none; }
+    .panel-section.active { display: block; }
+    .form-section label { display: block; font-size: 12px; color: #aaa; margin: 10px 0 4px; }
+    .form-section input, .form-section select, .form-section textarea {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #1e2a45;
+      background: #0d1220; color: #fff; font-size: 13px;
+    }
+    .form-section textarea { min-height: 80px; resize: vertical; }
+    .btn-adm {
+      display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px;
+      border-radius: 8px; border: none; font-size: 13px; font-weight: 600;
+      cursor: pointer; background: #2196f3; color: #fff; margin-top: 12px;
+    }
+    .btn-adm.danger { background: #e53935; }
+    .btn-adm.success { background: #43a047; }
+    .btn-adm.outline { background: transparent; border: 1px solid #2196f3; color: #2196f3; }
+    .order-card, .produk-card-adm {
+      background: #12182a; border: 1px solid #1e2a45; border-radius: 12px;
+      padding: 14px; margin-bottom: 10px;
+    }
+    .order-card .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .badge-st {
+      display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    }
+    .badge-st.belum { background: #3e2723; color: #ffab91; }
+    .badge-st.proses { background: #1a237e; color: #90caf9; }
+    .badge-st.sukses { background: #1b5e20; color: #a5d6a7; }
+    .badge-st.tolak { background: #b71c1c; color: #ef9a9a; }
+    .color-swatch {
+      width: 36px; height: 36px; border-radius: 8px; border: 2px solid #1e2a45;
+      cursor: pointer; display: inline-block;
+    }
+    .color-swatch.active { border-color: #2196f3; }
+    @media (max-width: 768px) {
+      .admin-sidebar { width: 60px; }
+      .admin-sidebar .logo-area h2, .admin-nav li a span { display: none; }
+      .admin-main { margin-left: 60px; padding: 12px; }
+      .admin-nav li a { justify-content: center; padding: 14px; }
+    }
+  </style>
 </head>
 <body>
-  <a href="index.html#/admin">Continue to NAILONG TOOLS</a>
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <div class="logo-area">
+        <img src="logo.png" alt="Voxyy">
+        <h2>VOXY ADMIN</h2>
+      </div>
+      <ul class="admin-nav">
+        <li><a href="#" class="active" data-panel="dashboard" onclick="showPanel('dashboard')"><i class="fa-solid fa-house"></i><span>Dashboard</span></a></li>
+        <li><a href="#" data-panel="produk" onclick="showPanel('produk')"><i class="fa-solid fa-box"></i><span>Produk</span></a></li>
+        <li><a href="#" data-panel="pesanan" onclick="showPanel('pesanan')"><i class="fa-solid fa-receipt"></i><span>Pesanan</span></a></li>
+        <li><a href="#" data-panel="pembayaran" onclick="showPanel('pembayaran')"><i class="fa-solid fa-credit-card"></i><span>Pembayaran</span></a></li>
+        <li><a href="#" data-panel="keuntungan" onclick="showPanel('keuntungan')"><i class="fa-solid fa-coins"></i><span>Keuntungan</span></a></li>
+        <li><a href="#" data-panel="tampilan" onclick="showPanel('tampilan')"><i class="fa-solid fa-palette"></i><span>Tampilan</span></a></li>
+        <li><a href="#" data-panel="pengaturan" onclick="showPanel('pengaturan')"><i class="fa-solid fa-gear"></i><span>Pengaturan</span></a></li>
+      </ul>
+    </aside>
+
+    <main class="admin-main">
+      <!-- DASHBOARD -->
+      <div id="panel-dashboard" class="panel-section active">
+        <div class="admin-topbar"><h1><i class="fa-solid fa-house"></i> Dashboard</h1></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="val" id="statSaldo">Rp 0</div><div class="lbl">Saldo Keuntungan</div></div>
+          <div class="stat-card"><div class="val" id="statPenjualan">0</div><div class="lbl">Total Penjualan</div></div>
+          <div class="stat-card"><div class="val" id="statPending">0</div><div class="lbl">Pesanan Pending</div></div>
+          <div class="stat-card"><div class="val" id="statSukses">0</div><div class="lbl">Pesanan Sukses</div></div>
+        </div>
+        <h3 style="color:#2196f3;margin-bottom:12px;">Transaksi Terbaru</h3>
+        <div id="dashboardOrders"></div>
+      </div>
+
+      <!-- PRODUK -->
+      <div id="panel-produk" class="panel-section">
+        <div class="admin-topbar">
+          <h1><i class="fa-solid fa-box"></i> Produk</h1>
+          <button class="btn-adm" onclick="toggleFormProduk()"><i class="fa-solid fa-plus"></i> Tambah Produk</button>
+        </div>
+        <div id="formProduk" class="form-section" style="display:none;background:#12182a;padding:16px;border-radius:12px;margin-bottom:16px;border:1px solid #1e2a45;">
+          <input type="hidden" id="produkId">
+          <label>Judul Produk</label>
+          <input type="text" id="produkJudul" placeholder="Nama produk">
+          <label>Kategori</label>
+          <select id="produkKategori">
+            <option value="joki">Joki</option>
+            <option value="jasa">Jasa</option>
+            <option value="layanan">Layanan</option>
+            <option value="digital">Digital</option>
+          </select>
+          <label>Harga (angka saja)</label>
+          <input type="number" id="produkHarga" placeholder="5000">
+          <label>Modal (untuk hitung profit)</label>
+          <input type="number" id="produkModal" placeholder="2000">
+          <label>Stok (-1 = unlimited)</label>
+          <input type="number" id="produkStok" value="-1">
+          <label>Deskripsi</label>
+          <textarea id="produkDeskripsi" placeholder="Deskripsi produk"></textarea>
+          <label>URL Gambar (opsional)</label>
+          <input type="text" id="produkImg" placeholder="logo.png">
+          <label>File / Link Download (untuk produk digital)</label>
+          <input type="text" id="produkFile" placeholder="https://...">
+          <label>Status</label>
+          <select id="produkStatus">
+            <option value="aktif">Aktif</option>
+            <option value="nonaktif">Nonaktif</option>
+          </select>
+          <button class="btn-adm success" onclick="simpanProduk()"><i class="fa-solid fa-save"></i> Simpan</button>
+          <button class="btn-adm outline" onclick="toggleFormProduk()">Batal</button>
+        </div>
+        <div id="listProdukAdm"></div>
+      </div>
+
+      <!-- PESANAN -->
+      <div id="panel-pesanan" class="panel-section">
+        <div class="admin-topbar">
+          <h1><i class="fa-solid fa-receipt"></i> Pesanan</h1>
+          <button class="btn-adm" onclick="toggleFormOrder()"><i class="fa-solid fa-plus"></i> Tambah Manual</button>
+        </div>
+        <div id="formOrder" class="form-section" style="display:none;background:#12182a;padding:16px;border-radius:12px;margin-bottom:16px;border:1px solid #1e2a45;">
+          <label>Kode Antrian (kosong = auto)</label>
+          <input type="text" id="admKode" placeholder="VJ-2026-XXXX">
+          <label>Nama</label>
+          <input type="text" id="admNama" placeholder="Nama customer">
+          <label>WhatsApp</label>
+          <input type="text" id="admWA" placeholder="08xxxxxxxxxx">
+          <label>Paket / Produk</label>
+          <input type="text" id="admPaket" placeholder="Nama paket">
+          <label>Total</label>
+          <input type="text" id="admTotal" placeholder="Rp 5.000">
+          <label>Status</label>
+          <select id="admStatus">
+            <option value="Belum Bayar">Belum Bayar</option>
+            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+            <option value="Proses">Proses</option>
+            <option value="Sukses">Sukses</option>
+            <option value="Ditolak">Ditolak</option>
+          </select>
+          <button class="btn-adm success" onclick="tambahOrderAdmin()"><i class="fa-solid fa-plus"></i> Tambah</button>
+          <button class="btn-adm outline" onclick="toggleFormOrder()">Batal</button>
+        </div>
+        <div style="margin-bottom:12px;">
+          <select id="filterStatus" onchange="loadPesanan()" style="padding:8px 12px;border-radius:8px;background:#0d1220;border:1px solid #1e2a45;color:#fff;">
+            <option value="all">Semua Status</option>
+            <option value="Belum Bayar">Belum Bayar</option>
+            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+            <option value="Proses">Proses</option>
+            <option value="Sukses">Sukses</option>
+            <option value="Ditolak">Ditolak</option>
+          </select>
+        </div>
+        <div id="listOrders"></div>
+      </div>
+
+      <!-- PEMBAYARAN -->
+      <div id="panel-pembayaran" class="panel-section">
+        <div class="admin-topbar"><h1><i class="fa-solid fa-credit-card"></i> Pembayaran</h1></div>
+        <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
+          <label>URL Gambar QRIS</label>
+          <input type="text" id="qrisUrl" value="qris.png" placeholder="qris.png atau https://...">
+          <label>Nomor Rekening / E-Wallet (opsional)</label>
+          <input type="text" id="rekeningInfo" placeholder="BCA 1234567890 a/n Voxyy">
+          <label>Catatan Pembayaran</label>
+          <textarea id="catatanBayar" placeholder="Transfer sesuai nominal, lalu upload bukti."></textarea>
+          <button class="btn-adm success" onclick="simpanPembayaran()"><i class="fa-solid fa-save"></i> Simpan Pengaturan Bayar</button>
+        </div>
+        <div style="margin-top:16px;text-align:center;">
+          <img id="previewQris" src="qris.png" alt="QRIS" style="max-width:200px;border-radius:12px;border:1px solid #1e2a45;">
+        </div>
+      </div>
+
+      <!-- KEUNTUNGAN -->
+      <div id="panel-keuntungan" class="panel-section">
+        <div class="admin-topbar"><h1><i class="fa-solid fa-coins"></i> Keuntungan</h1></div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="val" id="keuntunganTotal">Rp 0</div><div class="lbl">Total Keuntungan</div></div>
+          <div class="stat-card"><div class="val" id="keuntunganModal">Rp 0</div><div class="lbl">Total Modal</div></div>
+          <div class="stat-card"><div class="val" id="keuntunganOmzet">Rp 0</div><div class="lbl">Total Omzet</div></div>
+        </div>
+        <h3 style="color:#2196f3;margin-bottom:12px;">Profit per Transaksi (Sukses)</h3>
+        <div id="listProfit"></div>
+      </div>
+
+      <!-- TAMPILAN -->
+      <div id="panel-tampilan" class="panel-section">
+        <div class="admin-topbar"><h1><i class="fa-solid fa-palette"></i> Tampilan</h1></div>
+        <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
+          <label>URL Logo</label>
+          <input type="text" id="logoUrl" value="logo.png">
+          <label>URL Banner</label>
+          <input type="text" id="bannerUrl" value="banner.jpg">
+          <label>Warna Background (pilih atau custom)</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;">
+            <div class="color-swatch active" style="background:#0a0e18;" data-color="#0a0e18" onclick="pilihWarna(this)"></div>
+            <div class="color-swatch" style="background:#0d1b2a;" data-color="#0d1b2a" onclick="pilihWarna(this)"></div>
+            <div class="color-swatch" style="background:#1a0a2e;" data-color="#1a0a2e" onclick="pilihWarna(this)"></div>
+            <div class="color-swatch" style="background:#0a1f1a;" data-color="#0a1f1a" onclick="pilihWarna(this)"></div>
+            <div class="color-swatch" style="background:#1a1a0a;" data-color="#1a1a0a" onclick="pilihWarna(this)"></div>
+            <div class="color-swatch" style="background:#1a0a0a;" data-color="#1a0a0a" onclick="pilihWarna(this)"></div>
+          </div>
+          <input type="color" id="bgColorCustom" value="#0a0e18" style="width:60px;height:36px;border:none;cursor:pointer;" onchange="document.getElementById('bgColorHex').value=this.value">
+          <input type="text" id="bgColorHex" value="#0a0e18" placeholder="#0a0e18" style="width:120px;display:inline-block;margin-left:8px;">
+          <br>
+          <button class="btn-adm success" onclick="simpanTampilan()"><i class="fa-solid fa-save"></i> Simpan Tampilan</button>
+        </div>
+      </div>
+
+      <!-- PENGATURAN -->
+      <div id="panel-pengaturan" class="panel-section">
+        <div class="admin-topbar"><h1><i class="fa-solid fa-gear"></i> Pengaturan</h1></div>
+        <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
+          <label>Nama Toko</label>
+          <input type="text" id="namaToko" value="Voxyy">
+          <label>Nomor WhatsApp Admin</label>
+          <input type="text" id="waAdmin" value="6285151982250">
+          <label>Nomor WhatsApp Backup</label>
+          <input type="text" id="waBackup" value="6285706128277">
+          <label>Password Admin (untuk akses panel)</label>
+          <input type="password" id="adminPass" placeholder="Kosongkan jika tidak ubah">
+          <button class="btn-adm success" onclick="simpanPengaturan()"><i class="fa-solid fa-save"></i> Simpan Pengaturan</button>
+        </div>
+        <div style="margin-top:20px;">
+          <a href="index.html" class="btn-adm outline"><i class="fa-solid fa-arrow-left"></i> Kembali ke Website</a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script src="telegram.js"></script>
+  <script src="script.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>

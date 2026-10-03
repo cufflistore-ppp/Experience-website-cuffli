@@ -172,29 +172,70 @@ function loadProdukDigital() {
   } catch (e) {}
 }
 
+let digitalFilter = "all";
+let digitalSearch = "";
+
+function filterDigital(cat) {
+  digitalFilter = cat;
+  document.querySelectorAll("#digitalCats .cat-chip").forEach(b => {
+    b.classList.toggle("active", b.getAttribute("data-cat") === cat);
+  });
+  renderDigitalList();
+}
+
+function onSearchDigital() {
+  const inp = document.getElementById("searchDigital");
+  digitalSearch = (inp ? inp.value : "").trim().toLowerCase();
+  renderDigitalList();
+}
+
+function iconForDigital(p) {
+  const k = (p.label || "").toUpperCase();
+  if (k === "APK") return "fa-mobile-screen";
+  if (k === "SCRIPT") return "fa-code";
+  if (k === "NOKOS") return "fa-sim-card";
+  if (k === "MURID") return "fa-graduation-cap";
+  if (k === "JASA") return "fa-pen-ruler";
+  if (k.includes("GAME")) return "fa-gamepad";
+  return "fa-box";
+}
+
 function renderDigitalList() {
   const list = document.getElementById("digitalList");
   if (!list) return;
   loadProdukDigital();
 
-  list.innerHTML = produkDigital.map(p => {
-    const variants = Array.isArray(p.variants) && p.variants.length ? p.variants : null;
-    const actions = variants
-      ? `<div class="variant-grid">` + variants.map(v =>
-          `<a href="${payUrl(p.judul + " · " + v.nama, v.harga)}" class="btn-pesan variant-btn">${v.nama}<small>${formatRpDigital(v.harga)}</small></a>`
-        ).join("") + `</div>`
-      : `<a href="${payUrl(p.judul, p.harga)}" class="btn-pesan">Bayar Sekarang</a>`;
+  let items = produkDigital.slice();
+  if (digitalFilter !== "all") {
+    items = items.filter(p => (p.label || "").toUpperCase() === digitalFilter.toUpperCase());
+  }
+  if (digitalSearch) {
+    items = items.filter(p => {
+      const t = ((p.judul || "") + " " + (p.deskripsi || "") + " " + (p.label || "")).toLowerCase();
+      return t.includes(digitalSearch);
+    });
+  }
 
+  if (!items.length) {
+    list.innerHTML = '<div class="market-empty"><i class="fa-solid fa-box-open" style="font-size:32px;margin-bottom:8px;display:block;"></i>Tidak ada produk ditemukan.</div>';
+    return;
+  }
+
+  list.innerHTML = items.map(p => {
+    const href = payUrl(p.judul, p.harga);
+    const stok = p.stok !== undefined && p.stok !== -1 ? p.stok : Math.floor(15 + Math.random() * 20);
+    const icon = iconForDigital(p);
+    const desc = (p.deskripsi || "Produk digital berkualitas.").substring(0, 55);
     return `
-    <div class="paket-card">
-      <span class="paket-label">${p.label || "DIGITAL"}</span>
-      <h3>${p.judul}</h3>
-      <p>${p.deskripsi || ""}</p>
-      <ul>
-        ${(p.fitur || []).map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join("")}
-      </ul>
-      <div class="harga">${variants ? "Mulai " + formatRpDigital(p.harga) : formatRpDigital(p.harga)}</div>
-      ${actions}
+    <div class="m-card">
+      <div class="m-card-icon"><i class="fa-solid ${icon}"></i></div>
+      <div class="m-card-title">${p.judul}</div>
+      <div class="m-card-desc">${desc}</div>
+      <div class="m-card-meta">
+        <span class="stok">Stok ${stok}</span>
+        <span class="harga">${formatRpDigital(p.harga).replace(" ","")}</span>
+      </div>
+      <a href="${href}" class="m-card-btn">Beli Sekarang</a>
     </div>`;
   }).join("");
 }

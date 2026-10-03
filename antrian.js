@@ -91,6 +91,9 @@ async function renderAntrian() {
   const globalOn =
     window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured();
 
+  // Riwayat personal: prioritaskan kode yang tersimpan di device
+  const tracked = getTrackedKode();
+
   list.innerHTML = `
     <div class="antrian-empty">
       <div class="antrian-empty-icon">⏳</div>
@@ -386,11 +389,32 @@ async function cekStatus() {
       ? '<div class="status-note">Pesanan sudah sukses. Kode antrian di kolom pencarian dihapus otomatis.</div>'
       : '<div class="status-note">Kode antrian disimpan di kolom pencarian sampai status menjadi Sukses.</div>';
 
+    // Isi panel detail di halaman
+    const detailBox = document.getElementById("detailPesanan");
+    if (detailBox) {
+      detailBox.style.display = "block";
+      detailBox.innerHTML = `
+        <div class="order-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:12px;padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <strong style="font-size:15px;">${escapeHtml(found.kode || kode)}</strong>
+            <span class="badge-st ${cls}" style="padding:4px 10px;border-radius:6px;font-size:12px;font-weight:700;">${escapeHtml(st)}</span>
+          </div>
+          <div style="font-size:13px;line-height:1.7;color:#ccc;">
+            <div><b style="color:#2196f3;">Produk / Paket:</b> ${escapeHtml(found.paket || "-")}</div>
+            <div><b style="color:#2196f3;">Nama:</b> ${escapeHtml(found.nama || "-")}</div>
+            <div><b style="color:#2196f3;">Total:</b> ${escapeHtml(found.total || "-")}</div>
+            <div><b style="color:#2196f3;">Waktu:</b> ${escapeHtml(found.waktu || found.createdAt || "-")}</div>
+            ${found.file || found.download ? `<div style="margin-top:8px;"><a href="${escapeHtml(found.file || found.download)}" target="_blank" class="btn-adm" style="display:inline-flex;padding:8px 14px;background:#43a047;color:#fff;border-radius:8px;text-decoration:none;font-size:12px;"><i class="fa-solid fa-download"></i> Ambil Produk</a></div>` : ""}
+            ${isStatusSukses(st) ? '<div style="margin-top:8px;color:#a5d6a7;font-size:12px;">✅ Pesanan selesai. Produk siap diambil / sudah dikirim.</div>' : '<div style="margin-top:8px;color:#90caf9;font-size:12px;">⏳ Menunggu proses admin. Hubungi WA Admin jika sudah transfer.</div>'}
+          </div>
+        </div>`;
+    }
+
     showStatusModal(
       "Status Pesanan",
       row("Kode Antrian", "<code>" + escapeHtml(found.kode || kode) + "</code>") +
         row("Nama", escapeHtml(found.nama || "-")) +
-        row("Paket", escapeHtml(found.paket || "-")) +
+        row("Paket / Produk", escapeHtml(found.paket || "-")) +
         row("Status", escapeHtml(st), cls) +
         row("Total", escapeHtml(found.total || "-")) +
         row("Waktu", escapeHtml(found.waktu || "-")) +

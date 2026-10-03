@@ -1,3 +1,15 @@
+
+// Apply custom background from admin
+(function(){
+  try {
+    const bg = localStorage.getItem("voxyy_bg_color");
+    if (bg) {
+      document.body.style.background = bg;
+      document.body.style.backgroundImage = "none";
+    }
+  } catch(e){}
+})();
+
 // ========== TOP NOTIF (hanya muncul jika ada order real) ==========
 function formatRupiah(n) {
   if (typeof n === "string" && n.includes("Rp")) return n;
