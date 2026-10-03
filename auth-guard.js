@@ -3,10 +3,10 @@
  * Halaman publik: login.html, daftar.html saja.
  */
 (function () {
-  var PUBLIC = ["login.html", "daftar.html"];
+  var PUBLIC = ["login.html", "daftar.html", "index.html"];
   var path = (location.pathname || "").split("/").pop() || "index.html";
   path = path.toLowerCase();
-  if (!path || path === "/") path = "index.html";
+  if (!path || path === "/") path = "home.html";
 
   // Izinkan halaman auth
   if (PUBLIC.indexOf(path) >= 0) return;

@@ -168,6 +168,16 @@
     });
   }
 
+  const ADMIN_EMAILS = [
+    "emailwebvixy@gmail.com",
+    "voxymarket98@gmail.com"
+  ];
+
+  function isAdminEmail(email) {
+    if (!email) return false;
+    return ADMIN_EMAILS.indexOf(String(email).trim().toLowerCase()) >= 0;
+  }
+
   window.VoxyyAuth = {
     ensureAuth,
     currentUser,
@@ -176,7 +186,10 @@
     registerEmail,
     logout,
     onAuthChange,
+    onAuthStateChanged: onAuthChange,
     handleRedirectResult,
-    getClientId
+    getClientId,
+    isAdminEmail,
+    ADMIN_EMAILS
   };
 })();

@@ -1,207 +1,125 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="iframe-nav.js"></script>
+  <script src="auth-guard.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Voxyy Joki - Pusat Layanan</title>
+  <title>VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <style>
-    .header { justify-content: space-between; }
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .music-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(33, 150, 243, 0.12);
-      border: 1px solid rgba(33, 150, 243, 0.3);
-      border-radius: 20px;
-      padding: 4px 8px 4px 6px;
-    }
-    .music-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, #1976d2, #0d47a1);
-      color: #fff;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
-    }
-    .music-btn:active { transform: scale(0.92); }
-    .music-label {
-      font-size: 11px;
-      color: #90caf9;
-      font-weight: 600;
-      padding-right: 4px;
-    }
-    .user-chip {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      background: rgba(33, 150, 243, 0.12);
-      border: 1px solid rgba(33, 150, 243, 0.3);
-      border-radius: 20px;
-      padding: 3px 10px 3px 3px;
-      text-decoration: none;
-      color: #fff;
-    }
-    .user-chip.show { display: flex; }
-    .user-chip img {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid #2196f3;
-    }
-    .user-chip span {
-      font-size: 12px;
-      font-weight: 600;
-      max-width: 70px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  </style>
 </head>
 <body>
 
-  <audio id="bgMusic" loop preload="auto">
-    <source src="music.m4a" type="audio/mp4">
-  </audio>
-
   <header class="header">
     <div class="brand">
-      <img src="logo.png" alt="Voxyy Joki" class="logo">
+      <img src="logo.png" alt="VOXY MARKET" class="logo">
       <div>
-        <h1>Voxyy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pusat Layanan Voxyy Joki</p>
+        <h1>VOXY <span style="color:#2196f3">MARKET</span> <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Pusat Layanan Digital & Jasa</p>
       </div>
-    </div>
-    <div class="header-right">
-      <div class="music-controls" id="musicControls">
-        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
-          <i class="fa-solid fa-pause" id="musicIcon"></i>
-        </button>
-        <span class="music-label">Lagu</span>
-      </div>
-      <a href="akun.html" class="user-chip" id="userChip">
-        <img src="" alt="" id="userAvatar">
-        <span id="userName"></span>
-      </a>
     </div>
   </header>
 
+  <!-- Banner (bisa diganti dari Admin → Tampilan) -->
   <div class="banner">
-    <img src="banner.jpg" alt="Selamat Datang di Voxyy Joki" class="banner-full">
+    <img src="banner.jpg" alt="Selamat Datang di VOXY MARKET" class="banner-full">
   </div>
   <div class="top-notif" id="topNotif" style="display:none;"></div>
 
+  <!-- Menu pintasan -->
   <div class="menu-grid">
-    <a href="joki.html" class="menu-item">
-      <i class="fa-solid fa-shield-halved"></i>
-      <span>Joki</span>
-    </a>
     <a href="digital.html" class="menu-item">
-      <i class="fa-solid fa-box"></i>
-      <span>Produk Digital</span>
+      <i class="fa-solid fa-bag-shopping"></i>
+      <span>Lihat Produk</span>
     </a>
     <a href="pesan.html?type=jaspost" class="menu-item">
-      <i class="fa-solid fa-paper-plane"></i>
+      <i class="fa-brands fa-whatsapp"></i>
       <span>Jasa Post</span>
     </a>
-    <a href="https://wa.me//6285151982250" class="menu-item">
+    <a href="https://wa.me/6285151982250?text=Halo%20Admin%2C%20saya%20minta%20ACC%20pesanan" class="menu-item">
       <i class="fa-brands fa-whatsapp"></i>
-      <span>Wa Joki</span>
+      <span>WA Minta ACC</span>
     </a>
-    <a href="https://wa.me//6285706128277" class="menu-item">
+    <a href="antrian.html" class="menu-item">
+      <i class="fa-solid fa-receipt"></i>
+      <span>Pesanan Saya</span>
+    </a>
+    <a href="https://wa.me/6285151982250" class="menu-item">
       <i class="fa-brands fa-whatsapp"></i>
-      <span>Wa Backup Joki</span>
+      <span>WA Admin</span>
     </a>
-    <a href="pembayaran.html?paket=Nokos%20WA%20Indonesia&total=6000" class="menu-item">
-      <i class="fa-solid fa-mobile-screen"></i>
-      <span>Nokos WA Indonesia</span>
+    <a href="tentang.html" class="menu-item">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>Tentang</span>
     </a>
   </div>
 
+  <!-- Preview produk (bukan full catalog) -->
   <section class="produk-section">
-    <h3>PRODUK DIGITAL</h3>
-    <p class="subtitle">Nokos & Jasa Logo. Bayar QRIS, lalu konfirmasi via WhatsApp.</p>
+    <h3>PRODUK UNGGULAN</h3>
+    <p class="subtitle">Beberapa produk pilihan. Lihat semua di menu Produk.</p>
     <div class="produk-grid" id="produkGrid"></div>
+    <div style="padding:8px 0 16px;text-align:center;">
+      <a href="digital.html" class="m-card-btn" style="display:inline-block;width:auto;padding:10px 24px;text-decoration:none;">Lihat Semua Produk</a>
+    </div>
   </section>
 
   <div class="info-box">
-    <h4>Website jadi pusat proses order.</h4>
-    <p>Website dipakai untuk menerima order, pembayaran, data customer, antrian, dan status supaya proses tidak tercerai di chat.</p>
+    <h4>Order & bayar di website</h4>
+    <p>Pilih produk, bayar QRIS, lalu status & file produk bisa dicek di menu Pesanan. Admin mengelola semua dari panel admin.</p>
   </div>
 
   <div style="padding:0 12px 24px;">
     <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
   </div>
 
-  <nav class="bottom-nav nav-6">
-    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+    <nav class="bottom-nav nav-5">
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
+    <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
     <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
-    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
     <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
-  <script src="produk.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="auth.js"></script>
+  <script src="branding.js"></script>
+  <script src="katalog.js"></script>
+  <script src="produk.js"></script>
   <script src="script.js"></script>
-  <script src="music.js"></script>
   <script>
-    (function () {
-      // Di iframe: jangan redirect. Di luar: belum masuk → intro
-      try {
-        if (window.self === window.top) {
-          if (sessionStorage.getItem("voxyy_entered") !== "1") {
-            window.location.replace("index.html");
-            return;
-          }
+    // Home: tampilkan max 4 produk unggulan saja
+    document.addEventListener("DOMContentLoaded", function () {
+      setTimeout(function () {
+        var grid = document.getElementById("produkGrid");
+        if (!grid) return;
+        // Jika produk.js sudah isi, potong jadi 4
+        var cards = grid.children;
+        if (cards.length > 4) {
+          while (grid.children.length > 4) grid.removeChild(grid.lastChild);
         }
-      } catch (e) {}
-
-      function updateUserChip() {
-        try {
-          if (typeof firebase === "undefined" || !firebase.apps.length) return;
-          const user = firebase.auth().currentUser;
-          const chip = document.getElementById("userChip");
-          const avatar = document.getElementById("userAvatar");
-          const name = document.getElementById("userName");
-          if (user && chip) {
-            chip.classList.add("show");
-            if (avatar) avatar.src = user.photoURL || "logo.png";
-            if (name) name.textContent = (user.displayName || "Akun").split(" ")[0];
-          } else if (chip) {
-            chip.classList.remove("show");
-          }
-        } catch (e) {}
-      }
-
-      document.addEventListener("DOMContentLoaded", function () {
-        setTimeout(updateUserChip, 800);
-        if (typeof firebase !== "undefined") {
-          try {
-            firebase.auth().onAuthStateChanged(updateUserChip);
-          } catch (e) {}
+        // Atau pakai katalog market style ringkas
+        if (!cards.length && typeof getCatalog === "function") {
+          var list = getCatalog().slice(0, 4);
+          grid.className = "market-grid";
+          grid.innerHTML = list.map(function (p) {
+            var href = /jasa\s*post/i.test(p.judul || "")
+              ? "pesan.html?type=jaspost"
+              : "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
+            var stok = p.stok < 0 ? "∞" : p.stok;
+            return '<div class="m-card"><div class="m-card-icon"><i class="fa-solid fa-box"></i></div>' +
+              '<div class="m-card-title">' + (p.judul || "") + '</div>' +
+              '<div class="m-card-desc">' + (p.deskripsi || "").substring(0, 50) + '</div>' +
+              '<div class="m-card-meta"><span class="stok">Stok ' + stok + '</span><span class="harga">Rp' + Number(p.harga).toLocaleString("id-ID") + '</span></div>' +
+              '<a href="' + href + '" class="m-card-btn">Beli Sekarang</a></div>';
+          }).join("");
         }
-      });
-    })();
+      }, 400);
+    });
   </script>
 </body>
 </html>

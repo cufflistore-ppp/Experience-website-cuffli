@@ -1,125 +1,45 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="auth-guard.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VOXY MARKET</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-  <header class="header">
-    <div class="brand">
-      <img src="logo.png" alt="VOXY MARKET" class="logo">
-      <div>
-        <h1>VOXY <span style="color:#2196f3">MARKET</span> <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pusat Layanan Digital & Jasa</p>
-      </div>
-    </div>
-  </header>
-
-  <!-- Banner (bisa diganti dari Admin → Tampilan) -->
-  <div class="banner">
-    <img src="banner.jpg" alt="Selamat Datang di VOXY MARKET" class="banner-full">
-  </div>
-  <div class="top-notif" id="topNotif" style="display:none;"></div>
-
-  <!-- Menu pintasan -->
-  <div class="menu-grid">
-    <a href="digital.html" class="menu-item">
-      <i class="fa-solid fa-bag-shopping"></i>
-      <span>Lihat Produk</span>
-    </a>
-    <a href="pesan.html?type=jaspost" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>Jasa Post</span>
-    </a>
-    <a href="https://wa.me/6285151982250?text=Halo%20Admin%2C%20saya%20minta%20ACC%20pesanan" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>WA Minta ACC</span>
-    </a>
-    <a href="antrian.html" class="menu-item">
-      <i class="fa-solid fa-receipt"></i>
-      <span>Pesanan Saya</span>
-    </a>
-    <a href="https://wa.me/6285151982250" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>WA Admin</span>
-    </a>
-    <a href="tentang.html" class="menu-item">
-      <i class="fa-solid fa-circle-info"></i>
-      <span>Tentang</span>
-    </a>
-  </div>
-
-  <!-- Preview produk (bukan full catalog) -->
-  <section class="produk-section">
-    <h3>PRODUK UNGGULAN</h3>
-    <p class="subtitle">Beberapa produk pilihan. Lihat semua di menu Produk.</p>
-    <div class="produk-grid" id="produkGrid"></div>
-    <div style="padding:8px 0 16px;text-align:center;">
-      <a href="digital.html" class="m-card-btn" style="display:inline-block;width:auto;padding:10px 24px;text-decoration:none;">Lihat Semua Produk</a>
-    </div>
-  </section>
-
-  <div class="info-box">
-    <h4>Order & bayar di website</h4>
-    <p>Pilih produk, bayar QRIS, lalu status & file produk bisa dicek di menu Pesanan. Admin mengelola semua dari panel admin.</p>
-  </div>
-
-  <div style="padding:0 12px 24px;">
-    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
-  </div>
-
-    <nav class="bottom-nav nav-5">
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
-    <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
-    <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
-  </nav>
-
+  <script>
+    // Entry: langsung login. Jika sudah login → home.
+    (function () {
+      function go(url) { location.replace(url); }
+      var n = 0;
+      function tick() {
+        if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
+          window.VoxyyAuth.onAuthChange(function (user) {
+            var email = user && user.email ? String(user.email).toLowerCase() : "";
+            var admins = ["emailwebvixy@gmail.com", "voxymarket98@gmail.com"];
+            if (user && admins.indexOf(email) >= 0) go("admin.html");
+            else go(user ? "home.html" : "login.html");
+          });
+          return;
+        }
+        if (++n > 25) {
+          go("login.html");
+          return;
+        }
+        setTimeout(tick, 80);
+      }
+      // Load auth deps then check
+      tick();
+    })();
+  </script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="auth.js"></script>
-  <script src="branding.js"></script>
-  <script src="katalog.js"></script>
-  <script src="produk.js"></script>
-  <script src="script.js"></script>
-  <script>
-    // Home: tampilkan max 4 produk unggulan saja
-    document.addEventListener("DOMContentLoaded", function () {
-      setTimeout(function () {
-        var grid = document.getElementById("produkGrid");
-        if (!grid) return;
-        // Jika produk.js sudah isi, potong jadi 4
-        var cards = grid.children;
-        if (cards.length > 4) {
-          while (grid.children.length > 4) grid.removeChild(grid.lastChild);
-        }
-        // Atau pakai katalog market style ringkas
-        if (!cards.length && typeof getCatalog === "function") {
-          var list = getCatalog().slice(0, 4);
-          grid.className = "market-grid";
-          grid.innerHTML = list.map(function (p) {
-            var href = /jasa\s*post/i.test(p.judul || "")
-              ? "pesan.html?type=jaspost"
-              : "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
-            var stok = p.stok < 0 ? "∞" : p.stok;
-            return '<div class="m-card"><div class="m-card-icon"><i class="fa-solid fa-box"></i></div>' +
-              '<div class="m-card-title">' + (p.judul || "") + '</div>' +
-              '<div class="m-card-desc">' + (p.deskripsi || "").substring(0, 50) + '</div>' +
-              '<div class="m-card-meta"><span class="stok">Stok ' + stok + '</span><span class="harga">Rp' + Number(p.harga).toLocaleString("id-ID") + '</span></div>' +
-              '<a href="' + href + '" class="m-card-btn">Beli Sekarang</a></div>';
-          }).join("");
-        }
-      }, 400);
-    });
-  </script>
+  <style>
+    body { margin:0; background:#0b0b12; color:#7a7a8c; font-family:sans-serif;
+      display:flex;align-items:center;justify-content:center;min-height:100vh; }
+  </style>
+</head>
+<body>
+  <p>Memuat...</p>
 </body>
 </html>

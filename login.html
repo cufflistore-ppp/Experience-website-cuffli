@@ -128,13 +128,30 @@
   <script src="branding.js"></script>
   <script src="auth.js"></script>
   <script>
-    function afterLoginRedirect() {
+    function afterLoginRedirect(user) {
+      // Admin email → langsung panel admin (tanpa login lagi)
+      try {
+        var u = user || (window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser());
+        var email = u && u.email ? String(u.email).toLowerCase() : "";
+        if (window.VoxyyAuth && window.VoxyyAuth.isAdminEmail && window.VoxyyAuth.isAdminEmail(email)) {
+          localStorage.setItem("voxyy_admin_email", email);
+          location.href = "admin.html";
+          return;
+        }
+        // fallback: cek list lokal
+        var admins = ["emailwebvixy@gmail.com", "voxymarket98@gmail.com"];
+        if (email && admins.indexOf(email) >= 0) {
+          localStorage.setItem("voxyy_admin_email", email);
+          location.href = "admin.html";
+          return;
+        }
+      } catch (e) {}
+
       var q = new URLSearchParams(location.search).get("next") || "";
-      var target = "index.html";
+      var target = "home.html";
       if (q) {
         try {
           q = decodeURIComponent(q);
-          // prevent open redirect
           if (q.indexOf("://") < 0 && q.indexOf("login") < 0 && q.indexOf("daftar") < 0) {
             target = q;
           }
@@ -156,8 +173,8 @@
       btn.disabled = true; btn.textContent = "Memproses...";
       showErr("");
       try {
-        await window.VoxyyAuth.loginEmail(email, pass);
-        afterLoginRedirect();
+        var user = await window.VoxyyAuth.loginEmail(email, pass);
+        afterLoginRedirect(user);
       } catch (e) {
         var m = (e && e.message) ? e.message : String(e);
         if (/user-not-found|invalid-credential|wrong-password/i.test(m)) m = "Email atau password salah.";
@@ -171,8 +188,8 @@
       var btn = document.getElementById("btnGoogle");
       btn.disabled = true;
       try {
-        await window.VoxyyAuth.loginGoogle();
-        afterLoginRedirect();
+        var user = await window.VoxyyAuth.loginGoogle();
+        afterLoginRedirect(user);
       } catch (e) {
         showErr((e && e.message) ? e.message : String(e));
       }
@@ -188,7 +205,7 @@
         if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
           clearInterval(t);
           window.VoxyyAuth.onAuthChange(function (u) {
-            if (u) afterLoginRedirect();
+            if (u) afterLoginRedirect(u);
           });
         } else if (++n > 30) clearInterval(t);
       }, 150);

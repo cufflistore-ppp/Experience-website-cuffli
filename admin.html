@@ -96,7 +96,7 @@
         <i class="fa-brands fa-google" style="color:#ea4335;"></i> Masuk dengan Google
       </button>
       <p id="adminLoginError" style="display:none;color:#ef9a9a;font-size:12px;margin-top:14px;"></p>
-      <p style="margin-top:16px;"><a href="index.html" style="color:#2196f3;font-size:12px;">← Kembali ke website</a></p>
+      <p style="margin-top:16px;"><a href="home.html" style="color:#2196f3;font-size:12px;">← Kembali ke website</a></p>
     </div>
   </div>
 
@@ -305,11 +305,25 @@
             <option value="file">File / Script</option>
             <option value="lainnya">Lainnya</option>
           </select>
-          <label>Link unduhan / URL file (Drive, GitHub, dll)</label>
-          <input type="text" id="kirimFile" placeholder="https://...">
+          <label>Cara kirim</label>
+          <div style="display:flex;gap:8px;margin:6px 0 10px;flex-wrap:wrap;">
+            <button type="button" class="btn-adm outline" id="tabKirimFile" style="margin:0;" onclick="setKirimMode('file')">Upload File</button>
+            <button type="button" class="btn-adm outline" id="tabKirimUrl" style="margin:0;" onclick="setKirimMode('url')">Link URL</button>
+          </div>
+          <div id="kirimModeFile">
+            <label>Pilih file (APK, ZIP, PDF, dll)</label>
+            <input type="file" id="kirimFileInput" style="font-size:12px;color:#ccc;width:100%;padding:8px 0;">
+            <p id="kirimFileName" style="font-size:12px;color:#90caf9;margin-top:6px;"></p>
+            <p style="font-size:11px;color:#6a7a90;">File diupload ke Firebase Storage, pembeli bisa unduh dari Pesanan.</p>
+          </div>
+          <div id="kirimModeUrl" style="display:none;">
+            <label>Link unduhan / URL file</label>
+            <input type="text" id="kirimFile" placeholder="https://drive.google.com/... atau link lain">
+          </div>
           <label>Catatan untuk pembeli (opsional)</label>
           <textarea id="kirimCatatan" placeholder="Cara install, password zip, dll"></textarea>
-          <button class="btn-adm success" onclick="kirimProdukOrder()"><i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses</button>
+          <button class="btn-adm success" id="btnKirimProduk" onclick="kirimProdukOrder()"><i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses</button>
+          <p id="kirimProgress" style="display:none;font-size:12px;color:#90caf9;margin-top:8px;"></p>
         </div>
       </div>
 
@@ -329,7 +343,7 @@
           <button class="btn-adm success" onclick="simpanPengaturan()"><i class="fa-solid fa-save"></i> Simpan Pengaturan</button>
         </div>
         <div style="margin-top:20px;">
-          <a href="index.html" class="btn-adm outline"><i class="fa-solid fa-arrow-left"></i> Kembali ke Website</a>
+          <a href="home.html" class="btn-adm outline"><i class="fa-solid fa-arrow-left"></i> Kembali ke Website</a>
         </div>
       </div>
     </main>
@@ -338,6 +352,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script src="global-orders.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="auth.js"></script>

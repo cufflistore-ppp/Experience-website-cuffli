@@ -611,13 +611,76 @@ function simpanPengaturan() {
 
 
 /* ========== KIRIM PRODUK ========== */
+let _kirimMode = "file";
+let _kirimLocalFile = null;
+
+function setKirimMode(mode) {
+  _kirimMode = mode === "url" ? "url" : "file";
+  const f = document.getElementById("kirimModeFile");
+  const u = document.getElementById("kirimModeUrl");
+  const bf = document.getElementById("tabKirimFile");
+  const bu = document.getElementById("tabKirimUrl");
+  if (f) f.style.display = _kirimMode === "file" ? "block" : "none";
+  if (u) u.style.display = _kirimMode === "url" ? "block" : "none";
+  if (bf) {
+    bf.style.background = _kirimMode === "file" ? "#2196f3" : "transparent";
+    bf.style.color = _kirimMode === "file" ? "#fff" : "#2196f3";
+  }
+  if (bu) {
+    bu.style.background = _kirimMode === "url" ? "#2196f3" : "transparent";
+    bu.style.color = _kirimMode === "url" ? "#fff" : "#2196f3";
+  }
+}
+window.setKirimMode = setKirimMode;
+
 function loadKirim() {
   document.getElementById("kirimKode").value = "";
   document.getElementById("kirimInfo").innerHTML = "";
   document.getElementById("kirimPaket").value = "";
-  document.getElementById("kirimFile").value = "";
+  const urlInp = document.getElementById("kirimFile");
+  if (urlInp) urlInp.value = "";
   document.getElementById("kirimCatatan").value = "";
+  _kirimLocalFile = null;
+  const fi = document.getElementById("kirimFileInput");
+  if (fi) fi.value = "";
+  const fn = document.getElementById("kirimFileName");
+  if (fn) fn.textContent = "";
+  const prog = document.getElementById("kirimProgress");
+  if (prog) { prog.style.display = "none"; prog.textContent = ""; }
+  setKirimMode("file");
+  if (fi && !fi._bound) {
+    fi._bound = true;
+    fi.addEventListener("change", function () {
+      _kirimLocalFile = (fi.files && fi.files[0]) || null;
+      if (fn) {
+        fn.textContent = _kirimLocalFile
+          ? ("📎 " + _kirimLocalFile.name + " (" + Math.round(_kirimLocalFile.size / 1024) + " KB)")
+          : "";
+      }
+    });
+  }
 }
+
+async function uploadDeliveryFile(kode, file) {
+  if (!file) throw new Error("Tidak ada file");
+  // Init firebase app if needed
+  if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
+    window.VoxyyOrders.initFirebase();
+  }
+  if (typeof firebase === "undefined" || !firebase.storage) {
+    throw new Error("Firebase Storage belum termuat. Refresh halaman.");
+  }
+  const safeName = String(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_");
+  const path = "deliveries/" + String(kode || "x").replace(/[.#$\[\]]/g, "_") + "/" + Date.now() + "_" + safeName;
+  const ref = firebase.storage().ref().child(path);
+  const snap = await ref.put(file, {
+    contentType: file.type || "application/octet-stream",
+    customMetadata: { kode: String(kode || ""), originalName: file.name || safeName },
+  });
+  const url = await snap.ref.getDownloadURL();
+  return { url: url, name: file.name || safeName, path: path, size: file.size };
+}
+
 
 async function cariOrderKirim() {
   const kode = (document.getElementById("kirimKode").value || "").trim();
@@ -642,49 +705,93 @@ async function cariOrderKirim() {
 
 async function kirimProdukOrder() {
   const kode = (document.getElementById("kirimKode").value || "").trim();
-  const file = (document.getElementById("kirimFile").value || "").trim();
   const jenis = document.getElementById("kirimJenis").value;
   const catatan = (document.getElementById("kirimCatatan").value || "").trim();
   const paket = (document.getElementById("kirimPaket").value || "").trim();
   if (!kode) { alert("Isi kode order"); return; }
-  if (!file) { alert("Isi link unduhan / URL file"); return; }
+
+  let fileUrl = "";
+  let fileName = "";
+  const prog = document.getElementById("kirimProgress");
+  const btn = document.getElementById("btnKirimProduk");
+
+  if (_kirimMode === "file") {
+    if (!_kirimLocalFile) {
+      alert("Pilih file dulu, atau ganti ke mode Link URL.");
+      return;
+    }
+    try {
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengupload...'; }
+      if (prog) { prog.style.display = "block"; prog.textContent = "Upload " + _kirimLocalFile.name + "..."; }
+      const up = await uploadDeliveryFile(kode, _kirimLocalFile);
+      fileUrl = up.url;
+      fileName = up.name;
+      if (prog) prog.textContent = "Upload berhasil. Menyimpan order...";
+    } catch (e) {
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses'; }
+      alert("Gagal upload file: " + (e && e.message ? e.message : String(e)) + "\n\nCoba mode Link URL, atau cek Firebase Storage rules.");
+      return;
+    }
+  } else {
+    fileUrl = (document.getElementById("kirimFile").value || "").trim();
+    if (!fileUrl) {
+      alert("Isi link URL, atau ganti ke mode Upload File.");
+      return;
+    }
+    fileName = fileUrl.split("/").pop() || "download";
+  }
 
   const orders = await fetchOrders();
   const found = orders.find(o => String(o.kode || "").toUpperCase() === kode.toUpperCase() || String(o._id || "") === kode);
-  if (!found) { alert("Order tidak ditemukan. Cari dulu."); return; }
+  if (!found) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses'; }
+    alert("Order tidak ditemukan. Cari dulu.");
+    return;
+  }
 
   const id = found._id || found.kode;
   const patch = {
     status: "Sukses",
-    file: file,
-    download: file,
+    file: fileUrl,
+    download: fileUrl,
+    fileName: fileName,
     jenisFile: jenis,
     catatanAdmin: catatan,
     paket: paket || found.paket,
     dikirimAt: new Date().toLocaleString("id-ID"),
+    kirimVia: _kirimMode === "file" ? "upload" : "url",
   };
 
-  if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrder === "function") {
-    await window.VoxyyOrders.updateOrder(id, patch);
-  } else {
-    const idx = orders.findIndex(o => (o._id || o.kode) === id);
-    if (idx >= 0) {
-      Object.assign(orders[idx], patch);
-      localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+  try {
+    if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrder === "function") {
+      await window.VoxyyOrders.updateOrder(id, patch);
+    } else if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrderByKode === "function") {
+      await window.VoxyyOrders.updateOrderByKode(kode, patch);
+    } else {
+      const idx = orders.findIndex(o => (o._id || o.kode) === id);
+      if (idx >= 0) {
+        Object.assign(orders[idx], patch);
+        localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+      }
     }
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses'; }
+    alert("Gagal simpan order: " + (e && e.message ? e.message : String(e)));
+    return;
   }
 
-  // profit
   const settings = getSettings();
   const profit = parseRp(found.total) - (Number(found.modal) || Math.round(parseRp(found.total) * 0.3));
   settings.totalProfit = (Number(settings.totalProfit) || 0) + profit;
   saveSettings(settings);
 
-  alert("Produk dikirim! Status order → Sukses. Pembeli bisa unduh di halaman Pesanan.");
+  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses'; }
+  alert("Produk dikirim! Pembeli bisa unduh file di halaman Pesanan.");
   loadKirim();
   loadPesanan();
   loadDashboard();
 }
+
 
 
 
@@ -844,16 +951,15 @@ document.addEventListener("DOMContentLoaded", function () {
     if (window.VoxyyOrders) window.VoxyyOrders.initFirebase && window.VoxyyOrders.initFirebase();
   } catch (e) {}
 
-  if (window.VoxyyAuth && typeof window.VoxyyAuth.onAuthStateChanged === "function") {
-    window.VoxyyAuth.onAuthStateChanged(function (user) {
+  if (window.VoxyyAuth && typeof window.VoxyyAuth.onAuthChange === "function") {
+    window.VoxyyAuth.onAuthChange(function (user) {
       const email = user && user.email ? user.email.toLowerCase() : "";
       if (user && isAdminEmail(email)) {
         localStorage.setItem("voxyy_admin_email", email);
         showAdminApp();
         bootAdminData();
       } else if (user && !isAdminEmail(email)) {
-        if (window.VoxyyAuth.logout) window.VoxyyAuth.logout();
-        showAdminGate("Akses ditolak untuk " + email);
+        showAdminGate("Akses ditolak untuk " + email + ". Kembali ke website.");
       } else {
         showAdminGate();
       }
@@ -863,15 +969,15 @@ document.addEventListener("DOMContentLoaded", function () {
     let tries = 0;
     const wait = setInterval(function () {
       tries++;
-      if (window.VoxyyAuth && window.VoxyyAuth.onAuthStateChanged) {
+      if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
         clearInterval(wait);
-        window.VoxyyAuth.onAuthStateChanged(function (user) {
+        window.VoxyyAuth.onAuthChange(function (user) {
           const email = user && user.email ? user.email.toLowerCase() : "";
           if (user && isAdminEmail(email)) {
             showAdminApp();
             bootAdminData();
           } else {
-            showAdminGate(user ? ("Akses ditolak untuk " + email) : "");
+            showAdminGate(user ? ("Akses ditolak untuk " + email + ". Bukan akun admin.") : "");
           }
         });
       } else if (tries > 30) {

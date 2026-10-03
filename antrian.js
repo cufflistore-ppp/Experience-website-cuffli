@@ -522,7 +522,7 @@ async function renderAntrian() {
           <strong style="color:#fff;">${escapeHtml(o.kode || "-")}</strong>
           <div style="font-size:13px;color:#ccc;margin-top:4px;">${escapeHtml(o.paket || "-")}</div>
           <div style="font-size:12px;color:#6a7a90;margin-top:2px;">${escapeHtml(o.total || "")} · ${escapeHtml(o.waktu || "")}</div>
-          ${file ? `<a href="${escapeHtml(file)}" target="_blank" style="display:inline-block;margin-top:8px;padding:6px 12px;background:#43a047;color:#fff;border-radius:8px;font-size:12px;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh Produk</a>` : ""}
+          ${file ? `<a href="${escapeHtml(file)}" target="_blank" download style="display:inline-block;margin-top:8px;padding:6px 12px;background:#43a047;color:#fff;border-radius:8px;font-size:12px;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh ${escapeHtml(o.fileName || "Produk")}</a>` : ""}
           ${o.catatanAdmin ? `<div style="font-size:11px;color:#90caf9;margin-top:6px;">${escapeHtml(o.catatanAdmin)}</div>` : ""}
         </div>
         <span class="badge-st ${cls}">${escapeHtml(st)}</span>
