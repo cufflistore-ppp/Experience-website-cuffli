@@ -3,50 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riwayat Pesanan - Voxyy</title>
+  <title>Pesanan - VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<header class="header">
-    <div class="brand">
-      <img src="logo.png" class="logo">
-      <div>
-        <h1>Voxyy <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pusat Layanan Digital & Jasa</p>
-      </div>
+<body class="market-page">
+  <header class="market-header">
+    <div class="market-brand">
+      <div class="vx-badge">VX</div>
+      <div class="market-title">VOXY <span>MARKET</span></div>
     </div>
+    <a href="akun.html" class="market-user"><i class="fa-solid fa-user"></i></a>
   </header>
-  <div class="top-notif" id="topNotif" style="display:none;"></div>
 
-  <div class="page-content">
-    <h2 style="margin-bottom:6px;">RIWAYAT PESANAN</h2>
-    <p style="color:#aaa;font-size:13px;margin-bottom:16px;">Hanya menampilkan pesanan milikmu. Masukkan kode antrian untuk melihat produk yang kamu beli.</p>
+  <div class="market-content">
+    <h1 class="market-heading">Pesanan Saya</h1>
+    <p class="market-sub">Lihat produk yang kamu beli. Masukkan kode order untuk cek status & unduh file.</p>
 
-    <div class="search-box">
-      <input type="text" id="searchOrder" placeholder="VJ-2026-xxxx" autocomplete="off" spellcheck="false">
-      <button type="button" onclick="cekStatus()"><i class="fa-solid fa-search"></i> Cek Status</button>
+    <div class="market-search" style="margin-bottom:16px;">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchOrder" placeholder="Kode order (VJ-...)" autocomplete="off">
     </div>
-    <p style="color:#8aa0b8;font-size:12px;margin:-8px 0 16px;line-height:1.45;">Kode antrian tersimpan di perangkatmu selama status masih Belum Bayar / Proses. Setelah Sukses, kamu tetap bisa cek dengan kode yang sama.</p>
+    <button class="m-card-btn" style="margin-bottom:16px;" onclick="cekStatus()"><i class="fa-solid fa-search"></i> Cek Pesanan</button>
 
     <div id="detailPesanan" style="display:none;margin-bottom:16px;"></div>
     <div id="antrianList" class="antrian-list"></div>
   </div>
 
-  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
-
-    <nav class="bottom-nav nav-5">
-    <a href="joki.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
+  <nav class="bottom-nav nav-5">
+    <a href="index.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
     <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="antrian.html" class="nav-item active"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
     <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="branding.js"></script>
   <script src="antrian.js"></script>
   <script src="script.js"></script>
 </body>

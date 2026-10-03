@@ -146,6 +146,8 @@
         </div>
       </div>
       <p class="qris-label">QRIS</p>
+      <div id="rekeningInfoBox" style="display:none;margin:8px 0 4px;padding:10px 12px;background:#12182a;border:1px solid #1e2a45;border-radius:10px;font-size:12px;color:#ccc;text-align:left;"></div>
+      <p id="catatanBayarBox" style="display:none;font-size:12px;color:#8aa0b8;margin:6px 0 0;"></p>
 
       <p class="info-bayar" id="infoBayar">
         1. Scan <b>QRIS</b> di atas pakai e-wallet / mobile banking<br>
@@ -187,8 +189,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="branding.js"></script>
   <script src="telegram.js"></script>
-  <script src="script.js"></script>
+    <script src="script.js"></script>
     <script>
     let currentOrder = null;
 
@@ -228,6 +231,14 @@
           localStorage.setItem("voxyy_orders", JSON.stringify(orders));
         }
         if (kode) localStorage.setItem("voxyy_saved_kode", kode);
+        try {
+          let arr = JSON.parse(localStorage.getItem("voxyy_my_orders") || "[]");
+          if (!Array.isArray(arr)) arr = [];
+          const kk = String(kode).toUpperCase();
+          if (kk && !arr.includes(kk)) arr.unshift(kk);
+          localStorage.setItem("voxyy_my_orders", JSON.stringify(arr.slice(0, 30)));
+        } catch (e) {}
+
         const extra = isWebsite ? "&website=1" : "&digital=1";
         window.location.replace(`pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(order.total)}${extra}`);
         return;
@@ -274,6 +285,14 @@
       document.getElementById("kodeOrder").textContent = order.kode;
       if (order.kode && order.status !== "Sukses" && order.status !== "SELESAI") {
         localStorage.setItem("voxyy_saved_kode", order.kode);
+        try {
+          let arr = JSON.parse(localStorage.getItem("voxyy_my_orders") || "[]");
+          if (!Array.isArray(arr)) arr = [];
+          const kk = String(kode).toUpperCase();
+          if (kk && !arr.includes(kk)) arr.unshift(kk);
+          localStorage.setItem("voxyy_my_orders", JSON.stringify(arr.slice(0, 30)));
+        } catch (e) {}
+
       }
       const h2 = document.querySelector(".pay-card h2");
       if (h2 && order.paket) {
@@ -372,13 +391,71 @@ Customer sudah bayar & konfirmasi.
         `Halo admin Voxyy, saya sudah TF.\nKode: ${order.kode || "-"}\nPaket: ${order.paket || "-"}\nTotal: ${formatRupiah(finalAmt)}`
       );
       const waBtn = document.querySelector("#statusBox a[href*='wa.me']");
-      if (waBtn) waBtn.href = `https://wa.me/6285151982250?text=${waText}`;
+      const waNum = window._waAdmin || (getPaySettings().waAdmin || "6285151982250").replace(/\D/g, "");
+      if (waBtn) waBtn.href = `https://wa.me/${waNum}?text=${waText}`;
       setTimeout(function() {
-        window.open(`https://wa.me/6285151982250?text=${waText}`, "_blank");
+        window.open(`https://wa.me/${waNum}?text=${waText}`, "_blank");
       }, 600);
     }
 
-    document.addEventListener("DOMContentLoaded", loadOrderData);
+    
+    function getPaySettings() {
+      try {
+        return JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
+      } catch (e) { return {}; }
+    }
+
+    function applyPaySettings() {
+      const s = getPaySettings();
+      const qris = s.qrisUrl || "qris.png";
+      const img = document.getElementById("qrisImg");
+      if (img) {
+        img.style.display = "";
+        img.src = qris;
+        const fb = document.getElementById("qrisFallback");
+        if (fb) fb.style.display = "none";
+        img.onerror = function() {
+          this.style.display = "none";
+          if (fb) fb.style.display = "block";
+        };
+      }
+      const rek = document.getElementById("rekeningInfoBox");
+      if (rek && s.rekeningInfo) {
+        rek.style.display = "block";
+        rek.innerHTML = "<b style=\"color:#2196f3\">Transfer / E-Wallet:</b><br>" + String(s.rekeningInfo).replace(/</g, "&lt;");
+      }
+      const cat = document.getElementById("catatanBayarBox");
+      if (cat && s.catatanBayar) {
+        cat.style.display = "block";
+        cat.textContent = s.catatanBayar;
+      }
+      window._waAdmin = (s.waAdmin || "6285151982250").replace(/\D/g, "");
+      // update static WA links on page
+      document.querySelectorAll('a[href*="wa.me"]').forEach(function(a) {
+        const href = a.getAttribute("href") || "";
+        const textMatch = href.match(/[?&]text=[^&]+/);
+        const q = textMatch ? textMatch[0].replace(/^&/, "?") : "";
+        a.setAttribute("href", "https://wa.me/" + window._waAdmin + (q.startsWith("?") ? q : (q ? "?" + q : "")));
+      });
+    }
+
+    async function loadPaySettingsCloud() {
+      try {
+        if (window.VoxyyOrders && window.VoxyyOrders.getSettings) {
+          const s = await window.VoxyyOrders.getSettings();
+          if (s && Object.keys(s).length) {
+            localStorage.setItem("voxyy_settings", JSON.stringify(s));
+            applyPaySettings();
+          }
+        }
+      } catch (e) {}
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      applyPaySettings();
+      loadPaySettingsCloud();
+      loadOrderData();
+    });
   </script>
 </body>
 </html>

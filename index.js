@@ -1,5 +1,5 @@
 /**
- * VOXYY JOKI - Server Antrian Global
+ * VOXY MARKET - Server Antrian Global
  * API sederhana, gratis, data tersimpan di server.
  *
  * Endpoint:

@@ -3,84 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Voxyy - Pusat Layanan</title>
+  <title>VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="market-page">
 
-  <header class="header">
-    <div class="brand">
-      <img src="logo.png" alt="Voxyy" class="logo">
-      <div>
-        <h1>VOXY <span style="color:#2196f3">MARKET</span></h1>
-        <p>Pusat Layanan Digital & Jasa</p>
-      </div>
+  <header class="market-header">
+    <div class="market-brand">
+      <div class="vx-badge">VX</div>
+      <div class="market-title">VOXY <span>MARKET</span></div>
     </div>
+    <a href="akun.html" class="market-user"><i class="fa-solid fa-user"></i></a>
   </header>
 
-  <div class="banner">
-    <img src="banner.jpg" alt="Selamat Datang di Voxyy" class="banner-full">
-  </div>
   <div class="top-notif" id="topNotif" style="display:none;"></div>
 
-  <!-- Menu utama sesuai permintaan -->
-  <div class="menu-grid">
-    <a href="joki.html" class="menu-item">
-      <i class="fa-solid fa-compass"></i>
-      <span>Jelajahi Produk</span>
-    </a>
-    <a href="digital.html" class="menu-item">
-      <i class="fa-solid fa-box"></i>
-      <span>Produk Digital</span>
-    </a>
-    <a href="https://wa.me/6285151982250?text=Halo%20Admin%2C%20saya%20minta%20ACC%20pesanan" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>WA Minta ACC</span>
-    </a>
-    <a href="antrian.html" class="menu-item">
-      <i class="fa-solid fa-receipt"></i>
-      <span>Riwayat Pesanan</span>
-    </a>
-    <a href="https://wa.me/6285151982250" class="menu-item">
-      <i class="fa-brands fa-whatsapp"></i>
-      <span>WA Admin</span>
-    </a>
-    <a href="tentang.html" class="menu-item">
-      <i class="fa-solid fa-circle-info"></i>
-      <span>Tentang</span>
-    </a>
+  <div class="market-content">
+    <h1 class="market-heading">Semua Produk</h1>
+    <p class="market-sub">Pilih produk digital yang ingin kamu beli.</p>
+
+    <div class="market-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="searchHome" placeholder="Cari produk..." autocomplete="off" oninput="onSearchHome()">
+    </div>
+
+    <div class="market-cats" id="homeCats">
+      <button class="cat-chip active" data-cat="all" onclick="filterHome('all')">Semua</button>
+      <button class="cat-chip" data-cat="digital" onclick="filterHome('digital')">Digital</button>
+      <button class="cat-chip" data-cat="apk" onclick="filterHome('apk')">Aplikasi</button>
+      <button class="cat-chip" data-cat="jasa" onclick="filterHome('jasa')">Jasa</button>
+      <button class="cat-chip" data-cat="lainnya" onclick="filterHome('lainnya')">Lainnya</button>
+    </div>
+
+    <div class="market-grid" id="homeGrid"></div>
   </div>
 
-  <!-- Grid produk digital -->
-  <section class="produk-section">
-    <h3>PRODUK DIGITAL</h3>
-    <p class="subtitle">Nokos, APK, Script & Jasa. Bayar QRIS, lalu konfirmasi via WhatsApp.</p>
-    <div class="produk-grid" id="produkGrid"></div>
-  </section>
-
-  <div class="info-box">
-    <h4>Website jadi pusat proses order.</h4>
-    <p>Website dipakai untuk menerima order, pembayaran, data customer, riwayat pesanan, dan status supaya proses tidak tercerai di chat.</p>
-  </div>
-
-  <div style="padding:0 12px 24px;">
-    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
-  </div>
-
-    <nav class="bottom-nav nav-5">
-    <a href="joki.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
+  <nav class="bottom-nav nav-5">
+    <a href="index.html" class="nav-item active"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
-    <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
     <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
-  <script src="produk.js"></script>
+    <script src="katalog.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="branding.js"></script>
   <script src="script.js"></script>
+  <script>
+    // Home uses katalog.js
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof renderKatalog === "function") renderKatalog("homeGrid", "home");
+    });
+  </script>
 </body>
 </html>

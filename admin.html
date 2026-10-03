@@ -99,6 +99,7 @@
         <li><a href="#" data-panel="pembayaran" onclick="showPanel('pembayaran')"><i class="fa-solid fa-credit-card"></i><span>Pembayaran</span></a></li>
         <li><a href="#" data-panel="keuntungan" onclick="showPanel('keuntungan')"><i class="fa-solid fa-coins"></i><span>Keuntungan</span></a></li>
         <li><a href="#" data-panel="tampilan" onclick="showPanel('tampilan')"><i class="fa-solid fa-palette"></i><span>Tampilan</span></a></li>
+        <li><a href="#" data-panel="kirim" onclick="showPanel('kirim')"><i class="fa-solid fa-paper-plane"></i><span>Kirim Produk</span></a></li>
         <li><a href="#" data-panel="pengaturan" onclick="showPanel('pengaturan')"><i class="fa-solid fa-gear"></i><span>Pengaturan</span></a></li>
       </ul>
     </aside>
@@ -107,6 +108,7 @@
       <!-- DASHBOARD -->
       <div id="panel-dashboard" class="panel-section active">
         <div class="admin-topbar"><h1><i class="fa-solid fa-house"></i> Dashboard</h1></div>
+        <p style="color:#8aa0b8;font-size:12px;margin:-8px 0 14px;">Setiap ada order baru, langsung muncul di sini & menu <b>Pesanan</b>. Tidak perlu bot Telegram — kelola semua dari panel ini.</p>
         <div class="stat-grid">
           <div class="stat-card"><div class="val" id="statSaldo">Rp 0</div><div class="lbl">Saldo Keuntungan</div></div>
           <div class="stat-card"><div class="val" id="statPenjualan">0</div><div class="lbl">Total Penjualan</div></div>
@@ -142,8 +144,9 @@
           <input type="number" id="produkStok" value="-1">
           <label>Deskripsi</label>
           <textarea id="produkDeskripsi" placeholder="Deskripsi produk"></textarea>
-          <label>URL Gambar (opsional)</label>
-          <input type="text" id="produkImg" placeholder="logo.png">
+          <label>Foto Produk (URL gambar / link)</label>
+          <input type="text" id="produkImg" placeholder="https://... atau logo.png">
+          <div id="previewFotoProduk" style="margin-top:8px;"></div>
           <label>File / Link Download (untuk produk digital)</label>
           <input type="text" id="produkFile" placeholder="https://...">
           <label>Status</label>
@@ -202,13 +205,14 @@
       <div id="panel-pembayaran" class="panel-section">
         <div class="admin-topbar"><h1><i class="fa-solid fa-credit-card"></i> Pembayaran</h1></div>
         <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
-          <label>URL Gambar QRIS</label>
-          <input type="text" id="qrisUrl" value="qris.png" placeholder="qris.png atau https://...">
+          <label>Foto QRIS (URL gambar publik)</label>
+          <input type="text" id="qrisUrl" value="qris.png" placeholder="https://i.imgur.com/....png" oninput="document.getElementById('previewQris').src=this.value||'qris.png'">
+          <p style="font-size:11px;color:#6a7a90;margin:4px 0 8px;">Pakai link gambar langsung (Imgur, Drive direct, dll) agar terlihat di semua HP.</p>
           <label>Nomor Rekening / E-Wallet (opsional)</label>
-          <input type="text" id="rekeningInfo" placeholder="BCA 1234567890 a/n Voxyy">
+          <input type="text" id="rekeningInfo" placeholder="BCA 1234567890 a/n Voxyy · Dana 08xxx">
           <label>Catatan Pembayaran</label>
-          <textarea id="catatanBayar" placeholder="Transfer sesuai nominal, lalu upload bukti."></textarea>
-          <button class="btn-adm success" onclick="simpanPembayaran()"><i class="fa-solid fa-save"></i> Simpan Pengaturan Bayar</button>
+          <textarea id="catatanBayar" placeholder="Transfer sesuai nominal, lalu konfirmasi ke WA admin."></textarea>
+          <button class="btn-adm success" onclick="simpanPembayaran()"><i class="fa-solid fa-save"></i> Simpan QRIS & Metode Bayar</button>
         </div>
         <div style="margin-top:16px;text-align:center;">
           <img id="previewQris" src="qris.png" alt="QRIS" style="max-width:200px;border-radius:12px;border:1px solid #1e2a45;">
@@ -251,16 +255,44 @@
         </div>
       </div>
 
+      
+      <!-- KIRIM PRODUK -->
+      <div id="panel-kirim" class="panel-section">
+        <div class="admin-topbar"><h1><i class="fa-solid fa-paper-plane"></i> Kirim Produk</h1></div>
+        <p style="color:#888;font-size:13px;margin-bottom:16px;">Masukkan kode order, lalu kirim file APK / link website / file digital ke pembeli. Setelah dikirim, status jadi Sukses dan pembeli bisa unduh di halaman Pesanan.</p>
+        <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
+          <label>Kode Order</label>
+          <input type="text" id="kirimKode" placeholder="VJ-2026-XXXX">
+          <button class="btn-adm outline" type="button" onclick="cariOrderKirim()" style="margin-top:8px;"><i class="fa-solid fa-search"></i> Cari Order</button>
+          <div id="kirimInfo" style="margin:12px 0;font-size:13px;color:#aaa;"></div>
+          <label>Produk yang dipesan</label>
+          <input type="text" id="kirimPaket" placeholder="Nama produk" readonly>
+          <label>Jenis file</label>
+          <select id="kirimJenis">
+            <option value="apk">APK</option>
+            <option value="website">Website / Link</option>
+            <option value="file">File / Script</option>
+            <option value="lainnya">Lainnya</option>
+          </select>
+          <label>Link unduhan / URL file (Drive, GitHub, dll)</label>
+          <input type="text" id="kirimFile" placeholder="https://...">
+          <label>Catatan untuk pembeli (opsional)</label>
+          <textarea id="kirimCatatan" placeholder="Cara install, password zip, dll"></textarea>
+          <button class="btn-adm success" onclick="kirimProdukOrder()"><i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses</button>
+        </div>
+      </div>
+
       <!-- PENGATURAN -->
       <div id="panel-pengaturan" class="panel-section">
         <div class="admin-topbar"><h1><i class="fa-solid fa-gear"></i> Pengaturan</h1></div>
         <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
           <label>Nama Toko</label>
           <input type="text" id="namaToko" value="Voxyy">
-          <label>Nomor WhatsApp Admin</label>
-          <input type="text" id="waAdmin" value="6285151982250">
+          <label>Nomor WhatsApp Admin (tanpa +)</label>
+          <input type="text" id="waAdmin" value="6285151982250" placeholder="628xxxxxxxxxx">
+          <p style="font-size:11px;color:#6a7a90;margin:4px 0 8px;">Nomor ini dipakai di tombol WA semua halaman & konfirmasi bayar.</p>
           <label>Nomor WhatsApp Backup</label>
-          <input type="text" id="waBackup" value="6285706128277">
+          <input type="text" id="waBackup" value="6285706128277" placeholder="628xxxxxxxxxx">
           <label>Password Admin (untuk akses panel)</label>
           <input type="password" id="adminPass" placeholder="Kosongkan jika tidak ubah">
           <button class="btn-adm success" onclick="simpanPengaturan()"><i class="fa-solid fa-save"></i> Simpan Pengaturan</button>

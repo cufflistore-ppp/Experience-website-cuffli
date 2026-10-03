@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script>
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var type = (params.get("type") || "").toLowerCase();
+    var isJaspost = type === "jaspost" || type === "jasa-post" || type === "jasapost";
+    // Juga jika judul/paket mengandung jasa post
+    var paket = (params.get("paket") || params.get("judul") || "").toLowerCase();
+    if (!isJaspost && paket.indexOf("jasa post") >= 0) isJaspost = true;
+    if (!isJaspost) return;
+
+    var wa = "6285151982250";
+    try {
+      var s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
+      if (s.waAdmin) wa = String(s.waAdmin).replace(/\D/g, "");
+    } catch (e) {}
+
+    var text = encodeURIComponent(
+      "Halo Admin VOXY MARKET, saya mau *Jasa Post*.\n\n" +
+      "Mohon info format & ketentuan jasa postnya. Terima kasih."
+    );
+    location.replace("https://wa.me/" + wa + "?text=" + text);
+  })();
+  </script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pesan Paket - Voxyy</title>
@@ -179,9 +203,10 @@ Wa.me/628…
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="branding.js"></script>
   <script src="joki-produk.js"></script>
   <script src="telegram.js"></script>
-    <script src="script.js"></script>
+      <script src="script.js"></script>
   <script src="digital-produk.js"></script>
   <script>
     // Preview foto akun

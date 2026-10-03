@@ -1,5 +1,5 @@
 /**
- * VOXYY JOKI - Antrian & Admin Global (Firebase)
+ * VOXY MARKET - Antrian & Admin Global (Firebase)
  * authDomain = firebaseapp.com (stabil). Login Google pakai GIS (tanpa redirect).
  */
 const FIREBASE_CONFIG = {
@@ -289,6 +289,161 @@ function findOrderByKodeInList(orders, kode) {
   );
 }
 
+
+/* ========== SETTINGS & PRODUK GLOBAL (semua device) ========== */
+const LOCAL_SETTINGS_KEY = "voxyy_settings";
+const LOCAL_PRODUK_KEY = "voxyy_produk_admin";
+let _lastSettings = null;
+let _lastProduk = null;
+let _settingsListeners = [];
+let _produkListeners = [];
+
+function getLocalSettings() {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_SETTINGS_KEY) || "{}");
+  } catch (e) {
+    return {};
+  }
+}
+
+function setLocalSettings(obj) {
+  try {
+    localStorage.setItem(LOCAL_SETTINGS_KEY, JSON.stringify(obj || {}));
+  } catch (e) {}
+}
+
+function getLocalProduk() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(LOCAL_PRODUK_KEY) || "[]");
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setLocalProduk(list) {
+  try {
+    localStorage.setItem(LOCAL_PRODUK_KEY, JSON.stringify(list || []));
+  } catch (e) {}
+}
+
+async function getSettings() {
+  const local = getLocalSettings();
+  if (!isGlobalConfigured()) return local;
+  initFirebase();
+  if (!_db) return local;
+  if (_lastSettings) return { ...local, ..._lastSettings };
+  try {
+    const snap = await _db.ref("settings").once("value");
+    const val = snap.val() || {};
+    _lastSettings = val;
+    const merged = { ...local, ...val };
+    setLocalSettings(merged);
+    if (val.bgColor) localStorage.setItem("voxyy_bg_color", val.bgColor);
+    return merged;
+  } catch (e) {
+    return local;
+  }
+}
+
+async function saveSettingsGlobal(obj) {
+  const cur = await getSettings();
+  const next = { ...cur, ...obj, updatedAt: Date.now() };
+  setLocalSettings(next);
+  if (next.bgColor) localStorage.setItem("voxyy_bg_color", next.bgColor);
+  _lastSettings = next;
+  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  initFirebase();
+  if (!_db) return { ok: true, mode: "local" };
+  try {
+    await _db.ref("settings").update(next);
+    return { ok: true, mode: "global" };
+  } catch (e) {
+    return { ok: true, mode: "local", error: String(e) };
+  }
+}
+
+async function getProdukGlobal() {
+  const local = getLocalProduk();
+  if (!isGlobalConfigured()) return local;
+  initFirebase();
+  if (!_db) return local;
+  if (_lastProduk) return _lastProduk;
+  try {
+    const snap = await _db.ref("produk").once("value");
+    const val = snap.val();
+    let list = [];
+    if (Array.isArray(val)) list = val;
+    else if (val && typeof val === "object") {
+      list = Object.keys(val).map((k) => ({ ...val[k], id: val[k].id || k }));
+    }
+    if (list.length) {
+      _lastProduk = list;
+      setLocalProduk(list);
+      return list;
+    }
+    return local;
+  } catch (e) {
+    return local;
+  }
+}
+
+async function saveProdukGlobal(list) {
+  const arr = Array.isArray(list) ? list : [];
+  setLocalProduk(arr);
+  _lastProduk = arr;
+  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  initFirebase();
+  if (!_db) return { ok: true, mode: "local" };
+  try {
+    // simpan sebagai object keyed by id biar stabil
+    const map = {};
+    arr.forEach((p, i) => {
+      const id = String(p.id || "p" + i);
+      map[id] = { ...p, id };
+    });
+    await _db.ref("produk").set(map);
+    return { ok: true, mode: "global" };
+  } catch (e) {
+    return { ok: true, mode: "local", error: String(e) };
+  }
+}
+
+function onSettingsChange(fn) {
+  if (typeof fn === "function") _settingsListeners.push(fn);
+  initFirebase();
+  if (!_db) return;
+  _db.ref("settings").on("value", (snap) => {
+    const val = snap.val() || {};
+    _lastSettings = val;
+    setLocalSettings({ ...getLocalSettings(), ...val });
+    if (val.bgColor) localStorage.setItem("voxyy_bg_color", val.bgColor);
+    _settingsListeners.forEach((f) => {
+      try { f(val); } catch (e) {}
+    });
+  });
+}
+
+function onProdukChange(fn) {
+  if (typeof fn === "function") _produkListeners.push(fn);
+  initFirebase();
+  if (!_db) return;
+  _db.ref("produk").on("value", (snap) => {
+    const val = snap.val();
+    let list = [];
+    if (Array.isArray(val)) list = val;
+    else if (val && typeof val === "object") {
+      list = Object.keys(val).map((k) => ({ ...val[k], id: val[k].id || k }));
+    }
+    _lastProduk = list;
+    if (list.length) setLocalProduk(list);
+    _produkListeners.forEach((f) => {
+      try { f(list); } catch (e) {}
+    });
+  });
+}
+
+
 window.VoxyyOrders = {
   isGlobalConfigured,
   getOrders,
@@ -296,6 +451,7 @@ window.VoxyyOrders = {
   addOrder,
   updateOrderByKode,
   updateOrderByIndex,
+  updateOrder: updateOrderByKode,
   deleteOrderByIndex,
   deleteOrderByKode,
   findOrderByKodeInList,
@@ -303,6 +459,12 @@ window.VoxyyOrders = {
   setLocalOrders,
   onOrdersChange,
   initFirebase,
+  getSettings,
+  saveSettingsGlobal,
+  getProdukGlobal,
+  saveProdukGlobal,
+  onSettingsChange,
+  onProdukChange,
   FIREBASE_CONFIG,
   GOOGLE_WEB_CLIENT_ID
 };

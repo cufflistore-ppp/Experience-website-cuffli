@@ -17,7 +17,14 @@ function getSettings() {
 
 function saveSettings(obj) {
   const cur = getSettings();
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...cur, ...obj }));
+  const next = { ...cur, ...obj };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+  // Sync ke Firebase → semua device
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.saveSettingsGlobal === "function") {
+    window.VoxyyOrders.saveSettingsGlobal(next).then(function (r) {
+      console.log("[Admin] settings sync:", r && r.mode);
+    }).catch(function () {});
+  }
 }
 
 function getProdukAdmin() {
@@ -31,6 +38,11 @@ function getProdukAdmin() {
 
 function saveProdukAdmin(list) {
   localStorage.setItem(PRODUK_KEY, JSON.stringify(list || []));
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.saveProdukGlobal === "function") {
+    window.VoxyyOrders.saveProdukGlobal(list || []).then(function (r) {
+      console.log("[Admin] produk sync:", r && r.mode);
+    }).catch(function () {});
+  }
 }
 
 function escapeHtml(str) {
@@ -59,12 +71,30 @@ function showPanel(name) {
   const link = document.querySelector(`.admin-nav a[data-panel="${name}"]`);
   if (link) link.classList.add("active");
 
-  if (name === "dashboard") loadDashboard();
+  if (name === "dashboard")   // Ambil settings & produk dari Firebase dulu
+  (async function () {
+    try {
+      if (window.VoxyyOrders) {
+        window.VoxyyOrders.initFirebase && window.VoxyyOrders.initFirebase();
+        if (window.VoxyyOrders.getSettings) {
+          const s = await window.VoxyyOrders.getSettings();
+          if (s) localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+        }
+        if (window.VoxyyOrders.getProdukGlobal) {
+          const list = await window.VoxyyOrders.getProdukGlobal();
+          if (list && list.length) localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
+        }
+      }
+    } catch (e) {}
+    seedProdukIfEmpty();
+    loadDashboard();
+  })();
   if (name === "produk") loadProdukAdm();
   if (name === "pesanan") loadPesanan();
   if (name === "pembayaran") loadPembayaran();
   if (name === "keuntungan") loadKeuntungan();
   if (name === "tampilan") loadTampilan();
+  if (name === "kirim") loadKirim();
   if (name === "pengaturan") loadPengaturan();
 }
 
@@ -263,19 +293,27 @@ async function loadPesanan() {
     .map((o) => {
       const cls = statusClass(o.status);
       const id = o._id || o.kode || "";
-      return `<div class="order-card">
+      const st = (o.status || "").toLowerCase();
+      const isNew = st.includes("belum") || st.includes("verifikasi") || st.includes("menunggu");
+      const wa = (o.wa || o.whatsapp || "").replace(/\D/g, "");
+      const border = isNew ? "border-color:#2196f3;box-shadow:0 0 0 1px rgba(33,150,243,0.35);" : "";
+      return `<div class="order-card" style="${border}">
         <div class="row">
           <div>
+            ${isNew ? '<span style="background:#1565c0;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;margin-right:6px;">BARU</span>' : ""}
             <strong>${escapeHtml(o.kode || "-")}</strong> · ${escapeHtml(o.nama || "Anonim")}
-            <br><small style="color:#888;">WA: ${escapeHtml(o.wa || o.whatsapp || "-")} · ${escapeHtml(o.paket || "-")}</small>
-            <br><small style="color:#aaa;">${escapeHtml(o.total || "-")} · ${escapeHtml(o.waktu || o.createdAt || "")}</small>
+            <br><small style="color:#888;">${escapeHtml(o.paket || "-")} · ${escapeHtml(o.total || "-")}</small>
+            <br><small style="color:#aaa;">${escapeHtml(String(o.waktu || o.createdAt || ""))}</small>
+            ${wa ? `<br><a href="https://wa.me/${wa}" target="_blank" style="color:#25d366;font-size:12px;"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(o.wa || o.whatsapp)}</a>` : ""}
             ${o.bukti ? `<br><a href="${escapeHtml(o.bukti)}" target="_blank" style="color:#2196f3;font-size:12px;">Lihat Bukti Bayar</a>` : ""}
+            ${o.file || o.download ? `<br><small style="color:#a5d6a7;">File sudah dikirim</small>` : ""}
           </div>
           <div style="text-align:right;">
             <span class="badge-st ${cls}">${escapeHtml(o.status || "Belum Bayar")}</span>
             <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
               <button class="btn-adm success" style="margin:0;padding:5px 8px;font-size:11px;" onclick="ubahStatus('${escapeHtml(id)}','Sukses')">ACC</button>
               <button class="btn-adm" style="margin:0;padding:5px 8px;font-size:11px;background:#1565c0;" onclick="ubahStatus('${escapeHtml(id)}','Proses')">Proses</button>
+              <button class="btn-adm" style="margin:0;padding:5px 8px;font-size:11px;background:#6a1b9a;" onclick="showPanel('kirim');document.getElementById('kirimKode').value='${escapeHtml(o.kode || "")}';cariOrderKirim();">Kirim File</button>
               <button class="btn-adm danger" style="margin:0;padding:5px 8px;font-size:11px;" onclick="ubahStatus('${escapeHtml(id)}','Ditolak')">Tolak</button>
             </div>
           </div>
@@ -356,7 +394,7 @@ function simpanPembayaran() {
     catatanBayar: document.getElementById("catatanBayar").value.trim(),
   });
   document.getElementById("previewQris").src = qris;
-  alert("Pengaturan pembayaran disimpan!");
+  alert("QRIS, rekening Pengaturan pembayaran disimpan! catatan disimpan ke Firebase — muncul di semua device!");
 }
 
 /* ========== KEUNTUNGAN ========== */
@@ -432,10 +470,9 @@ function simpanTampilan() {
     bannerUrl: document.getElementById("bannerUrl").value.trim() || "banner.jpg",
     bgColor: bg,
   });
-  // apply immediately
   document.body.style.background = bg;
   localStorage.setItem("voxyy_bg_color", bg);
-  alert("Tampilan disimpan! Background akan diterapkan di website.");
+  alert("Tampilan disimpan! Logo, banner & warna langsung aktif di semua halaman.");
 }
 
 /* ========== PENGATURAN ========== */
@@ -457,7 +494,100 @@ function simpanPengaturan() {
     localStorage.setItem(ADMIN_PASS_KEY, pass);
   }
   saveSettings(data);
-  alert("Pengaturan disimpan!");
+  alert("Nama toko Pengaturan disimpan! nomor WA disimpan ke Firebase — muncul di semua device!");
+}
+
+
+/* ========== KIRIM PRODUK ========== */
+function loadKirim() {
+  document.getElementById("kirimKode").value = "";
+  document.getElementById("kirimInfo").innerHTML = "";
+  document.getElementById("kirimPaket").value = "";
+  document.getElementById("kirimFile").value = "";
+  document.getElementById("kirimCatatan").value = "";
+}
+
+async function cariOrderKirim() {
+  const kode = (document.getElementById("kirimKode").value || "").trim();
+  if (!kode) { alert("Isi kode order"); return; }
+  const orders = await fetchOrders();
+  const found = orders.find(o => String(o.kode || "").toUpperCase() === kode.toUpperCase() || String(o._id || "") === kode);
+  const info = document.getElementById("kirimInfo");
+  if (!found) {
+    info.innerHTML = '<span style="color:#ef9a9a;">Order tidak ditemukan.</span>';
+    document.getElementById("kirimPaket").value = "";
+    return;
+  }
+  window._kirimOrder = found;
+  info.innerHTML = `<span style="color:#a5d6a7;">✓ Ditemukan</span><br>
+    Nama: <b>${escapeHtml(found.nama || "-")}</b><br>
+    WA: ${escapeHtml(found.wa || found.whatsapp || "-")}<br>
+    Status: <b>${escapeHtml(found.status || "-")}</b><br>
+    Total: ${escapeHtml(found.total || "-")}`;
+  document.getElementById("kirimPaket").value = found.paket || found.judul || "";
+  if (found.file) document.getElementById("kirimFile").value = found.file;
+}
+
+async function kirimProdukOrder() {
+  const kode = (document.getElementById("kirimKode").value || "").trim();
+  const file = (document.getElementById("kirimFile").value || "").trim();
+  const jenis = document.getElementById("kirimJenis").value;
+  const catatan = (document.getElementById("kirimCatatan").value || "").trim();
+  const paket = (document.getElementById("kirimPaket").value || "").trim();
+  if (!kode) { alert("Isi kode order"); return; }
+  if (!file) { alert("Isi link unduhan / URL file"); return; }
+
+  const orders = await fetchOrders();
+  const found = orders.find(o => String(o.kode || "").toUpperCase() === kode.toUpperCase() || String(o._id || "") === kode);
+  if (!found) { alert("Order tidak ditemukan. Cari dulu."); return; }
+
+  const id = found._id || found.kode;
+  const patch = {
+    status: "Sukses",
+    file: file,
+    download: file,
+    jenisFile: jenis,
+    catatanAdmin: catatan,
+    paket: paket || found.paket,
+    dikirimAt: new Date().toLocaleString("id-ID"),
+  };
+
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrder === "function") {
+    await window.VoxyyOrders.updateOrder(id, patch);
+  } else {
+    const idx = orders.findIndex(o => (o._id || o.kode) === id);
+    if (idx >= 0) {
+      Object.assign(orders[idx], patch);
+      localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+    }
+  }
+
+  // profit
+  const settings = getSettings();
+  const profit = parseRp(found.total) - (Number(found.modal) || Math.round(parseRp(found.total) * 0.3));
+  settings.totalProfit = (Number(settings.totalProfit) || 0) + profit;
+  saveSettings(settings);
+
+  alert("Produk dikirim! Status order → Sukses. Pembeli bisa unduh di halaman Pesanan.");
+  loadKirim();
+  loadPesanan();
+  loadDashboard();
+}
+
+
+
+function seedProdukIfEmpty() {
+  let list = getProdukAdmin();
+  if (list && list.length) return;
+  list = [
+    { id: "d1", judul: "APK Auto SV Kontak", kategori: "apk", harga: 2000, modal: 500, stok: 25, deskripsi: "Produk digital berkualitas.", img: "", file: "", status: "aktif" },
+    { id: "d2", judul: "APK Logo Prem/Mod", kategori: "apk", harga: 3000, modal: 800, stok: 18, deskripsi: "Produk premium siap digunakan.", img: "", file: "", status: "aktif" },
+    { id: "d3", judul: "Script Bot Jaga", kategori: "digital", harga: 7000, modal: 2000, stok: 12, deskripsi: "Script siap pakai.", img: "", file: "", status: "aktif" },
+    { id: "d4", judul: "Nokos WA Indonesia", kategori: "digital", harga: 6000, modal: 3000, stok: 30, deskripsi: "Nokos WA Indonesia.", img: "", file: "", status: "aktif" },
+    { id: "d5", judul: "Jasa Logo Teks", kategori: "jasa", harga: 2000, modal: 500, stok: -1, deskripsi: "Jasa desain logo teks.", img: "", file: "", status: "aktif" },
+    { id: "d6", judul: "Murid Logo", kategori: "lainnya", harga: 5000, modal: 1500, stok: 10, deskripsi: "Paket murid logo.", img: "", file: "", status: "aktif" },
+  ];
+  saveProdukAdmin(list);
 }
 
 /* ========== INIT ========== */
@@ -478,13 +608,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadDashboard();
 
-  // realtime refresh if firebase
+  // Realtime: setiap order baru langsung muncul di admin (tanpa Telegram)
+  let _lastOrderCount = 0;
   if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
-    window.VoxyyOrders.onOrdersChange(() => {
+    window.VoxyyOrders.onOrdersChange(function (list) {
+      const orders = list || [];
+      const pending = orders.filter(function (o) {
+        const s = String(o.status || "").toLowerCase();
+        return !s.includes("sukses") && !s.includes("selesai") && !s.includes("tolak");
+      }).length;
+
+      // Badge di menu Pesanan
+      const navPesanan = document.querySelector('.admin-nav a[data-panel="pesanan"] span');
+      if (navPesanan) {
+        navPesanan.innerHTML = pending > 0
+          ? 'Pesanan <span style="background:#e53935;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px;">' + pending + "</span>"
+          : "Pesanan";
+      }
+
+      // Notifikasi title browser jika order baru
+      if (_lastOrderCount && orders.length > _lastOrderCount) {
+        const baru = orders.length - _lastOrderCount;
+        document.title = "(" + baru + " order baru) VOXY ADMIN";
+        // optional sound-free alert once
+        try {
+          if (document.hidden && Notification && Notification.permission === "granted") {
+            new Notification("VOXY MARKET", { body: baru + " pesanan baru masuk", icon: "logo.png" });
+          }
+        } catch (e) {}
+      }
+      _lastOrderCount = orders.length;
+
       const active = document.querySelector(".panel-section.active");
-      if (active && active.id === "panel-dashboard") loadDashboard();
+      if (!active || active.id === "panel-dashboard") loadDashboard();
       if (active && active.id === "panel-pesanan") loadPesanan();
       if (active && active.id === "panel-keuntungan") loadKeuntungan();
     });
   }
+
+  // Minta izin notifikasi browser (opsional)
+  try {
+    if (window.Notification && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  } catch (e) {}
+
+  // Auto-refresh cadangan tiap 15 detik
+  setInterval(function () {
+    const active = document.querySelector(".panel-section.active");
+    if (!active || active.id === "panel-dashboard") loadDashboard();
+    if (active && active.id === "panel-pesanan") loadPesanan();
+  }, 15000);
 });

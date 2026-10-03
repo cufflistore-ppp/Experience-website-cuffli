@@ -1,56 +1,18 @@
 ========================================
-   VOXYY MARKET
-   Firebase Global + Login Google + Admin Panel
-   Deploy khusus: VERCEL
+   VOXY MARKET
+   Deploy: Vercel | Firebase + Google Login
 ========================================
 
-DEPLOY VERCEL (disarankan)
----------------------------------
-1. Install Vercel CLI (opsional):
-   npm i -g vercel
+FITUR UTAMA
+- Home = katalog produk + search + kategori (tanpa Joki)
+- Admin: tambah/edit/hapus produk (nama, harga, foto, stok, file)
+- Admin: Kirim Produk → input kode order + link APK/website/file → status Sukses
+- Pesanan: hanya milik pembeli, bisa unduh file setelah admin kirim
+- Tampilan: ganti logo, banner, warna background, nama toko → langsung di semua halaman
 
-2. Di folder project:
-   vercel
-   atau drag-drop folder ke https://vercel.com/new
-
-3. Setelah deploy, catat domain kamu:
-   contoh: https://voxyy-market.vercel.app
-   atau custom domain: https://domainkamu.com
-
-4. Firebase Console → Authentication → Settings → Authorized domains
-   → Add domain Vercel:
-     - voxyy-market.vercel.app
-     - (dan custom domain jika ada)
-
-5. Google Cloud Console → APIs & Credentials → OAuth 2.0 Client
-   Authorized JavaScript origins:
-     https://voxyy-market.vercel.app
-   Authorized redirect URIs:
-     https://voxyyjoki.firebaseapp.com/__/auth/handler
-     https://voxyy-market.vercel.app
-
-6. Hard refresh di HP / browser
-
-SELESAI.
-
-SETUP FIREBASE (jika belum)
----------------------------------
-1. https://console.firebase.google.com → project voxyyjoki
-2. Realtime Database → test mode
-3. Authentication → Google enable
-4. Config ada di global-orders.js (sudah terisi)
-
-MENU BAWAH:
-Produk | Kategori | Home | Pesanan | Akun
+DEPLOY VERCEL
+1. vercel.com/new → upload folder
+2. Firebase Authorized domains → tambah xxx.vercel.app
+3. Google OAuth origins → domain Vercel
 
 ADMIN: /admin.html
-(Opsional set password di Pengaturan)
-
-File penting:
-- vercel.json           → config deploy Vercel + proxy Firebase Auth
-- admin.html + admin.js → panel admin
-- joki.html             → Jelajahi Produk (VOXY MARKET UI)
-- digital.html          → Produk Digital
-- antrian.html          → Riwayat Pesanan
-- global-orders.js      → Firebase
-========================================

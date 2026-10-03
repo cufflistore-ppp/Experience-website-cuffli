@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Produk Digital - VOXY MARKET</title>
+  <title>Kategori - VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -17,11 +17,9 @@
     <a href="akun.html" class="market-user"><i class="fa-solid fa-user"></i></a>
   </header>
 
-  <div class="top-notif" id="topNotif" style="display:none;"></div>
-
   <div class="market-content">
-    <h1 class="market-heading">Produk Digital</h1>
-    <p class="market-sub">Pilih produk digital yang ingin kamu beli.</p>
+    <h1 class="market-heading">Kategori Produk</h1>
+    <p class="market-sub">Filter berdasarkan jenis produk.</p>
 
     <div class="market-search">
       <i class="fa-solid fa-magnifying-glass"></i>
@@ -30,24 +28,34 @@
 
     <div class="market-cats" id="digitalCats">
       <button class="cat-chip active" data-cat="all" onclick="filterDigital('all')">Semua</button>
-      <button class="cat-chip" data-cat="APK" onclick="filterDigital('APK')">Aplikasi</button>
-      <button class="cat-chip" data-cat="SCRIPT" onclick="filterDigital('SCRIPT')">Script</button>
-      <button class="cat-chip" data-cat="NOKOS" onclick="filterDigital('NOKOS')">Nokos</button>
-      <button class="cat-chip" data-cat="MURID" onclick="filterDigital('MURID')">Lainnya</button>
+      <button class="cat-chip" data-cat="digital" onclick="filterDigital('digital')">Digital</button>
+      <button class="cat-chip" data-cat="apk" onclick="filterDigital('apk')">Aplikasi</button>
+      <button class="cat-chip" data-cat="jasa" onclick="filterDigital('jasa')">Jasa</button>
+      <button class="cat-chip" data-cat="lainnya" onclick="filterDigital('lainnya')">Lainnya</button>
     </div>
 
     <div class="market-grid" id="digitalList"></div>
   </div>
 
   <nav class="bottom-nav nav-5">
-    <a href="joki.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
+    <a href="index.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
     <a href="digital.html" class="nav-item active"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
     <a href="index.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
     <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
-  <script src="digital-produk.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script src="branding.js"></script>
+  <script src="katalog.js"></script>
   <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      renderKatalog("digitalList", "digital");
+    });
+  </script>
 </body>
 </html>

@@ -59,7 +59,7 @@ function loadAntrianFromOrders(orders) {
         ? "PROSES"
         : o.status === "Menunggu Verifikasi"
         ? "PROSES"
-        : "MASUK ANTRIAN"
+        : "MASUK PESANAN"
   }));
 }
 
@@ -426,14 +426,14 @@ async function cekStatus() {
       clearTrackedKode(found.kode || kode);
       syncSearchInput("");
     } else {
-      saveTrackedKode(found.kode || kode);
+      saveMyOrderKode(found.kode || kode);
       syncSearchInput(found.kode || kode);
     }
   } else {
     showStatusModal(
       "Order Tidak Ditemukan",
       row("Kode yang dicari", "<code>" + escapeHtml(kode) + "</code>") +
-        row("Info", "Nomor order tidak ditemukan di antrian global. Pastikan kode benar."),
+        row("Info", "Nomor order tidak ditemukan di daftar pesanan. Pastikan kode benar."),
       "❌"
     );
   }
@@ -467,3 +467,66 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 60000);
   }
 });
+
+
+// Simpan beberapa kode order di device (riwayat personal)
+const SAVED_CODES_KEY = "voxyy_my_orders";
+function saveMyOrderKode(kode) {
+  if (!kode) return;
+  try {
+    let arr = JSON.parse(localStorage.getItem(SAVED_CODES_KEY) || "[]");
+    if (!Array.isArray(arr)) arr = [];
+    const k = String(kode).trim().toUpperCase();
+    if (!arr.includes(k)) arr.unshift(k);
+    localStorage.setItem(SAVED_CODES_KEY, JSON.stringify(arr.slice(0, 30)));
+  } catch (e) {}
+  saveTrackedKode(kode);
+}
+function getMyOrderKodes() {
+  try {
+    const arr = JSON.parse(localStorage.getItem(SAVED_CODES_KEY) || "[]");
+    const single = getTrackedKode();
+    if (single && !arr.includes(single.toUpperCase())) arr.unshift(single.toUpperCase());
+    return arr;
+  } catch (e) {
+    const s = getTrackedKode();
+    return s ? [s] : [];
+  }
+}
+
+
+// Override render: tampilkan hanya pesanan milik user (kode tersimpan)
+async function renderAntrian() {
+  const list = document.getElementById("antrianList");
+  if (!list) return;
+  const orders = await fetchOrders();
+  const myKodes = (typeof getMyOrderKodes === "function" ? getMyOrderKodes() : []).map(k => String(k).toUpperCase());
+  let mine = [];
+  if (myKodes.length) {
+    mine = orders.filter(o => myKodes.includes(String(o.kode || "").toUpperCase()));
+  }
+  if (!mine.length) {
+    list.innerHTML = `<div style="text-align:center;padding:28px 12px;color:#6a7a90;font-size:13px;">
+      <i class="fa-solid fa-receipt" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+      Belum ada pesanan di perangkat ini.<br>Masukkan kode order di atas untuk melihat produk yang kamu beli.
+    </div>`;
+    return;
+  }
+  list.innerHTML = mine.slice().reverse().map(o => {
+    const st = o.status || "Belum Bayar";
+    const cls = statusClass(st);
+    const file = o.file || o.download || "";
+    return `<div class="order-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:12px;padding:14px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div>
+          <strong style="color:#fff;">${escapeHtml(o.kode || "-")}</strong>
+          <div style="font-size:13px;color:#ccc;margin-top:4px;">${escapeHtml(o.paket || "-")}</div>
+          <div style="font-size:12px;color:#6a7a90;margin-top:2px;">${escapeHtml(o.total || "")} · ${escapeHtml(o.waktu || "")}</div>
+          ${file ? `<a href="${escapeHtml(file)}" target="_blank" style="display:inline-block;margin-top:8px;padding:6px 12px;background:#43a047;color:#fff;border-radius:8px;font-size:12px;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh Produk</a>` : ""}
+          ${o.catatanAdmin ? `<div style="font-size:11px;color:#90caf9;margin-top:6px;">${escapeHtml(o.catatanAdmin)}</div>` : ""}
+        </div>
+        <span class="badge-st ${cls}">${escapeHtml(st)}</span>
+      </div>
+    </div>`;
+  }).join("");
+}
