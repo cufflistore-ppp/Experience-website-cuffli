@@ -115,8 +115,8 @@
         <div class="akun-email">Login atau daftar untuk menyimpan profil & pesanan.</div>
       </div>
       <div id="guestActions">
-        <a href="login.html" class="btn-auth-link" style="display:block;text-align:center;padding:13px;background:#8b5cf6;color:#fff;border-radius:12px;font-weight:700;text-decoration:none;margin-bottom:10px;">LOGIN</a>
-        <a href="daftar.html" style="display:block;text-align:center;padding:12px;background:transparent;color:#a78bfa;border:1px solid #3a3a4a;border-radius:12px;font-weight:600;text-decoration:none;margin-bottom:12px;">DAFTAR</a>
+        <a href="login.html" class="btn-auth-link" style="display:block;text-align:center;padding:13px;background:#1565c0;color:#fff;border-radius:12px;font-weight:700;text-decoration:none;margin-bottom:10px;">LOGIN</a>
+        <a href="daftar.html" style="display:block;text-align:center;padding:12px;background:transparent;color:#64b5f6;border:1px solid #3a3a4a;border-radius:12px;font-weight:600;text-decoration:none;margin-bottom:12px;">DAFTAR</a>
         <button type="button" class="btn-google" id="btnGoogle" style="background:#fff;color:#1f1f1f;border:none;">
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px;">
           <span>Masuk dengan Google</span>
@@ -175,28 +175,31 @@
         return;
       }
 
+      const guest = document.getElementById("guestActions");
       if (user) {
         status.className = "akun-status on";
         status.textContent = "Sudah masuk";
         const photo = user.photoURL
           ? '<img class="akun-avatar" src="' + user.photoURL + '" alt="foto">'
-          : '<div class="akun-avatar placeholder"><i class="fa-solid fa-user"></i></div>';
+          : '<div class="akun-avatar placeholder"><i class="fa-solid fa-circle-user"></i></div>';
         body.innerHTML =
           photo +
-          '<div class="akun-name">' + escapeHtml(user.displayName || "Pengguna") + "</div>" +
+          '<div class="akun-name">' + escapeHtml(user.displayName || "Pengguna") +
+          ' <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:0.9em;"></i></div>' +
           '<div class="akun-email">' + escapeHtml(user.email || "-") + "</div>";
-        btnG.style.display = "none";
-        btnL.style.display = "block";
+        if (btnG) btnG.style.display = "none";
+        if (guest) guest.style.display = "none";
+        if (btnL) btnL.style.display = "block";
       } else {
         status.className = "akun-status off";
         status.textContent = "Belum masuk";
         body.innerHTML =
-          '<div class="akun-avatar placeholder"><i class="fa-solid fa-user"></i></div>' +
+          '<div class="akun-avatar placeholder"><i class="fa-solid fa-circle-user"></i></div>' +
           '<div class="akun-name">Belum masuk</div>' +
-          '<div class="akun-email">Masuk dengan akun Google saja.</div>';
-        btnG.style.display = "flex";
-        btnG.disabled = false;
-        btnL.style.display = "none";
+          '<div class="akun-email">Login atau daftar untuk mulai.</div>';
+        if (guest) guest.style.display = "block";
+        if (btnG) { btnG.style.display = "flex"; btnG.disabled = false; }
+        if (btnL) btnL.style.display = "none";
       }
     }
 

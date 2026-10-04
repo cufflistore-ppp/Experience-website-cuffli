@@ -749,7 +749,7 @@ async function kirimProdukOrder() {
     return;
   }
 
-  const id = found._id || found.kode;
+  const orderKode = found.kode || kode;
   const patch = {
     status: "Sukses",
     file: fileUrl,
@@ -759,24 +759,35 @@ async function kirimProdukOrder() {
     catatanAdmin: catatan,
     paket: paket || found.paket,
     dikirimAt: new Date().toLocaleString("id-ID"),
+    dikirimTs: Date.now(),
     kirimVia: _kirimMode === "file" ? "upload" : "url",
+    // pastikan data pembeli tetap ada
+    email: found.email || found.userEmail || "",
+    userEmail: found.userEmail || found.email || "",
+    nama: found.nama || "",
+    wa: found.wa || found.whatsapp || "",
   };
 
   try {
-    if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrder === "function") {
-      await window.VoxyyOrders.updateOrder(id, patch);
-    } else if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrderByKode === "function") {
-      await window.VoxyyOrders.updateOrderByKode(kode, patch);
+    let ok = false;
+    if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrderByKode === "function") {
+      const res = await window.VoxyyOrders.updateOrderByKode(orderKode, patch);
+      ok = !!(res && res.ok);
+    } else if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrder === "function") {
+      const res = await window.VoxyyOrders.updateOrder(orderKode, patch);
+      ok = !!(res && res.ok !== false);
     } else {
-      const idx = orders.findIndex(o => (o._id || o.kode) === id);
+      const idx = orders.findIndex(o => String(o.kode || "").toUpperCase() === String(orderKode).toUpperCase());
       if (idx >= 0) {
         Object.assign(orders[idx], patch);
         localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+        ok = true;
       }
     }
+    if (!ok) throw new Error("Gagal menulis ke database. Cek koneksi Firebase.");
   } catch (e) {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses'; }
-    alert("Gagal simpan order: " + (e && e.message ? e.message : String(e)));
+    alert("Gagal kirim ke akun pembeli: " + (e && e.message ? e.message : String(e)));
     return;
   }
 
