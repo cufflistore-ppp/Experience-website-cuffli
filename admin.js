@@ -101,6 +101,124 @@ function showPanel(name) {
 }
 
 /* ========== DASHBOARD ========== */
+function showAdmToast(msg) {
+  const el = document.getElementById("admToast");
+  const tx = document.getElementById("admToastText");
+  if (tx) tx.textContent = msg || "Berhasil";
+  if (!el) { alert(msg || "Berhasil"); return; }
+  el.classList.add("show");
+  clearTimeout(window._admToastT);
+  window._admToastT = setTimeout(function () { el.classList.remove("show"); }, 2200);
+}
+window.showAdmToast = showAdmToast;
+
+function drawLineChart(canvas, values, color) {
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth || 300;
+  const h = canvas.getAttribute("height") || 140;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+  const data = values && values.length ? values : [0, 0, 0, 0, 0, 0, 0];
+  const max = Math.max.apply(null, data.concat([1]));
+  const pad = 12;
+  const chartW = w - pad * 2;
+  const chartH = h - pad * 2;
+  // grid
+  ctx.strokeStyle = "#1e2a45";
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 4; i++) {
+    const y = pad + (chartH / 3) * i;
+    ctx.beginPath();
+    ctx.moveTo(pad, y);
+    ctx.lineTo(w - pad, y);
+    ctx.stroke();
+  }
+  // line
+  ctx.strokeStyle = color || "#42a5f5";
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = "round";
+  ctx.beginPath();
+  data.forEach(function (v, i) {
+    const x = pad + (chartW * i) / Math.max(data.length - 1, 1);
+    const y = pad + chartH - (v / max) * chartH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+  // fill
+  const lastX = pad + chartW;
+  const firstX = pad;
+  ctx.lineTo(lastX, pad + chartH);
+  ctx.lineTo(firstX, pad + chartH);
+  ctx.closePath();
+  ctx.fillStyle = (color || "#42a5f5") + "33";
+  ctx.fill();
+  // dots
+  data.forEach(function (v, i) {
+    const x = pad + (chartW * i) / Math.max(data.length - 1, 1);
+    const y = pad + chartH - (v / max) * chartH;
+    ctx.beginPath();
+    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = color || "#42a5f5";
+    ctx.fill();
+  });
+}
+
+function drawPieChart(canvas, items, legendEl) {
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth || 280;
+  const h = Number(canvas.getAttribute("height") || 140);
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+  const colors = ["#42a5f5", "#66bb6a", "#ffb74d", "#ab47bc", "#ef5350", "#26c6da", "#ec407a"];
+  const total = items.reduce(function (s, x) { return s + x.v; }, 0) || 1;
+  const cx = w / 2;
+  const cy = h / 2;
+  const r = Math.min(w, h) / 2 - 8;
+  let ang = -Math.PI / 2;
+  items.forEach(function (it, i) {
+    const slice = (it.v / total) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, ang, ang + slice);
+    ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fill();
+    ang += slice;
+  });
+  // hole
+  ctx.beginPath();
+  ctx.arc(cx, cy, r * 0.45, 0, Math.PI * 2);
+  ctx.fillStyle = "#12182a";
+  ctx.fill();
+  if (legendEl) {
+    legendEl.innerHTML = items
+      .map(function (it, i) {
+        const pct = Math.round((it.v / total) * 100);
+        return (
+          '<div style="display:flex;align-items:center;gap:6px;margin:3px 0;">' +
+          '<span style="width:10px;height:10px;border-radius:3px;background:' +
+          colors[i % colors.length] +
+          ';display:inline-block;"></span>' +
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' +
+          escapeHtml(it.n) +
+          '</span><b style="color:#cfd8e3;">' +
+          pct +
+          '%</b></div>'
+        );
+      })
+      .join("");
+  }
+}
+
 async function loadDashboard() {
   const orders = await fetchOrders();
   let pending = 0, sukses = 0, omzet = 0;
@@ -116,13 +234,48 @@ async function loadDashboard() {
   const settings = getSettings();
   const profit = Number(settings.totalProfit || 0) || Math.round(omzet * 0.4);
 
-  document.getElementById("statSaldo").textContent = formatRp(profit);
-  document.getElementById("statPenjualan").textContent = orders.length;
-  document.getElementById("statPending").textContent = pending;
-  document.getElementById("statSukses").textContent = sukses;
+  const elSaldo = document.getElementById("statSaldo");
+  const elJual = document.getElementById("statPenjualan");
+  const elPend = document.getElementById("statPending");
+  const elSuk = document.getElementById("statSukses");
+  if (elSaldo) elSaldo.textContent = formatRp(profit);
+  if (elJual) elJual.textContent = orders.length;
+  if (elPend) elPend.textContent = pending;
+  if (elSuk) elSuk.textContent = sukses;
+
+  // Tren omzet 7 bucket
+  const buckets = [0, 0, 0, 0, 0, 0, 0];
+  const now = Date.now();
+  const day = 86400000;
+  orders.forEach(function (o) {
+    const st = String(o.status || "").toLowerCase();
+    if (!(st.includes("sukses") || st.includes("selesai"))) return;
+    const t = Number(o.createdAt) || Date.parse(o.waktu || "") || now;
+    const diff = Math.floor((now - t) / day);
+    const idx = 6 - Math.min(6, Math.max(0, diff));
+    buckets[idx] += parseRp(o.total);
+  });
+  drawLineChart(document.getElementById("chartOmzet"), buckets, "#42a5f5");
+
+  // Produk terlaris (pie)
+  const map = {};
+  orders.forEach(function (o) {
+    const st = String(o.status || "").toLowerCase();
+    if (!(st.includes("sukses") || st.includes("selesai"))) return;
+    const n = o.paket || "Lainnya";
+    map[n] = (map[n] || 0) + parseRp(o.total);
+  });
+  let items = Object.keys(map).map(function (k) { return { n: k, v: map[k] }; });
+  items.sort(function (a, b) { return b.v - a.v; });
+  items = items.slice(0, 6);
+  if (!items.length) items = [{ n: "Belum ada data", v: 1 }];
+  drawPieChart(document.getElementById("chartPie"), items, document.getElementById("chartPieLegend"));
 
   const box = document.getElementById("dashboardOrders");
-  const recent = orders.slice().reverse().slice(0, 8);
+  if (!box) return;
+  const recent = orders.slice().sort(function (a, b) {
+    return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+  }).slice(0, 8);
   if (!recent.length) {
     box.innerHTML = '<p style="color:#888;">Belum ada transaksi.</p>';
     return;
@@ -419,7 +572,7 @@ async function kirimLangsung(kode) {
       kirimVia: file ? "upload" : "url",
     });
     if (res && res.ok === false) throw new Error(res.error || "gagal simpan");
-    alert("Terkirim ke pembeli. Pesanan hilang dari daftar aktif.");
+    if (window.showAdmToast) showAdmToast("Berhasil dikirim ke pembeli!"); else alert("Terkirim ke pembeli!");
     loadPesanan();
     loadDashboard();
   } catch (e) {
@@ -892,7 +1045,7 @@ async function kirimProdukOrder() {
   saveSettings(settings);
 
   if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim & Tandai Sukses'; }
-  alert("Produk dikirim! Pembeli bisa unduh file di halaman Pesanan.");
+  if (window.showAdmToast) showAdmToast("Berhasil dikirim!"); else alert("Produk dikirim!");
   loadKirim();
   loadPesanan();
   loadDashboard();
