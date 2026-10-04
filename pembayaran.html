@@ -246,6 +246,7 @@
           return String(x).toUpperCase() !== up;
         })).slice(0, 30);
         localStorage.setItem("voxyy_saved_kodes", JSON.stringify(arr));
+        localStorage.setItem("voxyy_my_orders", JSON.stringify(arr));
       } catch (e) {}
     }
 
@@ -591,5 +592,6 @@
   })();
   </script>
   <script src="bgm.js"></script>
+  <script src="notif.js"></script>
 </body>
 </html>

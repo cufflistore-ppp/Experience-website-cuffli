@@ -1,6 +1,12 @@
 const SAVED_KODE_KEY = "voxyy_saved_kode";
 const SAVED_KODES_KEY = "voxyy_saved_kodes";
 
+function parseMoney(v) {
+  if (v == null || v === "") return 0;
+  if (typeof v === "number" && !isNaN(v)) return v;
+  var n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
+  return isNaN(n) ? 0 : n;
+}
 function escapeHtml(str) {
   return String(str ?? "")
     .replace(/&/g, "&amp;")
@@ -83,7 +89,8 @@ function renderOrderCard(o) {
   const fileName = o.fileName || "Produk";
   const kode = o.kode || "-";
   const paket = o.paket || o.judul || "Produk";
-  const total = o.total != null ? Number(o.total).toLocaleString("id-ID") : "-";
+  const totalNum = parseMoney(o.finalAmount != null ? o.finalAmount : o.total);
+  const total = totalNum > 0 ? totalNum.toLocaleString("id-ID") : (o.total || "-");
   const waktu = o.waktu || o.createdAt || o.dikirimAt || "";
   const catatan = o.catatanAdmin || "";
 
@@ -101,9 +108,10 @@ function renderOrderCard(o) {
     ${catatan ? `<div style="font-size:12px;color:#cfd8e3;background:#0a0e18;border-radius:8px;padding:8px 10px;margin-bottom:8px;">${escapeHtml(catatan)}</div>` : ""}
     ${
       file
-        ? `<a href="${escapeHtml(file)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:9px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh ${escapeHtml(fileName)}</a>`
+        ? `<a href="${escapeHtml(file)}" ${String(file).indexOf("data:")===0?"":'target="_blank" rel="noopener"'} download="${escapeHtml(fileName)}" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:9px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh / Buka ${escapeHtml(fileName || "file")}</a>`
         : st.cls === "sukses"
-        ? `<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Menunggu file dari admin...</div>`
+        ? `<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Menunggu file dari admin... Tekan WA Admin jika lama.</div>
+           <a href="#" onclick="return hubungiAdminWA('${escapeHtml(o.kode||"")}','${escapeHtml(o.paket||"")}');" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:9px 14px;background:#25d366;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WA Admin</a>`
         : `<div style="font-size:12px;color:#8aa0b8;margin-top:6px;line-height:1.4;">Pesanan belum dikirim / belum ACC admin.</div>
            <a href="#" onclick="return hubungiAdminWA('${escapeHtml(kode)}','${escapeHtml(paket)}');" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:9px 14px;background:#25d366;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WA Admin</a>`
     }

@@ -364,41 +364,91 @@ function loadProdukAdm() {
     .join("");
 }
 
-function simpanProduk() {
+async function simpanProduk() {
   const id = document.getElementById("produkId").value;
+  let imgVal = (document.getElementById("produkImg").value || "").trim();
+  const fotoFile = document.getElementById("produkFotoFile");
+  const f = fotoFile && fotoFile.files && fotoFile.files[0];
+  if (f) {
+    try {
+      if (f.size > 900000 && !f.type.startsWith("image/")) {
+        alert("File terlalu besar. Kompres atau pakai URL.");
+        return;
+      }
+      if (f.type.startsWith("image/")) {
+        imgVal = await compressImageFile(f, 800, 220);
+      } else {
+        try {
+          const up = await uploadDeliveryFile("produk", f);
+          imgVal = up.url;
+        } catch (e) {
+          imgVal = await new Promise(function (res, rej) {
+            const r = new FileReader();
+            r.onload = function () { res(r.result); };
+            r.onerror = rej;
+            r.readAsDataURL(f);
+          });
+        }
+      }
+    } catch (e) {
+      alert("Gagal baca foto: " + (e.message || e));
+      return;
+    }
+  }
+  if (!imgVal) imgVal = "logo.png";
+
   const item = {
     id: id || "p" + Date.now(),
     judul: document.getElementById("produkJudul").value.trim(),
     kategori: document.getElementById("produkKategori").value,
+    label: (document.getElementById("produkKategori").value || "digital").toUpperCase(),
     harga: Number(document.getElementById("produkHarga").value) || 0,
     modal: Number(document.getElementById("produkModal").value) || 0,
     stok: Number(document.getElementById("produkStok").value),
     deskripsi: document.getElementById("produkDeskripsi").value.trim(),
-    img: document.getElementById("produkImg").value.trim() || "logo.png",
+    img: imgVal,
     file: document.getElementById("produkFile").value.trim(),
-    status: document.getElementById("produkStatus").value,
+    status: document.getElementById("produkStatus").value || "aktif",
   };
   if (!item.judul) {
     alert("Judul wajib diisi");
     return;
   }
+  if (isNaN(item.stok)) item.stok = -1;
+
   let list = getProdukAdmin();
+  // merge dari firebase kalau local kosong
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
+      const remote = await window.VoxyyOrders.getProdukGlobal();
+      if (remote && remote.length && list.length < remote.length) list = remote;
+    }
+  } catch (e) {}
+
   if (id) {
-    const idx = list.findIndex((p) => p.id === id);
-    if (idx >= 0) list[idx] = item;
+    const idx = list.findIndex((p) => String(p.id) === String(id));
+    if (idx >= 0) list[idx] = Object.assign({}, list[idx], item);
     else list.push(item);
   } else {
     list.push(item);
   }
   saveProdukAdmin(list);
-  // sync ke joki catalog jika window ada
   try {
     localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif")));
   } catch (e) {}
+  if (window.VoxyyOrders && window.VoxyyOrders.saveProdukGlobal) {
+    try {
+      await window.VoxyyOrders.saveProdukGlobal(list);
+    } catch (e) {
+      console.warn(e);
+    }
+  }
   toggleFormProduk();
   loadProdukAdm();
-  alert("Produk disimpan!");
+  if (window.showAdmToast) showAdmToast("Produk disimpan & muncul di Home");
+  else alert("Produk disimpan!");
 }
+
 
 function editProduk(i) {
   const list = getProdukAdmin();
@@ -426,6 +476,9 @@ function hapusProduk(i) {
 }
 
 /* ========== PESANAN ========== */
+window._arsipPage = 0;
+const ARSIP_PER_PAGE = 10;
+
 function toggleFormOrder() {
   const f = document.getElementById("formOrder");
   f.style.display = f.style.display === "none" ? "block" : "none";
@@ -503,7 +556,7 @@ async function loadPesanan() {
           <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">Layani pesanan ini</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
             <button type="button" class="btn-adm danger" style="margin:0;padding:6px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
-            <button type="button" class="btn-adm success" style="margin:0;padding:6px 10px;font-size:11px;" onclick="ubahStatusKode('${kode}','Sukses')">Tandai Sukses</button>
+            <button type="button" class="btn-adm success" style="margin:0;padding:6px 10px;font-size:11px;" onclick="tandaiSukses('${kode}')">Tandai Sukses</button>
           </div>
           <label style="font-size:11px;color:#8aa0b8;">Upload file (APK/ZIP/dll)</label>
           <input type="file" id="file_${kode}" style="font-size:12px;color:#ccc;width:100%;margin:4px 0 8px;">
@@ -517,7 +570,151 @@ async function loadPesanan() {
       </div>`;
     })
     .join("");
+
+  // arsip bukti (sukses/tolak) selalu di-render di bawah
+  renderArsipBukti(orders);
 }
+
+function parseMoneyAdm(v) {
+  if (v == null || v === "") return 0;
+  if (typeof v === "number" && !isNaN(v)) return v;
+  var n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
+  return isNaN(n) ? 0 : n;
+}
+
+function renderArsipBukti(allOrders) {
+  const grid = document.getElementById("arsipBuktiGrid");
+  const pager = document.getElementById("arsipPager");
+  const info = document.getElementById("arsipInfo");
+  if (!grid) return;
+
+  const done = (allOrders || []).filter(function (o) {
+    const s = String(o.status || "").toLowerCase();
+    return s.includes("sukses") || s.includes("selesai") || s.includes("tolak");
+  });
+  // yang punya bukti dulu, lalu tanpa bukti
+  done.sort(function (a, b) {
+    const ta = Number(a.dikirimTs || a.createdAt) || 0;
+    const tb = Number(b.dikirimTs || b.createdAt) || 0;
+    return tb - ta;
+  });
+
+  const total = done.length;
+  const pages = Math.max(1, Math.ceil(total / ARSIP_PER_PAGE));
+  if (window._arsipPage >= pages) window._arsipPage = pages - 1;
+  if (window._arsipPage < 0) window._arsipPage = 0;
+  const start = window._arsipPage * ARSIP_PER_PAGE;
+  const slice = done.slice(start, start + ARSIP_PER_PAGE);
+
+  if (info) {
+    info.textContent = total
+      ? total + " arsip · halaman " + (window._arsipPage + 1) + "/" + pages
+      : "Belum ada arsip";
+  }
+
+  if (!slice.length) {
+    grid.innerHTML =
+      '<p style="color:#6a7a90;grid-column:1/-1;font-size:12px;">Belum ada pesanan selesai. Setelah Sukses/Tolak, kode + harga + produk + bukti TF tetap di sini.</p>';
+    if (pager) pager.innerHTML = "";
+    return;
+  }
+
+  grid.innerHTML = slice
+    .map(function (o) {
+      const kode = escapeHtml(o.kode || "-");
+      const paket = escapeHtml(o.paket || o.judul || "-");
+      const hargaN = parseMoneyAdm(o.finalAmount != null ? o.finalAmount : o.total);
+      const harga =
+        hargaN > 0
+          ? "Rp " + hargaN.toLocaleString("id-ID")
+          : escapeHtml(String(o.total || "-"));
+      const st = escapeHtml(o.status || "");
+      const bukti = o.bukti || o.buktiTf || o.buktiURL || "";
+      const img = bukti
+        ? '<a href="' +
+          escapeHtml(bukti) +
+          '" target="_blank"><img src="' +
+          escapeHtml(bukti) +
+          '" alt="Bukti" style="width:100%;height:110px;object-fit:cover;border-radius:8px;border:1px solid #1e2a45;display:block;background:#0a0e18;"/></a>'
+        : '<div style="width:100%;height:110px;border-radius:8px;background:#0a0e18;border:1px dashed #1e2a45;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6a7a90;">Tanpa foto</div>';
+      const cls = statusClass(o.status);
+      return (
+        '<div style="background:#12182a;border:1px solid #1e2a45;border-radius:12px;padding:10px;">' +
+        img +
+        '<div style="margin-top:8px;font-size:11px;font-weight:700;color:#90caf9;word-break:break-all;">' +
+        kode +
+        "</div>" +
+        '<div style="font-size:12px;color:#e3eaf2;margin-top:2px;line-height:1.3;">' +
+        paket +
+        "</div>" +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:4px;">' +
+        '<span style="font-size:12px;color:#64b5f6;font-weight:700;">' +
+        harga +
+        "</span>" +
+        '<span class="badge-st ' +
+        cls +
+        '" style="font-size:10px;">' +
+        st +
+        "</span>" +
+        "</div>" +
+        '<div style="font-size:10px;color:#6a7a90;margin-top:4px;">' +
+        escapeHtml(String(o.nama || "")) +
+        (o.waktu ? " · " + escapeHtml(String(o.waktu)) : "") +
+        "</div>" +
+        "</div>"
+      );
+    })
+    .join("");
+
+  if (pager) {
+    if (pages <= 1) {
+      pager.innerHTML = "";
+    } else {
+      pager.innerHTML =
+        '<button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;" onclick="arsipPrev()" ' +
+        (window._arsipPage <= 0 ? "disabled" : "") +
+        '><i class="fa-solid fa-chevron-left"></i> Sebelumnya</button>' +
+        '<span style="font-size:12px;color:#8aa0b8;">' +
+        (window._arsipPage + 1) +
+        " / " +
+        pages +
+        "</span>" +
+        '<button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;" onclick="arsipNext(' +
+        pages +
+        ')" ' +
+        (window._arsipPage >= pages - 1 ? "disabled" : "") +
+        '>Berikutnya <i class="fa-solid fa-chevron-right"></i></button>';
+    }
+  }
+}
+
+async function arsipPrev() {
+  window._arsipPage = Math.max(0, (window._arsipPage || 0) - 1);
+  const orders = await fetchOrders();
+  renderArsipBukti(orders);
+}
+async function arsipNext(pages) {
+  window._arsipPage = Math.min((pages || 1) - 1, (window._arsipPage || 0) + 1);
+  const orders = await fetchOrders();
+  renderArsipBukti(orders);
+}
+window.renderArsipBukti = renderArsipBukti;
+window.arsipPrev = arsipPrev;
+window.arsipNext = arsipNext;
+
+
+async function tandaiSukses(kode) {
+  const urlInp = document.getElementById("url_" + kode);
+  const fileInp = document.getElementById("file_" + kode);
+  const hasUrl = urlInp && urlInp.value && urlInp.value.trim();
+  const hasFile = fileInp && fileInp.files && fileInp.files[0];
+  if (!hasUrl && !hasFile) {
+    if (!confirm("Belum ada file/URL. Pembeli tidak bisa unduh produk.\n\nTetap tandai Sukses?")) return;
+  }
+  await ubahStatusKode(kode, "Sukses");
+  if (window.showAdmToast) showAdmToast("Ditandai Sukses");
+}
+window.tandaiSukses = tandaiSukses;
 
 async function ubahStatusKode(kode, status) {
   if (!kode) return;
@@ -566,39 +763,64 @@ async function kirimLangsung(kode) {
         fileUrl = up.url;
         fileName = up.name;
       } catch (upErr) {
-        // fallback: data URL jika storage gagal (file kecil)
-        if (file.size > 900000) {
-          throw new Error("Upload Storage gagal. Pakai mode URL, atau file lebih kecil. " + (upErr.message || ""));
+        console.warn("storage fail", upErr);
+        // fallback dataURL untuk file < 1.5MB
+        if (file.size > 1500000) {
+          throw new Error(
+            "Upload gagal (" + (upErr.message || upErr) + ").\\n" +
+            "Solusi: tempel link URL file (Google Drive/MediaFire), atau file lebih kecil."
+          );
         }
         fileUrl = await new Promise(function (resolve, reject) {
           const r = new FileReader();
           r.onload = function () { resolve(r.result); };
-          r.onerror = reject;
+          r.onerror = function () { reject(new Error("Gagal baca file")); };
           r.readAsDataURL(file);
         });
         fileName = file.name || "file";
       }
     } else {
-      fileName = fileUrl.split("/").pop() || "download";
+      fileName = fileUrl.split("/").pop().split("?")[0] || "download";
     }
 
+    if (!fileUrl) throw new Error("URL file kosong");
+
     if (!window.VoxyyOrders || !window.VoxyyOrders.updateOrderByKode) {
-      throw new Error("Firebase order belum siap. Refresh halaman.");
+      throw new Error("Koneksi order belum siap. Refresh halaman admin.");
     }
-    const res = await window.VoxyyOrders.updateOrderByKode(kode, {
+
+    const payload = {
       status: "Sukses",
       file: fileUrl,
       download: fileUrl,
+      fileUrl: fileUrl,
       fileName: fileName,
       catatanAdmin: catatan,
       dikirimAt: new Date().toLocaleString("id-ID"),
       dikirimTs: Date.now(),
       kirimVia: file ? "upload" : "url",
-    });
-    if (res && res.ok === false) throw new Error(res.error || "gagal simpan");
-    if (window.showAdmToast) showAdmToast("Berhasil dikirim ke pembeli!"); else alert("Terkirim!");
-    loadPesanan();
-    loadDashboard();
+    };
+    const res = await window.VoxyyOrders.updateOrderByKode(kode, payload);
+    if (res && res.ok === false) throw new Error(res.error || "gagal simpan order");
+
+    // pastikan local juga
+    try {
+      const raw = localStorage.getItem("voxyy_orders");
+      if (raw) {
+        const arr = JSON.parse(raw);
+        const i = arr.findIndex(function (o) { return String(o.kode) === String(kode); });
+        if (i >= 0) {
+          arr[i] = Object.assign({}, arr[i], payload);
+          localStorage.setItem("voxyy_orders", JSON.stringify(arr));
+        }
+      }
+    } catch (e) {}
+
+    if (window.showAdmToast) showAdmToast("Berhasil dikirim ke pembeli!");
+    else alert("Terkirim ke pembeli!");
+
+    await loadPesanan();
+    try { await loadDashboard(); } catch (e) {}
   } catch (e) {
     alert("Gagal kirim: " + (e && e.message ? e.message : String(e)));
     if (btn) {
@@ -730,6 +952,32 @@ function loadTampilan() {
   if (pb) pb.src = banner;
   document.getElementById("bgColorHex").value = s.bgColor || "#0a0e18";
   document.getElementById("bgColorCustom").value = s.bgColor || "#0a0e18";
+}
+
+function compressImageFile(file, maxW, maxKB) {
+  return new Promise(function (resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = new Image();
+      img.onload = function () {
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        let q = 0.75, data = c.toDataURL("image/jpeg", q);
+        while (data.length > maxKB * 1024 && q > 0.35) {
+          q -= 0.1;
+          data = c.toDataURL("image/jpeg", q);
+        }
+        resolve(data);
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 /** Kompres foto ke JPEG base64 agar muat di Firebase */
