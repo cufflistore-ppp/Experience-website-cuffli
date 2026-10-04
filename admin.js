@@ -492,7 +492,14 @@ async function loadPesanan() {
 
   function isDone(o) {
     const s = String(o.status || "").toLowerCase();
-    return s.includes("sukses") || s.includes("selesai") || s.includes("tolak");
+    // Tolak → arsip
+    if (s.includes("tolak")) return true;
+    // Sukses/Selesai HANYA arsip jika sudah dikirim file ke pembeli
+    if (s.includes("sukses") || s.includes("selesai")) {
+      const hasFile = !!(o.file || o.download || o.fileUrl || o.dikirimTs);
+      return hasFile;
+    }
+    return false;
   }
 
   if (filter === "aktif") {
@@ -553,11 +560,18 @@ async function loadPesanan() {
         </div>
 
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
-          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">Layani pesanan ini</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-            <button type="button" class="btn-adm danger" style="margin:0;padding:6px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
-            <button type="button" class="btn-adm success" style="margin:0;padding:6px 10px;font-size:11px;" onclick="tandaiSukses('${kode}')">Tandai Sukses</button>
+          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">1. Pilih status (order tetap di sini sampai dikirim)</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+            <select id="st_${kode}" style="flex:1;min-width:140px;padding:8px 10px;border-radius:8px;background:#0d1220;border:1px solid #1e2a45;color:#fff;font-size:12px;" onchange="gantiStatusSelect('${kode}', this.value)">
+              <option value="Belum Bayar" ${String(o.status||'')==='Belum Bayar'?'selected':''}>Belum Bayar</option>
+              <option value="Menunggu Verifikasi" ${(String(o.status||'').toLowerCase().includes('verifikasi')||String(o.status||'').toLowerCase().includes('menunggu'))&&!String(o.status||'').toLowerCase().includes('file')?'selected':''}>Menunggu Verifikasi</option>
+              <option value="Proses" ${String(o.status||'').toLowerCase().includes('proses')?'selected':''}>Proses</option>
+              <option value="Sukses" ${(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai'))?'selected':''}>Sukses</option>
+              <option value="Ditolak" ${String(o.status||'').toLowerCase().includes('tolak')?'selected':''}>Ditolak</option>
+            </select>
+            <button type="button" class="btn-adm danger" style="margin:0;padding:8px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
           </div>
+          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">2. Kirim produk → status Sukses + file masuk ke pembeli (barengan)</div>
           <label style="font-size:11px;color:#8aa0b8;">Upload file (APK/ZIP/dll)</label>
           <input type="file" id="file_${kode}" style="font-size:12px;color:#ccc;width:100%;margin:4px 0 8px;">
           <label style="font-size:11px;color:#8aa0b8;">atau tempel URL</label>
@@ -704,17 +718,34 @@ window.arsipNext = arsipNext;
 
 
 async function tandaiSukses(kode) {
-  const urlInp = document.getElementById("url_" + kode);
-  const fileInp = document.getElementById("file_" + kode);
-  const hasUrl = urlInp && urlInp.value && urlInp.value.trim();
-  const hasFile = fileInp && fileInp.files && fileInp.files[0];
-  if (!hasUrl && !hasFile) {
-    if (!confirm("Belum ada file/URL. Pembeli tidak bisa unduh produk.\n\nTetap tandai Sukses?")) return;
-  }
+  // Hanya ganti status — order tetap di list aktif sampai file benar-benar dikirim via tombol Kirim
   await ubahStatusKode(kode, "Sukses");
-  if (window.showAdmToast) showAdmToast("Ditandai Sukses");
+  if (window.showAdmToast) showAdmToast("Status Sukses. Kirim file agar produk masuk ke pembeli.");
 }
 window.tandaiSukses = tandaiSukses;
+
+async function gantiStatusSelect(kode, status) {
+  if (!kode || !status) return;
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
+      const res = await window.VoxyyOrders.updateOrderByKode(kode, {
+        status: status,
+        updatedAt: Date.now(),
+      });
+      if (res && res.ok === false) throw new Error(res.error || "gagal");
+    } else {
+      await ubahStatusKode(kode, status);
+      return;
+    }
+    if (window.showAdmToast) showAdmToast("Status: " + status);
+    // Jangan hilang dari list kecuali Tolak — reload tetap tampilkan di aktif jika belum dikirim
+    await loadPesanan();
+  } catch (e) {
+    alert("Gagal ganti status: " + (e.message || e));
+  }
+}
+window.gantiStatusSelect = gantiStatusSelect;
+
 
 async function ubahStatusKode(kode, status) {
   if (!kode) return;
@@ -736,18 +767,20 @@ async function tolakOrder(kode) {
 }
 
 async function kirimLangsung(kode) {
-  if (!kode) return;
+  if (!kode) { alert("Kode kosong"); return; }
   const fileInp = document.getElementById("file_" + kode);
   const urlInp = document.getElementById("url_" + kode);
   const noteInp = document.getElementById("note_" + kode);
   const btn = document.getElementById("btnKirim_" + kode);
   const file = fileInp && fileInp.files && fileInp.files[0];
   let fileUrl = (urlInp && urlInp.value ? urlInp.value : "").trim();
+  // ignore placeholder
+  if (fileUrl === "https://" || fileUrl === "http://" || fileUrl === "https://...") fileUrl = "";
   let fileName = "";
   const catatan = (noteInp && noteInp.value ? noteInp.value : "").trim();
 
   if (!file && !fileUrl) {
-    alert("Pilih file ATAU isi URL dulu (salah satu cukup).");
+    alert("Pilih file ATAU isi URL dulu (salah satu).");
     return;
   }
 
@@ -756,37 +789,48 @@ async function kirimLangsung(kode) {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
   }
 
+  // kunci biar realtime tidak ganggu di tengah upload
+  window._kirimBusy = true;
+
   try {
     if (file) {
+      let uploaded = false;
+      // 1) coba Firebase Storage
       try {
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Upload file...';
         const up = await uploadDeliveryFile(kode, file);
-        fileUrl = up.url;
-        fileName = up.name;
+        if (up && up.url) {
+          fileUrl = up.url;
+          fileName = up.name || file.name;
+          uploaded = true;
+        }
       } catch (upErr) {
-        console.warn("storage fail", upErr);
-        // fallback dataURL untuk file < 1.5MB
-        if (file.size > 1500000) {
+        console.warn("[kirim] storage:", upErr);
+        // 2) fallback dataURL hanya untuk file kecil (< 400KB)
+        if (file.size <= 400000) {
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Proses file...';
+          fileUrl = await readFileAsDataURL(file);
+          fileName = file.name || "file";
+          uploaded = true;
+        } else {
           throw new Error(
-            "Upload gagal (" + (upErr.message || upErr) + ").\\n" +
-            "Solusi: tempel link URL file (Google Drive/MediaFire), atau file lebih kecil."
+            "Upload Storage gagal: " + (upErr.message || upErr) +
+            "\\n\\nFile terlalu besar untuk fallback.\\n" +
+            "Solusi: upload file ke Google Drive / MediaFire, lalu tempel link-nya di kolom URL."
           );
         }
-        fileUrl = await new Promise(function (resolve, reject) {
-          const r = new FileReader();
-          r.onload = function () { resolve(r.result); };
-          r.onerror = function () { reject(new Error("Gagal baca file")); };
-          r.readAsDataURL(file);
-        });
-        fileName = file.name || "file";
+      }
+      if (!uploaded || !fileUrl) {
+        throw new Error("Gagal mendapatkan link file.");
       }
     } else {
-      fileName = fileUrl.split("/").pop().split("?")[0] || "download";
+      fileName = (fileUrl.split("/").pop() || "download").split("?")[0];
     }
 
-    if (!fileUrl) throw new Error("URL file kosong");
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Simpan ke pesanan...';
 
     if (!window.VoxyyOrders || !window.VoxyyOrders.updateOrderByKode) {
-      throw new Error("Koneksi order belum siap. Refresh halaman admin.");
+      throw new Error("Sistem order belum siap. Refresh halaman admin, login ulang.");
     }
 
     const payload = {
@@ -794,35 +838,51 @@ async function kirimLangsung(kode) {
       file: fileUrl,
       download: fileUrl,
       fileUrl: fileUrl,
-      fileName: fileName,
+      fileName: fileName || "produk",
       catatanAdmin: catatan,
       dikirimAt: new Date().toLocaleString("id-ID"),
       dikirimTs: Date.now(),
       kirimVia: file ? "upload" : "url",
     };
-    const res = await window.VoxyyOrders.updateOrderByKode(kode, payload);
-    if (res && res.ok === false) throw new Error(res.error || "gagal simpan order");
 
-    // pastikan local juga
+    const res = await window.VoxyyOrders.updateOrderByKode(kode, payload);
+    console.log("[kirim] update result", res);
+
+    if (!res || res.ok === false) {
+      throw new Error((res && res.error) ? res.error : "Gagal simpan ke database. Cek koneksi / rules Firebase.");
+    }
+
+    // verifikasi: baca ulang
     try {
-      const raw = localStorage.getItem("voxyy_orders");
-      if (raw) {
-        const arr = JSON.parse(raw);
-        const i = arr.findIndex(function (o) { return String(o.kode) === String(kode); });
-        if (i >= 0) {
-          arr[i] = Object.assign({}, arr[i], payload);
-          localStorage.setItem("voxyy_orders", JSON.stringify(arr));
+      const orders = await window.VoxyyOrders.getOrders();
+      const found = (orders || []).find(function (o) {
+        return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
+      });
+      if (found) {
+        const hasFile = !!(found.file || found.download || found.fileUrl);
+        const st = String(found.status || "").toLowerCase();
+        if (!st.includes("sukses") && !st.includes("selesai")) {
+          // paksa sekali lagi
+          await window.VoxyyOrders.updateOrderByKode(kode, payload);
+        }
+        if (!hasFile && fileUrl && !String(fileUrl).startsWith("data:")) {
+          await window.VoxyyOrders.updateOrderByKode(kode, { file: fileUrl, download: fileUrl, fileUrl: fileUrl });
         }
       }
-    } catch (e) {}
+    } catch (verErr) {
+      console.warn("[kirim] verify", verErr);
+    }
 
-    if (window.showAdmToast) showAdmToast("Berhasil dikirim ke pembeli!");
-    else alert("Terkirim ke pembeli!");
+    if (window.showAdmToast) showAdmToast("✓ Terkirim ke pembeli!");
+    else alert("Berhasil! Produk terkirim ke pembeli.\\nKode: " + kode);
 
+    window._kirimBusy = false;
     await loadPesanan();
     try { await loadDashboard(); } catch (e) {}
   } catch (e) {
-    alert("Gagal kirim: " + (e && e.message ? e.message : String(e)));
+    window._kirimBusy = false;
+    console.error("[kirim]", e);
+    alert("GAGAL kirim:\\n" + (e && e.message ? e.message : String(e)));
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim ke Pembeli & Selesai';
@@ -1187,12 +1247,18 @@ function loadKirim() {
 
 async function uploadDeliveryFile(kode, file) {
   if (!file) throw new Error("Tidak ada file");
-  // Init firebase app if needed
   if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
-    window.VoxyyOrders.initFirebase();
+    try { window.VoxyyOrders.initFirebase(); } catch (e) {}
   }
-  if (typeof firebase === "undefined" || !firebase.storage) {
-    throw new Error("Firebase Storage belum termuat. Refresh halaman.");
+  // Pastikan app firebase ada
+  if (typeof firebase === "undefined") {
+    throw new Error("Firebase belum termuat. Refresh halaman admin.");
+  }
+  if (!firebase.apps || !firebase.apps.length) {
+    throw new Error("Firebase app belum init. Refresh halaman.");
+  }
+  if (!firebase.storage) {
+    throw new Error("Firebase Storage script belum termuat.");
   }
   const safeName = String(file.name || "file").replace(/[^a-zA-Z0-9._-]/g, "_");
   const path = "deliveries/" + String(kode || "x").replace(/[.#$\[\]]/g, "_") + "/" + Date.now() + "_" + safeName;
@@ -1203,6 +1269,16 @@ async function uploadDeliveryFile(kode, file) {
   });
   const url = await snap.ref.getDownloadURL();
   return { url: url, name: file.name || safeName, path: path, size: file.size };
+}
+
+/** Baca file jadi dataURL (untuk fallback kecil) */
+function readFileAsDataURL(file) {
+  return new Promise(function (resolve, reject) {
+    const r = new FileReader();
+    r.onload = function () { resolve(r.result); };
+    r.onerror = function () { reject(new Error("Gagal baca file")); };
+    r.readAsDataURL(file);
+  });
 }
 
 

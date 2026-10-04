@@ -207,8 +207,9 @@ async function addOrder(order) {
 }
 
 async function updateOrderByKode(kode, patch) {
-  if (!kode) return { ok: false };
+  if (!kode) return { ok: false, error: "kode kosong" };
   const t = String(kode).trim().toUpperCase();
+  const key = kodeKey(kode);
   let local = getLocalOrders();
   const li = local.findIndex(
     (o) => String(o.kode || "").toUpperCase() === t
@@ -217,24 +218,51 @@ async function updateOrderByKode(kode, patch) {
     local[li] = { ...local[li], ...patch };
     setLocalOrders(local);
   }
+  // update cache realtime
+  if (_lastOrders && _lastOrders.length) {
+    const i2 = _lastOrders.findIndex(
+      (o) => String(o.kode || "").toUpperCase() === t || String(o._id || "").toUpperCase() === t
+    );
+    if (i2 >= 0) _lastOrders[i2] = { ..._lastOrders[i2], ...patch };
+  }
   if (!isGlobalConfigured()) return { ok: li >= 0, mode: "local" };
   initFirebase();
-  if (!_db) return { ok: li >= 0, mode: "local" };
+  if (!_db) return { ok: li >= 0, mode: "local", error: "db null" };
   try {
-    const ref = _db.ref("orders/" + kodeKey(kode));
-    const snap = await ref.once("value");
+    // cari path yang benar: key langsung, atau scan by field kode
+    let ref = _db.ref("orders/" + key);
+    let snap = await ref.once("value");
+    if (!snap.exists()) {
+      const all = await _db.ref("orders").once("value");
+      const val = all.val() || {};
+      let foundKey = null;
+      Object.keys(val).forEach(function (k) {
+        const o = val[k] || {};
+        if (String(o.kode || "").toUpperCase() === t || String(k).toUpperCase() === t) {
+          foundKey = k;
+        }
+      });
+      if (foundKey) {
+        ref = _db.ref("orders/" + foundKey);
+        snap = await ref.once("value");
+      }
+    }
     if (!snap.exists()) {
       const src =
         li >= 0
-          ? { ...local[li], ...patch }
-          : { kode, createdAt: Date.now(), ...patch };
+          ? { ...local[li], ...patch, kode: kode }
+          : { kode: kode, createdAt: Date.now(), ...patch };
       await ref.set(stripMeta(src));
     } else {
-      await ref.update(patch);
+      // merge full supaya field file pasti masuk
+      const cur = snap.val() || {};
+      const merged = stripMeta({ ...cur, ...patch, kode: cur.kode || kode });
+      await ref.set(merged);
     }
     return { ok: true, mode: "global" };
   } catch (e) {
-    return { ok: li >= 0, mode: "local", error: String(e) };
+    console.error("[Voxyy] updateOrderByKode", e);
+    return { ok: li >= 0, mode: "local", error: String(e && e.message ? e.message : e) };
   }
 }
 
