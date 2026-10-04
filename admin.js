@@ -571,15 +571,25 @@ async function loadPesanan() {
             </select>
             <button type="button" class="btn-adm danger" style="margin:0;padding:8px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
           </div>
-          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">2. Kirim produk → status Sukses + file masuk ke pembeli (barengan)</div>
-          <label style="font-size:11px;color:#8aa0b8;">Upload file (APK/ZIP/dll)</label>
-          <input type="file" id="file_${kode}" style="font-size:12px;color:#ccc;width:100%;margin:4px 0 8px;">
-          <label style="font-size:11px;color:#8aa0b8;">atau tempel URL</label>
-          <input type="text" id="url_${kode}" placeholder="https://..." value="${escapeHtml(o.file || o.download || "")}" style="width:100%;margin:4px 0 8px;">
+          <div style="font-size:11px;color:#8aa0b8;margin-bottom:8px;font-weight:600;">2. Kirim produk (pilih <b style="color:#90caf9;">SALAH SATU</b>: File <b>atau</b> URL)</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <button type="button" id="modeFile_${kode}" class="btn-adm" style="margin:0;flex:1;padding:8px;font-size:12px;background:#1565c0;" onclick="setOrderKirimMode('${kode}','file')">📁 File saja</button>
+            <button type="button" id="modeUrl_${kode}" class="btn-adm outline" style="margin:0;flex:1;padding:8px;font-size:12px;" onclick="setOrderKirimMode('${kode}','url')">🔗 URL saja</button>
+          </div>
+          <div id="boxFile_${kode}">
+            <label style="font-size:11px;color:#8aa0b8;">Pilih file dari HP (APK / ZIP / foto / dll)</label>
+            <input type="file" id="file_${kode}" style="font-size:12px;color:#ccc;width:100%;margin:4px 0 8px;" onchange="onOrderFilePicked('${kode}')">
+            <div id="fileNameHint_${kode}" style="font-size:11px;color:#64b5f6;margin-bottom:8px;display:none;"></div>
+          </div>
+          <div id="boxUrl_${kode}" style="display:none;">
+            <label style="font-size:11px;color:#8aa0b8;">Tempel link download saja</label>
+            <input type="text" id="url_${kode}" placeholder="https://drive.google.com/..." value="" style="width:100%;margin:4px 0 8px;">
+          </div>
           <input type="text" id="note_${kode}" placeholder="Catatan untuk pembeli (opsional)" style="width:100%;margin:0 0 8px;">
           <button type="button" class="btn-adm success" id="btnKirim_${kode}" style="margin:0;width:100%;" onclick="kirimLangsung('${kode}')">
             <i class="fa-solid fa-paper-plane"></i> Kirim ke Pembeli & Selesai
           </button>
+          <p style="font-size:10px;color:#6a7a90;margin:6px 0 0;">File mode = cukup pilih file, langsung kirim. URL mode = cukup tempel link, langsung kirim. Tidak perlu dua-duanya.</p>
         </div>
       </div>`;
     })
@@ -766,22 +776,74 @@ async function tolakOrder(kode) {
   await ubahStatusKode(kode, "Ditolak");
 }
 
+
+window._kirimModeMap = window._kirimModeMap || {};
+function setOrderKirimMode(kode, mode) {
+  window._kirimModeMap[kode] = mode === "url" ? "url" : "file";
+  var boxF = document.getElementById("boxFile_" + kode);
+  var boxU = document.getElementById("boxUrl_" + kode);
+  var btnF = document.getElementById("modeFile_" + kode);
+  var btnU = document.getElementById("modeUrl_" + kode);
+  if (mode === "url") {
+    if (boxF) boxF.style.display = "none";
+    if (boxU) boxU.style.display = "block";
+    if (btnF) { btnF.className = "btn-adm outline"; btnF.style.background = ""; }
+    if (btnU) { btnU.className = "btn-adm"; btnU.style.background = "#1565c0"; }
+    var fi = document.getElementById("file_" + kode);
+    if (fi) fi.value = "";
+    var h = document.getElementById("fileNameHint_" + kode);
+    if (h) { h.style.display = "none"; h.textContent = ""; }
+  } else {
+    if (boxF) boxF.style.display = "block";
+    if (boxU) boxU.style.display = "none";
+    if (btnF) { btnF.className = "btn-adm"; btnF.style.background = "#1565c0"; }
+    if (btnU) { btnU.className = "btn-adm outline"; btnU.style.background = ""; }
+    var ui = document.getElementById("url_" + kode);
+    if (ui) ui.value = "";
+  }
+}
+function onOrderFilePicked(kode) {
+  window._kirimModeMap[kode] = "file";
+  setOrderKirimMode(kode, "file");
+  var fi = document.getElementById("file_" + kode);
+  var h = document.getElementById("fileNameHint_" + kode);
+  var f = fi && fi.files && fi.files[0];
+  if (f && h) {
+    h.style.display = "block";
+    h.textContent = "✓ File siap: " + f.name + " (" + Math.round(f.size / 1024) + " KB) — langsung tekan Kirim (tanpa URL)";
+  } else if (h) {
+    h.style.display = "none";
+    h.textContent = "";
+  }
+}
+window.setOrderKirimMode = setOrderKirimMode;
+window.onOrderFilePicked = onOrderFilePicked;
+
 async function kirimLangsung(kode) {
   if (!kode) { alert("Kode kosong"); return; }
+  const mode = (window._kirimModeMap && window._kirimModeMap[kode]) || "file";
   const fileInp = document.getElementById("file_" + kode);
   const urlInp = document.getElementById("url_" + kode);
   const noteInp = document.getElementById("note_" + kode);
   const btn = document.getElementById("btnKirim_" + kode);
   const file = fileInp && fileInp.files && fileInp.files[0];
   let fileUrl = (urlInp && urlInp.value ? urlInp.value : "").trim();
-  // ignore placeholder
-  if (fileUrl === "https://" || fileUrl === "http://" || fileUrl === "https://...") fileUrl = "";
+  if (fileUrl === "https://" || fileUrl === "http://" || fileUrl === "https://..." || fileUrl === "https://") fileUrl = "";
   let fileName = "";
   const catatan = (noteInp && noteInp.value ? noteInp.value : "").trim();
 
-  if (!file && !fileUrl) {
-    alert("Pilih file ATAU isi URL dulu (salah satu).");
-    return;
+  // Mode terpisah: FILE saja ATAU URL saja — tidak digabung
+  if (mode === "file") {
+    if (!file) {
+      alert("Mode File: pilih file dulu, lalu tekan Kirim.\nTidak perlu isi URL.");
+      return;
+    }
+    fileUrl = ""; // paksa hanya file
+  } else {
+    if (!fileUrl) {
+      alert("Mode URL: tempel link dulu, lalu tekan Kirim.\nTidak perlu pilih file.");
+      return;
+    }
   }
 
   if (btn) {
@@ -807,7 +869,7 @@ async function kirimLangsung(kode) {
       } catch (upErr) {
         console.warn("[kirim] storage:", upErr);
         // 2) fallback dataURL hanya untuk file kecil (< 400KB)
-        if (file.size <= 400000) {
+        if (file.size <= 1200000) {
           if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Proses file...';
           fileUrl = await readFileAsDataURL(file);
           fileName = file.name || "file";
