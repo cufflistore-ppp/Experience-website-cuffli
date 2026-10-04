@@ -90,7 +90,7 @@ function renderProduk() {
   } catch (e) {}
 
   grid.innerHTML = produk.map(p => {
-    const href = "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
+    const href = "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(Number(String(p.harga||"0").replace(/[^\d]/g,""))||0));
     return `
     <div class="produk-card">
       <img src="${p.img || "logo.png"}" alt="${p.judul}" onerror="this.src='logo.png'">

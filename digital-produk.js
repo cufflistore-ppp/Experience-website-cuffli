@@ -152,7 +152,7 @@ function formatRpDigital(n) {
 }
 
 function payUrl(judul, harga) {
-  return "pembayaran.html?paket=" + encodeURIComponent(judul) + "&total=" + encodeURIComponent(String(harga));
+  return "pembayaran.html?paket=" + encodeURIComponent(judul) + "&total=" + encodeURIComponent(String(Number(String(harga||"0").replace(/[^\d]/g,""))||0));
 }
 
 function loadProdukDigital() {
