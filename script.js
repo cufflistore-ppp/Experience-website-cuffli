@@ -189,20 +189,105 @@ async function buatPesanan() {
 }
 
 // ========== LAPORAN ==========
+function compressImageFile(file, maxW, maxKB) {
+  return new Promise(function (resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = new Image();
+      img.onload = function () {
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        let q = 0.75, data = c.toDataURL("image/jpeg", q);
+        while (data.length > maxKB * 1024 && q > 0.35) {
+          q -= 0.1;
+          data = c.toDataURL("image/jpeg", q);
+        }
+        resolve(data);
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 async function kirimLaporan() {
-  const noPesanan = document.getElementById("noPesanan")?.value || "-";
-  const judul = document.getElementById("judulLaporan")?.value || "-";
-  const deskripsi = document.getElementById("deskripsiLaporan")?.value || "-";
+  const noPesanan = (document.getElementById("noPesanan") && document.getElementById("noPesanan").value) || "-";
+  const judul = (document.getElementById("judulLaporan") && document.getElementById("judulLaporan").value) || "";
+  const deskripsi = (document.getElementById("deskripsiLaporan") && document.getElementById("deskripsiLaporan").value) || "";
   const fileInput = document.getElementById("fotoLaporan");
+  const files = fileInput ? Array.from(fileInput.files).slice(0, 5) : [];
 
-  const data = { noPesanan, judul, deskripsi };
-  const files = fileInput ? Array.from(fileInput.files).slice(0, 3) : [];
-
-  if (typeof kirimLaporanKeTelegram === "function") {
-    await kirimLaporanKeTelegram(data, files);
+  if (!judul.trim() && !deskripsi.trim()) {
+    showSiteModal("Isi judul atau deskripsi laporan.", "warning");
+    return;
+  }
+  if (!files.length) {
+    showSiteModal("Upload minimal 1 foto laporan.", "warning");
+    return;
   }
 
-  showSiteModal("Laporan berhasil dikirim ke admin via Telegram!", "success");
+  let email = "";
+  let nama = "";
+  try {
+    const u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser();
+    if (u) {
+      email = u.email || "";
+      nama = u.displayName || u.email || "";
+    }
+  } catch (e) {}
+
+  const fotos = [];
+  try {
+    for (let i = 0; i < files.length; i++) {
+      fotos.push(await compressImageFile(files[i], 1000, 280));
+    }
+  } catch (e) {
+    showSiteModal("Gagal baca foto: " + (e.message || e), "warning");
+    return;
+  }
+
+  const pesan = (judul ? judul + "\n\n" : "") + deskripsi + (noPesanan && noPesanan !== "-" ? "\n\nNo. Pesanan: " + noPesanan : "");
+  const entry = {
+    email: email || "anonim",
+    nama: nama || "User",
+    noPesanan: noPesanan,
+    judul: judul,
+    pesan: pesan,
+    fotos: fotos,
+    waktu: new Date().toLocaleString("id-ID"),
+    createdAt: Date.now(),
+  };
+
+  try {
+    // local backup
+    const local = JSON.parse(localStorage.getItem("voxyy_laporan") || "[]");
+    local.unshift(entry);
+    localStorage.setItem("voxyy_laporan", JSON.stringify(local.slice(0, 50)));
+  } catch (e) {}
+
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
+      window.VoxyyOrders.initFirebase();
+    }
+    if (typeof firebase !== "undefined" && firebase.database) {
+      await firebase.database().ref("laporan").push(entry);
+    }
+  } catch (e) {
+    console.warn("laporan firebase", e);
+  }
+
+  showSiteModal("Laporan terkirim ke panel admin. Email, pesan, dan foto sudah masuk.", "success");
+  try {
+    document.getElementById("judulLaporan").value = "";
+    document.getElementById("deskripsiLaporan").value = "";
+    document.getElementById("noPesanan").value = "";
+    if (fileInput) fileInput.value = "";
+  } catch (e) {}
 }
 
 // ========== Custom Animated Modal ==========

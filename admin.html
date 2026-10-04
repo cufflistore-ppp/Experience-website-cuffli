@@ -231,6 +231,8 @@
         <a href="#" data-panel="keuntungan" onclick="return goPanel('keuntungan')"><i class="fa-solid fa-coins"></i> Keuntungan</a>
         <a href="#" data-panel="tampilan" onclick="return goPanel('tampilan')"><i class="fa-solid fa-palette"></i> Tampilan</a>
         <a href="#" data-panel="pengaturan" onclick="return goPanel('pengaturan')"><i class="fa-solid fa-gear"></i> Pengaturan</a>
+        <div class="menu-label">LAINNYA</div>
+        <a href="#" data-panel="laporan" onclick="return goPanel('laporan')"><i class="fa-solid fa-flag"></i> Laporan User</a>
       </nav>
       <div class="adm-drawer-foot">
         <a href="home.html" style="display:block;text-align:center;padding:10px;border:1px solid #1e3a5f;border-radius:10px;color:#64b5f6;text-decoration:none;font-weight:600;font-size:13px;margin-bottom:8px;"><i class="fa-solid fa-store"></i> Lihat Website</a>
@@ -250,15 +252,15 @@
           <div class="stat-card"><div class="val" id="statSukses">0</div><div class="lbl">Pesanan Sukses</div></div>
         </div>
         <h3 style="color:#2196f3;margin-bottom:12px;">Transaksi Terbaru</h3>
-        <div class="chart-row" style="margin:14px 0;">
-          <div class="chart-box">
-            <h3><i class="fa-solid fa-chart-line"></i> Tren Omzet</h3>
-            <canvas id="chartOmzet" height="140"></canvas>
+        <div class="chart-row" style="margin:10px 0 14px;display:flex;gap:8px;align-items:stretch;">
+          <div class="chart-box" style="flex:1;min-width:0;padding:10px;">
+            <h3 style="font-size:12px;margin:0 0 6px;"><i class="fa-solid fa-chart-line"></i> Tren</h3>
+            <canvas id="chartOmzet" height="90"></canvas>
           </div>
-          <div class="chart-box">
-            <h3><i class="fa-solid fa-chart-pie"></i> Produk Terlaris</h3>
-            <canvas id="chartPie" height="140"></canvas>
-            <div id="chartPieLegend" style="margin-top:8px;font-size:11px;color:#8aa0b8;"></div>
+          <div class="chart-box" style="flex:1;min-width:0;padding:10px;">
+            <h3 style="font-size:12px;margin:0 0 6px;"><i class="fa-solid fa-chart-pie"></i> Terlaris</h3>
+            <canvas id="chartPie" height="90"></canvas>
+            <div id="chartPieLegend" style="margin-top:4px;font-size:10px;color:#8aa0b8;"></div>
           </div>
         </div>
 
@@ -462,6 +464,12 @@
       </div>
 
       <!-- PENGATURAN -->
+      <div id="panel-laporan" class="panel-section">
+        <div class="admin-topbar"><h1><i class="fa-solid fa-flag"></i> Laporan User</h1></div>
+        <p style="color:#8aa0b8;font-size:12px;margin:-8px 0 12px;">Laporan dari user masuk di sini (email, pesan, foto).</p>
+        <div id="listLaporanAdm"></div>
+      </div>
+
       <div id="panel-pengaturan" class="panel-section">
         <div class="admin-topbar"><h1><i class="fa-solid fa-gear"></i> Pengaturan</h1></div>
         <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
@@ -534,7 +542,7 @@ function goPanel(name) {
     keuntungan: "Keuntungan",
     tampilan: "Tampilan",
     kirim: "Kirim File",
-    pengaturan: "Pengaturan"
+    pengaturan: "Pengaturan", laporan: "Laporan"
   };
   var el = document.getElementById("admTopTitle");
   if (el) el.textContent = titles[name] || name;

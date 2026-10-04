@@ -69,7 +69,7 @@ function showPanel(name) {
   const panel = document.getElementById("panel-" + name);
   if (panel) panel.classList.add("active");
   document.querySelectorAll(`[data-panel="${name}"]`).forEach((link) => link.classList.add("active"));
-  const titles = { dashboard:"Dashboard", produk:"Produk", pesanan:"Pesanan", pembayaran:"Pembayaran", keuntungan:"Keuntungan", tampilan:"Tampilan", kirim:"Kirim File", pengaturan:"Pengaturan" };
+  const titles = { dashboard:"Dashboard", produk:"Produk", pesanan:"Pesanan", pembayaran:"Pembayaran", keuntungan:"Keuntungan", tampilan:"Tampilan", kirim:"Kirim File", pengaturan:"Pengaturan", laporan:"Laporan" };
   const top = document.getElementById("admTopTitle");
   if (top) top.textContent = titles[name] || name;
 
@@ -98,6 +98,7 @@ function showPanel(name) {
   if (name === "tampilan") loadTampilan();
   if (name === "kirim") loadKirim();
   if (name === "pengaturan") loadPengaturan();
+  if (name === "laporan") loadLaporanAdm();
 }
 
 /* ========== DASHBOARD ========== */
@@ -501,15 +502,15 @@ async function loadPesanan() {
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
           <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">Layani pesanan ini</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-            <button type="button" class="btn-adm" style="margin:0;padding:6px 10px;font-size:11px;background:#1565c0;" onclick="ubahStatusKode('${kode}','Proses')">Proses</button>
-            <button type="button" class="btn-adm danger" style="margin:0;padding:6px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak & Hilangkan</button>
+            <button type="button" class="btn-adm danger" style="margin:0;padding:6px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
+            <button type="button" class="btn-adm success" style="margin:0;padding:6px 10px;font-size:11px;" onclick="ubahStatusKode('${kode}','Sukses')">Tandai Sukses</button>
           </div>
           <label style="font-size:11px;color:#8aa0b8;">Upload file (APK/ZIP/dll)</label>
           <input type="file" id="file_${kode}" style="font-size:12px;color:#ccc;width:100%;margin:4px 0 8px;">
           <label style="font-size:11px;color:#8aa0b8;">atau tempel URL</label>
           <input type="text" id="url_${kode}" placeholder="https://..." value="${escapeHtml(o.file || o.download || "")}" style="width:100%;margin:4px 0 8px;">
           <input type="text" id="note_${kode}" placeholder="Catatan untuk pembeli (opsional)" style="width:100%;margin:0 0 8px;">
-          <button type="button" class="btn-adm success" style="margin:0;width:100%;" onclick="kirimLangsung('${kode}')">
+          <button type="button" class="btn-adm success" id="btnKirim_${kode}" style="margin:0;width:100%;" onclick="kirimLangsung('${kode}')">
             <i class="fa-solid fa-paper-plane"></i> Kirim ke Pembeli & Selesai
           </button>
         </div>
@@ -542,25 +543,48 @@ async function kirimLangsung(kode) {
   const fileInp = document.getElementById("file_" + kode);
   const urlInp = document.getElementById("url_" + kode);
   const noteInp = document.getElementById("note_" + kode);
+  const btn = document.getElementById("btnKirim_" + kode);
   const file = fileInp && fileInp.files && fileInp.files[0];
   let fileUrl = (urlInp && urlInp.value ? urlInp.value : "").trim();
   let fileName = "";
   const catatan = (noteInp && noteInp.value ? noteInp.value : "").trim();
 
   if (!file && !fileUrl) {
-    alert("Pilih file atau isi URL dulu.");
+    alert("Pilih file ATAU isi URL dulu (salah satu cukup).");
     return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
   }
 
   try {
     if (file) {
-      const up = await uploadDeliveryFile(kode, file);
-      fileUrl = up.url;
-      fileName = up.name;
+      try {
+        const up = await uploadDeliveryFile(kode, file);
+        fileUrl = up.url;
+        fileName = up.name;
+      } catch (upErr) {
+        // fallback: data URL jika storage gagal (file kecil)
+        if (file.size > 900000) {
+          throw new Error("Upload Storage gagal. Pakai mode URL, atau file lebih kecil. " + (upErr.message || ""));
+        }
+        fileUrl = await new Promise(function (resolve, reject) {
+          const r = new FileReader();
+          r.onload = function () { resolve(r.result); };
+          r.onerror = reject;
+          r.readAsDataURL(file);
+        });
+        fileName = file.name || "file";
+      }
     } else {
       fileName = fileUrl.split("/").pop() || "download";
     }
 
+    if (!window.VoxyyOrders || !window.VoxyyOrders.updateOrderByKode) {
+      throw new Error("Firebase order belum siap. Refresh halaman.");
+    }
     const res = await window.VoxyyOrders.updateOrderByKode(kode, {
       status: "Sukses",
       file: fileUrl,
@@ -572,11 +596,15 @@ async function kirimLangsung(kode) {
       kirimVia: file ? "upload" : "url",
     });
     if (res && res.ok === false) throw new Error(res.error || "gagal simpan");
-    if (window.showAdmToast) showAdmToast("Berhasil dikirim ke pembeli!"); else alert("Terkirim ke pembeli!");
+    if (window.showAdmToast) showAdmToast("Berhasil dikirim ke pembeli!"); else alert("Terkirim!");
     loadPesanan();
     loadDashboard();
   } catch (e) {
     alert("Gagal kirim: " + (e && e.message ? e.message : String(e)));
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim ke Pembeli & Selesai';
+    }
   }
 }
 
@@ -1258,3 +1286,80 @@ async function adminLogout() {
   location.replace("login.html");
 }
 window.adminLogout = adminLogout;
+
+
+async function loadLaporanAdm() {
+  const box = document.getElementById("listLaporanAdm");
+  if (!box) return;
+  box.innerHTML = '<p style="color:#8aa0b8;">Memuat laporan...</p>';
+  let list = [];
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.getLaporan) {
+      list = await window.VoxyyOrders.getLaporan();
+    } else if (window.VoxyyOrders && window.VoxyyOrders._db) {
+      // fallback
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  // also try direct
+  try {
+    if ((!list || !list.length) && window.VoxyyOrders) {
+      window.VoxyyOrders.initFirebase && window.VoxyyOrders.initFirebase();
+      if (typeof firebase !== "undefined" && firebase.database) {
+        const snap = await firebase.database().ref("laporan").once("value");
+        const val = snap.val() || {};
+        list = Object.keys(val).map(function (k) {
+          return Object.assign({ id: k }, val[k]);
+        });
+      }
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  try {
+    const local = JSON.parse(localStorage.getItem("voxyy_laporan") || "[]");
+    if (local.length) {
+      const ids = {};
+      (list || []).forEach(function (x) { ids[x.id || x.createdAt] = 1; });
+      local.forEach(function (x) {
+        if (!ids[x.id || x.createdAt]) list.push(x);
+      });
+    }
+  } catch (e) {}
+
+  list = (list || []).slice().sort(function (a, b) {
+    return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+  });
+
+  if (!list.length) {
+    box.innerHTML = '<p style="color:#8aa0b8;">Belum ada laporan dari user.</p>';
+    return;
+  }
+
+  box.innerHTML = list
+    .map(function (L) {
+      const fotos = L.fotos || L.photos || (L.foto ? [L.foto] : []);
+      const imgs = (fotos || [])
+        .map(function (src) {
+          return '<a href="' + escapeHtml(src) + '" target="_blank"><img src="' + escapeHtml(src) + '" style="max-width:100%;max-height:120px;border-radius:8px;margin:4px 4px 0 0;border:1px solid #1e2a45;"/></a>';
+        })
+        .join("");
+      return (
+        '<div class="order-card">' +
+        '<div style="font-size:12px;color:#90caf9;font-weight:700;">' +
+        escapeHtml(L.email || L.nama || "User") +
+        "</div>" +
+        '<div style="font-size:11px;color:#6a7a90;margin:2px 0 8px;">' +
+        escapeHtml(String(L.waktu || L.createdAt || "")) +
+        "</div>" +
+        '<div style="font-size:13px;color:#e3eaf2;white-space:pre-wrap;line-height:1.45;">' +
+        escapeHtml(L.pesan || L.isi || L.message || "-") +
+        "</div>" +
+        (imgs ? '<div style="margin-top:8px;">' + imgs + "</div>" : '<div style="margin-top:6px;font-size:11px;color:#ef9a9a;">Tanpa foto</div>') +
+        "</div>"
+      );
+    })
+    .join("");
+}
+window.loadLaporanAdm = loadLaporanAdm;

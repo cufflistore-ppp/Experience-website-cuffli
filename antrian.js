@@ -104,7 +104,8 @@ function renderOrderCard(o) {
         ? `<a href="${escapeHtml(file)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:9px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh ${escapeHtml(fileName)}</a>`
         : st.cls === "sukses"
         ? `<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Menunggu file dari admin...</div>`
-        : `<div style="font-size:12px;color:#6a7a90;margin-top:4px;">Produk dikirim admin setelah pesanan diproses.</div>`
+        : `<div style="font-size:12px;color:#8aa0b8;margin-top:6px;line-height:1.4;">Pesanan belum dikirim / belum ACC admin.</div>
+           <a href="#" onclick="return hubungiAdminWA('${escapeHtml(kode)}','${escapeHtml(paket)}');" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:9px 14px;background:#25d366;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WA Admin</a>`
     }
   </div>`;
 }
