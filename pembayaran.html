@@ -132,7 +132,7 @@
       <h2>Scan QRIS untuk Bayar</h2>
       <p style="font-size:13px;color:#aaa;">Order kamu sudah dibuat</p>
       
-      <div class="kode" id="kodeOrder">VJ-2026-0000</div>
+      <div class="kode" id="kodeOrder">VM-0000</div>
       
       <div class="total-bayar" id="totalBayar">Rp 0</div>
       <div class="rincian" id="rincianBayar" style="display:none;"></div>
@@ -152,22 +152,28 @@
 
       <p class="info-bayar" id="infoBayar">
         1. Scan <b>QRIS</b> di atas pakai e-wallet / mobile banking<br>
-        2. Transfer sesuai <b>nominal total</b> di atas<br>
-        3. Setelah TF, klik <b>Saya Sudah Bayar</b><br>
-        4. Langsung <b>hubungi admin via WhatsApp</b> (kirim bukti TF di chat WA)
+        2. Transfer <b>sesuai nominal total</b> di atas<br>
+        3. Upload <b>foto bukti TF</b> di bawah (wajib)<br>
+        4. Klik <b>Konfirmasi Pembayaran</b> — langsung masuk panel admin
       </p>
 
-      <button class="btn-konfirmasi" id="btnKonfirmasi" onclick="konfirmasiPembayaran()">
-        <i class="fa-solid fa-check-circle"></i> Saya Sudah Bayar
+      <div style="text-align:left;margin:14px 0 10px;padding:12px;background:#12182a;border:1px solid #1e2a45;border-radius:12px;">
+        <label style="display:block;font-size:13px;font-weight:700;color:#e3eaf2;margin-bottom:8px;">
+          <i class="fa-solid fa-image" style="color:#2196f3;"></i> Bukti Transfer (wajib)
+        </label>
+        <input type="file" id="buktiTfInput" accept="image/*" capture="environment" style="width:100%;font-size:12px;color:#ccc;">
+        <div id="buktiTfPreview" style="display:none;margin-top:10px;">
+          <img id="buktiTfImg" alt="Bukti TF" style="max-width:100%;max-height:180px;border-radius:10px;border:1px solid #1e2a45;">
+        </div>
+        <p style="font-size:11px;color:#6a7a90;margin-top:8px;">Tanpa foto bukti TF, tombol konfirmasi tidak aktif.</p>
+      </div>
+
+      <button class="btn-konfirmasi" id="btnKonfirmasi" onclick="konfirmasiPembayaran()" disabled>
+        <i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran
       </button>
 
       <div class="status-box" id="statusBox">
-        ✅ Konfirmasi terkirim.<br>
-        <b>Langkah terakhir:</b> hubungi admin WhatsApp, kirim bukti TF + kode order di chat.<br>
-        <a href="https://wa.me/6285151982250?text=Halo%20admin%20Voxyy%2C%20saya%20sudah%20TF%20order" target="_blank" rel="noopener"
-           style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:#25d366;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;">
-          <i class="fa-brands fa-whatsapp"></i> Hubungi Admin WhatsApp
-        </a>
+        ✅ Konfirmasi & bukti TF terkirim ke admin.
       </div>
     </div>
 
@@ -198,6 +204,48 @@
     <script>
     let currentOrder = null;
 
+    let _buktiDataUrl = "";
+    document.addEventListener("DOMContentLoaded", function () {
+      const inp = document.getElementById("buktiTfInput");
+      const btn = document.getElementById("btnKonfirmasi");
+      if (inp) {
+        inp.addEventListener("change", function () {
+          const f = inp.files && inp.files[0];
+          if (!f) {
+            _buktiDataUrl = "";
+            if (btn) btn.disabled = true;
+            const pv = document.getElementById("buktiTfPreview");
+            if (pv) pv.style.display = "none";
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = function () {
+            // compress via canvas
+            const img = new Image();
+            img.onload = function () {
+              let w = img.width, h = img.height;
+              const max = 1200;
+              if (w > max) { h = Math.round(h * max / w); w = max; }
+              const c = document.createElement("canvas");
+              c.width = w; c.height = h;
+              c.getContext("2d").drawImage(img, 0, 0, w, h);
+              let q = 0.8, data = c.toDataURL("image/jpeg", q);
+              while (data.length > 450000 && q > 0.4) { q -= 0.1; data = c.toDataURL("image/jpeg", q); }
+              _buktiDataUrl = data;
+              const pv = document.getElementById("buktiTfPreview");
+              const im = document.getElementById("buktiTfImg");
+              if (im) im.src = data;
+              if (pv) pv.style.display = "block";
+              if (btn) btn.disabled = false;
+            };
+            img.src = reader.result;
+          };
+          reader.readAsDataURL(f);
+        });
+      }
+    });
+
+
     function formatRupiah(n) {
       return "Rp " + Number(n).toLocaleString("id-ID");
     }
@@ -207,16 +255,49 @@
       const paramsEarly = new URLSearchParams(window.location.search);
       const paketEarly = (paramsEarly.get("paket") || "").trim();
       if (paketEarly && !paramsEarly.get("kode")) {
-        const totalNum = parseInt(String(paramsEarly.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
+        // Harga dari URL (produk) — samakan dengan katalog
+        let totalNum = parseInt(String(paramsEarly.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
+        const pid = (paramsEarly.get("pid") || "").trim();
+        // Coba ambil harga resmi dari produk admin bila pid ada
+        try {
+          if (pid) {
+            let list = [];
+            if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
+              list = await window.VoxyyOrders.getProdukGlobal();
+            }
+            if (!list || !list.length) {
+              list = JSON.parse(localStorage.getItem("voxyy_produk_admin") || "[]");
+            }
+            const prod = (list || []).find(function (x) {
+              return String(x.id || "") === pid || String(x.judul || "") === paketEarly;
+            });
+            if (prod && prod.harga != null) {
+              totalNum = Number(prod.harga) || totalNum;
+            }
+          }
+        } catch (e) {}
+        // Kode order acak unik
         const rand = Math.floor(1000 + Math.random() * 9000);
-        const timePart = String(Date.now()).slice(-3);
-        const kode = `VJ-2026-${rand}${timePart}`;
+        const timePart = String(Date.now()).slice(-5);
+        const kode = "VM-" + rand + timePart;
         const isWebsite = /website/i.test(paketEarly);
+        let userEmail = "";
+        let userName = "Customer";
+        try {
+          const u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser();
+          if (u) {
+            userEmail = u.email || "";
+            userName = u.displayName || u.email || "Customer";
+          }
+        } catch (e) {}
         const order = {
           kode,
-          nama: "Customer",
+          nama: userName,
           wa: "-",
-          catatan: paketEarly + " — bayar QRIS dulu, setelah konfirmasi hubungi admin WA",
+          email: userEmail,
+          userEmail: userEmail,
+          pid: pid || "",
+          catatan: paketEarly + " — order website, proses di panel admin",
           total: "Rp " + totalNum.toLocaleString("id-ID"),
           paket: paketEarly === "website" ? "Jasa Bikin Website" : paketEarly,
           status: "Belum Bayar",
@@ -268,7 +349,7 @@
         const total = params.get("total") || "Rp 5.000";
         order = {
           userEmail: (function(){ try { var u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser(); return u && u.email ? u.email : ''; } catch(e){ return ''; } })(),
-      kode: kodeParam || "VJ-2026-0000",
+      kode: kodeParam || "VM-0000",
           total: total,
           nama: "-",
           wa: "-",
@@ -311,6 +392,10 @@
     }
 
     async function konfirmasiPembayaran() {
+      if (!_buktiDataUrl) {
+        alert("Upload foto bukti TF dulu. Wajib sebelum konfirmasi.");
+        return;
+      }
       const btn = document.getElementById("btnKonfirmasi");
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
@@ -378,12 +463,14 @@ Customer sudah bayar & konfirmasi.
       // Update status order di localStorage (opsional: tetap Belum Bayar sampai admin ubah)
       try {
         if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrderByKode === "function") {
-          await window.VoxyyOrders.updateOrderByKode(order.kode, { status: "Menunggu Verifikasi" });
+          await window.VoxyyOrders.updateOrderByKode(order.kode, { status: "Menunggu Verifikasi", bukti: _buktiDataUrl, buktiAt: Date.now() });
         } else {
           let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
           const idx = orders.findIndex(o => o.kode === order.kode);
           if (idx >= 0) {
             orders[idx].status = "Menunggu Verifikasi";
+            orders[idx].bukti = _buktiDataUrl;
+            orders[idx].buktiAt = Date.now();
             localStorage.setItem("voxyy_orders", JSON.stringify(orders));
           }
         }

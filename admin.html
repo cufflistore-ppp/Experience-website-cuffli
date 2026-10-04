@@ -213,14 +213,15 @@
         </div>
         <div style="margin-bottom:12px;">
           <select id="filterStatus" onchange="loadPesanan()" style="padding:8px 12px;border-radius:8px;background:#0d1220;border:1px solid #1e2a45;color:#fff;">
-            <option value="all">Semua Status</option>
-            <option value="Belum Bayar">Belum Bayar</option>
-            <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-            <option value="Proses">Proses</option>
-            <option value="Sukses">Sukses</option>
-            <option value="Ditolak">Ditolak</option>
+            <option value="aktif" selected>Perlu dilayani (aktif)</option>
+            <option value="all">Semua</option>
+            <option value="menunggu">Menunggu / Belum</option>
+            <option value="proses">Proses</option>
+            <option value="sukses">Selesai (arsip)</option>
+            <option value="tolak">Ditolak (arsip)</option>
           </select>
         </div>
+        <p style="color:#8aa0b8;font-size:12px;margin:0 0 12px;">Order + <b>foto bukti TF</b> muncul di sini. Cek gambar bukti sebelum kirim produk.</p>
         <div id="listOrders"></div>
       </div>
 

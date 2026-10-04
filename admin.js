@@ -275,79 +275,163 @@ function toggleFormOrder() {
   f.style.display = f.style.display === "none" ? "block" : "none";
 }
 
+
 async function loadPesanan() {
   const orders = await fetchOrders();
-  const filter = (document.getElementById("filterStatus") || {}).value || "all";
-  let filtered = orders;
-  if (filter !== "all") {
-    filtered = orders.filter((o) => (o.status || "").toLowerCase().includes(filter.toLowerCase().split(" ")[0]));
+  const filter = (document.getElementById("filterStatus") || {}).value || "aktif";
+  let filtered = orders.slice();
+
+  function isDone(o) {
+    const s = String(o.status || "").toLowerCase();
+    return s.includes("sukses") || s.includes("selesai") || s.includes("tolak");
   }
+
+  if (filter === "aktif") {
+    filtered = filtered.filter((o) => !isDone(o));
+  } else if (filter === "sukses") {
+    filtered = filtered.filter((o) => {
+      const s = String(o.status || "").toLowerCase();
+      return s.includes("sukses") || s.includes("selesai");
+    });
+  } else if (filter === "tolak") {
+    filtered = filtered.filter((o) => String(o.status || "").toLowerCase().includes("tolak"));
+  } else if (filter !== "all") {
+    filtered = filtered.filter((o) =>
+      String(o.status || "").toLowerCase().includes(String(filter).toLowerCase())
+    );
+  }
+
+  // terbaru dulu
+  filtered.sort((a, b) => (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0));
+
   const box = document.getElementById("listOrders");
+  if (!box) return;
   if (!filtered.length) {
-    box.innerHTML = '<p style="color:#888;">Tidak ada pesanan.</p>';
+    box.innerHTML =
+      filter === "aktif"
+        ? '<p style="color:#8aa0b8;">Tidak ada pesanan aktif. Order baru muncul di sini otomatis.</p>'
+        : '<p style="color:#8aa0b8;">Tidak ada pesanan di filter ini.</p>';
     return;
   }
+
   box.innerHTML = filtered
-    .slice()
-    .reverse()
     .map((o) => {
       const cls = statusClass(o.status);
-      const id = o._id || o.kode || "";
-      const st = (o.status || "").toLowerCase();
-      const isNew = st.includes("belum") || st.includes("verifikasi") || st.includes("menunggu");
-      const wa = (o.wa || o.whatsapp || "").replace(/\D/g, "");
-      const border = isNew ? "border-color:#2196f3;box-shadow:0 0 0 1px rgba(33,150,243,0.35);" : "";
+      const kode = escapeHtml(o.kode || "");
+      const st = String(o.status || "").toLowerCase();
+      const isNew =
+        st.includes("belum") ||
+        st.includes("verifikasi") ||
+        st.includes("menunggu") ||
+        !st;
+      const total = o.total != null ? o.total : o.finalAmount != null ? "Rp " + Number(o.finalAmount).toLocaleString("id-ID") : "-";
+      const border = isNew
+        ? "border-color:#2196f3;box-shadow:0 0 0 1px rgba(33,150,243,0.35);"
+        : "";
       return `<div class="order-card" style="${border}">
         <div class="row">
-          <div>
+          <div style="flex:1;min-width:0;">
             ${isNew ? '<span style="background:#1565c0;color:#fff;font-size:10px;padding:2px 6px;border-radius:4px;margin-right:6px;">BARU</span>' : ""}
-            <strong>${escapeHtml(o.kode || "-")}</strong> · ${escapeHtml(o.nama || "Anonim")}
-            <br><small style="color:#888;">${escapeHtml(o.paket || "-")} · ${escapeHtml(o.total || "-")}</small>
-            <br><small style="color:#aaa;">${escapeHtml(String(o.waktu || o.createdAt || ""))}</small>
-            ${wa ? `<br><a href="https://wa.me/${wa}" target="_blank" style="color:#25d366;font-size:12px;"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(o.wa || o.whatsapp)}</a>` : ""}
-            ${o.bukti ? `<br><a href="${escapeHtml(o.bukti)}" target="_blank" style="color:#2196f3;font-size:12px;">Lihat Bukti Bayar</a>` : ""}
-            ${o.file || o.download ? `<br><small style="color:#a5d6a7;">File sudah dikirim</small>` : ""}
+            <strong>${kode}</strong> · ${escapeHtml(o.nama || "Customer")}
+            <br><small style="color:#cfd8e3;font-weight:600;">${escapeHtml(o.paket || "-")}</small>
+            <br><small style="color:#90caf9;">Harga: ${escapeHtml(String(total))}</small>
+            <br><small style="color:#6a7a90;">${escapeHtml(String(o.waktu || ""))}</small>
+            ${o.bukti ? `<div style="margin-top:8px;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div><a href="${escapeHtml(o.bukti)}" target="_blank"><img src="${escapeHtml(o.bukti)}" alt="Bukti TF" style="max-width:100%;max-height:160px;border-radius:8px;border:1px solid #1e2a45;display:block;"></a></div>` : `<div style="margin-top:6px;font-size:11px;color:#ef9a9a;">Belum ada bukti TF</div>`}
           </div>
           <div style="text-align:right;">
             <span class="badge-st ${cls}">${escapeHtml(o.status || "Belum Bayar")}</span>
-            <div style="margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;">
-              <button class="btn-adm success" style="margin:0;padding:5px 8px;font-size:11px;" onclick="ubahStatus('${escapeHtml(id)}','Sukses')">ACC</button>
-              <button class="btn-adm" style="margin:0;padding:5px 8px;font-size:11px;background:#1565c0;" onclick="ubahStatus('${escapeHtml(id)}','Proses')">Proses</button>
-              <button class="btn-adm" style="margin:0;padding:5px 8px;font-size:11px;background:#6a1b9a;" onclick="showPanel('kirim');document.getElementById('kirimKode').value='${escapeHtml(o.kode || "")}';cariOrderKirim();">Kirim File</button>
-              <button class="btn-adm danger" style="margin:0;padding:5px 8px;font-size:11px;" onclick="ubahStatus('${escapeHtml(id)}','Ditolak')">Tolak</button>
-            </div>
           </div>
+        </div>
+
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
+          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">Layani pesanan ini</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+            <button type="button" class="btn-adm" style="margin:0;padding:6px 10px;font-size:11px;background:#1565c0;" onclick="ubahStatusKode('${kode}','Proses')">Proses</button>
+            <button type="button" class="btn-adm danger" style="margin:0;padding:6px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak & Hilangkan</button>
+          </div>
+          <label style="font-size:11px;color:#8aa0b8;">Upload file (APK/ZIP/dll)</label>
+          <input type="file" id="file_${kode}" style="font-size:12px;color:#ccc;width:100%;margin:4px 0 8px;">
+          <label style="font-size:11px;color:#8aa0b8;">atau tempel URL</label>
+          <input type="text" id="url_${kode}" placeholder="https://..." value="${escapeHtml(o.file || o.download || "")}" style="width:100%;margin:4px 0 8px;">
+          <input type="text" id="note_${kode}" placeholder="Catatan untuk pembeli (opsional)" style="width:100%;margin:0 0 8px;">
+          <button type="button" class="btn-adm success" style="margin:0;width:100%;" onclick="kirimLangsung('${kode}')">
+            <i class="fa-solid fa-paper-plane"></i> Kirim ke Pembeli & Selesai
+          </button>
         </div>
       </div>`;
     })
     .join("");
 }
 
-async function ubahStatus(id, status) {
-  if (!id) return;
-  if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrder === "function") {
-    await window.VoxyyOrders.updateOrder(id, { status });
-  } else {
-    let orders = await fetchOrders();
-    const idx = orders.findIndex((o) => (o._id || o.kode) === id);
-    if (idx >= 0) {
-      orders[idx].status = status;
-      localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+async function ubahStatusKode(kode, status) {
+  if (!kode) return;
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
+      await window.VoxyyOrders.updateOrderByKode(kode, { status: status });
     }
-  }
-  // hitung profit jika sukses
-  if (status === "Sukses") {
-    const orders = await fetchOrders();
-    const o = orders.find((x) => (x._id || x.kode) === id);
-    if (o) {
-      const settings = getSettings();
-      const profit = parseRp(o.total) - (Number(o.modal) || Math.round(parseRp(o.total) * 0.3));
-      settings.totalProfit = (Number(settings.totalProfit) || 0) + profit;
-      saveSettings(settings);
-    }
+  } catch (e) {
+    alert("Gagal ubah status: " + (e.message || e));
+    return;
   }
   loadPesanan();
   loadDashboard();
+}
+
+async function tolakOrder(kode) {
+  if (!confirm("Tolak pesanan " + kode + "? Akan hilang dari daftar aktif.")) return;
+  await ubahStatusKode(kode, "Ditolak");
+}
+
+async function kirimLangsung(kode) {
+  if (!kode) return;
+  const fileInp = document.getElementById("file_" + kode);
+  const urlInp = document.getElementById("url_" + kode);
+  const noteInp = document.getElementById("note_" + kode);
+  const file = fileInp && fileInp.files && fileInp.files[0];
+  let fileUrl = (urlInp && urlInp.value ? urlInp.value : "").trim();
+  let fileName = "";
+  const catatan = (noteInp && noteInp.value ? noteInp.value : "").trim();
+
+  if (!file && !fileUrl) {
+    alert("Pilih file atau isi URL dulu.");
+    return;
+  }
+
+  try {
+    if (file) {
+      const up = await uploadDeliveryFile(kode, file);
+      fileUrl = up.url;
+      fileName = up.name;
+    } else {
+      fileName = fileUrl.split("/").pop() || "download";
+    }
+
+    const res = await window.VoxyyOrders.updateOrderByKode(kode, {
+      status: "Sukses",
+      file: fileUrl,
+      download: fileUrl,
+      fileName: fileName,
+      catatanAdmin: catatan,
+      dikirimAt: new Date().toLocaleString("id-ID"),
+      dikirimTs: Date.now(),
+      kirimVia: file ? "upload" : "url",
+    });
+    if (res && res.ok === false) throw new Error(res.error || "gagal simpan");
+    alert("Terkirim ke pembeli. Pesanan hilang dari daftar aktif.");
+    loadPesanan();
+    loadDashboard();
+  } catch (e) {
+    alert("Gagal kirim: " + (e && e.message ? e.message : String(e)));
+  }
+}
+
+window.ubahStatusKode = ubahStatusKode;
+window.tolakOrder = tolakOrder;
+window.kirimLangsung = kirimLangsung;
+
+async function ubahStatus(id, status) {
+  // kompatibilitas tombol lama → pakai kode
+  await ubahStatusKode(id, status);
 }
 
 async function tambahOrderAdmin() {
