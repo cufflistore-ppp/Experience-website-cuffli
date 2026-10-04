@@ -99,7 +99,9 @@ function renderKatalog(gridId, mode) {
         "&total=" +
         encodeURIComponent(String(Number(String(p.harga || "0").replace(/[^\d]/g, "")) || 0)) +
         "&pid=" +
-        encodeURIComponent(p.id || "");
+        encodeURIComponent(p.id || "") +
+        "&kat=" +
+        encodeURIComponent(p.kategori || p.label || "");
       const stok = p.stok < 0 ? "∞" : p.stok;
       const icon = iconFor(p);
       const imgHtml = p.img

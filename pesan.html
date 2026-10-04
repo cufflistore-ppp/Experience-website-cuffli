@@ -28,7 +28,7 @@
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pesan Paket - Voxyy</title>
+  <title>Pesan Paket - VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -69,9 +69,9 @@
 <body>
   <header class="header">
     <div class="brand">
-      <img src="logo.png" alt="Voxyy" class="logo"  >
+      <img src="logo.png" alt="VOXY MARKET" class="logo"  >
       <div>
-        <h1>Voxyy <i class="fa-solid fa-circle-check verified"></i></h1>
+        <h1>VOXY MARKET <i class="fa-solid fa-circle-check verified"></i></h1>
         <p>Form Pemesanan</p>
       </div>
     </div>
@@ -85,8 +85,8 @@
     <div class="order-header" style="margin-bottom:16px;">
       <img src="logo.png" class="order-logo"  >
       <div>
-        <h3 id="paketJudul">Joki Kontak</h3>
-        <p>Voxyy · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
+        <h3 id="paketJudul">Produk</h3>
+        <p>VOXY MARKET · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
       </div>
     </div>
 
@@ -184,7 +184,7 @@ Wa.me/628…
 
     <div class="ringkasan">
       <h4>Ringkasan Order</h4>
-      <div class="row"><span id="namaPaketRow">Joki Kontak</span><span>Paket</span><span id="hargaPaket">Rp 5.000</span></div>
+      <div class="row"><span id="namaPaketRow">Produk</span><span>Paket</span><span id="hargaPaket">Rp 5.000</span></div>
       <div class="row total"><span>Total</span><span id="totalHarga">Rp 5.000</span></div>
       <button class="btn-buat" id="btnSubmitOrder" onclick="buatPesanan()">Buat Pesanan</button>
     </div>
@@ -231,8 +231,8 @@ Wa.me/628…
       const id = parseInt(params.get("id") || "1", 10);
 
       window.isJaspost = false;
-      window.orderType = "Joki Kontak";
-      window.orderPaketName = "Joki Kontak";
+      window.orderType = "Produk";
+      window.orderPaketName = "Produk";
 
       if (type === "jaspost") {
         window.isJaspost = true;
@@ -304,7 +304,7 @@ Wa.me/628…
           document.getElementById("hargaPaket").textContent = "Rp " + Number(paket.harga).toLocaleString("id-ID");
           if (typeof updateTotal === "function") updateTotal();
           window.orderPaketName = paket.judul;
-          window.orderType = "Joki Kontak";
+          window.orderType = "Produk";
         }
       }
     });

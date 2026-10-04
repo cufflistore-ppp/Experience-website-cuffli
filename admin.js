@@ -65,11 +65,13 @@ function parseRp(str) {
 /* ========== PANEL SWITCH ========== */
 function showPanel(name) {
   document.querySelectorAll(".panel-section").forEach((el) => el.classList.remove("active"));
-  document.querySelectorAll(".admin-nav a").forEach((el) => el.classList.remove("active"));
+  document.querySelectorAll(".admin-nav a, .adm-drawer a[data-panel]").forEach((el) => el.classList.remove("active"));
   const panel = document.getElementById("panel-" + name);
   if (panel) panel.classList.add("active");
-  const link = document.querySelector(`.admin-nav a[data-panel="${name}"]`);
-  if (link) link.classList.add("active");
+  document.querySelectorAll(`[data-panel="${name}"]`).forEach((link) => link.classList.add("active"));
+  const titles = { dashboard:"Dashboard", produk:"Produk", pesanan:"Pesanan", pembayaran:"Pembayaran", keuntungan:"Keuntungan", tampilan:"Tampilan", kirim:"Kirim File", pengaturan:"Pengaturan" };
+  const top = document.getElementById("admTopTitle");
+  if (top) top.textContent = titles[name] || name;
 
   if (name === "dashboard")   // Ambil settings & produk dari Firebase dulu
   (async function () {
@@ -674,23 +676,32 @@ function simpanTampilan() {
 /* ========== PENGATURAN ========== */
 function loadPengaturan() {
   const s = getSettings();
-  document.getElementById("namaToko").value = s.namaToko || "Voxyy";
-  document.getElementById("waAdmin").value = s.waAdmin || "6285151982250";
-  document.getElementById("waBackup").value = s.waBackup || "6285706128277";
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  set("namaToko", s.namaToko || "VOXY MARKET");
+  set("waAdmin", s.waAdmin || "6285151982250");
+  set("waBackup", s.waBackup || "6285706128277");
+  set("linkChannel", s.linkChannel || "");
+  set("linkCs", s.linkCs || "");
+  set("linkTelegram", s.linkTelegram || "");
+  set("linkIg", s.linkIg || "");
 }
 
 function simpanPengaturan() {
-  const pass = document.getElementById("adminPass").value.trim();
-  const data = {
-    namaToko: document.getElementById("namaToko").value.trim() || "Voxyy",
-    waAdmin: document.getElementById("waAdmin").value.trim(),
-    waBackup: document.getElementById("waBackup").value.trim(),
+  const val = (id) => {
+    const el = document.getElementById(id);
+    return el ? String(el.value || "").trim() : "";
   };
-  if (pass) {
-    localStorage.setItem(ADMIN_PASS_KEY, pass);
-  }
+  const data = {
+    namaToko: val("namaToko") || "VOXY MARKET",
+    waAdmin: val("waAdmin").replace(/\D/g, ""),
+    waBackup: val("waBackup").replace(/\D/g, ""),
+    linkChannel: val("linkChannel"),
+    linkCs: val("linkCs"),
+    linkTelegram: val("linkTelegram"),
+    linkIg: val("linkIg"),
+  };
   saveSettings(data);
-  alert("Nama toko Pengaturan disimpan! nomor WA disimpan ke Firebase — muncul di semua device!");
+  alert("Pengaturan disimpan. Nama VOXY MARKET & link Tentang aktif di semua halaman.");
 }
 
 

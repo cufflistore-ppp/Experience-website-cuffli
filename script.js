@@ -40,7 +40,7 @@ function generateNotifFromOrder(order) {
   const shortName = (order.nama || "A").substring(0, 1) + "****";
   const price = order.total || order.finalAmount || "Rp 5.000";
   const priceText = typeof price === "number" ? formatRupiah(price) : price;
-  const svc = order.paket || "Joki Kontak";
+  const svc = order.paket || "Produk";
   let timeText = "baru saja";
   try {
     if (order.createdAt) {
@@ -128,7 +128,7 @@ async function buatPesanan() {
   const wa = document.getElementById("wa")?.value?.trim() || "";
   let catatan = document.getElementById("catatan")?.value || "";
 
-  // Validasi field wajib untuk Joki Kontak
+  // Validasi field wajib untuk Produk
   if (!nama || !wa) {
     showSiteModal("Lengkapi field wajib: Nama (Store/JB) dan Nomor WhatsApp.", "warning");
     return;
@@ -159,7 +159,7 @@ async function buatPesanan() {
     wa,
     catatan,
     total,
-    paket: (window.orderPaketName || window.orderType || "Joki Kontak"),
+    paket: (window.orderPaketName || window.orderType || "Produk"),
     status: "Belum Bayar",
     waktu: new Date().toLocaleString("id-ID")
   };

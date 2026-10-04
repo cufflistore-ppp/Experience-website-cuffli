@@ -10,15 +10,25 @@
 </head>
 <body>
 
-  <header class="header">
-    <div class="brand">
-      <img src="logo.png" alt="VOXY MARKET" class="logo">
+  <header class="header" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+    <div class="brand" style="flex:1;min-width:0;">
+      <img src="logo.png" alt="VOXY MARKET" class="logo" id="homeLogo">
       <div>
         <h1>VOXY <span style="color:#1565c0">MARKET</span> <i class="fa-solid fa-circle-check verified"></i></h1>
         <p>Pusat Layanan Digital & Jasa</p>
       </div>
     </div>
+    <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;padding-right:4px;">
+      <button type="button" id="btnBgm" title="Musik" aria-label="Play/Pause musik"
+        style="width:40px;height:40px;border-radius:50%;border:1px solid #1e3a5f;background:#12182a;color:#64b5f6;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;">
+        <i class="fa-solid fa-pause" id="bgmIcon"></i>
+      </button>
+      <a href="akun.html" title="Akun" style="width:40px;height:40px;border-radius:50%;border:1px solid #1e3a5f;background:#12182a;color:#90caf9;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:18px;">
+        <i class="fa-solid fa-circle-user"></i>
+      </a>
+    </div>
   </header>
+  <audio id="bgmAudio" src="bgm.mp3" loop preload="auto"></audio>
 
   <div class="banner">
     <img src="banner.jpg" alt="Selamat Datang di VOXY MARKET" class="banner-full">
@@ -93,5 +103,60 @@
       renderKatalog("homeGrid", "home");
     });
   </script>
+
+  <script>
+  (function () {
+    var audio = document.getElementById("bgmAudio");
+    var btn = document.getElementById("btnBgm");
+    var icon = document.getElementById("bgmIcon");
+    if (!audio || !btn) return;
+    audio.loop = true;
+    function setPlaying(on) {
+      if (icon) {
+        icon.className = on ? "fa-solid fa-pause" : "fa-solid fa-play";
+      }
+      try { localStorage.setItem("voxyy_bgm_on", on ? "1" : "0"); } catch (e) {}
+    }
+    function tryPlay() {
+      var p = audio.play();
+      if (p && p.then) {
+        p.then(function () { setPlaying(true); }).catch(function () {
+          setPlaying(false);
+          // autoplay blocked until user taps
+        });
+      } else setPlaying(true);
+    }
+    btn.addEventListener("click", function () {
+      if (audio.paused) {
+        tryPlay();
+      } else {
+        audio.pause();
+        setPlaying(false);
+      }
+    });
+    // logo also toggles
+    var logo = document.getElementById("homeLogo");
+    if (logo) {
+      logo.style.cursor = "pointer";
+      logo.title = "Play / Pause musik";
+      logo.addEventListener("click", function () { btn.click(); });
+    }
+    // auto start
+    var want = true;
+    try { want = localStorage.getItem("voxyy_bgm_on") !== "0"; } catch (e) {}
+    if (want) {
+      tryPlay();
+      document.addEventListener("touchstart", function once() {
+        if (audio.paused && localStorage.getItem("voxyy_bgm_on") !== "0") tryPlay();
+        document.removeEventListener("touchstart", once);
+      }, { passive: true });
+    } else setPlaying(false);
+    audio.addEventListener("ended", function () {
+      audio.currentTime = 0;
+      tryPlay();
+    });
+  })();
+  </script>
+
 </body>
 </html>

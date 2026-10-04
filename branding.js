@@ -17,6 +17,7 @@
   function applyBranding(s) {
     s = s || getSettingsLocal();
     const nama = s.namaToko || "VOXY MARKET";
+    try { if (nama) document.title = document.title.replace(/VOXY MARKET|Voxyy|Voxy/gi, nama); } catch(e) {}
     const logo = s.logoUrl || "logo.png";
     const banner = s.bannerUrl || "banner.jpg";
     const bg = s.bgColor || localStorage.getItem("voxyy_bg_color") || "";

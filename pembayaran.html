@@ -4,7 +4,7 @@
   <script src="auth-guard.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pembayaran - Voxyy</title>
+  <title>Pembayaran - VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -117,9 +117,9 @@
 <body>
   <header class="header">
     <div class="brand">
-      <img src="logo.png" alt="Voxyy" class="logo"  >
+      <img src="logo.png" alt="VOXY MARKET" class="logo"  >
       <div>
-        <h1>Voxyy <i class="fa-solid fa-circle-check verified"></i></h1>
+        <h1>VOXY MARKET <i class="fa-solid fa-circle-check verified"></i></h1>
         <p>Pembayaran</p>
       </div>
     </div>
@@ -161,7 +161,7 @@
         <label style="display:block;font-size:13px;font-weight:700;color:#e3eaf2;margin-bottom:8px;">
           <i class="fa-solid fa-image" style="color:#2196f3;"></i> Bukti Transfer (wajib)
         </label>
-        <input type="file" id="buktiTfInput" accept="image/*" capture="environment" style="width:100%;font-size:12px;color:#ccc;">
+        <input type="file" id="buktiTfInput" accept="image/*" style="width:100%;font-size:12px;color:#ccc;">
         <div id="buktiTfPreview" style="display:none;margin-top:10px;">
           <img id="buktiTfImg" alt="Bukti TF" style="max-width:100%;max-height:180px;border-radius:10px;border:1px solid #1e2a45;">
         </div>
@@ -315,6 +315,7 @@
         parseInt(String(params.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
       var kode = (params.get("kode") || "").trim();
       var pid = (params.get("pid") || "").trim();
+      var katUrl = (params.get("kat") || "").trim().toLowerCase();
 
       var resolved = await resolveHarga(pid, paket, totalNum);
       totalNum = resolved.totalNum;
@@ -357,6 +358,27 @@
       }
 
       if (!order) {
+        var kat = "";
+        try {
+          var listK = [];
+          if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
+            try { listK = await window.VoxyyOrders.getProdukGlobal(); } catch (e) {}
+          }
+          if (!listK || !listK.length) {
+            try { listK = JSON.parse(localStorage.getItem("voxyy_produk_admin") || "[]"); } catch (e) {}
+          }
+          var pr = (listK || []).find(function (x) {
+            return (pid && String(x.id || "") === String(pid)) ||
+              (paket && String(x.judul || "").toLowerCase() === String(paket).toLowerCase());
+          });
+          if (pr) kat = String(pr.kategori || pr.label || "").toLowerCase();
+        } catch (e) {}
+        if (!kat) {
+          var pk = String(paket || "").toLowerCase();
+          if (pk.indexOf("jasa") >= 0 || pk.indexOf("post") >= 0) kat = "jasa";
+        }
+        var isJasa = kat.indexOf("jasa") >= 0;
+
         order = {
           kode: kode,
           nama: userName,
@@ -364,14 +386,16 @@
           email: userEmail,
           userEmail: userEmail,
           pid: pid || "",
-          catatan: paket + " — order website, proses di panel admin",
+          kategori: kat || "digital",
+          isJasa: isJasa,
+          catatan: paket + (isJasa ? " — jasa, konfirmasi ke WA admin" : " — order website, proses di panel admin"),
           total: formatRupiah(totalNum),
           paket: paket,
           status: "Belum Bayar",
           waktu: new Date().toLocaleString("id-ID"),
           createdAt: Date.now(),
           finalAmount: totalNum,
-          isDigital: true,
+          isDigital: !isJasa,
         };
         try {
           if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
@@ -451,9 +475,54 @@
       }
 
       saveTrackedKode(order.kode);
+
+      // Deteksi jasa
+      var isJasa = !!(order.isJasa);
+      if (!isJasa) {
+        var k = String(order.kategori || order.paket || "").toLowerCase();
+        isJasa = k.indexOf("jasa") >= 0 || k.indexOf("post") >= 0;
+      }
+
+      var nominal = order.finalAmount != null
+        ? Number(order.finalAmount)
+        : parseInt(String(order.total || "0").replace(/[^\d]/g, ""), 10) || 0;
+      var nominalStr = "Rp " + Number(nominal).toLocaleString("id-ID");
+
       var sb = document.getElementById("statusBox");
+      if (sb) sb.classList.add("show");
+
+      if (isJasa) {
+        var wa = (window._waAdmin || "").replace(/\D/g, "");
+        if (!wa) {
+          try {
+            var s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
+            wa = String(s.waAdmin || "6285151982250").replace(/\D/g, "");
+          } catch (e) { wa = "6285151982250"; }
+        }
+        var teks =
+          "Halo Admin VOXY MARKET, saya sudah transfer untuk *Jasa*.\n\n" +
+          "📦 Jasa: *" + (order.paket || "-") + "*\n" +
+          "🆔 Kode: *" + (order.kode || "-") + "*\n" +
+          "💰 Nominal: *" + nominalStr + "*\n" +
+          "👤 Nama: " + (order.nama || "-") + "\n\n" +
+          "Bukti TF sudah diupload di website. Mohon diproses ya.";
+        var waUrl = "https://wa.me/" + wa + "?text=" + encodeURIComponent(teks);
+        if (sb) {
+          sb.innerHTML =
+            '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
+            "<b>Jasa dikonfirmasi</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
+            "Jasa: <b>" + (order.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
+            "Membuka WhatsApp admin...</div>" +
+            '<a href="' + waUrl + '" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#25d366;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> Chat Admin</a>';
+        }
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Terkirim';
+        setTimeout(function () {
+          window.location.href = waUrl;
+        }, 600);
+        return;
+      }
+
       if (sb) {
-        sb.classList.add("show");
         sb.innerHTML =
           '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
           "<b>Pesanan masuk ke admin</b><br>Kode: <b>" +
