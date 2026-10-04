@@ -85,38 +85,82 @@ function filterMyOrders(orders) {
 
 function renderOrderCard(o) {
   const st = statusMeta(o.status);
-  const file = o.file || o.download || "";
-  const fileName = o.fileName || "Produk";
   const kode = o.kode || "-";
-  const paket = o.paket || o.judul || "Produk";
-  const totalNum = parseMoney(o.finalAmount != null ? o.finalAmount : o.total);
-  const total = totalNum > 0 ? totalNum.toLocaleString("id-ID") : (o.total || "-");
-  const waktu = o.waktu || o.createdAt || o.dikirimAt || "";
-  const catatan = o.catatanAdmin || "";
+  const paket = o.paket || o.judul || "Pesanan";
+  const totalN = parseMoney(o.finalAmount != null ? o.finalAmount : o.total);
+  const total = totalN > 0 ? totalN.toLocaleString("id-ID") : String(o.total || "-").replace(/^Rp\s*/i, "");
+  const waktu = o.waktu || o.dikirimAt || "";
+  const file = o.file || o.download || o.fileUrl || "";
+  const fileName = o.fileName || (file ? (String(file).split("/").pop() || "file").split("?")[0] : "");
+  const catatan = o.catatanAdmin || o.catatan || "";
+  const isData = String(file).indexOf("data:") === 0;
+  const isApk = /\.apk(\?|$)/i.test(fileName) || /\.apk(\?|$)/i.test(String(file));
+  const isZip = /\.(zip|rar|7z)(\?|$)/i.test(fileName) || /\.(zip|rar|7z)(\?|$)/i.test(String(file));
 
-  return `
-  <div class="order-status-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:14px;padding:14px;margin-bottom:12px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">
-      <div>
-        <div style="font-size:12px;color:#8aa0b8;">Kode</div>
-        <div style="font-weight:800;color:#fff;letter-spacing:0.3px;">${escapeHtml(kode)}</div>
-      </div>
-      <span style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:${st.bg};color:${st.color};white-space:nowrap;">${escapeHtml(st.label)}</span>
-    </div>
-    <div style="font-size:14px;font-weight:700;color:#e3eaf2;margin-bottom:4px;">${escapeHtml(paket)}</div>
-    <div style="font-size:12px;color:#8aa0b8;margin-bottom:8px;">Total Rp ${escapeHtml(String(total))}${waktu ? " · " + escapeHtml(String(waktu)) : ""}</div>
-    ${catatan ? `<div style="font-size:12px;color:#cfd8e3;background:#0a0e18;border-radius:8px;padding:8px 10px;margin-bottom:8px;">${escapeHtml(catatan)}</div>` : ""}
-    ${
-      file
-        ? `<a href="${escapeHtml(file)}" ${String(file).indexOf("data:")===0?"":'target="_blank" rel="noopener"'} download="${escapeHtml(fileName)}" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:9px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-solid fa-download"></i> Unduh / Buka ${escapeHtml(fileName || "file")}</a>`
-        : st.cls === "sukses"
-        ? `<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Menunggu file dari admin... Tekan WA Admin jika lama.</div>
-           <a href="#" onclick="return hubungiAdminWA('${escapeHtml(o.kode||"")}','${escapeHtml(o.paket||"")}');" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:9px 14px;background:#25d366;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WA Admin</a>`
-        : `<div style="font-size:12px;color:#8aa0b8;margin-top:6px;line-height:1.4;">Pesanan belum dikirim / belum ACC admin.</div>
-           <a href="#" onclick="return hubungiAdminWA('${escapeHtml(kode)}','${escapeHtml(paket)}');" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:9px 14px;background:#25d366;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> WA Admin</a>`
-    }
-  </div>`;
+  let actionHtml = "";
+  if (file) {
+    // File/URL sudah masuk ke kode order ini — tanpa WA
+    const openLabel = isApk ? "Buka / Install APK" : isZip ? "Unduh ZIP" : "Unduh / Buka file";
+    actionHtml =
+      '<div style="font-size:12px;color:#81c784;margin-bottom:6px;font-weight:600;">✓ Produk sudah masuk ke pesanan ini</div>' +
+      '<a href="' +
+      escapeHtml(file) +
+      '" ' +
+      (isData ? "" : 'target="_blank" rel="noopener"') +
+      ' download="' +
+      escapeHtml(fileName || "produk") +
+      '" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
+      '<i class="fa-solid fa-download"></i> ' +
+      escapeHtml(openLabel) +
+      (fileName ? " · " + escapeHtml(fileName) : "") +
+      "</a>";
+  } else if (st.cls === "sukses") {
+    actionHtml =
+      '<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Status selesai. Menunggu file dari admin di website ini...</div>';
+  } else if (st.cls === "tolak") {
+    actionHtml =
+      '<div style="font-size:12px;color:#ef9a9a;margin-top:4px;">Pesanan ditolak admin.</div>';
+  } else {
+    actionHtml =
+      '<div style="font-size:12px;color:#8aa0b8;margin-top:6px;line-height:1.4;">Pesanan diproses di website. File akan muncul di sini (kode ' +
+      escapeHtml(kode) +
+      ") setelah admin kirim.</div>";
+  }
+
+  return (
+    '<div class="order-status-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:14px;padding:14px;margin-bottom:12px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">' +
+    "<div>" +
+    '<div style="font-size:12px;color:#8aa0b8;">Kode</div>' +
+    '<div style="font-weight:800;color:#fff;letter-spacing:0.3px;">' +
+    escapeHtml(kode) +
+    "</div>" +
+    "</div>" +
+    '<span style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:' +
+    st.bg +
+    ";color:" +
+    st.color +
+    ';white-space:nowrap;">' +
+    escapeHtml(st.label) +
+    "</span>" +
+    "</div>" +
+    '<div style="font-size:14px;font-weight:700;color:#e3eaf2;margin-bottom:4px;">' +
+    escapeHtml(paket) +
+    "</div>" +
+    '<div style="font-size:12px;color:#8aa0b8;margin-bottom:8px;">Total Rp ' +
+    escapeHtml(String(total)) +
+    (waktu ? " · " + escapeHtml(String(waktu)) : "") +
+    "</div>" +
+    (catatan
+      ? '<div style="font-size:12px;color:#cfd8e3;background:#0a0e18;border-radius:8px;padding:8px 10px;margin-bottom:8px;">' +
+        escapeHtml(catatan) +
+        "</div>"
+      : "") +
+    actionHtml +
+    "</div>"
+  );
 }
+
 
 async function renderAntrian() {
   const list = document.getElementById("antrianList");
