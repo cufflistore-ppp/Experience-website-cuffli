@@ -485,7 +485,13 @@ function toggleFormOrder() {
 }
 
 
-async function loadPesanan() {
+async function loadPesanan(force) {
+  // Jangan re-render list kalau admin lagi pilih file / ketik URL / lagi kirim
+  // (re-render = file input hilang → keluar-masuk kesal)
+  if (!force && isPesananFormDirty()) {
+    console.log("[pesanan] skip refresh — form sedang diisi");
+    return;
+  }
   const orders = await fetchOrders();
   const filter = (document.getElementById("filterStatus") || {}).value || "aktif";
   let filtered = orders.slice();
@@ -583,7 +589,7 @@ async function loadPesanan() {
           </div>
           <div id="boxUrl_${kode}" style="display:none;">
             <label style="font-size:11px;color:#8aa0b8;">Tempel link download saja</label>
-            <input type="text" id="url_${kode}" placeholder="https://drive.google.com/..." value="" style="width:100%;margin:4px 0 8px;">
+            <input type="text" id="url_${kode}" placeholder="Tempel link di sini (contoh: https://drive.google.com/...)" value="" style="width:100%;margin:4px 0 8px;" onfocus="window._lockPesananForm=true;window._kirimModeMap=window._kirimModeMap||{};window._kirimModeMap['${kode}']='url';" oninput="window._lockPesananForm=true;">
           </div>
           <input type="text" id="note_${kode}" placeholder="Catatan untuk pembeli (opsional)" style="width:100%;margin:0 0 8px;">
           <button type="button" class="btn-adm success" id="btnKirim_${kode}" style="margin:0;width:100%;" onclick="kirimLangsung('${kode}')">
@@ -777,9 +783,42 @@ async function tolakOrder(kode) {
 }
 
 
+
+window._pickedFiles = window._pickedFiles || {};
+window._lockPesananForm = false;
+
+function isPesananFormDirty() {
+  if (window._kirimBusy) return true;
+  if (window._lockPesananForm) return true;
+  try {
+    var files = document.querySelectorAll('[id^="file_"]');
+    for (var i = 0; i < files.length; i++) {
+      if (files[i].files && files[i].files.length > 0) return true;
+    }
+    var urls = document.querySelectorAll('[id^="url_"]');
+    for (var j = 0; j < urls.length; j++) {
+      var v = (urls[j].value || "").trim();
+      if (v && v !== "https://" && v !== "http://" && v.indexOf("drive.google.com/...") < 0) return true;
+    }
+    var notes = document.querySelectorAll('[id^="note_"]');
+    for (var k = 0; k < notes.length; k++) {
+      if ((notes[k].value || "").trim()) return true;
+    }
+    // ada file tersimpan di memori
+    if (window._pickedFiles) {
+      for (var key in window._pickedFiles) {
+        if (window._pickedFiles[key]) return true;
+      }
+    }
+  } catch (e) {}
+  return false;
+}
+window.isPesananFormDirty = isPesananFormDirty;
+
 window._kirimModeMap = window._kirimModeMap || {};
 function setOrderKirimMode(kode, mode) {
   window._kirimModeMap[kode] = mode === "url" ? "url" : "file";
+  window._lockPesananForm = true;
   var boxF = document.getElementById("boxFile_" + kode);
   var boxU = document.getElementById("boxUrl_" + kode);
   var btnF = document.getElementById("modeFile_" + kode);
@@ -789,28 +828,44 @@ function setOrderKirimMode(kode, mode) {
     if (boxU) boxU.style.display = "block";
     if (btnF) { btnF.className = "btn-adm outline"; btnF.style.background = ""; }
     if (btnU) { btnU.className = "btn-adm"; btnU.style.background = "#1565c0"; }
-    var fi = document.getElementById("file_" + kode);
-    if (fi) fi.value = "";
+    // JANGAN hapus file input / memory — user bisa balik ke File
     var h = document.getElementById("fileNameHint_" + kode);
-    if (h) { h.style.display = "none"; h.textContent = ""; }
+    if (h && !window._pickedFiles[kode]) { h.style.display = "none"; h.textContent = ""; }
   } else {
     if (boxF) boxF.style.display = "block";
     if (boxU) boxU.style.display = "none";
     if (btnF) { btnF.className = "btn-adm"; btnF.style.background = "#1565c0"; }
     if (btnU) { btnU.className = "btn-adm outline"; btnU.style.background = ""; }
-    var ui = document.getElementById("url_" + kode);
-    if (ui) ui.value = "";
+    // restore hint jika ada file di memori
+    var h2 = document.getElementById("fileNameHint_" + kode);
+    var mem = window._pickedFiles && window._pickedFiles[kode];
+    if (mem && h2) {
+      h2.style.display = "block";
+      h2.textContent = "✓ File siap: " + mem.name + " (" + Math.round(mem.size / 1024) + " KB) — tekan Kirim";
+    }
   }
 }
 function onOrderFilePicked(kode) {
   window._kirimModeMap[kode] = "file";
-  setOrderKirimMode(kode, "file");
+  window._lockPesananForm = true;
+  // Jangan panggil setOrderKirimMode penuh (bisa reset) — cukup pastikan box file tampil
+  var boxF = document.getElementById("boxFile_" + kode);
+  var boxU = document.getElementById("boxUrl_" + kode);
+  var btnF = document.getElementById("modeFile_" + kode);
+  var btnU = document.getElementById("modeUrl_" + kode);
+  if (boxF) boxF.style.display = "block";
+  if (boxU) boxU.style.display = "none";
+  if (btnF) { btnF.className = "btn-adm"; btnF.style.background = "#1565c0"; }
+  if (btnU) { btnU.className = "btn-adm outline"; btnU.style.background = ""; }
   var fi = document.getElementById("file_" + kode);
   var h = document.getElementById("fileNameHint_" + kode);
   var f = fi && fi.files && fi.files[0];
-  if (f && h) {
-    h.style.display = "block";
-    h.textContent = "✓ File siap: " + f.name + " (" + Math.round(f.size / 1024) + " KB) — langsung tekan Kirim (tanpa URL)";
+  if (f) {
+    window._pickedFiles[kode] = f;
+    if (h) {
+      h.style.display = "block";
+      h.textContent = "✓ File siap: " + f.name + " (" + Math.round(f.size / 1024) + " KB) — tekan Kirim, jangan pindah tab";
+    }
   } else if (h) {
     h.style.display = "none";
     h.textContent = "";
@@ -826,7 +881,11 @@ async function kirimLangsung(kode) {
   const urlInp = document.getElementById("url_" + kode);
   const noteInp = document.getElementById("note_" + kode);
   const btn = document.getElementById("btnKirim_" + kode);
-  const file = fileInp && fileInp.files && fileInp.files[0];
+  let file = fileInp && fileInp.files && fileInp.files[0];
+  // fallback: file yang sudah dipilih sebelumnya (kalau DOM sempat di-refresh)
+  if (!file && window._pickedFiles && window._pickedFiles[kode]) {
+    file = window._pickedFiles[kode];
+  }
   let fileUrl = (urlInp && urlInp.value ? urlInp.value : "").trim();
   if (fileUrl === "https://" || fileUrl === "http://" || fileUrl === "https://..." || fileUrl === "https://") fileUrl = "";
   let fileName = "";
@@ -1595,7 +1654,9 @@ function bootAdminData() {
       _lastOrderCount = orders.length;
       const active = document.querySelector(".panel-section.active");
       if (!active || active.id === "panel-dashboard") loadDashboard();
-      if (active && active.id === "panel-pesanan") loadPesanan();
+      if (active && active.id === "panel-pesanan") {
+        if (!isPesananFormDirty()) loadPesanan();
+      }
       if (active && active.id === "panel-keuntungan") loadKeuntungan();
     });
   }
@@ -1610,8 +1671,10 @@ function bootAdminData() {
     if (!_adminBooted) return;
     const active = document.querySelector(".panel-section.active");
     if (!active || active.id === "panel-dashboard") loadDashboard();
-    if (active && active.id === "panel-pesanan") loadPesanan();
-  }, 15000);
+    if (active && active.id === "panel-pesanan") {
+      if (!isPesananFormDirty()) loadPesanan();
+    }
+  }, 20000);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
