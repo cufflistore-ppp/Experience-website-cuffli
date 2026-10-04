@@ -97,7 +97,7 @@ function renderKatalog(gridId, mode) {
         "pembayaran.html?paket=" +
         encodeURIComponent(p.judul) +
         "&total=" +
-        encodeURIComponent(String(p.harga)) +
+        encodeURIComponent(String(Number(String(p.harga || "0").replace(/[^\d]/g, "")) || 0)) +
         "&pid=" +
         encodeURIComponent(p.id || "");
       const stok = p.stok < 0 ? "∞" : p.stok;

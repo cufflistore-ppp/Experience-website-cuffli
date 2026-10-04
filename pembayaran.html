@@ -250,148 +250,144 @@
       return "Rp " + Number(n).toLocaleString("id-ID");
     }
 
+    
     async function loadOrderData() {
-      // Klik produk → buat order otomatis + tampil QRIS
-      const paramsEarly = new URLSearchParams(window.location.search);
-      const paketEarly = (paramsEarly.get("paket") || "").trim();
-      if (paketEarly && !paramsEarly.get("kode")) {
-        // Harga dari URL (produk) — samakan dengan katalog
-        let totalNum = parseInt(String(paramsEarly.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
-        const pid = (paramsEarly.get("pid") || "").trim();
-        // Coba ambil harga resmi dari produk admin bila pid ada
-        try {
-          if (pid) {
-            let list = [];
-            if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
-              list = await window.VoxyyOrders.getProdukGlobal();
-            }
-            if (!list || !list.length) {
-              list = JSON.parse(localStorage.getItem("voxyy_produk_admin") || "[]");
-            }
-            const prod = (list || []).find(function (x) {
-              return String(x.id || "") === pid || String(x.judul || "") === paketEarly;
-            });
-            if (prod && prod.harga != null) {
-              totalNum = Number(prod.harga) || totalNum;
-            }
+      const params = new URLSearchParams(window.location.search);
+      let paket = (params.get("paket") || params.get("judul") || "").trim();
+      let totalNum = parseInt(String(params.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
+      let kode = (params.get("kode") || "").trim();
+      const pid = (params.get("pid") || "").trim();
+
+      // Ambil harga dari produk bila total 0 / kosong
+      try {
+        let list = [];
+        if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
+          try { list = await window.VoxyyOrders.getProdukGlobal(); } catch (e) {}
+        }
+        if (!list || !list.length) {
+          try { list = JSON.parse(localStorage.getItem("voxyy_produk_admin") || "[]"); } catch (e) { list = []; }
+        }
+        if ((!totalNum || totalNum <= 0) && (pid || paket) && list && list.length) {
+          const prod = list.find(function (x) {
+            return (pid && String(x.id || "") === pid) ||
+              (paket && String(x.judul || "").toLowerCase() === paket.toLowerCase());
+          });
+          if (prod) {
+            totalNum = Number(prod.harga) || totalNum;
+            if (!paket) paket = prod.judul || paket;
           }
-        } catch (e) {}
-        // Kode order acak unik
+        }
+      } catch (e) {}
+
+      // Kode acak jika belum ada
+      if (!kode || kode === "VM-0000" || kode === "VJ-2026-0000") {
         const rand = Math.floor(1000 + Math.random() * 9000);
         const timePart = String(Date.now()).slice(-5);
-        const kode = "VM-" + rand + timePart;
-        const isWebsite = /website/i.test(paketEarly);
-        let userEmail = "";
-        let userName = "Customer";
-        try {
-          const u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser();
-          if (u) {
-            userEmail = u.email || "";
-            userName = u.displayName || u.email || "Customer";
-          }
-        } catch (e) {}
-        const order = {
-          kode,
+        kode = "VM-" + rand + timePart;
+      }
+
+      // Nama user login
+      let userEmail = "";
+      let userName = "Customer";
+      try {
+        const u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser();
+        if (u) {
+          userEmail = u.email || "";
+          userName = u.displayName || u.email || "Customer";
+        }
+      } catch (e) {}
+
+      // Cari order existing by kode
+      let order = null;
+      let orders = [];
+      try {
+        if (window.VoxyyOrders && window.VoxyyOrders.getOrders) {
+          orders = await window.VoxyyOrders.getOrders();
+        } else {
+          orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+        }
+      } catch (e) { orders = []; }
+
+      if (params.get("kode")) {
+        order = (orders || []).find(function (o) {
+          return String(o.kode || "").toUpperCase() === String(params.get("kode")).toUpperCase();
+        }) || null;
+      }
+
+      // Buat order baru jika belum ada (klik dari produk)
+      if (!order) {
+        if (!paket) paket = "Produk Digital";
+        if (!totalNum || totalNum < 0) totalNum = 0;
+        order = {
+          kode: kode,
           nama: userName,
           wa: "-",
           email: userEmail,
           userEmail: userEmail,
           pid: pid || "",
-          catatan: paketEarly + " — order website, proses di panel admin",
-          total: "Rp " + totalNum.toLocaleString("id-ID"),
-          paket: paketEarly === "website" ? "Jasa Bikin Website" : paketEarly,
+          catatan: paket + " — order website, proses di panel admin",
+          total: "Rp " + Number(totalNum).toLocaleString("id-ID"),
+          paket: paket,
           status: "Belum Bayar",
           waktu: new Date().toLocaleString("id-ID"),
           createdAt: Date.now(),
           finalAmount: totalNum,
-          isWebsite: isWebsite,
-          isDigital: !isWebsite
+          isDigital: true
         };
-        if (window.VoxyyOrders && typeof window.VoxyyOrders.addOrder === "function") {
-          await window.VoxyyOrders.addOrder(order);
-        } else {
-          let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-          orders.unshift(order);
-          localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+        try {
+          if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
+            await window.VoxyyOrders.addOrder(order);
+          } else {
+            orders.unshift(order);
+            localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+          }
+        } catch (e) {
+          console.warn("addOrder", e);
         }
-        if (kode) localStorage.setItem("voxyy_saved_kode", kode);
+        // Simpan kode di device
         try {
-          let arr = JSON.parse(localStorage.getItem("voxyy_my_orders") || "[]");
-          if (!Array.isArray(arr)) arr = [];
-          const kk = String(kode).toUpperCase();
-          if (kk && !arr.includes(kk)) arr.unshift(kk);
-          localStorage.setItem("voxyy_my_orders", JSON.stringify(arr.slice(0, 30)));
+          localStorage.setItem("voxyy_saved_kode", kode);
+          var arr = [];
+          try { arr = JSON.parse(localStorage.getItem("voxyy_saved_kodes") || "[]"); } catch (e2) {}
+          arr = [kode].concat((arr || []).filter(function (x) {
+            return String(x).toUpperCase() !== kode.toUpperCase();
+          })).slice(0, 30);
+          localStorage.setItem("voxyy_saved_kodes", JSON.stringify(arr));
         } catch (e) {}
 
-        const extra = isWebsite ? "&website=1" : "&digital=1";
-        window.location.replace(`pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(order.total)}${extra}`);
-        return;
-      }
-
-      let orders = [];
-      if (window.VoxyyOrders && typeof window.VoxyyOrders.getOrders === "function") {
-        orders = await window.VoxyyOrders.getOrders();
+        // Update URL biar refresh tetap pakai kode yang sama
+        try {
+          var u = new URL(window.location.href);
+          u.searchParams.set("kode", kode);
+          u.searchParams.set("total", String(totalNum));
+          if (paket) u.searchParams.set("paket", paket);
+          history.replaceState(null, "", u.pathname + u.search);
+        } catch (e) {}
       } else {
-        orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-      }
-      const params = new URLSearchParams(window.location.search);
-      const kodeParam = params.get("kode");
-
-      let order = null;
-      if (kodeParam) {
-        order = orders.find(o => o.kode === kodeParam) || null;
-      }
-      if (!order && orders.length > 0) {
-        order = orders[0];
+        // sync total display dari order
+        totalNum = order.finalAmount || parseInt(String(order.total || "0").replace(/[^\d]/g, ""), 10) || totalNum;
+        kode = order.kode || kode;
+        paket = order.paket || paket;
       }
 
-      if (!order) {
-        const total = params.get("total") || "Rp 5.000";
-        order = {
-          userEmail: (function(){ try { var u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser(); return u && u.email ? u.email : ''; } catch(e){ return ''; } })(),
-      kode: kodeParam || "VM-0000",
-          total: total,
-          nama: "-",
-          wa: "-",
-          status: "Belum Bayar"
-        };
-      }
-
-      if (params.get("website") === "1") {
-        order.isWebsite = true;
-        order.paket = order.paket || "Jasa Bikin Website";
-      }
-      if (params.get("digital") === "1") {
-        order.isDigital = true;
-      }
       currentOrder = order;
-      window.currentOrder = order;
 
-      document.getElementById("kodeOrder").textContent = order.kode;
-      if (order.kode && order.status !== "Sukses" && order.status !== "SELESAI") {
-        localStorage.setItem("voxyy_saved_kode", order.kode);
-        try {
-          let arr = JSON.parse(localStorage.getItem("voxyy_my_orders") || "[]");
-          if (!Array.isArray(arr)) arr = [];
-          const kk = String(kode).toUpperCase();
-          if (kk && !arr.includes(kk)) arr.unshift(kk);
-          localStorage.setItem("voxyy_my_orders", JSON.stringify(arr.slice(0, 30)));
-        } catch (e) {}
+      // Tampilkan di UI
+      var elKode = document.getElementById("kodeOrder");
+      var elTotal = document.getElementById("totalBayar");
+      if (elKode) elKode.textContent = kode || order.kode || "-";
+      if (elTotal) elTotal.textContent = formatRupiah(totalNum);
+      var h2 = document.querySelector(".pay-card h2");
+      // keep title Scan QRIS
+      var sub = document.querySelector(".pay-card p");
+      if (sub && paket) sub.textContent = paket + " · Order sudah dibuat";
 
+      if (kode) {
+        try { localStorage.setItem("voxyy_saved_kode", kode); } catch (e) {}
       }
-      const h2 = document.querySelector(".pay-card h2");
-      if (h2 && order.paket) {
-        h2.textContent = "Bayar " + order.paket;
-      }
-
-      const totalNum = order.finalAmount
-        || Number(String(order.total).replace(/[^\d]/g, ""))
-        || 0;
-
-      document.getElementById("totalBayar").textContent = formatRupiah(totalNum);
     }
 
-    async function konfirmasiPembayaran() {
+async function konfirmasiPembayaran() {
       if (!_buktiDataUrl) {
         alert("Upload foto bukti TF dulu. Wajib sebelum konfirmasi.");
         return;
@@ -557,6 +553,7 @@ Customer sudah bayar & konfirmasi.
       applyPaySettings();
       loadPaySettingsCloud();
       loadOrderData();
+      setTimeout(function(){ try { var k=document.getElementById('kodeOrder'); if(k && (k.textContent==='VM-0000'||k.textContent.indexOf('0000')>=0)) loadOrderData(); } catch(e){} }, 600);
     });
   </script>
 </body>
