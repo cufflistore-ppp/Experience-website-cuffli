@@ -392,10 +392,10 @@
       <div id="panel-pembayaran" class="panel-section">
         <div class="admin-topbar"><h1><i class="fa-solid fa-credit-card"></i> Pembayaran</h1></div>
         <div class="form-section" style="background:#12182a;padding:16px;border-radius:12px;border:1px solid #1e2a45;">
-          <label>Foto QRIS — pilih dari galeri HP</label>
-          <input type="file" id="qrisFile" accept="image/*" style="font-size:12px;color:#ccc;width:100%;margin-bottom:8px;" onchange="onQrisFilePicked(this)">
-          <input type="text" id="qrisUrl" value="qris.png" placeholder="atau tempel URL gambar (opsional)" oninput="document.getElementById('previewQris').src=this.value||'qris.png'">
-          <p style="font-size:11px;color:#6a7a90;margin:4px 0 10px;">Pilih foto dari galeri → langsung ganti. Atau tempel URL gambar publik.</p>
+          <label>Foto QRIS — hanya dari galeri HP</label>
+          <input type="file" id="qrisFile" accept="image/*" capture="environment" style="font-size:13px;color:#e3eaf2;width:100%;margin-bottom:8px;padding:10px;background:#0a0e18;border:1px solid #1e2a45;border-radius:10px;" onchange="onQrisFilePicked(this)">
+          <input type="hidden" id="qrisUrl" value="qris.png">
+          <p style="font-size:11px;color:#6a7a90;margin:4px 0 10px;">Pilih foto QRIS dari galeri → preview muncul → tekan <b>Simpan</b>. Tidak pakai URL.</p>
           <label>Nomor Rekening / E-Wallet (opsional)</label>
           <input type="text" id="rekeningInfo" placeholder="BCA 1234567890 a/n VOXY MARKET · Dana 08xxx">
           <label>Catatan Pembayaran</label>

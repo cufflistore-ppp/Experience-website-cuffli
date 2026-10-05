@@ -1,10 +1,10 @@
 /**
  * VOXY MARKET - Branding global (Firebase)
- * Logo, nama, banner, warna dari admin → tampil di SEMUA device.
+ * Logo, nama, banner, warna dari admin → tampil di SEMUA halaman & device.
  */
 (function () {
-  const SETTINGS_KEY = "voxyy_settings";
-  const PRODUK_KEY = "voxyy_produk_admin";
+  var SETTINGS_KEY = "voxyy_settings";
+  var PRODUK_KEY = "voxyy_produk_admin";
 
   function getSettingsLocal() {
     try {
@@ -15,121 +15,144 @@
   }
 
   function applyBranding(s) {
-    s = s || getSettingsLocal();
-    const nama = s.namaToko || "VOXY MARKET";
-    try { if (nama) document.title = document.title.replace(/VOXY MARKET|Voxyy|Voxy/gi, nama); } catch(e) {}
-    const logo = s.logoUrl || "logo.png";
-    const banner = s.bannerUrl || "banner.jpg";
-    const bg = s.bgColor || localStorage.getItem("voxyy_bg_color") || "";
+    s = s || getSettingsLocal() || {};
+    var nama = s.namaToko || s.nama || "VOXY MARKET";
+    var logo = s.logoUrl || s.logo || "logo.png";
+    var banner = s.bannerUrl || s.banner || "banner.jpg";
+    var bg = s.bgColor || localStorage.getItem("voxyy_bg_color") || "";
+    var check =
+      ' <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
+
+    try {
+      document.title = String(document.title || "").replace(
+        /VOXY\s*MARKET/gi,
+        nama
+      );
+    } catch (e) {}
 
     if (bg) {
       document.body.style.background = bg;
       document.body.style.backgroundImage = "none";
     }
 
-    document.querySelectorAll("img.logo, img.brand-logo, .market-brand img, header .logo").forEach((img) => {
-      if (img && logo) {
+    // LOGO — semua halaman
+    document
+      .querySelectorAll(
+        "img.logo, img.brand-logo, img.auth-logo, .market-brand img, header .logo, #homeLogo, #authLogo"
+      )
+      .forEach(function (img) {
+        if (!img) return;
         img.src = logo;
+        img.alt = nama;
         img.onerror = function () {
           this.src = "logo.png";
         };
-      }
-    });
+      });
 
-    document.querySelectorAll(".vx-badge").forEach((el) => {
-      const parts = String(nama).trim().split(/\s+/);
-      el.textContent =
-        parts.length >= 2
-          ? (parts[0][0] + parts[1][0]).toUpperCase()
-          : String(nama).substring(0, 2).toUpperCase();
-    });
-
-    document.querySelectorAll(".market-title").forEach((el) => {
-      const parts = String(nama).split(/\s+/);
-      if (parts.length >= 2) {
-        el.innerHTML = parts[0] + " <span>" + parts.slice(1).join(" ") + "</span>";
-      } else {
-        el.innerHTML = nama;
-      }
-    });
-
-    document.querySelectorAll(".brand h1, .header h1").forEach((el) => {
-      if (el.closest(".admin-sidebar") || el.closest(".admin-main")) return;
-      const parts = String(nama).split(/\s+/);
+    // NAMA — market-title
+    document.querySelectorAll(".market-title").forEach(function (el) {
+      var parts = String(nama).trim().split(/\s+/);
       if (parts.length >= 2) {
         el.innerHTML =
-          parts[0] + ' <span style="color:#2196f3">' + parts.slice(1).join(" ") + "</span>";
+          parts[0] + " <span>" + parts.slice(1).join(" ") + "</span>" + check;
+      } else {
+        el.innerHTML = nama + check;
+      }
+    });
+
+    // NAMA — brand/header h1 (bukan admin)
+    document
+      .querySelectorAll(".brand h1, .header h1, header .brand h1")
+      .forEach(function (el) {
+        if (
+          el.closest(".admin-sidebar") ||
+          el.closest(".admin-main") ||
+          el.closest("#adminApp")
+        )
+          return;
+        var parts = String(nama).trim().split(/\s+/);
+        if (parts.length >= 2) {
+          el.innerHTML =
+            parts[0] +
+            ' <span style="color:#1565c0">' +
+            parts.slice(1).join(" ") +
+            "</span>" +
+            check;
+        } else {
+          el.innerHTML = nama + check;
+        }
+      });
+
+    // login / daftar
+    document.querySelectorAll(".auth-brand").forEach(function (el) {
+      var parts = String(nama).trim().split(/\s+/);
+      if (parts.length >= 2) {
+        el.innerHTML =
+          parts[0] +
+          ' <span class="market-blue">' +
+          parts.slice(1).join(" ") +
+          "</span>";
       } else {
         el.textContent = nama;
       }
     });
 
-    document.querySelectorAll("img.banner-full, .banner img").forEach((img) => {
-      if (banner) {
+    // tentang
+    document.querySelectorAll("#aboutNama, #aboutCopy").forEach(function (el) {
+      if (el) el.textContent = nama;
+    });
+
+    // BANNER
+    document
+      .querySelectorAll("img.banner-full, .banner img, #homeBanner")
+      .forEach(function (img) {
+        if (!img || !banner) return;
         img.src = banner;
+        img.alt = "Selamat Datang di " + nama;
         img.onerror = function () {
           this.src = "banner.jpg";
         };
-      }
-    });
-
-
-    // QRIS image di halaman bayar
-    if (s.qrisUrl) {
-      document.querySelectorAll("#qrisImg, img.qris, img[alt='QRIS']").forEach((img) => {
-        img.src = s.qrisUrl;
-        img.style.display = "";
       });
+
+    // QRIS (halaman bayar)
+    if (s.qrisUrl) {
+      document
+        .querySelectorAll("#qrisImg, img.qris, img[alt='QRIS']")
+        .forEach(function (img) {
+          if (img) img.src = s.qrisUrl;
+        });
     }
 
-
-    // Samakan logo di header market (Produk/Kategori) dengan Home
-    document.querySelectorAll(".market-brand").forEach((brand) => {
-      let img = brand.querySelector("img.logo, img.brand-logo");
+    // market-brand: pastikan ada logo
+    document.querySelectorAll(".market-brand").forEach(function (brand) {
+      var img = brand.querySelector("img.logo, img.brand-logo");
       if (!img) {
         img = document.createElement("img");
         img.className = "logo brand-logo";
-        img.alt = "Logo";
+        img.alt = nama;
         brand.insertBefore(img, brand.firstChild);
       }
       img.src = logo;
-      img.onerror = function () { this.src = "logo.png"; };
-      const badge = brand.querySelector(".vx-badge");
+      img.onerror = function () {
+        this.src = "logo.png";
+      };
+      var badge = brand.querySelector(".vx-badge");
       if (badge) badge.style.display = "none";
     });
-    // Centang biru di judul
-    document.querySelectorAll(".market-title").forEach((el) => {
-      if (!el.querySelector(".verified")) {
-        el.insertAdjacentHTML("beforeend", ' <i class="fa-solid fa-circle-check verified"></i>');
-      }
-    });
-
-    if (s.waAdmin) {
-      const wa = String(s.waAdmin).replace(/\D/g, "");
-      document.querySelectorAll('a[href*="wa.me"]').forEach((a) => {
-        const href = a.getAttribute("href") || "";
-        if (href.includes("6285151982250") || href.includes("6285706128277") || href.includes("wa.me/")) {
-          const textMatch = href.match(/[?&]text=[^&]+/);
-          const q = textMatch ? textMatch[0].replace(/^&/, "?") : "";
-          const q2 = q.startsWith("?") ? q : q ? "?" + q : "";
-          a.setAttribute("href", "https://wa.me/" + wa + q2);
-        }
-      });
-    }
   }
 
   async function loadFromCloud() {
     try {
-      if (window.VoxyyOrders && typeof window.VoxyyOrders.getSettings === "function") {
-        const s = await window.VoxyyOrders.getSettings();
-        if (s && Object.keys(s).length) {
+      if (!window.VoxyyOrders) return;
+      if (window.VoxyyOrders.getSettings) {
+        var s = await window.VoxyyOrders.getSettings();
+        if (s && typeof s === "object") {
           localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
-          if (s.bgColor) localStorage.setItem("voxyy_bg_color", s.bgColor);
           applyBranding(s);
         }
       }
-      if (window.VoxyyOrders && typeof window.VoxyyOrders.getProdukGlobal === "function") {
-        const list = await window.VoxyyOrders.getProdukGlobal();
+      if (window.VoxyyOrders.getProdukGlobal) {
+        var list = await window.VoxyyOrders.getProdukGlobal();
         if (list && list.length) {
           localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
           if (typeof window.renderKatalog === "function") {
@@ -140,7 +163,7 @@
         }
       }
     } catch (e) {
-      console.warn("[Brand] cloud load:", e);
+      console.warn("[branding] loadFromCloud", e);
     }
   }
 
@@ -148,11 +171,17 @@
     if (!window.VoxyyOrders) return;
     if (typeof window.VoxyyOrders.onSettingsChange === "function") {
       window.VoxyyOrders.onSettingsChange(function (s) {
-        applyBranding(s);
+        if (s) {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+          applyBranding(s);
+        }
       });
     }
     if (typeof window.VoxyyOrders.onProdukChange === "function") {
-      window.VoxyyOrders.onProdukChange(function () {
+      window.VoxyyOrders.onProdukChange(function (list) {
+        if (list && list.length) {
+          localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
+        }
         if (typeof window.renderKatalog === "function") {
           try {
             window.renderKatalog();
@@ -165,13 +194,16 @@
   window.VoxyyBrand = {
     getSettings: getSettingsLocal,
     apply: applyBranding,
-    loadFromCloud,
+    loadFromCloud: loadFromCloud,
     getProduk: function () {
       try {
-        const raw = localStorage.getItem(PRODUK_KEY);
+        var raw = localStorage.getItem(PRODUK_KEY);
         if (raw) {
-          const arr = JSON.parse(raw);
-          if (Array.isArray(arr)) return arr.filter((p) => p.status !== "nonaktif");
+          var arr = JSON.parse(raw);
+          if (Array.isArray(arr))
+            return arr.filter(function (p) {
+              return p.status !== "nonaktif";
+            });
         }
       } catch (e) {}
       return null;
@@ -187,15 +219,16 @@
 
   function boot() {
     applyBranding();
-    // tunggu firebase script kalau belum ready
-    let tries = 0;
-    const tick = function () {
+    var tries = 0;
+    var tick = function () {
       tries++;
-      if (window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured()) {
-        window.VoxyyOrders.initFirebase && window.VoxyyOrders.initFirebase();
+      if (window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured) {
+        try {
+          if (window.VoxyyOrders.initFirebase) window.VoxyyOrders.initFirebase();
+        } catch (e) {}
         loadFromCloud();
         bindRealtime();
-      } else if (tries < 40) {
+      } else if (tries < 50) {
         setTimeout(tick, 150);
       }
     };

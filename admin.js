@@ -394,9 +394,9 @@ async function loadProdukAdm() {
           <br><small style="color:#888;">${escapeHtml(p.kategori)} · ${formatRp(p.harga)} · Stok: ${p.stok == -1 ? "∞" : p.stok}</small>
           <br><small style="color:#666;">${escapeHtml(p.deskripsi || "").substring(0, 80)}</small>
         </div>
-        <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
-          <button type="button" class="btn-adm outline" style="margin:0;padding:10px 14px;min-width:48px;min-height:44px;font-size:16px;cursor:pointer;pointer-events:auto;z-index:2;" onclick="event.stopPropagation();editProdukById('${pid}')"><i class="fa-solid fa-pen"></i></button>
-          <button type="button" class="btn-adm danger" style="margin:0;padding:10px 14px;min-width:48px;min-height:44px;font-size:16px;cursor:pointer;pointer-events:auto;z-index:2;" onclick="event.stopPropagation();hapusProdukById('${pid}')"><i class="fa-solid fa-trash"></i></button>
+        <div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;flex-shrink:0;margin-top:10px;width:100%;">
+          <button type="button" class="btn-adm outline" style="margin:0;padding:10px 14px;min-height:44px;font-size:13px;font-weight:700;cursor:pointer;pointer-events:auto;z-index:2;flex:1;" onclick="event.stopPropagation();editProdukById('${pid}')"><i class="fa-solid fa-pen"></i> Edit produk</button>
+          <button type="button" class="btn-adm danger" style="margin:0;padding:10px 14px;min-height:44px;font-size:13px;font-weight:700;cursor:pointer;pointer-events:auto;z-index:2;flex:1;" onclick="event.stopPropagation();hapusProdukById('${pid}')"><i class="fa-solid fa-trash"></i> Hapus</button>
         </div>
       </div>
     </div>`;
@@ -1237,7 +1237,7 @@ async function onQrisFilePicked(input) {
     }
     document.getElementById("qrisUrl").value = dataUrl;
     document.getElementById("previewQris").src = dataUrl;
-    if (window.showAdmToast) showAdmToast("QRIS siap — tekan Simpan");
+    if (window.showAdmToast) showAdmToast("Foto QRIS dari galeri siap — tekan Simpan");
   } catch (e) {
     alert("Gagal baca foto QRIS: " + (e.message || e));
   }
@@ -1245,14 +1245,18 @@ async function onQrisFilePicked(input) {
 window.onQrisFilePicked = onQrisFilePicked;
 
 async function simpanPembayaran() {
-  const qris = document.getElementById("qrisUrl").value.trim() || "qris.png";
+  const qrisEl = document.getElementById("qrisUrl");
+  const qris = (qrisEl && qrisEl.value ? qrisEl.value : "").trim() || "qris.png";
   const payload = {
     qrisUrl: qris,
-    rekeningInfo: document.getElementById("rekeningInfo").value.trim(),
-    catatanBayar: document.getElementById("catatanBayar").value.trim(),
+    rekeningInfo: (document.getElementById("rekeningInfo") || {}).value || "",
+    catatanBayar: (document.getElementById("catatanBayar") || {}).value || "",
   };
+  payload.rekeningInfo = String(payload.rekeningInfo).trim();
+  payload.catatanBayar = String(payload.catatanBayar).trim();
   saveSettings(payload);
-  document.getElementById("previewQris").src = qris;
+  var prev = document.getElementById("previewQris");
+  if (prev) prev.src = qris;
   try {
     if (window.VoxyyOrders && window.VoxyyOrders.saveSettingsGlobal) {
       await window.VoxyyOrders.saveSettingsGlobal(payload);
@@ -1260,8 +1264,8 @@ async function simpanPembayaran() {
   } catch (e) {
     console.warn(e);
   }
-  if (window.showAdmToast) showAdmToast("QRIS & pembayaran tersimpan — semua device ikut");
-  else alert("Pembayaran disimpan! Muncul di semua device.");
+  if (window.showAdmToast) showAdmToast("QRIS dari galeri tersimpan — semua device ikut");
+  else alert("QRIS & pembayaran disimpan!");
 }
 window.simpanPembayaran = simpanPembayaran;
 
