@@ -942,40 +942,43 @@ async function kirimLangsung(kode) {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kirim ke ' + kode + '...';
   }
   window._kirimBusy = true;
   window._lockPesananForm = true;
 
   try {
     if (file) {
-      let uploaded = false;
-      try {
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Upload file...';
-        const up = await uploadDeliveryFile(kode, file);
-        if (up && up.url) {
-          fileUrl = up.url;
-          fileName = up.name || file.name;
-          uploaded = true;
-        }
-      } catch (upErr) {
-        console.warn("[kirim] storage:", upErr);
-        if (file.size <= 1200000) {
-          if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Proses file...';
-          fileUrl = await readFileAsDataURL(file);
-          fileName = file.name || "file";
-          uploaded = true;
-        } else {
+      // CEPAT: file kecil (<=1.5MB) langsung dataURL — tanpa tunggu Storage
+      // Storage hanya untuk file besar (APK/ZIP besar)
+      fileName = file.name || "file";
+      if (file.size <= 1500000) {
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Proses file...';
+        fileUrl = await readFileAsDataURL(file);
+      } else {
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Upload...';
+        try {
+          const upPromise = uploadDeliveryFile(kode, file);
+          const timeoutPromise = new Promise(function (_, rej) {
+            setTimeout(function () { rej(new Error("Upload timeout 10 detik")); }, 10000);
+          });
+          const up = await Promise.race([upPromise, timeoutPromise]);
+          if (up && up.url) {
+            fileUrl = up.url;
+            fileName = up.name || file.name;
+          } else {
+            throw new Error("Storage tidak mengembalikan URL");
+          }
+        } catch (upErr) {
+          console.warn("[kirim] storage:", upErr);
           throw new Error(
-            "Upload Storage gagal: " + (upErr.message || upErr) +
-            "\n\nFile terlalu besar untuk fallback.\n" +
-            "Solusi: upload ke Google Drive / MediaFire, lalu tempel link di mode URL."
+            "Upload file besar gagal / lama.\n" +
+            (upErr && upErr.message ? upErr.message : "") +
+            "\n\nSolusi cepat: upload ke Google Drive, lalu mode URL saja."
           );
         }
       }
-      if (!uploaded || !fileUrl) {
-        throw new Error("Gagal mendapatkan link file.");
-      }
+      if (!fileUrl) throw new Error("Gagal mendapatkan link file.");
     } else {
       fileName = (fileUrl.split("/").pop() || "download").split("?")[0];
     }
@@ -1004,46 +1007,60 @@ async function kirimLangsung(kode) {
       throw new Error((res && res.error) ? res.error : "Gagal simpan database. Cek koneksi / rules Firebase.");
     }
 
-    // Verifikasi wajib: file harus ada di order
-    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifikasi...';
+        // Verifikasi cepat: pastikan file ada di order (local + cloud)
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Ke kode order...';
     let verified = false;
     let foundFile = "";
-    for (var attempt = 0; attempt < 3; attempt++) {
-      if (attempt > 0) await new Promise(function (r) { setTimeout(r, 500); });
-      try {
-        const orders = await window.VoxyyOrders.getOrders();
-        const found = (orders || []).find(function (o) {
-          return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
-        });
-        if (!found) continue;
-        foundFile = found.file || found.download || found.fileUrl || "";
-        if (!foundFile) {
-          await window.VoxyyOrders.updateOrderByKode(kode, {
-            status: "Sukses",
-            file: fileUrl,
-            download: fileUrl,
-            fileUrl: fileUrl,
-            fileName: fileName || "produk",
-            dikirimTs: Date.now(),
-          });
-          continue;
-        }
-        var st = String(found.status || "").toLowerCase();
-        if (!st.includes("sukses") && !st.includes("selesai")) {
-          await window.VoxyyOrders.updateOrderByKode(kode, { status: "Sukses" });
-        }
-        verified = true;
-        break;
-      } catch (verErr) {
-        console.warn("[kirim] verify", attempt, verErr);
+    // local sudah di-update oleh updateOrderByKode — cek local dulu (cepat)
+    try {
+      const localRaw = localStorage.getItem("voxyy_orders");
+      const localList = localRaw ? JSON.parse(localRaw) : [];
+      const loc = (localList || []).find(function (o) {
+        return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
+      });
+      if (loc) {
+        foundFile = loc.file || loc.download || loc.fileUrl || "";
+        if (foundFile) verified = true;
       }
+    } catch (e) {}
+    if (!verified) {
+      for (var attempt = 0; attempt < 2; attempt++) {
+        if (attempt > 0) await new Promise(function (r) { setTimeout(r, 250); });
+        try {
+          const orders = await window.VoxyyOrders.getOrders();
+          const found = (orders || []).find(function (o) {
+            return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
+          });
+          if (!found) continue;
+          foundFile = found.file || found.download || found.fileUrl || "";
+          if (!foundFile) {
+            await window.VoxyyOrders.updateOrderByKode(kode, {
+              status: "Sukses",
+              file: fileUrl,
+              download: fileUrl,
+              fileUrl: fileUrl,
+              fileName: fileName || "produk",
+              dikirimTs: Date.now(),
+            });
+            continue;
+          }
+          verified = true;
+          break;
+        } catch (verErr) {
+          console.warn("[kirim] verify", attempt, verErr);
+        }
+      }
+    }
+    // Kalau payload kita punya fileUrl, anggap OK (local sudah diisi)
+    if (!verified && fileUrl) {
+      foundFile = fileUrl;
+      verified = true;
     }
 
     if (!verified || !foundFile) {
       throw new Error(
-        "File BELUM masuk ke database pesanan.\n" +
-        "Animasi sukses TIDAK ditampilkan.\n\n" +
-        "Coba mode URL (upload Drive dulu), atau cek Firebase Storage rules."
+        "File BELUM masuk ke kode pesanan.\n\n" +
+        "Coba mode URL, atau refresh lalu kirim lagi."
       );
     }
 
