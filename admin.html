@@ -182,6 +182,32 @@
       60% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
+
+    /* Full success overlay saat kirim produk */
+    .kirim-sukses-overlay {
+      position: fixed; inset: 0; z-index: 99999;
+      background: rgba(6, 12, 20, 0.82);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .kirim-sukses-overlay.show { display: flex; }
+    .kirim-sukses-box {
+      background: #0d3d1a; border: 2px solid #43a047; border-radius: 20px;
+      padding: 28px 24px; text-align: center; max-width: 340px; width: 100%;
+      box-shadow: 0 16px 48px rgba(0,0,0,.5);
+      animation: suksesPop .45s cubic-bezier(.2,1.2,.4,1);
+    }
+    .kirim-sukses-box .big-check {
+      width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 50%;
+      background: #43a047; display: flex; align-items: center; justify-content: center;
+      animation: popOk .5s ease;
+    }
+    .kirim-sukses-box h3 { margin: 0 0 6px; color: #c8e6c9; font-size: 18px; }
+    .kirim-sukses-box p { margin: 0; color: #a5d6a7; font-size: 13px; line-height: 1.45; }
+    @keyframes suksesPop {
+      0% { transform: scale(.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -520,6 +546,13 @@
   <script src="auth.js"></script>
   <script src="telegram.js"></script>
   <script src="script.js"></script>
+  <div id="kirimSuksesOverlay" class="kirim-sukses-overlay" onclick="this.classList.remove('show')">
+    <div class="kirim-sukses-box" onclick="event.stopPropagation()">
+      <div class="big-check"><i class="fa-solid fa-check" style="color:#fff;font-size:32px;"></i></div>
+      <h3>Produk telah dikirim!</h3>
+      <p id="kirimSuksesText">File/URL masuk ke kode pesanan pembeli.</p>
+    </div>
+  </div>
   <div id="admToast" class="adm-toast"><div class="spin-ok"><i class="fa-solid fa-check" style="color:#fff;font-size:14px;"></i></div><span id="admToastText">Berhasil</span></div>
   <script>
 function toggleAdminMenu() {

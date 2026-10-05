@@ -49,10 +49,14 @@ async function fetchOrders() {
   }
 }
 
-function statusMeta(status) {
+function statusMeta(status, hasFile) {
   const s = String(status || "").toLowerCase();
-  if (s.includes("sukses") || s.includes("selesai")) {
+  // Selesai hanya kalau file/URL sudah benar-benar ada di order
+  if ((s.includes("sukses") || s.includes("selesai")) && hasFile) {
     return { label: "Selesai / Siap Diambil", cls: "sukses", color: "#66bb6a", bg: "#0d3d1a" };
+  }
+  if (s.includes("sukses") || s.includes("selesai")) {
+    return { label: "Diproses — menunggu file", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
   }
   if (s.includes("tolak")) {
     return { label: "Ditolak", cls: "tolak", color: "#ef9a9a", bg: "#3d1515" };
@@ -84,13 +88,13 @@ function filterMyOrders(orders) {
 }
 
 function renderOrderCard(o) {
-  const st = statusMeta(o.status);
+  const file = o.file || o.download || o.fileUrl || "";
+  const st = statusMeta(o.status, !!file);
   const kode = o.kode || "-";
   const paket = o.paket || o.judul || "Pesanan";
   const totalN = parseMoney(o.finalAmount != null ? o.finalAmount : o.total);
   const total = totalN > 0 ? totalN.toLocaleString("id-ID") : String(o.total || "-").replace(/^Rp\s*/i, "");
   const waktu = o.waktu || o.dikirimAt || "";
-  const file = o.file || o.download || o.fileUrl || "";
   const fileName = o.fileName || (file ? (String(file).split("/").pop() || "file").split("?")[0] : "");
   const catatan = o.catatanAdmin || o.catatan || "";
   const isData = String(file).indexOf("data:") === 0;
@@ -116,7 +120,7 @@ function renderOrderCard(o) {
       "</a>";
   } else if (st.cls === "sukses") {
     actionHtml =
-      '<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Status selesai. Menunggu file dari admin di website ini...</div>';
+      '<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Admin sedang proses. File akan muncul di kode ini setelah admin kirim.</div>';
   } else if (st.cls === "tolak") {
     actionHtml =
       '<div style="font-size:12px;color:#ef9a9a;margin-top:4px;">Pesanan ditolak admin.</div>';

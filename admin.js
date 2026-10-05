@@ -113,6 +113,26 @@ function showAdmToast(msg) {
 }
 window.showAdmToast = showAdmToast;
 
+function showKirimSukses(kode, fileName) {
+  const ov = document.getElementById("kirimSuksesOverlay");
+  const tx = document.getElementById("kirimSuksesText");
+  if (tx) {
+    tx.textContent = "Kode " + (kode || "-") +
+      (fileName ? " · " + fileName : "") +
+      " — pembeli bisa unduh di Pesanan Saya.";
+  }
+  if (ov) {
+    ov.classList.add("show");
+    clearTimeout(window._kirimSuksesT);
+    window._kirimSuksesT = setTimeout(function () {
+      ov.classList.remove("show");
+    }, 2800);
+  }
+  showAdmToast("✓ Produk telah dikirim ke " + (kode || "pembeli"));
+}
+window.showKirimSukses = showKirimSukses;
+
+
 function drawLineChart(canvas, values, color) {
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
@@ -734,14 +754,30 @@ window.arsipNext = arsipNext;
 
 
 async function tandaiSukses(kode) {
-  // Hanya ganti status — order tetap di list aktif sampai file benar-benar dikirim via tombol Kirim
-  await ubahStatusKode(kode, "Sukses");
-  if (window.showAdmToast) showAdmToast("Status Sukses. Kirim file agar produk masuk ke pembeli.");
+  alert("Untuk menyelesaikan pesanan, pilih File atau URL lalu tekan «Kirim ke Pembeli & Selesai».\nStatus Sukses otomatis setelah produk terkirim.");
 }
 window.tandaiSukses = tandaiSukses;
 
 async function gantiStatusSelect(kode, status) {
   if (!kode || !status) return;
+  // Sukses HANYA lewat tombol Kirim + file/URL — jangan lewat dropdown
+  const s = String(status).toLowerCase();
+  if (s.includes("sukses") || s.includes("selesai")) {
+    alert("Status Sukses hanya setelah Kirim produk (file atau URL).\n\nPilih file/URL di bawah, lalu tekan «Kirim ke Pembeli & Selesai».");
+    // kembalikan select ke non-sukses
+    var sel = document.getElementById("st_" + kode);
+    if (sel) {
+      // cari opsi non-sukses
+      for (var i = 0; i < sel.options.length; i++) {
+        var v = String(sel.options[i].value || "").toLowerCase();
+        if (!v.includes("sukses") && !v.includes("selesai")) {
+          sel.selectedIndex = i;
+          break;
+        }
+      }
+    }
+    return;
+  }
   try {
     if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
       const res = await window.VoxyyOrders.updateOrderByKode(kode, {
@@ -754,8 +790,7 @@ async function gantiStatusSelect(kode, status) {
       return;
     }
     if (window.showAdmToast) showAdmToast("Status: " + status);
-    // Jangan hilang dari list kecuali Tolak — reload tetap tampilkan di aktif jika belum dikirim
-    await loadPesanan();
+    await loadPesanan(true);
   } catch (e) {
     alert("Gagal ganti status: " + (e.message || e));
   }
@@ -876,13 +911,14 @@ window.onOrderFilePicked = onOrderFilePicked;
 
 async function kirimLangsung(kode) {
   if (!kode) { alert("Kode kosong"); return; }
+  if (window._kirimBusy) { alert("Masih proses kirim, tunggu sebentar..."); return; }
+
   const mode = (window._kirimModeMap && window._kirimModeMap[kode]) || "file";
   const fileInp = document.getElementById("file_" + kode);
   const urlInp = document.getElementById("url_" + kode);
   const noteInp = document.getElementById("note_" + kode);
   const btn = document.getElementById("btnKirim_" + kode);
   let file = fileInp && fileInp.files && fileInp.files[0];
-  // fallback: file yang sudah dipilih sebelumnya (kalau DOM sempat di-refresh)
   if (!file && window._pickedFiles && window._pickedFiles[kode]) {
     file = window._pickedFiles[kode];
   }
@@ -891,13 +927,12 @@ async function kirimLangsung(kode) {
   let fileName = "";
   const catatan = (noteInp && noteInp.value ? noteInp.value : "").trim();
 
-  // Mode terpisah: FILE saja ATAU URL saja — tidak digabung
   if (mode === "file") {
     if (!file) {
       alert("Mode File: pilih file dulu, lalu tekan Kirim.\nTidak perlu isi URL.");
       return;
     }
-    fileUrl = ""; // paksa hanya file
+    fileUrl = "";
   } else {
     if (!fileUrl) {
       alert("Mode URL: tempel link dulu, lalu tekan Kirim.\nTidak perlu pilih file.");
@@ -909,14 +944,12 @@ async function kirimLangsung(kode) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
   }
-
-  // kunci biar realtime tidak ganggu di tengah upload
   window._kirimBusy = true;
+  window._lockPesananForm = true;
 
   try {
     if (file) {
       let uploaded = false;
-      // 1) coba Firebase Storage
       try {
         if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Upload file...';
         const up = await uploadDeliveryFile(kode, file);
@@ -927,7 +960,6 @@ async function kirimLangsung(kode) {
         }
       } catch (upErr) {
         console.warn("[kirim] storage:", upErr);
-        // 2) fallback dataURL hanya untuk file kecil (< 400KB)
         if (file.size <= 1200000) {
           if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Proses file...';
           fileUrl = await readFileAsDataURL(file);
@@ -936,8 +968,8 @@ async function kirimLangsung(kode) {
         } else {
           throw new Error(
             "Upload Storage gagal: " + (upErr.message || upErr) +
-            "\\n\\nFile terlalu besar untuk fallback.\\n" +
-            "Solusi: upload file ke Google Drive / MediaFire, lalu tempel link-nya di kolom URL."
+            "\n\nFile terlalu besar untuk fallback.\n" +
+            "Solusi: upload ke Google Drive / MediaFire, lalu tempel link di mode URL."
           );
         }
       }
@@ -948,11 +980,11 @@ async function kirimLangsung(kode) {
       fileName = (fileUrl.split("/").pop() || "download").split("?")[0];
     }
 
-    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Simpan ke pesanan...';
-
     if (!window.VoxyyOrders || !window.VoxyyOrders.updateOrderByKode) {
       throw new Error("Sistem order belum siap. Refresh halaman admin, login ulang.");
     }
+
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Simpan database...';
 
     const payload = {
       status: "Sukses",
@@ -968,48 +1000,81 @@ async function kirimLangsung(kode) {
 
     const res = await window.VoxyyOrders.updateOrderByKode(kode, payload);
     console.log("[kirim] update result", res);
-
     if (!res || res.ok === false) {
-      throw new Error((res && res.error) ? res.error : "Gagal simpan ke database. Cek koneksi / rules Firebase.");
+      throw new Error((res && res.error) ? res.error : "Gagal simpan database. Cek koneksi / rules Firebase.");
     }
 
-    // verifikasi: baca ulang
-    try {
-      const orders = await window.VoxyyOrders.getOrders();
-      const found = (orders || []).find(function (o) {
-        return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
-      });
-      if (found) {
-        const hasFile = !!(found.file || found.download || found.fileUrl);
-        const st = String(found.status || "").toLowerCase();
+    // Verifikasi wajib: file harus ada di order
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifikasi...';
+    let verified = false;
+    let foundFile = "";
+    for (var attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise(function (r) { setTimeout(r, 500); });
+      try {
+        const orders = await window.VoxyyOrders.getOrders();
+        const found = (orders || []).find(function (o) {
+          return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
+        });
+        if (!found) continue;
+        foundFile = found.file || found.download || found.fileUrl || "";
+        if (!foundFile) {
+          await window.VoxyyOrders.updateOrderByKode(kode, {
+            status: "Sukses",
+            file: fileUrl,
+            download: fileUrl,
+            fileUrl: fileUrl,
+            fileName: fileName || "produk",
+            dikirimTs: Date.now(),
+          });
+          continue;
+        }
+        var st = String(found.status || "").toLowerCase();
         if (!st.includes("sukses") && !st.includes("selesai")) {
-          // paksa sekali lagi
-          await window.VoxyyOrders.updateOrderByKode(kode, payload);
+          await window.VoxyyOrders.updateOrderByKode(kode, { status: "Sukses" });
         }
-        if (!hasFile && fileUrl && !String(fileUrl).startsWith("data:")) {
-          await window.VoxyyOrders.updateOrderByKode(kode, { file: fileUrl, download: fileUrl, fileUrl: fileUrl });
-        }
+        verified = true;
+        break;
+      } catch (verErr) {
+        console.warn("[kirim] verify", attempt, verErr);
       }
-    } catch (verErr) {
-      console.warn("[kirim] verify", verErr);
     }
 
-    if (window.showAdmToast) showAdmToast("✓ Terkirim ke pembeli!");
-    else alert("Berhasil! Produk terkirim ke pembeli.\\nKode: " + kode);
+    if (!verified || !foundFile) {
+      throw new Error(
+        "File BELUM masuk ke database pesanan.\n" +
+        "Animasi sukses TIDAK ditampilkan.\n\n" +
+        "Coba mode URL (upload Drive dulu), atau cek Firebase Storage rules."
+      );
+    }
 
+    // SUKSES NYATA
     window._kirimBusy = false;
-    await loadPesanan();
+    window._lockPesananForm = false;
+    if (window._pickedFiles) delete window._pickedFiles[kode];
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Terkirim';
+      btn.style.background = "#2e7d32";
+    }
+    if (typeof showKirimSukses === "function") showKirimSukses(kode, fileName || "file");
+    else if (typeof showAdmToast === "function") showAdmToast("✓ Produk telah dikirim!");
+    else alert("Produk telah dikirim!\nKode: " + kode);
+
+    await loadPesanan(true);
     try { await loadDashboard(); } catch (e) {}
   } catch (e) {
     window._kirimBusy = false;
     console.error("[kirim]", e);
-    alert("GAGAL kirim:\\n" + (e && e.message ? e.message : String(e)));
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim ke Pembeli & Selesai';
+      btn.style.background = "";
     }
+    alert("GAGAL kirim (produk BELUM ke pembeli):\n\n" + (e && e.message ? e.message : String(e)));
   }
 }
+
+window.kirimLangsung = kirimLangsung;
 
 window.ubahStatusKode = ubahStatusKode;
 window.tolakOrder = tolakOrder;
