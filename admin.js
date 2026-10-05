@@ -30,9 +30,16 @@ function saveSettings(obj) {
 function getProdukAdmin() {
   try {
     const raw = localStorage.getItem(PRODUK_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr.length) return arr;
+    }
   } catch (e) {}
-  // default dari joki-produk jika ada
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders._lastProduk && window.VoxyyOrders._lastProduk.length) {
+      return window.VoxyyOrders._lastProduk.slice();
+    }
+  } catch (e) {}
   return [];
 }
 
@@ -356,30 +363,44 @@ function resetFormProduk() {
   document.getElementById("produkStatus").value = "aktif";
 }
 
-function loadProdukAdm() {
-  const list = getProdukAdmin();
+async function loadProdukAdm() {
+  let list = getProdukAdmin();
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
+      const remote = await window.VoxyyOrders.getProdukGlobal();
+      if (remote && remote.length) {
+        list = remote;
+        localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
+      }
+    }
+  } catch (e) {}
   const box = document.getElementById("listProdukAdm");
+  if (!box) return;
   if (!list.length) {
     box.innerHTML = '<p style="color:#888;">Belum ada produk. Klik Tambah Produk.</p>';
     return;
   }
   box.innerHTML = list
     .map(
-      (p, i) => `
+      (p, i) => {
+        const pid = String(p.id || i).replace(/'/g, "");
+        return `
     <div class="produk-card-adm">
       <div class="row">
-        <div>
+        <div style="flex:1;min-width:0;">
+          ${p.img ? '<img src="'+escapeHtml(p.img)+'" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px;margin-bottom:6px;border:1px solid #1e2a45;" onerror="this.style.display=\'none\'">' : ""}
           <strong>${escapeHtml(p.judul)}</strong>
-          <span class="badge-st ${p.status === "aktif" ? "sukses" : "tolak"}">${p.status}</span>
+          <span class="badge-st ${p.status === "aktif" ? "sukses" : "tolak"}">${escapeHtml(p.status || "")}</span>
           <br><small style="color:#888;">${escapeHtml(p.kategori)} · ${formatRp(p.harga)} · Stok: ${p.stok == -1 ? "∞" : p.stok}</small>
           <br><small style="color:#666;">${escapeHtml(p.deskripsi || "").substring(0, 80)}</small>
         </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn-adm outline" style="margin:0;padding:6px 10px;" onclick="editProduk(${i})"><i class="fa-solid fa-pen"></i></button>
-          <button class="btn-adm danger" style="margin:0;padding:6px 10px;" onclick="hapusProduk(${i})"><i class="fa-solid fa-trash"></i></button>
+        <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+          <button type="button" class="btn-adm outline" style="margin:0;padding:10px 14px;min-width:48px;min-height:44px;font-size:16px;cursor:pointer;pointer-events:auto;z-index:2;" onclick="event.stopPropagation();editProdukById('${pid}')"><i class="fa-solid fa-pen"></i></button>
+          <button type="button" class="btn-adm danger" style="margin:0;padding:10px 14px;min-width:48px;min-height:44px;font-size:16px;cursor:pointer;pointer-events:auto;z-index:2;" onclick="event.stopPropagation();hapusProdukById('${pid}')"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
-    </div>`
+    </div>`;
+      }
     )
     .join("");
 }
@@ -441,7 +462,13 @@ async function simpanProduk() {
   try {
     if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
       const remote = await window.VoxyyOrders.getProdukGlobal();
-      if (remote && remote.length && list.length < remote.length) list = remote;
+      if (remote && remote.length) {
+        // merge by id: remote base, local overrides
+        var map = {};
+        remote.forEach(function (p) { if (p && p.id) map[String(p.id)] = p; });
+        list.forEach(function (p) { if (p && p.id) map[String(p.id)] = p; });
+        list = Object.keys(map).map(function (k) { return map[k]; });
+      }
     }
   } catch (e) {}
 
@@ -463,37 +490,92 @@ async function simpanProduk() {
       console.warn(e);
     }
   }
-  toggleFormProduk();
-  loadProdukAdm();
-  if (window.showAdmToast) showAdmToast("Produk disimpan & muncul di Home");
+  resetFormProduk();
+  document.getElementById("formProduk").style.display = "none";
+  await loadProdukAdm();
+  if (window.showAdmToast) showAdmToast("Produk disimpan — muncul di semua device");
   else alert("Produk disimpan!");
 }
 
 
+
 function editProduk(i) {
+  editProdukById(null, i);
+}
+function editProdukById(id, index) {
   const list = getProdukAdmin();
-  const p = list[i];
-  if (!p) return;
-  document.getElementById("produkId").value = p.id;
+  let p = null;
+  if (id != null && id !== "") {
+    p = list.find(function (x) { return String(x.id) === String(id); });
+  }
+  if (!p && index != null && list[index]) p = list[index];
+  if (!p) {
+    alert("Produk tidak ditemukan. Refresh halaman admin.");
+    return;
+  }
+  document.getElementById("produkId").value = p.id || "";
   document.getElementById("produkJudul").value = p.judul || "";
-  document.getElementById("produkKategori").value = p.kategori || "joki";
+  var kat = p.kategori || "digital";
+  var sel = document.getElementById("produkKategori");
+  if (sel) {
+    var ok = false;
+    for (var oi = 0; oi < sel.options.length; oi++) {
+      if (sel.options[oi].value === kat) { ok = true; break; }
+    }
+    sel.value = ok ? kat : "digital";
+  }
   document.getElementById("produkHarga").value = p.harga || 0;
   document.getElementById("produkModal").value = p.modal || 0;
-  document.getElementById("produkStok").value = p.stok ?? -1;
+  document.getElementById("produkStok").value = p.stok != null ? p.stok : -1;
   document.getElementById("produkDeskripsi").value = p.deskripsi || "";
-  document.getElementById("produkImg").value = p.img || "";
+  document.getElementById("produkImg").value = (p.img && !String(p.img).startsWith("data:")) ? p.img : (p.img || "");
+  if (p.img && String(p.img).startsWith("data:")) {
+    document.getElementById("produkImg").value = p.img;
+  }
   document.getElementById("produkFile").value = p.file || "";
   document.getElementById("produkStatus").value = p.status || "aktif";
-  document.getElementById("formProduk").style.display = "block";
+  var ff = document.getElementById("produkFotoFile");
+  if (ff) ff.value = "";
+  var form = document.getElementById("formProduk");
+  if (form) {
+    form.style.display = "block";
+    try { form.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) {}
+  }
+  if (window.showAdmToast) showAdmToast("Edit: " + (p.judul || "produk"));
 }
 
 function hapusProduk(i) {
+  hapusProdukById(null, i);
+}
+async function hapusProdukById(id, index) {
   if (!confirm("Hapus produk ini?")) return;
   let list = getProdukAdmin();
-  list.splice(i, 1);
-  saveProdukAdmin(list);
-  loadProdukAdm();
+  if (id != null && id !== "") {
+    list = list.filter(function (x) { return String(x.id) !== String(id); });
+  } else if (index != null) {
+    list.splice(index, 1);
+  }
+  localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.saveProdukGlobal) {
+      await window.VoxyyOrders.saveProdukGlobal(list);
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  // sync catalog keys
+  try {
+    localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list));
+    localStorage.setItem("voxyy_digital", JSON.stringify(list));
+  } catch (e) {}
+  if (window.showAdmToast) showAdmToast("Produk dihapus");
+  await loadProdukAdm();
 }
+window.editProduk = editProduk;
+window.editProdukById = editProdukById;
+window.hapusProduk = hapusProduk;
+window.hapusProdukById = hapusProdukById;
+
 
 /* ========== PESANAN ========== */
 window._arsipPage = 0;
@@ -1138,16 +1220,51 @@ function loadPembayaran() {
   document.getElementById("previewQris").src = s.qrisUrl || "qris.png";
 }
 
-function simpanPembayaran() {
+async function onQrisFilePicked(input) {
+  const f = input && input.files && input.files[0];
+  if (!f) return;
+  try {
+    let dataUrl;
+    if (typeof compressImageFile === "function" && f.type.startsWith("image/")) {
+      dataUrl = await compressImageFile(f, 900, 280);
+    } else {
+      dataUrl = await new Promise(function (res, rej) {
+        const r = new FileReader();
+        r.onload = function () { res(r.result); };
+        r.onerror = rej;
+        r.readAsDataURL(f);
+      });
+    }
+    document.getElementById("qrisUrl").value = dataUrl;
+    document.getElementById("previewQris").src = dataUrl;
+    if (window.showAdmToast) showAdmToast("QRIS siap — tekan Simpan");
+  } catch (e) {
+    alert("Gagal baca foto QRIS: " + (e.message || e));
+  }
+}
+window.onQrisFilePicked = onQrisFilePicked;
+
+async function simpanPembayaran() {
   const qris = document.getElementById("qrisUrl").value.trim() || "qris.png";
-  saveSettings({
+  const payload = {
     qrisUrl: qris,
     rekeningInfo: document.getElementById("rekeningInfo").value.trim(),
     catatanBayar: document.getElementById("catatanBayar").value.trim(),
-  });
+  };
+  saveSettings(payload);
   document.getElementById("previewQris").src = qris;
-  alert("QRIS, rekening Pengaturan pembayaran disimpan! catatan disimpan ke Firebase — muncul di semua device!");
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.saveSettingsGlobal) {
+      await window.VoxyyOrders.saveSettingsGlobal(payload);
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+  if (window.showAdmToast) showAdmToast("QRIS & pembayaran tersimpan — semua device ikut");
+  else alert("Pembayaran disimpan! Muncul di semua device.");
 }
+window.simpanPembayaran = simpanPembayaran;
+
 
 /* ========== KEUNTUNGAN ========== */
 async function loadKeuntungan() {
@@ -1894,3 +2011,7 @@ async function loadLaporanAdm() {
     .join("");
 }
 window.loadLaporanAdm = loadLaporanAdm;
+
+window.simpanProduk = simpanProduk;
+window.toggleFormProduk = toggleFormProduk;
+window.loadProdukAdm = loadProdukAdm;
