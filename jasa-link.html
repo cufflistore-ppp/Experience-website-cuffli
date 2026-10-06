@@ -54,11 +54,8 @@
         pesanan + bukti + link <b>baru masuk</b> ke panel admin dan Pesanan Saya.
       </p>
 
-      <label><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target (wajib)</label>
+      <label><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target</label>
       <input type="url" id="jlLink" placeholder="https://..." inputmode="url" autocomplete="off">
-
-      <label>Catatan (opsional)</label>
-      <input type="text" id="jlNote" placeholder="Misal: 1k followers">
 
       <button type="button" class="jl-btn" id="jlKirim" onclick="kirimLinkJasa()">
         <i class="fa-solid fa-check-circle"></i> Konfirmasi & kirim ke admin
@@ -119,7 +116,7 @@
 
     async function kirimLinkJasa() {
       var link = (document.getElementById("jlLink").value || "").trim();
-      var note = (document.getElementById("jlNote").value || "").trim();
+      var note = "";
       var btn = document.getElementById("jlKirim");
       var msg = document.getElementById("jlMsg");
 

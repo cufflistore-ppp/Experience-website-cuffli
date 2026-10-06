@@ -617,15 +617,11 @@ async function loadPesanan(force) {
   let filtered = orders.slice();
 
   function isDone(o) {
+    // Aktif list: Proses & Menunggu TETAP tampil. Sukses & Tolak HILANG.
     const s = String(o.status || "").toLowerCase();
     if (s.includes("tolak")) return true;
-    if (s.includes("sukses") || s.includes("selesai")) {
-      // Jasa: cukup status Sukses (tanpa file)
-      if (typeof isOrderJasa === "function" && isOrderJasa(o)) return true;
-      const hasFile = !!(o.file || o.download || o.fileUrl || o.dikirimTs);
-      return hasFile;
-    }
-    return false;
+    if (s.includes("sukses") || s.includes("selesai")) return true;
+    return false; // Proses / Menunggu / dll tetap di list
   }
 
   if (filter === "aktif") {
@@ -696,9 +692,13 @@ async function loadPesanan(force) {
               <option value="Sukses" ${(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai'))?'selected':''}>Sukses</option>
               <option value="Ditolak" ${String(o.status||'').toLowerCase().includes('tolak')?'selected':''}>Ditolak</option>
             </select>
-            <button type="button" class="btn-adm danger" style="margin:0;padding:8px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
           </div>
-          <p style="font-size:10px;color:#6a7a90;margin:0;">Tidak perlu kirim file/URL. Salin link di atas, proses di luar, lalu set status Sukses / Tolak.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+            <button type="button" class="btn-adm" style="margin:0;padding:8px 12px;font-size:12px;background:#1565c0;" onclick="gantiStatusSelect('${kode}','Proses')">Proses</button>
+            <button type="button" class="btn-adm success" style="margin:0;padding:8px 12px;font-size:12px;" onclick="gantiStatusSelect('${kode}','Sukses')">Sukses</button>
+            <button type="button" class="btn-adm danger" style="margin:0;padding:8px 12px;font-size:12px;" onclick="gantiStatusSelect('${kode}','Ditolak')">Tolak</button>
+          </div>
+          <p style="font-size:10px;color:#6a7a90;margin:6px 0 0;">Proses = tetap di list · Sukses/Tolak = hilang dari list aktif</p>
         </div>
         ` : `
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
@@ -710,7 +710,11 @@ async function loadPesanan(force) {
               <option value="Sukses" ${(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai'))?'selected':''}>Sukses</option>
               <option value="Ditolak" ${String(o.status||'').toLowerCase().includes('tolak')?'selected':''}>Ditolak</option>
             </select>
-            <button type="button" class="btn-adm danger" style="margin:0;padding:8px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+            <button type="button" class="btn-adm" style="margin:0;padding:8px 12px;font-size:12px;background:#1565c0;" onclick="gantiStatusSelect('${kode}','Proses')">Proses</button>
+            <button type="button" class="btn-adm success" style="margin:0;padding:8px 12px;font-size:12px;" onclick="gantiStatusSelect('${kode}','Sukses')">Sukses</button>
+            <button type="button" class="btn-adm danger" style="margin:0;padding:8px 12px;font-size:12px;" onclick="gantiStatusSelect('${kode}','Ditolak')">Tolak</button>
           </div>
           <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">2. Kirim produk (file ATAU URL — salah satu)</div>
           <div style="display:flex;gap:6px;margin-bottom:10px;">
@@ -885,7 +889,6 @@ function isOrderJasa(o) {
 async function gantiStatusSelect(kode, status) {
   if (!kode || !status) return;
   const s = String(status).toLowerCase();
-  // Cek apakah order jasa (boleh Sukses tanpa file)
   var orderObj = null;
   try {
     var all = await fetchOrders();
@@ -893,40 +896,31 @@ async function gantiStatusSelect(kode, status) {
       return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
     });
   } catch (e) {}
-  var jasa = isOrderJasa(orderObj);
-  if ((s.includes("sukses") || s.includes("selesai")) && !jasa) {
-    alert("Produk digital: Sukses hanya setelah Kirim file/URL.\n\nUntuk jasa (suntik/media), pilih Sukses langsung dari status.");
-    var sel = document.getElementById("st_" + kode);
-    if (sel) {
-      for (var i = 0; i < sel.options.length; i++) {
-        var v = String(sel.options[i].value || "").toLowerCase();
-        if (!v.includes("sukses") && !v.includes("selesai")) {
-          sel.selectedIndex = i;
-          break;
-        }
+  var jasa = typeof isOrderJasa === "function" && isOrderJasa(orderObj);
+  // Digital: Sukses sebaiknya setelah ada file — tapi jangan blok total jika admin yakin
+  if ((s.includes("sukses") || s.includes("selesai")) && !jasa && orderObj) {
+    var hasFile = !!(orderObj.file || orderObj.download || orderObj.fileUrl || orderObj.dikirimTs);
+    if (!hasFile) {
+      var ok = confirm("Belum ada file/URL terkirim untuk order ini.\nTetap set Sukses?");
+      if (!ok) {
+        // kembalikan select
+        try {
+          var sel = document.getElementById("st_" + kode);
+          if (sel) sel.value = orderObj.status || "Menunggu Verifikasi";
+        } catch (e) {}
+        return;
       }
     }
-    return;
   }
   try {
-    if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
-      const res = await window.VoxyyOrders.updateOrderByKode(kode, {
-        status: status,
-        updatedAt: Date.now(),
-      });
-      if (res && res.ok === false) throw new Error(res.error || "gagal");
-    } else {
-      await ubahStatusKode(kode, status);
-      return;
-    }
-    if (window.showAdmToast) showAdmToast("Status: " + status);
+    await updateOrder(kode, { status: status, updatedAt: Date.now() });
+    showAdmToast("Status: " + status);
+    // Reload list — Sukses/Tolak hilang dari Aktif, Proses tetap
     await loadPesanan(true);
   } catch (e) {
-    alert("Gagal ganti status: " + (e.message || e));
+    alert("Gagal ubah status: " + (e.message || e));
   }
 }
-window.gantiStatusSelect = gantiStatusSelect;
-
 
 async function ubahStatusKode(kode, status) {
   if (!kode) return;
