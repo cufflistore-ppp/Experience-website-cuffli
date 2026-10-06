@@ -600,10 +600,10 @@ async function loadPesanan(force) {
 
   function isDone(o) {
     const s = String(o.status || "").toLowerCase();
-    // Tolak → arsip
     if (s.includes("tolak")) return true;
-    // Sukses/Selesai HANYA arsip jika sudah dikirim file ke pembeli
     if (s.includes("sukses") || s.includes("selesai")) {
+      // Jasa: cukup status Sukses (tanpa file)
+      if (typeof isOrderJasa === "function" && isOrderJasa(o)) return true;
       const hasFile = !!(o.file || o.download || o.fileUrl || o.dikirimTs);
       return hasFile;
     }
@@ -668,8 +668,23 @@ async function loadPesanan(force) {
           </div>
         </div>
 
+        ${isOrderJasa(o) ? `
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
-          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">1. Pilih status (jasa: boleh Sukses langsung · digital: kirim file dulu)</div>
+          <div style="font-size:11px;color:#90caf9;margin-bottom:8px;font-weight:700;">Jasa suntik — salin link & ubah status saja</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+            <select id="st_${kode}" style="flex:1;min-width:140px;padding:8px 10px;border-radius:8px;background:#0d1220;border:1px solid #1e2a45;color:#fff;font-size:12px;" onchange="gantiStatusSelect('${kode}', this.value)">
+              <option value="Menunggu Verifikasi" ${!(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai')||String(o.status||'').toLowerCase().includes('tolak')||String(o.status||'').toLowerCase().includes('proses'))?'selected':''}>Menunggu Verifikasi</option>
+              <option value="Proses" ${String(o.status||'').toLowerCase().includes('proses')?'selected':''}>Proses</option>
+              <option value="Sukses" ${(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai'))?'selected':''}>Sukses</option>
+              <option value="Ditolak" ${String(o.status||'').toLowerCase().includes('tolak')?'selected':''}>Ditolak</option>
+            </select>
+            <button type="button" class="btn-adm danger" style="margin:0;padding:8px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
+          </div>
+          <p style="font-size:10px;color:#6a7a90;margin:0;">Tidak perlu kirim file/URL. Salin link di atas, proses di luar, lalu set status Sukses / Tolak.</p>
+        </div>
+        ` : `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
+          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">1. Pilih status (digital: kirim file dulu baru Sukses)</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
             <select id="st_${kode}" style="flex:1;min-width:140px;padding:8px 10px;border-radius:8px;background:#0d1220;border:1px solid #1e2a45;color:#fff;font-size:12px;" onchange="gantiStatusSelect('${kode}', this.value)">
               <option value="Menunggu Verifikasi" ${!(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai')||String(o.status||'').toLowerCase().includes('tolak')||String(o.status||'').toLowerCase().includes('proses'))?'selected':''}>Menunggu Verifikasi</option>
@@ -679,7 +694,7 @@ async function loadPesanan(force) {
             </select>
             <button type="button" class="btn-adm danger" style="margin:0;padding:8px 10px;font-size:11px;" onclick="tolakOrder('${kode}')">Tolak</button>
           </div>
-          <div style="font-size:11px;color:#8aa0b8;margin-bottom:8px;font-weight:600;">2. Kirim produk (pilih <b style="color:#90caf9;">SALAH SATU</b>: File <b>atau</b> URL)</div>
+          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">2. Kirim produk (file ATAU URL — salah satu)</div>
           <div style="display:flex;gap:6px;margin-bottom:10px;">
             <button type="button" id="modeFile_${kode}" class="btn-adm" style="margin:0;flex:1;padding:8px;font-size:12px;background:#1565c0;" onclick="setOrderKirimMode('${kode}','file')">📁 File saja</button>
             <button type="button" id="modeUrl_${kode}" class="btn-adm outline" style="margin:0;flex:1;padding:8px;font-size:12px;" onclick="setOrderKirimMode('${kode}','url')">🔗 URL saja</button>
@@ -697,8 +712,9 @@ async function loadPesanan(force) {
           <button type="button" class="btn-adm success" id="btnKirim_${kode}" style="margin:0;width:100%;" onclick="kirimLangsung('${kode}')">
             <i class="fa-solid fa-paper-plane"></i> Kirim ke Pembeli & Selesai
           </button>
-          <p style="font-size:10px;color:#6a7a90;margin:6px 0 0;">File mode = cukup pilih file, langsung kirim. URL mode = cukup tempel link, langsung kirim. Tidak perlu dua-duanya.</p>
+          <p style="font-size:10px;color:#6a7a90;margin:6px 0 0;">File mode = cukup pilih file. URL mode = cukup tempel link. Tidak perlu dua-duanya.</p>
         </div>
+        `}
       </div>`;
     })
     .join("");
