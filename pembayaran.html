@@ -326,6 +326,17 @@
       var pid = (params.get("pid") || "").trim();
       var katUrl = (params.get("kat") || "").trim().toLowerCase();
 
+      // Tampilkan dulu dari URL biar tidak stuck "Memuat..."
+      if (!kode || kode === "VM-0000" || String(kode).indexOf("0000") >= 0) {
+        kode = makeKode();
+      }
+      showOrderOnUI({
+        kode: kode,
+        paket: paket || "Produk",
+        finalAmount: totalNum,
+        total: totalNum > 0 ? formatRupiah(totalNum) : "Memuat...",
+      });
+
       var resolved = await resolveHarga(pid, paket, totalNum);
       totalNum = resolved.totalNum;
       paket = resolved.paket || paket || "Produk Digital";
@@ -536,20 +547,6 @@
       }
 
       if (sb) {
-          sb.innerHTML =
-            '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
-            "<b>Pembayaran jasa diterima</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
-            "Jasa: <b>" + (order.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
-            "Lanjut isi <b>link target</b> (akun/channel yang mau di-suntik).</div>";
-        }
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Lanjut isi link...';
-        setTimeout(function () {
-          window.location.href = "jasa-link.html?kode=" + encodeURIComponent(order.kode || "");
-        }, 700);
-        return;
-      }
-
-      if (sb) {
         sb.innerHTML =
           '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
           "<b>Pesanan masuk ke admin</b><br>Kode: <b>" +
@@ -610,33 +607,46 @@
           }
           var reader = new FileReader();
           reader.onload = function () {
-            var img = new Image();
-            img.onload = function () {
-              var w = img.width,
-                h = img.height;
-              var max = 1200;
-              if (w > max) {
-                h = Math.round((h * max) / w);
-                w = max;
-              }
-              var c = document.createElement("canvas");
-              c.width = w;
-              c.height = h;
-              c.getContext("2d").drawImage(img, 0, 0, w, h);
-              var q = 0.8;
-              var data = c.toDataURL("image/jpeg", q);
-              while (data.length > 450000 && q > 0.4) {
-                q -= 0.1;
-                data = c.toDataURL("image/jpeg", q);
-              }
+            function applyBukti(data) {
               _buktiDataUrl = data;
               var im = document.getElementById("buktiTfImg");
               var pv = document.getElementById("buktiTfPreview");
               if (im) im.src = data;
               if (pv) pv.style.display = "block";
-              if (btn) btn.disabled = false;
+              if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+              }
+            }
+            var img = new Image();
+            img.onload = function () {
+              try {
+                var w = img.width, h = img.height;
+                var max = 1200;
+                if (w > max) { h = Math.round((h * max) / w); w = max; }
+                var c = document.createElement("canvas");
+                c.width = w; c.height = h;
+                c.getContext("2d").drawImage(img, 0, 0, w, h);
+                var q = 0.75;
+                var data = c.toDataURL("image/jpeg", q);
+                while (data.length > 400000 && q > 0.35) {
+                  q -= 0.1;
+                  data = c.toDataURL("image/jpeg", q);
+                }
+                applyBukti(data);
+              } catch (e) {
+                applyBukti(reader.result);
+              }
+            };
+            img.onerror = function () {
+              applyBukti(reader.result);
             };
             img.src = reader.result;
+          };
+          reader.onerror = function () {
+            alert("Gagal baca foto. Coba foto lain.");
+            if (btn) btn.disabled = true;
           };
           reader.readAsDataURL(f);
         });
