@@ -386,11 +386,18 @@
           });
           if (pr) kat = String(pr.kategori || pr.label || "").toLowerCase();
         } catch (e) {}
+        if (!kat && katUrl) kat = katUrl;
         if (!kat) {
           var pk = String(paket || "").toLowerCase();
-          if (pk.indexOf("jasa") >= 0 || pk.indexOf("post") >= 0) kat = "jasa";
+          if (pk.indexOf("jasa") >= 0 || pk.indexOf("post") >= 0 || pk.indexOf("suntik") >= 0) kat = "jasa";
         }
-        var isJasa = kat.indexOf("jasa") >= 0;
+        var pk2 = String(paket || "").toLowerCase();
+        var isJasa =
+          String(kat || "").indexOf("jasa") >= 0 ||
+          pk2.indexOf("jasa") >= 0 ||
+          pk2.indexOf("suntik") >= 0 ||
+          pk2.indexOf("post") >= 0 ||
+          String(katUrl || "").indexOf("jasa") >= 0;
 
         order = {
           kode: kode,
@@ -491,11 +498,16 @@
       saveTrackedKode(order.kode);
 
       // Deteksi jasa
-      var isJasa = !!(order.isJasa);
-      if (!isJasa) {
-        var k = String(order.kategori || order.paket || "").toLowerCase();
-        isJasa = k.indexOf("jasa") >= 0 || k.indexOf("post") >= 0;
+      // HANYA "suntik" yang ke halaman isi link. Jasa lain (web, logo, dll) langsung ke Pesanan.
+      function isSuntikOrder(o) {
+        if (!o) return false;
+        var pk = String(o.paket || o.judul || "").toLowerCase();
+        var k = String(o.kategori || "").toLowerCase();
+        var pp = "";
+        try { pp = (new URLSearchParams(location.search).get("paket") || "").toLowerCase(); } catch (e) {}
+        return pk.indexOf("suntik") >= 0 || pp.indexOf("suntik") >= 0;
       }
+      var isSuntik = isSuntikOrder(order);
 
       var nominal = order.finalAmount != null
         ? Number(order.finalAmount)
@@ -505,18 +517,21 @@
       var sb = document.getElementById("statusBox");
       if (sb) sb.classList.add("show");
 
-      if (isJasa) {
+      if (isSuntik) {
+        var nextUrl = "jasa-link.html?kode=" + encodeURIComponent(order.kode || "");
+        try { localStorage.setItem("voxyy_saved_kode", order.kode || ""); } catch (e) {}
         if (sb) {
           sb.innerHTML =
             '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
             "<b>Pembayaran diterima</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
             "Jasa: <b>" + (order.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
-            "Lanjut isi <b>link target</b> di halaman berikutnya.</div>";
+            "Sekarang isi <b>link target</b>.</div>" +
+            '<a href="' + nextUrl + '" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Isi Link Target Sekarang</a>';
         }
         if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Lanjut isi link...';
         setTimeout(function () {
-          location.href = "jasa-link.html?kode=" + encodeURIComponent(order.kode || "");
-        }, 700);
+          window.location.replace(nextUrl);
+        }, 400);
         return;
       }
 
@@ -549,12 +564,13 @@
     function showLinkJasaBox(order) {
       /* Link diisi di jasa-link.html setelah bayar */
       var info = document.getElementById("infoBayar");
-      if (info && isJasaOrder(order)) {
+      var pkInfo = String((order && order.paket) || "").toLowerCase();
+      if (info && pkInfo.indexOf("suntik") >= 0) {
         info.innerHTML =
           "1. Scan <b>QRIS</b> & transfer sesuai nominal<br>" +
           "2. Upload <b>foto bukti TF</b> (wajib)<br>" +
           "3. Klik <b>Konfirmasi Pembayaran</b><br>" +
-          "4. Setelah itu kamu isi <b>link target</b> di halaman khusus";
+          "4. Setelah itu isi <b>link target</b> di halaman khusus (khusus suntik)";
       }
     }
 

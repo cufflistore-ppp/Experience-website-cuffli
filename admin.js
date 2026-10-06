@@ -857,16 +857,12 @@ async function tandaiSukses(kode) {
 window.tandaiSukses = tandaiSukses;
 
 function isOrderJasa(o) {
+  // UI khusus (link + status, tanpa file) HANYA untuk suntik
   if (!o) return false;
-  if (o.isJasa) return true;
-  var k = String(o.kategori || o.label || "").toLowerCase();
   var p = String(o.paket || o.judul || "").toLowerCase();
-  if (k.includes("jasa") || p.includes("jasa") || p.includes("suntik") || p.includes("post")) return true;
-  // digital file products
-  if (p.includes("apk") || p.includes("zip") || p.includes("website") || p.includes("script")) return false;
-  if (k.includes("apk") || k.includes("digital")) return false;
-  return false;
+  return p.indexOf("suntik") >= 0;
 }
+
 
 async function gantiStatusSelect(kode, status) {
   if (!kode || !status) return;
