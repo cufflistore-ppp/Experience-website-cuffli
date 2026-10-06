@@ -79,6 +79,9 @@ function filterMyOrders(orders) {
   } catch (e) {}
 
   return (orders || []).filter((o) => {
+    // Pesanan ditolak admin → hilang dari list pembeli
+    const st = String(o.status || "").toLowerCase();
+    if (st.includes("tolak")) return false;
     const kode = String(o.kode || "").toUpperCase();
     if (tracked.has(kode)) return true;
     if (email && String(o.email || "").toLowerCase() === email) return true;

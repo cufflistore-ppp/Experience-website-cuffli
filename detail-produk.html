@@ -102,56 +102,62 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="auth.js"></script>
   <script src="branding.js"></script>
+  <script src="katalog.js"></script>
     <script src="script.js"></script>
   <script>
     function loadDetailProduk() {
       const params = new URLSearchParams(window.location.search);
-      const id = parseInt(params.get("id") || "1", 10);
-
-      // reload dari storage (digital-produk.js sudah load)
-      if (typeof loadProdukDigital === "function") loadProdukDigital();
-
-      const item = (typeof produkDigital !== "undefined" ? produkDigital : []).find(p => p.id === id);
+      const id = params.get("id") || "";
+      const paketQ = params.get("paket") || "";
       const el = document.getElementById("detailProduk");
-
+      if (!el) return;
+      let list = [];
+      try {
+        if (window.VoxyyBrand && window.VoxyyBrand.getProduk) list = window.VoxyyBrand.getProduk() || [];
+      } catch (e) {}
+      if (!list.length) {
+        try { list = JSON.parse(localStorage.getItem("voxyy_produk_admin") || "[]"); } catch (e) {}
+      }
+      if (!list.length && typeof getCatalog === "function") {
+        try { list = getCatalog(); } catch (e) {}
+      }
+      let item = null;
+      if (id) item = list.find(function (p) { return String(p.id) === String(id); });
+      if (!item && paketQ) {
+        item = list.find(function (p) {
+          return String(p.judul || "").toLowerCase() === String(paketQ).toLowerCase();
+        });
+      }
       if (!item) {
-        el.innerHTML = "<p style='color:#aaa;'>Produk tidak ditemukan. <a href='digital.html' style='color:#0d47a1;'>Kembali</a></p>";
+        el.innerHTML = "<p style='color:#aaa;'>Produk tidak ditemukan. <a href='home.html' style='color:#1565c0;'>Kembali</a></p>";
         return;
       }
-
-      const harga = "Rp " + Number(item.harga).toLocaleString("id-ID");
-
-      el.innerHTML = `
-        <div class="badge">PRODUK DIGITAL</div>
-        <div class="produk-detail-card" style="margin-top:12px;">
-          ${item.img ? `<img src="${item.img}" alt="${item.judul}" class="produk-detail-img" onerror="this.style.display=\'none\'">` : ""}
-          <span class="produk-status">${item.status || "TERSEDIA"}</span>
-          <h2>${item.judul}</h2>
-          <p style="font-size:13px;color:#bbb;line-height:1.5;">${item.deskripsi || ""}</p>
-          
-          <div class="produk-harga-big">${harga}</div>
-
-          <h4 style="font-size:14px;margin-top:8px;color:#0d47a1;">Yang kamu dapat:</h4>
-          <ul class="fitur-list">
-            ${(item.fitur || []).map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join("")}
-          </ul>
-
-          <a href="pesan.html?type=produk&id=${item.id}" class="btn-pesan" style="display:block;text-align:center;text-decoration:none;margin-top:16px;">
-            Pesan Produk Ini
-          </a>
-        </div>
-
-        <div class="info-box" style="margin-top:16px;">
-          <h4>Bedanya dengan Joki?</h4>
-          <p style="font-size:12px;color:#bbb;">
-            <b>Produk Digital</b> = file / jasa sekali beli, dikirim setelah bayar.<br>
-            <b>Produk</b> = layanan push kontak berdurasi (1 hari, 2 hari, dst).
-          </p>
-        </div>
-      `;
+      const hargaNum = Number(String(item.harga || "0").replace(/[^\d]/g, "")) || 0;
+      const harga = "Rp " + hargaNum.toLocaleString("id-ID");
+      const stok = item.stok == null || Number(item.stok) < 0 ? "Unlimited" : String(item.stok);
+      const buy =
+        "pembayaran.html?paket=" + encodeURIComponent(item.judul || "") +
+        "&total=" + encodeURIComponent(String(hargaNum)) +
+        "&pid=" + encodeURIComponent(item.id || "") +
+        "&kat=" + encodeURIComponent(item.kategori || "");
+      el.innerHTML =
+        '<div class="produk-detail-card">' +
+        (item.img
+          ? '<img src="' + String(item.img).replace(/"/g, "&quot;") + '" alt="" class="produk-detail-img" onerror="this.style.display=\'none\'">'
+          : "") +
+        '<span class="produk-status">' + String(item.kategori || "produk").toUpperCase() + " · " + (item.status || "aktif") + "</span>" +
+        "<h2>" + String(item.judul || "Produk") + "</h2>" +
+        '<p style="font-size:13px;color:#bbb;line-height:1.5;">' + String(item.deskripsi || "") + "</p>" +
+        '<div class="produk-harga-big">' + harga + "</div>" +
+        '<p style="font-size:12px;color:#8aa0b8;">Stok: ' + stok + "</p>" +
+        '<a href="' + buy + '" style="display:block;text-align:center;text-decoration:none;margin-top:16px;padding:14px;background:#1565c0;color:#fff;border-radius:12px;font-weight:800;">Pesan Sekarang</a>' +
+        "</div>";
     }
 
-    document.addEventListener("DOMContentLoaded", loadDetailProduk);
+    document.addEventListener("DOMContentLoaded", function () {
+      setTimeout(loadDetailProduk, 200);
+      setTimeout(loadDetailProduk, 900);
+    });
   </script>
   <script src="bgm.js"></script>
   <script src="notif.js"></script>

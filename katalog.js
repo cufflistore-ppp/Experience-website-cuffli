@@ -7,6 +7,7 @@ const DEFAULT_PRODUK = [
   { id: "d3", judul: "Script Bot Jaga", kategori: "digital", label: "SCRIPT", deskripsi: "Script siap pakai.", harga: 7000, stok: 12, img: "", status: "aktif", file: "" },
   { id: "d4", judul: "Nokos WA Indonesia", kategori: "digital", label: "NOKOS", deskripsi: "Nokos WA Indonesia.", harga: 6000, stok: 30, img: "", status: "aktif", file: "" },
   { id: "d5", judul: "Jasa Logo Teks", kategori: "jasa", label: "JASA", deskripsi: "Jasa desain logo teks.", harga: 2000, stok: -1, img: "", status: "aktif", file: "" },
+  { id: "d7", judul: "Jasa Suntik Media", kategori: "jasa", label: "JASA", deskripsi: "Suntik followers/view/like media sosial. Setelah bayar, isi link target.", harga: 5000, stok: -1, img: "", status: "aktif", file: "" },
   { id: "d6", judul: "Murid Logo", kategori: "lainnya", label: "MURID", deskripsi: "Paket murid logo.", harga: 5000, stok: 10, img: "", status: "aktif", file: "" },
 ];
 
@@ -93,7 +94,7 @@ function renderKatalog(gridId, mode) {
   }
   box.innerHTML = list
     .map((p) => {
-      const href =
+      const buyHref =
         "pembayaran.html?paket=" +
         encodeURIComponent(p.judul) +
         "&total=" +
@@ -102,6 +103,11 @@ function renderKatalog(gridId, mode) {
         encodeURIComponent(p.id || "") +
         "&kat=" +
         encodeURIComponent(p.kategori || p.label || "");
+      const detailHref =
+        "detail-produk.html?id=" +
+        encodeURIComponent(p.id || "") +
+        "&paket=" +
+        encodeURIComponent(p.judul || "");
       const stok = p.stok < 0 ? "∞" : p.stok;
       const icon = iconFor(p);
       const imgHtml = p.img
@@ -109,14 +115,19 @@ function renderKatalog(gridId, mode) {
            <i class="fa-solid ${icon}" style="display:none"></i>`
         : `<i class="fa-solid ${icon}"></i>`;
       return `<div class="m-card">
-        <div class="m-card-icon">${imgHtml}</div>
-        <div class="m-card-title">${escapeK(p.judul)}</div>
-        <div class="m-card-desc">${escapeK(p.deskripsi)}</div>
-        <div class="m-card-meta">
-          <span class="stok">Stok ${stok}</span>
-          <span class="harga">${formatRpK(p.harga)}</span>
+        <a href="${detailHref}" style="text-decoration:none;color:inherit;display:block;">
+          <div class="m-card-icon">${imgHtml}</div>
+          <div class="m-card-title">${escapeK(p.judul)}</div>
+          <div class="m-card-desc">${escapeK(p.deskripsi)}</div>
+          <div class="m-card-meta">
+            <span class="stok">Stok ${stok}</span>
+            <span class="harga">${formatRpK(p.harga)}</span>
+          </div>
+        </a>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <a href="${detailHref}" class="m-card-btn" style="flex:1;background:#1e2a45;text-align:center;">Detail</a>
+          <a href="${buyHref}" class="m-card-btn" style="flex:1;text-align:center;">Pesan</a>
         </div>
-        <a href="${href}" class="m-card-btn">Beli Sekarang</a>
       </div>`;
     })
     .join("");

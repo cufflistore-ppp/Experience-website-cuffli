@@ -661,6 +661,7 @@ async function loadPesanan(force) {
             <br><small style="color:#90caf9;">Harga: ${escapeHtml(String(total))}</small>
             <br><small style="color:#6a7a90;">${escapeHtml(String(o.waktu || ""))}</small>
             ${o.bukti ? `<div style="margin-top:8px;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div><a href="${escapeHtml(o.bukti)}" target="_blank"><img src="${escapeHtml(o.bukti)}" alt="Bukti TF" style="max-width:100%;max-height:160px;border-radius:8px;border:1px solid #1e2a45;display:block;"></a></div>` : `<div style="margin-top:6px;font-size:11px;color:#ef9a9a;">Belum ada bukti TF</div>`}
+            ${(o.targetLink || o.linkTarget || o.linkJasa) ? `<div style="margin-top:10px;padding:10px;background:#0a0e18;border-radius:10px;border:1px solid #1e2a45;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">🔗 Link target jasa</div><div style="font-size:12px;color:#e3eaf2;word-break:break-all;margin-bottom:8px;">${escapeHtml(o.targetLink || o.linkTarget || o.linkJasa)}</div><button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;font-size:12px;" onclick="navigator.clipboard.writeText('${escapeHtml(String(o.targetLink || o.linkTarget || o.linkJasa).replace(/'/g, ""))}').then(function(){if(window.showAdmToast)showAdmToast('Link disalin');else alert('Link disalin');})"><i class="fa-solid fa-copy"></i> Salin link</button></div>` : (isOrderJasa(o) ? `<div style="margin-top:8px;font-size:11px;color:#ffb74d;">Menunggu pembeli isi link target…</div>` : "")}
           </div>
           <div style="text-align:right;">
             <span class="badge-st ${cls}">${escapeHtml(o.status || "Belum Bayar")}</span>
@@ -668,11 +669,10 @@ async function loadPesanan(force) {
         </div>
 
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
-          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">1. Pilih status (order tetap di sini sampai dikirim)</div>
+          <div style="font-size:11px;color:#8aa0b8;margin-bottom:6px;font-weight:600;">1. Pilih status (jasa: boleh Sukses langsung · digital: kirim file dulu)</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
             <select id="st_${kode}" style="flex:1;min-width:140px;padding:8px 10px;border-radius:8px;background:#0d1220;border:1px solid #1e2a45;color:#fff;font-size:12px;" onchange="gantiStatusSelect('${kode}', this.value)">
-              <option value="Belum Bayar" ${String(o.status||'')==='Belum Bayar'?'selected':''}>Belum Bayar</option>
-              <option value="Menunggu Verifikasi" ${(String(o.status||'').toLowerCase().includes('verifikasi')||String(o.status||'').toLowerCase().includes('menunggu'))&&!String(o.status||'').toLowerCase().includes('file')?'selected':''}>Menunggu Verifikasi</option>
+              <option value="Menunggu Verifikasi" ${!(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai')||String(o.status||'').toLowerCase().includes('tolak')||String(o.status||'').toLowerCase().includes('proses'))?'selected':''}>Menunggu Verifikasi</option>
               <option value="Proses" ${String(o.status||'').toLowerCase().includes('proses')?'selected':''}>Proses</option>
               <option value="Sukses" ${(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai'))?'selected':''}>Sukses</option>
               <option value="Ditolak" ${String(o.status||'').toLowerCase().includes('tolak')?'selected':''}>Ditolak</option>
@@ -840,16 +840,34 @@ async function tandaiSukses(kode) {
 }
 window.tandaiSukses = tandaiSukses;
 
+function isOrderJasa(o) {
+  if (!o) return false;
+  if (o.isJasa) return true;
+  var k = String(o.kategori || o.label || "").toLowerCase();
+  var p = String(o.paket || o.judul || "").toLowerCase();
+  if (k.includes("jasa") || p.includes("jasa") || p.includes("suntik") || p.includes("post")) return true;
+  // digital file products
+  if (p.includes("apk") || p.includes("zip") || p.includes("website") || p.includes("script")) return false;
+  if (k.includes("apk") || k.includes("digital")) return false;
+  return false;
+}
+
 async function gantiStatusSelect(kode, status) {
   if (!kode || !status) return;
-  // Sukses HANYA lewat tombol Kirim + file/URL — jangan lewat dropdown
   const s = String(status).toLowerCase();
-  if (s.includes("sukses") || s.includes("selesai")) {
-    alert("Status Sukses hanya setelah Kirim produk (file atau URL).\n\nPilih file/URL di bawah, lalu tekan «Kirim ke Pembeli & Selesai».");
-    // kembalikan select ke non-sukses
+  // Cek apakah order jasa (boleh Sukses tanpa file)
+  var orderObj = null;
+  try {
+    var all = await fetchOrders();
+    orderObj = (all || []).find(function (o) {
+      return String(o.kode || "").toUpperCase() === String(kode).toUpperCase();
+    });
+  } catch (e) {}
+  var jasa = isOrderJasa(orderObj);
+  if ((s.includes("sukses") || s.includes("selesai")) && !jasa) {
+    alert("Produk digital: Sukses hanya setelah Kirim file/URL.\n\nUntuk jasa (suntik/media), pilih Sukses langsung dari status.");
     var sel = document.getElementById("st_" + kode);
     if (sel) {
-      // cari opsi non-sukses
       for (var i = 0; i < sel.options.length; i++) {
         var v = String(sel.options[i].value || "").toLowerCase();
         if (!v.includes("sukses") && !v.includes("selesai")) {
@@ -1731,14 +1749,23 @@ async function kirimProdukOrder() {
 
 
 function seedProdukIfEmpty() {
-  let list = getProdukAdmin();
-  if (list && list.length) return;
+  let list = getProdukAdmin() || [];
+  // Pastikan Jasa Suntik Media selalu ada
+  if (!list.some(function (p) { return String(p.judul || "").toLowerCase().includes("suntik"); })) {
+    list.push({ id: "d7", judul: "Jasa Suntik Media", kategori: "jasa", harga: 5000, modal: 1000, stok: -1, deskripsi: "Suntik followers/view/like media. Setelah bayar, isi link target.", img: "", file: "", status: "aktif" });
+    saveProdukAdmin(list);
+  }
+  if (list && list.length > 1) return; // sudah ada produk lain
+  if (list.length === 1 && String(list[0].judul || "").includes("Suntik")) {
+    // only suntik — seed full catalog too
+  } else if (list.length) return;
   list = [
     { id: "d1", judul: "APK Auto SV Kontak", kategori: "apk", harga: 2000, modal: 500, stok: 25, deskripsi: "Produk digital berkualitas.", img: "", file: "", status: "aktif" },
     { id: "d2", judul: "APK Logo Prem/Mod", kategori: "apk", harga: 3000, modal: 800, stok: 18, deskripsi: "Produk premium siap digunakan.", img: "", file: "", status: "aktif" },
     { id: "d3", judul: "Script Bot Jaga", kategori: "digital", harga: 7000, modal: 2000, stok: 12, deskripsi: "Script siap pakai.", img: "", file: "", status: "aktif" },
     { id: "d4", judul: "Nokos WA Indonesia", kategori: "digital", harga: 6000, modal: 3000, stok: 30, deskripsi: "Nokos WA Indonesia.", img: "", file: "", status: "aktif" },
     { id: "d5", judul: "Jasa Logo Teks", kategori: "jasa", harga: 2000, modal: 500, stok: -1, deskripsi: "Jasa desain logo teks.", img: "", file: "", status: "aktif" },
+    { id: "d7", judul: "Jasa Suntik Media", kategori: "jasa", harga: 5000, modal: 1000, stok: -1, deskripsi: "Suntik followers/view/like. Setelah bayar isi link target.", img: "", file: "", status: "aktif" },
     { id: "d6", judul: "Murid Logo", kategori: "lainnya", harga: 5000, modal: 1500, stok: 10, deskripsi: "Paket murid logo.", img: "", file: "", status: "aktif" },
   ];
   saveProdukAdmin(list);

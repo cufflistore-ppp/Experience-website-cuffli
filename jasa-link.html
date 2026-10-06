@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Isi Link Jasa - VOXY MARKET</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="auth-guard.js"></script>
+  <style>
+    .jl-card { background:#12182a;border:1px solid #1e2a45;border-radius:14px;padding:18px;margin-top:12px; }
+    .jl-card label { display:block;font-size:12px;color:#8aa0b8;margin:10px 0 6px; }
+    .jl-card input { width:100%;padding:12px;border-radius:10px;border:1px solid #1e2a45;background:#0a0e18;color:#fff;font-size:14px; }
+    .jl-btn { width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#1565c0;color:#fff;font-weight:800;font-size:15px;cursor:pointer; }
+    .jl-btn:disabled { opacity:.6; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <img src="logo.png" alt="VOXY MARKET" class="logo">
+      <div>
+        <h1>VOXY <span style="color:#1565c0">MARKET</span> <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Isi link target jasa</p>
+      </div>
+    </div>
+  </header>
+  <div class="page-content" style="padding:16px;max-width:480px;margin:0 auto;">
+    <a href="antrian.html" class="back"><i class="fa-solid fa-arrow-left"></i> Pesanan Saya</a>
+    <div class="jl-card">
+      <div style="font-size:13px;color:#8aa0b8;">Kode order</div>
+      <div id="jlKode" style="font-weight:800;font-size:18px;color:#fff;margin-bottom:8px;">-</div>
+      <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-bottom:12px;"></div>
+      <p style="font-size:13px;color:#8aa0b8;line-height:1.45;">Tempel <b>link target</b> (profil / post / channel) yang mau dikerjakan. Admin akan proses lewat link ini.</p>
+      <label>Link target</label>
+      <input type="url" id="jlLink" placeholder="https://..." inputmode="url" autocomplete="off">
+      <label>Catatan (opsional)</label>
+      <input type="text" id="jlNote" placeholder="Misal: 1k followers, akun private, dll">
+      <button type="button" class="jl-btn" id="jlKirim" onclick="kirimLinkJasa()">
+        <i class="fa-solid fa-paper-plane"></i> Kirim link ke admin
+      </button>
+      <div id="jlMsg" style="display:none;margin-top:12px;padding:12px;border-radius:10px;font-size:13px;"></div>
+    </div>
+  </div>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script src="branding.js"></script>
+  <script>
+    var _kode = "";
+    async function boot() {
+      var p = new URLSearchParams(location.search);
+      _kode = (p.get("kode") || localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
+      document.getElementById("jlKode").textContent = _kode || "-";
+      if (!_kode) {
+        document.getElementById("jlMsg").style.display = "block";
+        document.getElementById("jlMsg").style.background = "#3d1515";
+        document.getElementById("jlMsg").style.color = "#ef9a9a";
+        document.getElementById("jlMsg").textContent = "Kode order tidak ditemukan.";
+        return;
+      }
+      try {
+        var orders = window.VoxyyOrders ? await window.VoxyyOrders.getOrders() : [];
+        var o = (orders || []).find(function (x) {
+          return String(x.kode || "").toUpperCase() === _kode;
+        });
+        if (o) {
+          document.getElementById("jlPaket").textContent = (o.paket || "") + " · " + (o.total || "");
+          if (o.targetLink || o.linkTarget) {
+            document.getElementById("jlLink").value = o.targetLink || o.linkTarget;
+          }
+        }
+      } catch (e) {}
+    }
+    async function kirimLinkJasa() {
+      var link = (document.getElementById("jlLink").value || "").trim();
+      var note = (document.getElementById("jlNote").value || "").trim();
+      var btn = document.getElementById("jlKirim");
+      var msg = document.getElementById("jlMsg");
+      if (!link || link.length < 8) {
+        alert("Isi link target yang valid.");
+        return;
+      }
+      if (!/^https?:\/\//i.test(link)) link = "https://" + link;
+      if (!_kode) { alert("Kode kosong"); return; }
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+      try {
+        var patch = {
+          targetLink: link,
+          linkTarget: link,
+          linkJasa: link,
+          catatanJasa: note,
+          status: "Menunggu Verifikasi",
+          updatedAt: Date.now(),
+        };
+        if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
+          var res = await window.VoxyyOrders.updateOrderByKode(_kode, patch);
+          if (res && res.ok === false) throw new Error(res.error || "gagal");
+        } else {
+          throw new Error("Sistem order belum siap");
+        }
+        msg.style.display = "block";
+        msg.style.background = "#0d3d1a";
+        msg.style.color = "#a5d6a7";
+        msg.innerHTML = "<b>Link terkirim ke admin.</b><br>Kode " + _kode + " · status bisa dicek di Pesanan Saya.";
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Terkirim';
+        setTimeout(function () { location.href = "antrian.html"; }, 1200);
+      } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim link ke admin';
+        alert("Gagal: " + (e.message || e));
+      }
+    }
+    window.kirimLinkJasa = kirimLinkJasa;
+    document.addEventListener("DOMContentLoaded", boot);
+  </script>
+  <script src="bgm.js"></script>
+</body>
+</html>

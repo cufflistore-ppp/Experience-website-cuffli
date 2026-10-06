@@ -389,7 +389,7 @@
           pid: pid || "",
           kategori: kat || "digital",
           isJasa: isJasa,
-          catatan: paket + (isJasa ? " — jasa, konfirmasi ke WA admin" : " — order website, proses di panel admin"),
+          catatan: paket + (isJasa ? " — jasa, isi link target setelah bayar" : " — order website, proses di panel admin"),
           total: formatRupiah(totalNum),
           paket: paket,
           status: "Belum Bayar",
@@ -511,15 +511,14 @@
         if (sb) {
           sb.innerHTML =
             '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
-            "<b>Jasa dikonfirmasi</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
+            "<b>Pembayaran jasa diterima</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
             "Jasa: <b>" + (order.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
-            "Membuka WhatsApp admin...</div>" +
-            '<a href="' + waUrl + '" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#25d366;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> Chat Admin</a>';
+            "Lanjut isi <b>link target</b> (akun/channel yang mau di-suntik).</div>";
         }
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Terkirim';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Lanjut isi link...';
         setTimeout(function () {
-          window.location.href = waUrl;
-        }, 600);
+          window.location.href = "jasa-link.html?kode=" + encodeURIComponent(order.kode || "");
+        }, 700);
         return;
       }
 
