@@ -8,11 +8,56 @@
   <link rel="stylesheet" href="style.css">
   <script src="auth-guard.js"></script>
   <style>
-    .jl-card { background:#12182a;border:1px solid #1e2a45;border-radius:14px;padding:18px;margin-top:12px; }
-    .jl-card label { display:block;font-size:12px;color:#8aa0b8;margin:10px 0 6px; }
-    .jl-card input { width:100%;padding:12px;border-radius:10px;border:1px solid #1e2a45;background:#0a0e18;color:#fff;font-size:14px; }
-    .jl-btn { width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:#1565c0;color:#fff;font-weight:800;font-size:15px;cursor:pointer; }
-    .jl-btn:disabled { opacity:.6; }
+    .jl-wrap { max-width: 480px; margin: 0 auto; padding: 16px; }
+    .jl-card {
+      background: #12182a;
+      border: 1px solid #1e2a45;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 12px;
+    }
+    .jl-step {
+      font-size: 12px;
+      color: #64b5f6;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .jl-card label {
+      display: block;
+      font-size: 13px;
+      color: #cfd8e3;
+      font-weight: 700;
+      margin: 14px 0 8px;
+    }
+    .jl-card input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #1e2a45;
+      background: #0a0e18;
+      color: #fff;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+    .jl-btn {
+      width: 100%;
+      margin-top: 18px;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      background: #1565c0;
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .jl-btn:disabled { opacity: 0.55; }
+    .jl-kode {
+      font-weight: 800;
+      font-size: 20px;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 <body>
@@ -25,53 +70,76 @@
       </div>
     </div>
   </header>
-  <div class="page-content" style="padding:16px;max-width:480px;margin:0 auto;">
+
+  <div class="jl-wrap">
     <a href="antrian.html" class="back"><i class="fa-solid fa-arrow-left"></i> Pesanan Saya</a>
+
     <div class="jl-card">
-      <div style="font-size:13px;color:#8aa0b8;">Kode order</div>
-      <div id="jlKode" style="font-weight:800;font-size:18px;color:#fff;margin-bottom:8px;">-</div>
-      <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-bottom:12px;"></div>
-      <p style="font-size:13px;color:#8aa0b8;line-height:1.45;">Tempel <b>link target</b> (profil / post / channel) yang mau dikerjakan. Admin akan proses lewat link ini.</p>
-      <label>Link target</label>
+      <div class="jl-step">LANGKAH 2 · SETELAH BAYAR</div>
+      <div style="font-size:12px;color:#8aa0b8;">Kode order</div>
+      <div class="jl-kode" id="jlKode">-</div>
+      <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-top:6px;"></div>
+
+      <p style="font-size:13px;color:#8aa0b8;line-height:1.5;margin-top:14px;">
+        Tempel <b>link target</b> (profil / post / channel) yang mau diproses.
+        Setelah dikirim, admin bisa salin link dari panel dan memproses order.
+      </p>
+
+      <label><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target (wajib)</label>
       <input type="url" id="jlLink" placeholder="https://..." inputmode="url" autocomplete="off">
+
       <label>Catatan (opsional)</label>
       <input type="text" id="jlNote" placeholder="Misal: 1k followers, akun private, dll">
+
       <button type="button" class="jl-btn" id="jlKirim" onclick="kirimLinkJasa()">
         <i class="fa-solid fa-paper-plane"></i> Kirim link ke admin
       </button>
-      <div id="jlMsg" style="display:none;margin-top:12px;padding:12px;border-radius:10px;font-size:13px;"></div>
+
+      <div id="jlMsg" style="display:none;margin-top:14px;padding:12px;border-radius:12px;font-size:13px;line-height:1.45;"></div>
     </div>
   </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
   <script src="branding.js"></script>
   <script>
     var _kode = "";
+
     async function boot() {
       var p = new URLSearchParams(location.search);
       _kode = (p.get("kode") || localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
       document.getElementById("jlKode").textContent = _kode || "-";
       if (!_kode) {
-        document.getElementById("jlMsg").style.display = "block";
-        document.getElementById("jlMsg").style.background = "#3d1515";
-        document.getElementById("jlMsg").style.color = "#ef9a9a";
-        document.getElementById("jlMsg").textContent = "Kode order tidak ditemukan.";
+        var msg = document.getElementById("jlMsg");
+        msg.style.display = "block";
+        msg.style.background = "#3d1515";
+        msg.style.color = "#ef9a9a";
+        msg.textContent = "Kode order tidak ditemukan. Selesaikan pembayaran dulu.";
+        document.getElementById("jlKirim").disabled = true;
         return;
       }
       try {
-        var orders = window.VoxyyOrders ? await window.VoxyyOrders.getOrders() : [];
+        if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
+          try { window.VoxyyOrders.initFirebase(); } catch (e) {}
+        }
+        var orders = window.VoxyyOrders && window.VoxyyOrders.getOrders
+          ? await window.VoxyyOrders.getOrders()
+          : [];
         var o = (orders || []).find(function (x) {
           return String(x.kode || "").toUpperCase() === _kode;
         });
         if (o) {
-          document.getElementById("jlPaket").textContent = (o.paket || "") + " · " + (o.total || "");
-          if (o.targetLink || o.linkTarget) {
-            document.getElementById("jlLink").value = o.targetLink || o.linkTarget;
+          document.getElementById("jlPaket").textContent =
+            (o.paket || "Jasa") + (o.total ? " · " + o.total : "");
+          if (o.targetLink || o.linkTarget || o.linkJasa) {
+            document.getElementById("jlLink").value =
+              o.targetLink || o.linkTarget || o.linkJasa;
           }
         }
       } catch (e) {}
     }
+
     async function kirimLinkJasa() {
       var link = (document.getElementById("jlLink").value || "").trim();
       var note = (document.getElementById("jlNote").value || "").trim();
@@ -82,7 +150,10 @@
         return;
       }
       if (!/^https?:\/\//i.test(link)) link = "https://" + link;
-      if (!_kode) { alert("Kode kosong"); return; }
+      if (!_kode) {
+        alert("Kode order kosong");
+        return;
+      }
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
       try {
@@ -96,22 +167,28 @@
         };
         if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
           var res = await window.VoxyyOrders.updateOrderByKode(_kode, patch);
-          if (res && res.ok === false) throw new Error(res.error || "gagal");
+          if (res && res.ok === false) throw new Error(res.error || "gagal update");
         } else {
-          throw new Error("Sistem order belum siap");
+          throw new Error("Sistem order belum siap. Refresh & coba lagi.");
         }
         msg.style.display = "block";
         msg.style.background = "#0d3d1a";
         msg.style.color = "#a5d6a7";
-        msg.innerHTML = "<b>Link terkirim ke admin.</b><br>Kode " + _kode + " · status bisa dicek di Pesanan Saya.";
+        msg.innerHTML =
+          "<b>Link terkirim ke admin.</b><br>Kode <b>" +
+          _kode +
+          "</b> · cek status di Pesanan Saya.";
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Terkirim';
-        setTimeout(function () { location.href = "antrian.html"; }, 1200);
+        setTimeout(function () {
+          location.href = "antrian.html";
+        }, 1000);
       } catch (e) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim link ke admin';
-        alert("Gagal: " + (e.message || e));
+        alert("Gagal kirim link: " + (e.message || e));
       }
     }
+
     window.kirimLinkJasa = kirimLinkJasa;
     document.addEventListener("DOMContentLoaded", boot);
   </script>

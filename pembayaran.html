@@ -168,13 +168,6 @@
         <p style="font-size:11px;color:#6a7a90;margin-top:8px;">Tanpa foto bukti TF, tombol konfirmasi tidak aktif.</p>
       </div>
 
-      <div id="boxLinkJasa" style="display:none;text-align:left;margin:0 0 10px;padding:12px;background:#12182a;border:1px solid #1e2a45;border-radius:12px;">
-        <label style="display:block;font-size:13px;font-weight:700;color:#e3eaf2;margin-bottom:8px;">
-          <i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target jasa (wajib)
-        </label>
-        <input type="url" id="linkJasaInput" placeholder="https://... (profil / post / channel)" style="width:100%;padding:12px;border-radius:10px;border:1px solid #1e2a45;background:#0a0e18;color:#fff;font-size:14px;" inputmode="url">
-        <p style="font-size:11px;color:#6a7a90;margin-top:8px;">Isi link yang mau diproses. Setelah konfirmasi, link masuk ke panel admin — admin salin & proses. <b>Tanpa WhatsApp.</b></p>
-      </div>
 
       <button class="btn-konfirmasi" id="btnKonfirmasi" onclick="konfirmasiPembayaran()" disabled>
         <i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran
@@ -408,7 +401,7 @@
           pid: pid || "",
           kategori: kat || "digital",
           isJasa: isJasa,
-          catatan: paket + (isJasa ? " — jasa, isi link target setelah bayar" : " — order website, proses di panel admin"),
+          catatan: paket + (isJasa ? " — jasa, bayar dulu lalu isi link di halaman khusus" : " — order website, proses di panel admin"),
           total: formatRupiah(totalNum),
           paket: paket,
           status: "Belum Bayar",
@@ -448,7 +441,7 @@
       window.currentOrder = order;
       saveTrackedKode(kode);
       showOrderOnUI(order);
-      showLinkJasaBox(order);
+      /* link di halaman jasa-link terpisah */
     }
 
     async function konfirmasiPembayaran() {
@@ -456,20 +449,6 @@
         alert("Upload foto bukti TF dulu. Wajib sebelum konfirmasi.");
         return;
       }
-      var linkJasaVal = "";
-      try {
-        var boxL = document.getElementById("boxLinkJasa");
-        var inpL = document.getElementById("linkJasaInput");
-        var needLink = boxL && boxL.style.display !== "none";
-        if (needLink) {
-          linkJasaVal = (inpL && inpL.value ? inpL.value : "").trim();
-          if (!linkJasaVal || linkJasaVal.length < 8) {
-            alert("Isi link target jasa dulu (profil/post/channel).");
-            return;
-          }
-          if (!/^https?:\/\//i.test(linkJasaVal)) linkJasaVal = "https://" + linkJasaVal;
-        }
-      } catch (e) {}
       var btn = document.getElementById("btnKonfirmasi");
       if (btn) {
         btn.disabled = true;
@@ -482,9 +461,6 @@
             status: "Menunggu Verifikasi",
             bukti: _buktiDataUrl,
             buktiAt: Date.now(),
-            targetLink: linkJasaVal || undefined,
-            linkTarget: linkJasaVal || undefined,
-            linkJasa: linkJasaVal || undefined,
             finalAmount: order.finalAmount,
             total: order.total,
             paket: order.paket,
@@ -500,7 +476,6 @@
             orders[idx].status = "Menunggu Verifikasi";
             orders[idx].bukti = _buktiDataUrl;
             orders[idx].buktiAt = Date.now();
-            if (linkJasaVal) { orders[idx].targetLink = linkJasaVal; orders[idx].linkTarget = linkJasaVal; orders[idx].linkJasa = linkJasaVal; }
             localStorage.setItem("voxyy_orders", JSON.stringify(orders));
           }
         }
@@ -534,15 +509,14 @@
         if (sb) {
           sb.innerHTML =
             '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
-            "<b>Jasa terkirim ke admin</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
+            "<b>Pembayaran diterima</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
             "Jasa: <b>" + (order.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
-            "Link target sudah masuk panel admin. Cek status di <b>Pesanan</b>.</div>" +
-            '<a href="antrian.html" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Lihat Pesanan Saya</a>';
+            "Lanjut isi <b>link target</b> di halaman berikutnya.</div>";
         }
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Terkirim';
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Lanjut isi link...';
         setTimeout(function () {
-          location.href = "antrian.html";
-        }, 900);
+          location.href = "jasa-link.html?kode=" + encodeURIComponent(order.kode || "");
+        }, 700);
         return;
       }
 
@@ -573,17 +547,14 @@
       return false;
     }
     function showLinkJasaBox(order) {
-      var box = document.getElementById("boxLinkJasa");
-      if (!box) return;
-      var show = isJasaOrder(order);
-      box.style.display = show ? "block" : "none";
+      /* Link diisi di jasa-link.html setelah bayar */
       var info = document.getElementById("infoBayar");
-      if (info && show) {
+      if (info && isJasaOrder(order)) {
         info.innerHTML =
           "1. Scan <b>QRIS</b> & transfer sesuai nominal<br>" +
-          "2. Upload <b>foto bukti TF</b><br>" +
-          "3. Isi <b>link target</b> (akun/channel)<br>" +
-          "4. Klik <b>Konfirmasi</b> → link masuk admin, kamu ke <b>Pesanan</b> (tanpa WhatsApp)";
+          "2. Upload <b>foto bukti TF</b> (wajib)<br>" +
+          "3. Klik <b>Konfirmasi Pembayaran</b><br>" +
+          "4. Setelah itu kamu isi <b>link target</b> di halaman khusus";
       }
     }
 
