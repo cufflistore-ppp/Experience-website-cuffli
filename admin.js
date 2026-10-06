@@ -97,6 +97,23 @@ function showPanel(name) {
     } catch (e) {}
     seedProdukIfEmpty();
     loadDashboard();
+    try {
+      var st = getSettings();
+      if (window.VoxyyBranding && window.VoxyyBranding.apply) window.VoxyyBranding.apply(st);
+      var logo = st.logoUrl || st.logo || "logo.png";
+      var nama = st.namaToko || "VOXY MARKET";
+      var elL = document.getElementById("adminBrandLogo");
+      if (elL) elL.src = logo;
+      var elT = document.getElementById("adminBrandTitle");
+      if (elT) {
+        var base = String(nama).replace(/\s*MARKET\s*$/i, "").trim() || "VOXY";
+        elT.innerHTML = base + ' ADMIN <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
+      }
+      if (st.bgColor) {
+        document.body.style.background = st.bgColor;
+        document.body.style.backgroundImage = "none";
+      }
+    } catch (e) {}
   })();
   if (name === "produk") loadProdukAdm();
   if (name === "pesanan") loadPesanan();
@@ -277,21 +294,22 @@ async function loadDashboard() {
   const day = 86400000;
   orders.forEach(function (o) {
     const st = String(o.status || "").toLowerCase();
-    if (!(st.includes("sukses") || st.includes("selesai"))) return;
+    if (st.includes("tolak") || st.includes("draft")) return;
     const t = Number(o.createdAt) || Date.parse(o.waktu || "") || now;
     const diff = Math.floor((now - t) / day);
     const idx = 6 - Math.min(6, Math.max(0, diff));
-    buckets[idx] += parseRp(o.total);
+    buckets[idx] += parseRp(o.total) || 1;
   });
   drawLineChart(document.getElementById("chartOmzet"), buckets, "#42a5f5");
 
-  // Produk terlaris (pie)
+  // Produk terlaris (pie) — semua order aktif (pending/proses/sukses) agar bergerak saat ada order baru
   const map = {};
   orders.forEach(function (o) {
     const st = String(o.status || "").toLowerCase();
-    if (!(st.includes("sukses") || st.includes("selesai"))) return;
+    if (st.includes("tolak") || st.includes("draft")) return;
     const n = o.paket || "Lainnya";
-    map[n] = (map[n] || 0) + parseRp(o.total);
+    const amt = parseRp(o.total) || 1;
+    map[n] = (map[n] || 0) + amt;
   });
   let items = Object.keys(map).map(function (k) { return { n: k, v: map[k] }; });
   items.sort(function (a, b) { return b.v - a.v; });
@@ -1514,6 +1532,30 @@ function simpanTampilan() {
   if (pl) pl.src = logo;
   if (pb) pb.src = banner;
   alert("Foto logo & banner disimpan! Muncul di semua halaman & device.");
+  if (window.VoxyyBranding && window.VoxyyBranding.apply) {
+    window.VoxyyBranding.apply(getSettings());
+  } else if (window.applyBranding) {
+    window.applyBranding(getSettings());
+  }
+  // update admin header sekarang
+  try {
+    var s2 = getSettings();
+    var logo2 = s2.logoUrl || s2.logo || "logo.png";
+    var nama2 = s2.namaToko || "VOXY MARKET";
+    var el = document.getElementById("adminBrandLogo");
+    if (el) el.src = logo2;
+    document.querySelectorAll(".adm-topnav .brand img").forEach(function (im) {
+      im.src = logo2;
+    });
+    var t = document.getElementById("adminBrandTitle");
+    if (t) {
+      var base = String(nama2).replace(/\s*MARKET\s*$/i, "").trim() || "VOXY";
+      t.innerHTML = base + ' <span style="color:#64b5f6">ADMIN</span> <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
+    }
+    if (s2.bgColor) {
+      document.body.style.background = s2.bgColor;
+    }
+  } catch (e) {}
 }
 
 /* ========== PENGATURAN ========== */
@@ -1544,7 +1586,19 @@ function simpanPengaturan() {
     linkIg: val("linkIg"),
   };
   saveSettings(data);
-  alert("Pengaturan disimpan. Nama VOXY MARKET & link Tentang aktif di semua halaman.");
+  alert("Pengaturan disimpan. Nama & link aktif di semua halaman termasuk admin.");
+  if (window.VoxyyBranding && window.VoxyyBranding.apply) {
+    window.VoxyyBranding.apply(getSettings());
+  }
+  try {
+    var s = getSettings();
+    var nama = s.namaToko || "VOXY MARKET";
+    var t = document.getElementById("adminBrandTitle");
+    if (t) {
+      var base = String(nama).replace(/\s*MARKET\s*$/i, "").trim() || "VOXY";
+      t.innerHTML = base + ' ADMIN <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
+    }
+  } catch (e) {}
 }
 
 
@@ -1868,6 +1922,23 @@ function bootAdminData() {
     } catch (e) {}
     seedProdukIfEmpty();
     loadDashboard();
+    try {
+      var st = getSettings();
+      if (window.VoxyyBranding && window.VoxyyBranding.apply) window.VoxyyBranding.apply(st);
+      var logo = st.logoUrl || st.logo || "logo.png";
+      var nama = st.namaToko || "VOXY MARKET";
+      var elL = document.getElementById("adminBrandLogo");
+      if (elL) elL.src = logo;
+      var elT = document.getElementById("adminBrandTitle");
+      if (elT) {
+        var base = String(nama).replace(/\s*MARKET\s*$/i, "").trim() || "VOXY";
+        elT.innerHTML = base + ' ADMIN <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
+      }
+      if (st.bgColor) {
+        document.body.style.background = st.bgColor;
+        document.body.style.backgroundImage = "none";
+      }
+    } catch (e) {}
   })();
 
   let _lastOrderCount = 0;

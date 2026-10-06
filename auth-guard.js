@@ -29,7 +29,7 @@
         cb();
         return;
       }
-      if (++n > 40) {
+      if (++n > 80) {
         // Firebase tidak siap — tetap minta login
         goLogin();
         return;

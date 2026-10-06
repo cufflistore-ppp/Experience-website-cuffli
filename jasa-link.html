@@ -6,8 +6,7 @@
   <title>Isi Link Suntik - VOXY MARKET</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <script src="auth-guard.js"></script>
-  <style>
+    <style>
     .jl-wrap { max-width: 480px; margin: 0 auto; padding: 16px; }
     .jl-card {
       background: #12182a; border: 1px solid #1e2a45;
@@ -73,14 +72,18 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="auth.js"></script>
+  <script src="auth-guard.js"></script>
   <script src="branding.js"></script>
   <script>
     var _draft = null;
     var _kode = "";
 
     function loadDraft() {
+      _draft = null;
       try {
-        var raw = sessionStorage.getItem("voxyy_suntik_draft");
+        var raw = sessionStorage.getItem("voxyy_suntik_draft") || localStorage.getItem("voxyy_suntik_draft");
         if (raw) _draft = JSON.parse(raw);
       } catch (e) { _draft = null; }
       return _draft;
@@ -174,6 +177,7 @@
         } catch (e) {}
 
         try { sessionStorage.removeItem("voxyy_suntik_draft"); } catch (e) {}
+        try { localStorage.removeItem("voxyy_suntik_draft"); } catch (e) {}
 
         msg.style.display = "block";
         msg.style.background = "#0d3d1a";

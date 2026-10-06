@@ -441,6 +441,7 @@
             order._suntikDraft = true;
             try {
               sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify(order));
+              try { localStorage.setItem("voxyy_suntik_draft", JSON.stringify(order)); } catch (e2) {}
             } catch (e) {}
           } else if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
             await window.VoxyyOrders.addOrder(order);
@@ -500,6 +501,7 @@
         });
         try {
           sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify(draft));
+          try { localStorage.setItem("voxyy_suntik_draft", JSON.stringify(draft)); } catch (e2) {}
           localStorage.setItem("voxyy_saved_kode", draft.kode || "");
         } catch (e) {
           alert("Gagal simpan data sementara. Coba lagi.");
@@ -526,7 +528,7 @@
         }
         if (btn) btn.innerHTML = '<i class="fa-solid fa-link"></i> Ke isi link...';
         setTimeout(function () {
-          window.location.replace(nextUrl);
+          window.location.href = nextUrl;
         }, 300);
         return;
       }

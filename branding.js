@@ -83,6 +83,38 @@
         }
       });
 
+    
+    // ADMIN panel logo + title
+    var adminLogo = document.getElementById("adminBrandLogo");
+    if (adminLogo) {
+      adminLogo.src = logo;
+      adminLogo.alt = nama;
+      adminLogo.onerror = function () { this.src = "logo.png"; };
+    }
+    document.querySelectorAll(".adm-topnav img, .admin-header img, .adm-drawer img.logo").forEach(function (img) {
+      if (!img || img.id === "previewLogo" || img.id === "previewBanner") return;
+      img.src = logo;
+      img.onerror = function () { this.src = "logo.png"; };
+    });
+    var adminTitle = document.getElementById("adminBrandTitle");
+    if (adminTitle) {
+      var base = String(nama).replace(/\s*MARKET\s*$/i, "").trim() || "VOXY";
+      adminTitle.innerHTML =
+        base +
+        ' <span style="color:#64b5f6">ADMIN</span> <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
+    }
+    document.querySelectorAll(".adm-topnav .brand img").forEach(function (img) {
+      if (img.id === "previewLogo") return;
+      img.src = logo;
+      img.onerror = function () { this.src = "logo.png"; };
+    });
+    // warna aksen card admin
+    if (bg) {
+      try {
+        document.documentElement.style.setProperty("--adm-bg", bg);
+      } catch (e) {}
+    }
+
     // login / daftar
     document.querySelectorAll(".auth-brand").forEach(function (el) {
       var parts = String(nama).trim().split(/\s+/);
@@ -194,6 +226,7 @@
   window.VoxyyBrand = {
     getSettings: getSettingsLocal,
     apply: applyBranding,
+
     loadFromCloud: loadFromCloud,
     getProduk: function () {
       try {
@@ -241,3 +274,6 @@
     boot();
   }
 })();
+
+  window.VoxyyBranding = { apply: applyBranding };
+  window.applyBranding = applyBranding;
