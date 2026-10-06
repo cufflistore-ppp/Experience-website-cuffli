@@ -206,6 +206,22 @@
     var currentOrder = null;
     var _buktiDataUrl = "";
 
+
+    function isSuntikName(paket, kat) {
+      var pk = String(paket || "").toLowerCase();
+      var k = String(kat || "").toLowerCase();
+      var pp = "";
+      try { pp = (new URLSearchParams(location.search).get("paket") || "").toLowerCase(); } catch (e) {}
+      var kk = "";
+      try { kk = (new URLSearchParams(location.search).get("kat") || "").toLowerCase(); } catch (e) {}
+      return (
+        pk.indexOf("suntik") >= 0 ||
+        pp.indexOf("suntik") >= 0 ||
+        k.indexOf("suntik") >= 0 ||
+        kk.indexOf("suntik") >= 0
+      );
+    }
+
     function formatRupiah(n) {
       return "Rp " + Number(n || 0).toLocaleString("id-ID");
     }
@@ -392,10 +408,11 @@
           if (pk.indexOf("jasa") >= 0 || pk.indexOf("post") >= 0 || pk.indexOf("suntik") >= 0) kat = "jasa";
         }
         var pk2 = String(paket || "").toLowerCase();
+        var isSuntik = isSuntikName(paket, kat || katUrl);
         var isJasa =
+          isSuntik ||
           String(kat || "").indexOf("jasa") >= 0 ||
           pk2.indexOf("jasa") >= 0 ||
-          pk2.indexOf("suntik") >= 0 ||
           pk2.indexOf("post") >= 0 ||
           String(katUrl || "").indexOf("jasa") >= 0;
 
@@ -418,7 +435,14 @@
           isDigital: !isJasa,
         };
         try {
-          if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
+          // Suntik: jangan masuk admin/pesanan dulu — tunggu isi link di jasa-link.html
+          if (isSuntikName(order.paket, order.kategori) || order.isJasa && isSuntikName(order.paket)) {
+            order.status = "Draft Suntik";
+            order._suntikDraft = true;
+            try {
+              sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify(order));
+            } catch (e) {}
+          } else if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
             await window.VoxyyOrders.addOrder(order);
           } else {
             orders.unshift(order);
@@ -459,9 +483,55 @@
       var btn = document.getElementById("btnKonfirmasi");
       if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
       }
       var order = currentOrder || window.currentOrder || {};
+      var isSuntik = isSuntikName(order.paket, order.kategori);
+
+      // ===== SUNTIK: simpan draft lokal, BELUM ke admin/pesanan =====
+      if (isSuntik) {
+        var draft = Object.assign({}, order, {
+          bukti: _buktiDataUrl,
+          buktiAt: Date.now(),
+          status: "Draft Suntik",
+          _suntikDraft: true,
+          isJasa: true,
+          kategori: order.kategori || "jasa",
+        });
+        try {
+          sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify(draft));
+          localStorage.setItem("voxyy_saved_kode", draft.kode || "");
+        } catch (e) {
+          alert("Gagal simpan data sementara. Coba lagi.");
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran';
+          }
+          return;
+        }
+        var nominal = draft.finalAmount != null
+          ? Number(draft.finalAmount)
+          : parseInt(String(draft.total || "0").replace(/[^\d]/g, ""), 10) || 0;
+        var nominalStr = "Rp " + Number(nominal).toLocaleString("id-ID");
+        var nextUrl = "jasa-link.html?kode=" + encodeURIComponent(draft.kode || "");
+        var sb = document.getElementById("statusBox");
+        if (sb) {
+          sb.classList.add("show");
+          sb.innerHTML =
+            '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
+            "<b>Bukti TF tersimpan</b><br>Kode: <b>" + (draft.kode || "-") + "</b><br>" +
+            "Jasa: <b>" + (draft.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
+            "Lanjut isi link target. Order masuk admin setelah link dikirim.</div>" +
+            '<a href="' + nextUrl + '" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Isi Link Target</a>';
+        }
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-link"></i> Ke isi link...';
+        setTimeout(function () {
+          window.location.replace(nextUrl);
+        }, 300);
+        return;
+      }
+
+      // ===== NON-SUNTIK: langsung ke admin =====
       try {
         if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
           await window.VoxyyOrders.updateOrderByKode(order.kode, {
@@ -497,18 +567,6 @@
 
       saveTrackedKode(order.kode);
 
-      // Deteksi jasa
-      // HANYA "suntik" yang ke halaman isi link. Jasa lain (web, logo, dll) langsung ke Pesanan.
-      function isSuntikOrder(o) {
-        if (!o) return false;
-        var pk = String(o.paket || o.judul || "").toLowerCase();
-        var k = String(o.kategori || "").toLowerCase();
-        var pp = "";
-        try { pp = (new URLSearchParams(location.search).get("paket") || "").toLowerCase(); } catch (e) {}
-        return pk.indexOf("suntik") >= 0 || pp.indexOf("suntik") >= 0;
-      }
-      var isSuntik = isSuntikOrder(order);
-
       var nominal = order.finalAmount != null
         ? Number(order.finalAmount)
         : parseInt(String(order.total || "0").replace(/[^\d]/g, ""), 10) || 0;
@@ -517,23 +575,6 @@
       var sb = document.getElementById("statusBox");
       if (sb) sb.classList.add("show");
 
-      if (isSuntik) {
-        var nextUrl = "jasa-link.html?kode=" + encodeURIComponent(order.kode || "");
-        try { localStorage.setItem("voxyy_saved_kode", order.kode || ""); } catch (e) {}
-        if (sb) {
-          sb.innerHTML =
-            '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
-            "<b>Pembayaran diterima</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
-            "Jasa: <b>" + (order.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
-            "Sekarang isi <b>link target</b>.</div>" +
-            '<a href="' + nextUrl + '" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Isi Link Target Sekarang</a>';
-        }
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Lanjut isi link...';
-        setTimeout(function () {
-          window.location.replace(nextUrl);
-        }, 400);
-        return;
-      }
 
       if (sb) {
         sb.innerHTML =
