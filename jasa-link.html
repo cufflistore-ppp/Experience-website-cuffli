@@ -24,7 +24,7 @@
       width: 100%; margin-top: 18px; padding: 15px; border: none; border-radius: 12px;
       background: #1565c0; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer;
     }
-    .jl-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .jl-btn:disabled { opacity: 0.6; }
     .jl-kode { font-weight: 800; font-size: 20px; color: #fff; word-break: break-all; }
   </style>
 </head>
@@ -41,23 +41,16 @@
 
   <div class="jl-wrap">
     <div class="jl-card">
-      <div class="jl-step">KHUSUS SUNTIK · ISI LINK</div>
+      <div class="jl-step">ISI LINK TARGET</div>
       <div style="font-size:12px;color:#8aa0b8;">Kode order</div>
-      <div class="jl-kode" id="jlKode">Memuat...</div>
+      <div class="jl-kode" id="jlKode">-</div>
       <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-top:6px;"></div>
-      <div id="jlBuktiOk" style="display:none;margin-top:10px;font-size:12px;color:#a5d6a7;">
-        <i class="fa-solid fa-check-circle"></i> Pembayaran tercatat — tempel link lalu kirim
-      </div>
 
-      <p style="font-size:13px;color:#8aa0b8;line-height:1.5;margin-top:14px;">
-        Tempel <b>link target</b> (profil / post / channel), lalu konfirmasi.
-      </p>
-
-      <label><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target</label>
+      <label style="margin-top:16px;"><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target</label>
       <input type="url" id="jlLink" placeholder="https://..." inputmode="url" autocomplete="off">
 
-      <button type="button" class="jl-btn" id="jlKirim" onclick="kirimLinkJasa()" disabled>
-        <i class="fa-solid fa-check-circle"></i> Konfirmasi &amp; kirim ke admin
+      <button type="button" class="jl-btn" id="jlKirim" onclick="kirimLinkJasa()">
+        <i class="fa-solid fa-check-circle"></i> Kirim link ke admin
       </button>
 
       <div id="jlMsg" style="display:none;margin-top:14px;padding:12px;border-radius:12px;font-size:13px;line-height:1.45;"></div>
@@ -73,147 +66,105 @@
   <script src="auth-guard.js"></script>
   <script src="branding.js"></script>
   <script>
-    var _order = null;
     var _kode = "";
+    var _order = null;
 
-    function setMsg(html, ok) {
-      var msg = document.getElementById("jlMsg");
-      msg.style.display = "block";
-      msg.style.background = ok ? "#0d3d1a" : "#3d1515";
-      msg.style.color = ok ? "#a5d6a7" : "#ef9a9a";
-      msg.innerHTML = html;
-    }
-    function hideMsg() {
-      document.getElementById("jlMsg").style.display = "none";
-    }
-
-    async function findOrder(kode) {
-      var up = String(kode || "").trim().toUpperCase();
-      if (!up) return null;
-      try {
-        if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
-          try { window.VoxyyOrders.initFirebase(); } catch (e) {}
-        }
-        if (window.VoxyyOrders && window.VoxyyOrders.getOrders) {
-          var orders = await window.VoxyyOrders.getOrders();
-          var o = (orders || []).find(function (x) {
-            return String(x.kode || "").toUpperCase() === up ||
-              String(x._id || "").toUpperCase() === up;
-          });
-          if (o) return o;
-        }
-      } catch (e) {}
-      // localStorage fallback
-      try {
-        var loc = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-        return (loc || []).find(function (x) {
-          return String(x.kode || "").toUpperCase() === up;
-        }) || null;
-      } catch (e) {
-        return null;
-      }
-    }
-
-    async function boot() {
-      var params = new URLSearchParams(location.search);
-      _kode = (params.get("kode") || localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
+    function boot() {
+      var p = new URLSearchParams(location.search);
+      _kode = (p.get("kode") || localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
       document.getElementById("jlKode").textContent = _kode || "-";
-
-      if (!_kode) {
-        setMsg("Kode order tidak ada di URL. Ulangi dari halaman pembayaran (konfirmasi + bukti TF).", false);
-        document.getElementById("jlKirim").disabled = true;
-        return;
-      }
-
-      var o = null;
-      for (var i = 0; i < 10; i++) {
-        o = await findOrder(_kode);
-        if (o) break;
-        await new Promise(function (r) { setTimeout(r, 500); });
-      }
-
-      if (!o) {
-        // Tetap izinkan isi link — order akan dibuat/update saat kirim
-        document.getElementById("jlPaket").textContent = "Order sedang disiapkan…";
-        document.getElementById("jlBuktiOk").style.display = "block";
-        document.getElementById("jlBuktiOk").innerHTML =
-          '<i class="fa-solid fa-circle-info"></i> Kode <b>' + _kode +
-          '</b> — tempel link lalu kirim. Sistem akan menghubungkan ke pembayaran Anda.';
-        document.getElementById("jlKirim").disabled = false;
-        hideMsg();
-        _order = { kode: _kode, status: "Menunggu Link", isSuntik: true };
-        return;
-      }
-
-      _order = o;
-      document.getElementById("jlPaket").textContent =
-        (o.paket || "Jasa Suntik") + (o.total ? " · " + o.total : "");
-      document.getElementById("jlBuktiOk").style.display = "block";
-      if (o.targetLink || o.linkTarget || o.linkJasa) {
-        document.getElementById("jlLink").value = o.targetLink || o.linkTarget || o.linkJasa;
-      }
+      // tombol selalu aktif — yang penting kirim link
       document.getElementById("jlKirim").disabled = false;
-      hideMsg();
+      if (!_kode) {
+        document.getElementById("jlPaket").textContent = "Isi link tetap bisa dikirim setelah kode tersedia dari pembayaran.";
+      }
+      // load info opsional (tidak blokir)
+      (async function () {
+        try {
+          if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
+            try { window.VoxyyOrders.initFirebase(); } catch (e) {}
+          }
+          if (!_kode || !window.VoxyyOrders || !window.VoxyyOrders.getOrders) return;
+          var list = await window.VoxyyOrders.getOrders();
+          var o = (list || []).find(function (x) {
+            return String(x.kode || "").toUpperCase() === _kode;
+          });
+          if (o) {
+            _order = o;
+            document.getElementById("jlPaket").textContent =
+              (o.paket || "Jasa Suntik") + (o.total ? " · " + o.total : "");
+            if (o.targetLink || o.linkJasa || o.linkTarget) {
+              document.getElementById("jlLink").value =
+                o.targetLink || o.linkJasa || o.linkTarget;
+            }
+          }
+        } catch (e) {}
+      })();
     }
 
     async function kirimLinkJasa() {
       var link = (document.getElementById("jlLink").value || "").trim();
       var btn = document.getElementById("jlKirim");
-      if (!link || link.length < 8) {
-        alert("Isi link target yang valid.");
+      var msg = document.getElementById("jlMsg");
+      if (!link || link.length < 5) {
+        alert("Tempel link target dulu.");
         return;
       }
       if (!/^https?:\/\//i.test(link)) link = "https://" + link;
       if (!_kode) {
-        alert("Kode order kosong");
+        _kode = (localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
+      }
+      if (!_kode) {
+        alert("Kode order kosong. Ulangi dari halaman bayar supaya kode ikut.");
         return;
       }
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+      msg.style.display = "none";
+
+      var patch = {
+        targetLink: link,
+        linkTarget: link,
+        linkJasa: link,
+        status: "Menunggu Verifikasi",
+        isJasa: true,
+        isSuntik: true,
+        updatedAt: Date.now(),
+      };
+      if (_order) {
+        if (_order.paket) patch.paket = _order.paket;
+        if (_order.total) patch.total = _order.total;
+        if (_order.finalAmount != null) patch.finalAmount = _order.finalAmount;
+        if (_order.bukti) patch.bukti = _order.bukti;
+        if (_order.hasBukti) patch.hasBukti = true;
+        if (_order.nama) patch.nama = _order.nama;
+        if (_order.userEmail || _order.email) {
+          patch.userEmail = _order.userEmail || _order.email;
+          patch.email = _order.email || _order.userEmail;
+        }
+      }
 
       try {
         if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
           try { window.VoxyyOrders.initFirebase(); } catch (e) {}
         }
-
-        var patch = {
-          targetLink: link,
-          linkTarget: link,
-          linkJasa: link,
-          status: "Menunggu Verifikasi",
-          isJasa: true,
-          isSuntik: true,
-          updatedAt: Date.now(),
-        };
-        if (_order) {
-          if (_order.paket) patch.paket = _order.paket;
-          if (_order.total) patch.total = _order.total;
-          if (_order.finalAmount != null) patch.finalAmount = _order.finalAmount;
-          if (_order.bukti && String(_order.bukti).indexOf("data:") === 0) patch.bukti = _order.bukti;
-          if (_order.hasBukti) patch.hasBukti = true;
-          if (_order.nama) patch.nama = _order.nama;
-          if (_order.userEmail || _order.email) {
-            patch.userEmail = _order.userEmail || _order.email;
-            patch.email = _order.email || _order.userEmail;
+        var res = null;
+        if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
+          res = await window.VoxyyOrders.updateOrderByKode(_kode, patch);
+        }
+        // kalau belum ada order, buat baru
+        if (!res || res.ok === false) {
+          if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
+            res = await window.VoxyyOrders.addOrder(Object.assign({
+              kode: _kode,
+              createdAt: Date.now(),
+              waktu: new Date().toLocaleString("id-ID"),
+              paket: (_order && _order.paket) || "Jasa Suntik",
+            }, patch));
           }
         }
-
-        var res = null;
-        var existing = await findOrder(_kode);
-        if (existing && window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
-          res = await window.VoxyyOrders.updateOrderByKode(_kode, patch);
-        } else if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
-          res = await window.VoxyyOrders.addOrder(Object.assign({
-            kode: _kode,
-            createdAt: Date.now(),
-            waktu: new Date().toLocaleString("id-ID"),
-            paket: (_order && _order.paket) || "Jasa Suntik",
-          }, patch));
-        } else {
-          throw new Error("Sistem order belum siap. Refresh & coba lagi.");
-        }
-        if (res && res.ok === false) throw new Error(res.error || "gagal simpan");
+        if (res && res.ok === false) throw new Error(res.error || "gagal");
 
         try {
           localStorage.setItem("voxyy_saved_kode", _kode);
@@ -226,13 +177,19 @@
           localStorage.setItem("voxyy_saved_kodes", JSON.stringify(arr));
         } catch (e) {}
 
-        setMsg("<b>Berhasil!</b> Link masuk panel admin.<br>Kode <b>" + _kode + "</b>", true);
+        msg.style.display = "block";
+        msg.style.background = "#0d3d1a";
+        msg.style.color = "#a5d6a7";
+        msg.innerHTML = "<b>Link terkirim.</b> Kode <b>" + _kode + "</b>";
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Terkirim';
-        setTimeout(function () { location.href = "antrian.html"; }, 900);
+        setTimeout(function () { location.href = "antrian.html"; }, 800);
       } catch (e) {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Konfirmasi &amp; kirim ke admin';
-        setMsg("Gagal kirim: " + (e.message || e), false);
+        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Kirim link ke admin';
+        msg.style.display = "block";
+        msg.style.background = "#3d1515";
+        msg.style.color = "#ef9a9a";
+        msg.textContent = "Gagal: " + (e.message || e);
       }
     }
 

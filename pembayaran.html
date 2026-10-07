@@ -493,28 +493,8 @@
       if (isSuntik) {
         var buktiData = _buktiDataUrl;
         // kompres bukti biar tidak gagal di Firebase / localStorage
-        try {
-          buktiData = await new Promise(function (resolve) {
-            var img = new Image();
-            img.onload = function () {
-              var c = document.createElement("canvas");
-              var max = 720;
-              var w = img.width, h = img.height;
-              if (w > max) { h = Math.round((h * max) / w); w = max; }
-              c.width = w; c.height = h;
-              c.getContext("2d").drawImage(img, 0, 0, w, h);
-              var q = 0.55;
-              var out = c.toDataURL("image/jpeg", q);
-              while (out.length > 120000 && q > 0.25) {
-                q -= 0.1;
-                out = c.toDataURL("image/jpeg", q);
-              }
-              resolve(out);
-            };
-            img.onerror = function () { resolve(_buktiDataUrl); };
-            img.src = _buktiDataUrl;
-          });
-        } catch (e) { buktiData = _buktiDataUrl; }
+        /* bukti apa adanya — yang penting order + link berhasil */
+
 
         var draft = Object.assign({}, order, {
           bukti: buktiData,
@@ -541,12 +521,12 @@
             throw new Error("Sistem order belum siap");
           }
           if (saveRes && saveRes.ok === false) {
-            // coba sekali lagi tanpa base64 bukti
-            var light = Object.assign({}, draft, { hasBukti: true, bukti: "" });
-            saveRes = await window.VoxyyOrders.addOrder(light);
-            if (saveRes && saveRes.ok === false) {
-              throw new Error(saveRes.error || "Gagal simpan order ke server");
-            }
+            // coba tanpa bukti base64 — tetap lanjut ke isi link
+            try {
+              var light = Object.assign({}, draft, { hasBukti: true, bukti: "" });
+              saveRes = await window.VoxyyOrders.addOrder(light);
+            } catch (e2) {}
+            // jangan blok user — link page yang penting
           }
           // backup lokal (tanpa bukti besar jika gagal)
           try {
