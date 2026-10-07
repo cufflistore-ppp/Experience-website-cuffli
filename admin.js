@@ -617,11 +617,13 @@ async function loadPesanan(force) {
   let filtered = orders.slice();
 
   function isDone(o) {
-    // Aktif list: Proses & Menunggu TETAP tampil. Sukses & Tolak HILANG.
+    // Aktif: Proses & Menunggu Verifikasi tampil.
+    // Sukses/Tolak hilang. "Menunggu Link" (belum isi link suntik) disembunyikan dari admin.
     const s = String(o.status || "").toLowerCase();
     if (s.includes("tolak")) return true;
     if (s.includes("sukses") || s.includes("selesai")) return true;
-    return false; // Proses / Menunggu / dll tetap di list
+    if (s.includes("menunggu link") || s.includes("draft")) return true;
+    return false;
   }
 
   if (filter === "aktif") {

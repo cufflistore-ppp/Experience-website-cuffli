@@ -90,6 +90,8 @@ function filterMyOrders(orders) {
     // Pesanan ditolak admin → hilang dari list pembeli
     const st = String(o.status || "").toLowerCase();
     if (st.includes("tolak")) return false;
+    // belum isi link suntik → jangan tampil dulu di pesanan
+    if (st.includes("menunggu link") || st.includes("draft suntik") || st.includes("draft")) return false;
     const kode = String(o.kode || "").toUpperCase();
     if (tracked.has(kode)) return true;
     if (email && String(o.email || "").toLowerCase() === email) return true;

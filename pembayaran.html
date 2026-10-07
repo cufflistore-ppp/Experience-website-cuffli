@@ -489,28 +489,79 @@
       var order = currentOrder || window.currentOrder || {};
       var isSuntik = isSuntikName(order.paket, order.kategori);
 
-      // ===== SUNTIK: simpan draft lokal, BELUM ke admin/pesanan =====
+      // ===== SUNTIK: simpan ke Firebase (status Menunggu Link) supaya semua device bisa lanjut =====
       if (isSuntik) {
-        var draft = Object.assign({}, order, {
-          bukti: _buktiDataUrl,
-          buktiAt: Date.now(),
-          status: "Draft Suntik",
-          _suntikDraft: true,
-          isJasa: true,
-          kategori: order.kategori || "jasa",
-        });
+        var buktiData = _buktiDataUrl;
+        // kompres bukti biar tidak gagal di Firebase / localStorage
         try {
-          sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify(draft));
-          try { localStorage.setItem("voxyy_suntik_draft", JSON.stringify(draft)); } catch (e2) {}
-          localStorage.setItem("voxyy_saved_kode", draft.kode || "");
+          if (buktiData && buktiData.length > 400000 && window.compressImageDataUrl) {
+            buktiData = await window.compressImageDataUrl(buktiData, 900, 0.7);
+          } else if (buktiData && buktiData.length > 600000) {
+            // fallback kecil: potong kualitas via canvas
+            buktiData = await new Promise(function (resolve) {
+              var img = new Image();
+              img.onload = function () {
+                var c = document.createElement("canvas");
+                var max = 1000;
+                var w = img.width, h = img.height;
+                if (w > max) { h = Math.round(h * max / w); w = max; }
+                c.width = w; c.height = h;
+                c.getContext("2d").drawImage(img, 0, 0, w, h);
+                resolve(c.toDataURL("image/jpeg", 0.65));
+              };
+              img.onerror = function () { resolve(_buktiDataUrl); };
+              img.src = _buktiDataUrl;
+            });
+          }
+        } catch (e) { buktiData = _buktiDataUrl; }
+
+        var draft = Object.assign({}, order, {
+          bukti: buktiData,
+          buktiAt: Date.now(),
+          status: "Menunggu Link",
+          isJasa: true,
+          isSuntik: true,
+          kategori: order.kategori || "jasa",
+          updatedAt: Date.now(),
+          createdAt: order.createdAt || Date.now(),
+        });
+        delete draft._suntikDraft;
+
+        try {
+          if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
+            try { window.VoxyyOrders.initFirebase(); } catch (e) {}
+          }
+          if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
+            await window.VoxyyOrders.addOrder(draft);
+          } else if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
+            await window.VoxyyOrders.updateOrderByKode(draft.kode, draft);
+          } else {
+            throw new Error("Sistem order belum siap");
+          }
+          // backup lokal (tanpa bukti besar jika gagal)
+          try {
+            sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify({
+              kode: draft.kode, paket: draft.paket, total: draft.total,
+              finalAmount: draft.finalAmount, status: draft.status, hasBukti: true
+            }));
+            localStorage.setItem("voxyy_saved_kode", draft.kode || "");
+            var arr = [];
+            try { arr = JSON.parse(localStorage.getItem("voxyy_saved_kodes") || "[]"); } catch (e) {}
+            var up = String(draft.kode).toUpperCase();
+            arr = [draft.kode].concat((arr || []).filter(function (x) {
+              return String(x).toUpperCase() !== up;
+            })).slice(0, 30);
+            localStorage.setItem("voxyy_saved_kodes", JSON.stringify(arr));
+          } catch (e) {}
         } catch (e) {
-          alert("Gagal simpan data sementara. Coba lagi.");
+          alert("Gagal simpan bukti: " + (e.message || e) + "\nCoba foto lebih kecil / coba lagi.");
           if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran';
           }
           return;
         }
+
         var nominal = draft.finalAmount != null
           ? Number(draft.finalAmount)
           : parseInt(String(draft.total || "0").replace(/[^\d]/g, ""), 10) || 0;
@@ -523,13 +574,13 @@
             '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
             "<b>Bukti TF tersimpan</b><br>Kode: <b>" + (draft.kode || "-") + "</b><br>" +
             "Jasa: <b>" + (draft.paket || "-") + "</b><br>Nominal: <b>" + nominalStr + "</b><br>" +
-            "Lanjut isi link target. Order masuk admin setelah link dikirim.</div>" +
+            "Lanjut isi link target.</div>" +
             '<a href="' + nextUrl + '" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Isi Link Target</a>';
         }
         if (btn) btn.innerHTML = '<i class="fa-solid fa-link"></i> Ke isi link...';
         setTimeout(function () {
           window.location.href = nextUrl;
-        }, 300);
+        }, 400);
         return;
       }
 
