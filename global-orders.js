@@ -185,25 +185,89 @@ async function getOrders() {
 }
 
 async function addOrder(order) {
-  if (!order || !order.kode) return { ok: false };
+  if (!order || !order.kode) return { ok: false, error: "kode kosong" };
   if (!order.createdAt) order.createdAt = Date.now();
+  const full = stripMeta(order);
+  // localStorage: jangan simpan base64 besar (quota)
+  const light = { ...full };
+  if (light.bukti && String(light.bukti).length > 8000) {
+    light.hasBukti = true;
+    light.bukti = "[stored]";
+  }
+  if (light.file && String(light.file).indexOf("data:") === 0 && String(light.file).length > 8000) {
+    light.file = "[stored]";
+  }
   const local = getLocalOrders();
   const t = String(order.kode).toUpperCase();
   const li = local.findIndex(
     (o) => String(o.kode || "").toUpperCase() === t
   );
-  if (li >= 0) local[li] = { ...local[li], ...stripMeta(order) };
-  else local.unshift(stripMeta(order));
-  setLocalOrders(local);
+  if (li >= 0) local[li] = { ...local[li], ...light };
+  else local.unshift(light);
+  try { setLocalOrders(local); } catch (e) {
+    try {
+      // hapus bukti dari semua lalu simpan
+      setLocalOrders(local.map(function (o) {
+        const x = { ...o };
+        if (x.bukti && String(x.bukti).length > 500) x.bukti = "[stored]";
+        return x;
+      }));
+    } catch (e2) {}
+  }
   if (!isGlobalConfigured()) return { ok: true, mode: "local" };
   initFirebase();
   if (!_db) return { ok: true, mode: "local" };
+  const key = kodeKey(order.kode);
   try {
-    await _db.ref("orders/" + kodeKey(order.kode)).set(stripMeta(order));
+    // bukti terpisah jika besar
+    let payload = { ...full };
+    if (payload.bukti && String(payload.bukti).length > 100000) {
+      try {
+        await _db.ref("order_bukti/" + key).set({
+          bukti: payload.bukti,
+          at: Date.now(),
+          kode: order.kode,
+        });
+        payload = { ...payload, hasBukti: true, bukti: "[fb]" };
+      } catch (e) {
+        // kalau gagal simpan bukti, tetap simpan order tanpa bukti base64
+        payload = { ...payload, hasBukti: true, bukti: "[fb-fail]" };
+      }
+    }
+    await _db.ref("orders/" + key).set(stripMeta(payload));
     return { ok: true, mode: "global" };
   } catch (e) {
-    return { ok: false, mode: "local", error: String(e) };
+    // retry tanpa bukti
+    try {
+      const minimal = { ...full, hasBukti: !!full.bukti, bukti: full.bukti ? "[retry]" : "" };
+      delete minimal.file;
+      await _db.ref("orders/" + key).set(stripMeta(minimal));
+      return { ok: true, mode: "global-minimal", warn: String(e && e.message ? e.message : e) };
+    } catch (e2) {
+      return { ok: false, mode: "local", error: String(e2 && e2.message ? e2.message : e2) };
+    }
   }
+}
+
+async function getBuktiByKode(kode) {
+  if (!kode) return "";
+  const key = kodeKey(kode);
+  try {
+    const orders = await getOrders();
+    const o = (orders || []).find(function (x) {
+      return String(x.kode || "").toUpperCase() === String(kode).toUpperCase();
+    });
+    if (o && o.bukti && String(o.bukti).indexOf("data:") === 0) return o.bukti;
+  } catch (e) {}
+  if (!isGlobalConfigured()) return "";
+  initFirebase();
+  if (!_db) return "";
+  try {
+    const snap = await _db.ref("order_bukti/" + key).once("value");
+    const v = snap.val();
+    if (v && v.bukti) return v.bukti;
+  } catch (e) {}
+  return "";
 }
 
 async function updateOrderByKode(kode, patch) {
@@ -477,6 +541,7 @@ window.VoxyyOrders = {
   getOrders,
   saveOrders,
   addOrder,
+  getBuktiByKode,
   updateOrderByKode,
   updateOrderByIndex,
   updateOrder: updateOrderByKode,

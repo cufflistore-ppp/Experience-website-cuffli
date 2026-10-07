@@ -25,7 +25,7 @@
       background: #1565c0; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer;
     }
     .jl-btn:disabled { opacity: 0.55; cursor: not-allowed; }
-    .jl-kode { font-weight: 800; font-size: 20px; color: #fff; }
+    .jl-kode { font-weight: 800; font-size: 20px; color: #fff; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -41,17 +41,16 @@
 
   <div class="jl-wrap">
     <div class="jl-card">
-      <div class="jl-step">KHUSUS SUNTIK · LANGKAH TERAKHIR</div>
+      <div class="jl-step">KHUSUS SUNTIK · ISI LINK</div>
       <div style="font-size:12px;color:#8aa0b8;">Kode order</div>
       <div class="jl-kode" id="jlKode">Memuat...</div>
       <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-top:6px;"></div>
       <div id="jlBuktiOk" style="display:none;margin-top:10px;font-size:12px;color:#a5d6a7;">
-        <i class="fa-solid fa-check-circle"></i> Bukti TF sudah ada — siap dikirim ke admin
+        <i class="fa-solid fa-check-circle"></i> Pembayaran tercatat — tempel link lalu kirim
       </div>
 
       <p style="font-size:13px;color:#8aa0b8;line-height:1.5;margin-top:14px;">
-        Tempel <b>link target</b> (profil / post / channel). Setelah konfirmasi,
-        pesanan masuk panel admin &amp; Pesanan Saya.
+        Tempel <b>link target</b> (profil / post / channel), lalu konfirmasi.
       </p>
 
       <label><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target</label>
@@ -77,88 +76,89 @@
     var _order = null;
     var _kode = "";
 
-    function showErr(text) {
+    function setMsg(html, ok) {
       var msg = document.getElementById("jlMsg");
       msg.style.display = "block";
-      msg.style.background = "#3d1515";
-      msg.style.color = "#ef9a9a";
-      msg.innerHTML = text;
-      document.getElementById("jlKirim").disabled = true;
+      msg.style.background = ok ? "#0d3d1a" : "#3d1515";
+      msg.style.color = ok ? "#a5d6a7" : "#ef9a9a";
+      msg.innerHTML = html;
     }
-    function showOk() {
-      var msg = document.getElementById("jlMsg");
-      msg.style.display = "none";
-      document.getElementById("jlKirim").disabled = false;
+    function hideMsg() {
+      document.getElementById("jlMsg").style.display = "none";
     }
 
-    async function findOrderByKode(kode) {
-      if (!kode) return null;
-      var up = String(kode).trim().toUpperCase();
+    async function findOrder(kode) {
+      var up = String(kode || "").trim().toUpperCase();
+      if (!up) return null;
       try {
         if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
           try { window.VoxyyOrders.initFirebase(); } catch (e) {}
         }
-        var orders = [];
         if (window.VoxyyOrders && window.VoxyyOrders.getOrders) {
-          orders = await window.VoxyyOrders.getOrders();
+          var orders = await window.VoxyyOrders.getOrders();
+          var o = (orders || []).find(function (x) {
+            return String(x.kode || "").toUpperCase() === up ||
+              String(x._id || "").toUpperCase() === up;
+          });
+          if (o) return o;
         }
-        var o = (orders || []).find(function (x) {
-          return String(x.kode || "").toUpperCase() === up;
-        });
-        if (o) return o;
       } catch (e) {}
-      return null;
+      // localStorage fallback
+      try {
+        var loc = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+        return (loc || []).find(function (x) {
+          return String(x.kode || "").toUpperCase() === up;
+        }) || null;
+      } catch (e) {
+        return null;
+      }
     }
 
     async function boot() {
-      var p = new URLSearchParams(location.search);
-      _kode = (p.get("kode") || localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
+      var params = new URLSearchParams(location.search);
+      _kode = (params.get("kode") || localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
       document.getElementById("jlKode").textContent = _kode || "-";
 
       if (!_kode) {
-        showErr("Kode order tidak ada. Ulangi dari halaman pembayaran.");
+        setMsg("Kode order tidak ada di URL. Ulangi dari halaman pembayaran (konfirmasi + bukti TF).", false);
+        document.getElementById("jlKirim").disabled = true;
         return;
       }
 
-      // Coba beberapa kali (Firebase kadang telat)
       var o = null;
-      for (var i = 0; i < 6; i++) {
-        o = await findOrderByKode(_kode);
-        if (o && (o.bukti || String(o.status || "").toLowerCase().indexOf("link") >= 0)) break;
-        await new Promise(function (r) { setTimeout(r, 400); });
+      for (var i = 0; i < 10; i++) {
+        o = await findOrder(_kode);
+        if (o) break;
+        await new Promise(function (r) { setTimeout(r, 500); });
       }
 
       if (!o) {
-        showErr("Order <b>" + _kode + "</b> belum ditemukan.<br>Pastikan sudah konfirmasi pembayaran + upload bukti TF. Tunggu sebentar lalu refresh.");
+        // Tetap izinkan isi link — order akan dibuat/update saat kirim
+        document.getElementById("jlPaket").textContent = "Order sedang disiapkan…";
+        document.getElementById("jlBuktiOk").style.display = "block";
+        document.getElementById("jlBuktiOk").innerHTML =
+          '<i class="fa-solid fa-circle-info"></i> Kode <b>' + _kode +
+          '</b> — tempel link lalu kirim. Sistem akan menghubungkan ke pembayaran Anda.';
+        document.getElementById("jlKirim").disabled = false;
+        hideMsg();
+        _order = { kode: _kode, status: "Menunggu Link", isSuntik: true };
         return;
       }
 
       _order = o;
       document.getElementById("jlPaket").textContent =
         (o.paket || "Jasa Suntik") + (o.total ? " · " + o.total : "");
-
-      var hasBukti = !!(o.bukti);
-      var st = String(o.status || "").toLowerCase();
-      // sudah pernah isi link
+      document.getElementById("jlBuktiOk").style.display = "block";
       if (o.targetLink || o.linkTarget || o.linkJasa) {
         document.getElementById("jlLink").value = o.targetLink || o.linkTarget || o.linkJasa;
       }
-
-      if (!hasBukti && st.indexOf("link") < 0 && st.indexOf("menunggu") < 0 && st.indexOf("verifikasi") < 0) {
-        showErr("Bukti TF belum tercatat untuk kode ini. Kembali ke pembayaran, upload bukti, lalu konfirmasi.");
-        return;
-      }
-
-      if (hasBukti) {
-        document.getElementById("jlBuktiOk").style.display = "block";
-      }
-      showOk();
+      document.getElementById("jlKirim").disabled = false;
+      hideMsg();
     }
 
     async function kirimLinkJasa() {
       var link = (document.getElementById("jlLink").value || "").trim();
       var btn = document.getElementById("jlKirim");
-      var msg = document.getElementById("jlMsg");
       if (!link || link.length < 8) {
         alert("Isi link target yang valid.");
         return;
@@ -170,9 +170,13 @@
       }
 
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim ke admin...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
 
       try {
+        if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
+          try { window.VoxyyOrders.initFirebase(); } catch (e) {}
+        }
+
         var patch = {
           targetLink: link,
           linkTarget: link,
@@ -182,12 +186,12 @@
           isSuntik: true,
           updatedAt: Date.now(),
         };
-        // pastikan bukti & data lain ikut
         if (_order) {
-          if (_order.bukti && !patch.bukti) patch.bukti = _order.bukti;
           if (_order.paket) patch.paket = _order.paket;
           if (_order.total) patch.total = _order.total;
           if (_order.finalAmount != null) patch.finalAmount = _order.finalAmount;
+          if (_order.bukti && String(_order.bukti).indexOf("data:") === 0) patch.bukti = _order.bukti;
+          if (_order.hasBukti) patch.hasBukti = true;
           if (_order.nama) patch.nama = _order.nama;
           if (_order.userEmail || _order.email) {
             patch.userEmail = _order.userEmail || _order.email;
@@ -195,12 +199,21 @@
           }
         }
 
-        if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
-          var res = await window.VoxyyOrders.updateOrderByKode(_kode, patch);
-          if (res && res.ok === false) throw new Error(res.error || "gagal update");
+        var res = null;
+        var existing = await findOrder(_kode);
+        if (existing && window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
+          res = await window.VoxyyOrders.updateOrderByKode(_kode, patch);
+        } else if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
+          res = await window.VoxyyOrders.addOrder(Object.assign({
+            kode: _kode,
+            createdAt: Date.now(),
+            waktu: new Date().toLocaleString("id-ID"),
+            paket: (_order && _order.paket) || "Jasa Suntik",
+          }, patch));
         } else {
-          throw new Error("Sistem order belum siap");
+          throw new Error("Sistem order belum siap. Refresh & coba lagi.");
         }
+        if (res && res.ok === false) throw new Error(res.error || "gagal simpan");
 
         try {
           localStorage.setItem("voxyy_saved_kode", _kode);
@@ -213,21 +226,13 @@
           localStorage.setItem("voxyy_saved_kodes", JSON.stringify(arr));
         } catch (e) {}
 
-        msg.style.display = "block";
-        msg.style.background = "#0d3d1a";
-        msg.style.color = "#a5d6a7";
-        msg.innerHTML =
-          "<b>Berhasil!</b> Link + bukti masuk panel admin.<br>Kode <b>" +
-          _kode +
-          "</b>";
+        setMsg("<b>Berhasil!</b> Link masuk panel admin.<br>Kode <b>" + _kode + "</b>", true);
         btn.innerHTML = '<i class="fa-solid fa-check"></i> Terkirim';
-        setTimeout(function () {
-          location.href = "antrian.html";
-        }, 900);
+        setTimeout(function () { location.href = "antrian.html"; }, 900);
       } catch (e) {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Konfirmasi &amp; kirim ke admin';
-        alert("Gagal: " + (e.message || e));
+        setMsg("Gagal kirim: " + (e.message || e), false);
       }
     }
 
