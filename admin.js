@@ -913,10 +913,22 @@ async function gantiStatusSelect(kode, status) {
     }
   }
   try {
-    await updateOrder(kode, { status: status, updatedAt: Date.now() });
-    showAdmToast("Status: " + status);
-    // Reload list — Sukses/Tolak hilang dari Aktif, Proses tetap
+    var res = null;
+    if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
+      res = await window.VoxyyOrders.updateOrderByKode(kode, {
+        status: status,
+        updatedAt: Date.now(),
+      });
+    } else if (typeof updateOrder === "function") {
+      res = await updateOrder(kode, { status: status, updatedAt: Date.now() });
+    } else {
+      throw new Error("Sistem order belum siap");
+    }
+    if (res && res.ok === false) throw new Error(res.error || "gagal simpan");
+    if (typeof showAdmToast === "function") showAdmToast("Status: " + status);
+    // Reload — Sukses/Tolak hilang dari Aktif, Proses tetap
     await loadPesanan(true);
+    if (typeof loadDashboard === "function") loadDashboard();
   } catch (e) {
     alert("Gagal ubah status: " + (e.message || e));
   }

@@ -49,23 +49,31 @@ async function fetchOrders() {
   }
 }
 
-function statusMeta(status, hasFile) {
+function statusMeta(status, hasFile, order) {
   const s = String(status || "").toLowerCase();
-  // Selesai hanya kalau file/URL sudah benar-benar ada di order
-  if ((s.includes("sukses") || s.includes("selesai")) && hasFile) {
-    return { label: "Selesai / Siap Diambil", cls: "sukses", color: "#66bb6a", bg: "#0d3d1a" };
-  }
+  var isSuntik = false;
+  try {
+    var pk = String((order && (order.paket || order.judul)) || "").toLowerCase();
+    isSuntik = pk.indexOf("suntik") >= 0 || !!(order && order.isJasa);
+  } catch (e) {}
+  // Sukses: jasa/suntik selesai tanpa file; digital selesai kalau ada file
   if (s.includes("sukses") || s.includes("selesai")) {
-    return { label: "Diproses — menunggu file", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
+    if (hasFile || isSuntik) {
+      return { label: "Selesai", cls: "sukses", color: "#66bb6a", bg: "#0d3d1a" };
+    }
+    return { label: "Sukses — menunggu file", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
   }
   if (s.includes("tolak")) {
     return { label: "Ditolak", cls: "tolak", color: "#ef9a9a", bg: "#3d1515" };
   }
-  if (s.includes("proses") || s.includes("verifikasi")) {
+  if (s.includes("proses")) {
     return { label: "Diproses Admin", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
   }
-  if (s.includes("bayar") || s.includes("menunggu")) {
+  if (s.includes("verifikasi") || s.includes("menunggu")) {
     return { label: "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
+  }
+  if (s.includes("bayar")) {
+    return { label: "Belum Bayar", cls: "belum", color: "#90a4ae", bg: "#1a2433" };
   }
   return { label: status || "Pesanan Masuk", cls: "belum", color: "#90a4ae", bg: "#1a2433" };
 }
@@ -92,7 +100,7 @@ function filterMyOrders(orders) {
 
 function renderOrderCard(o) {
   const file = o.file || o.download || o.fileUrl || "";
-  const st = statusMeta(o.status, !!file);
+  const st = statusMeta(o.status, !!file, o);
   const kode = o.kode || "-";
   const paket = o.paket || o.judul || "Pesanan";
   const totalN = parseMoney(o.finalAmount != null ? o.finalAmount : o.total);
