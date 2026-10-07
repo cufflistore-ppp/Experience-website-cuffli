@@ -20,6 +20,52 @@
     var logo = s.logoUrl || s.logo || "logo.png";
     var banner = s.bannerUrl || s.banner || "banner.jpg";
     var bg = s.bgColor || localStorage.getItem("voxyy_bg_color") || "";
+    // resolve async assets (logo/banner besar di Firebase)
+    try {
+      if (window.VoxyyOrders && window.VoxyyOrders.resolveBrandingAsset) {
+        if (String(logo).indexOf("firebase:") === 0) {
+          window.VoxyyOrders.resolveBrandingAsset(logo).then(function (real) {
+            if (real) {
+              s.logoUrl = real;
+              applyBrandingCore(Object.assign({}, s, { logoUrl: real, bannerUrl: banner, _resolved: true }));
+            }
+          });
+        }
+        if (String(banner).indexOf("firebase:") === 0) {
+          window.VoxyyOrders.resolveBrandingAsset(banner).then(function (real) {
+            if (real) {
+              applyBrandingCore(Object.assign({}, s, { bannerUrl: real, _resolved: true }));
+            }
+          });
+        }
+        if (s.qrisUrl && String(s.qrisUrl).indexOf("firebase:") === 0) {
+          window.VoxyyOrders.resolveBrandingAsset(s.qrisUrl).then(function (real) {
+            if (real) {
+              applyBrandingCore(Object.assign({}, s, { qrisUrl: real, _resolved: true }));
+            }
+          });
+        }
+      }
+    } catch (e) {}
+    applyBrandingCore(s);
+  }
+
+  function applyBrandingCore(s) {
+    s = s || getSettingsLocal() || {};
+    var nama = s.namaToko || s.nama || "VOXY MARKET";
+    var logo = s.logoUrl || s.logo || "logo.png";
+    var banner = s.bannerUrl || s.banner || "banner.jpg";
+    var bg = s.bgColor || localStorage.getItem("voxyy_bg_color") || "";
+    if (String(logo).indexOf("firebase:") === 0) logo = "logo.png";
+    if (String(banner).indexOf("firebase:") === 0) banner = "banner.jpg";
+    // cache bust supaya tidak nempel logo lama
+    var bust = s.updatedAt ? ("?v=" + s.updatedAt) : "";
+    if (logo && logo.indexOf("data:") !== 0 && logo.indexOf("blob:") !== 0 && bust) {
+      logo = logo.split("?")[0] + bust;
+    }
+    if (banner && banner.indexOf("data:") !== 0 && banner.indexOf("blob:") !== 0 && bust) {
+      banner = banner.split("?")[0] + bust;
+    }
     var check =
       ' <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
 
@@ -261,6 +307,9 @@
         } catch (e) {}
         loadFromCloud();
         bindRealtime();
+        // reload lagi biar logo/banner cloud pasti nempel
+        setTimeout(loadFromCloud, 800);
+        setTimeout(loadFromCloud, 2500);
       } else if (tries < 50) {
         setTimeout(tick, 150);
       }
@@ -268,12 +317,12 @@
     tick();
   }
 
+  window.VoxyyBranding = { apply: applyBranding, loadFromCloud: loadFromCloud };
+  window.applyBranding = applyBranding;
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);
   } else {
     boot();
   }
 })();
-
-  window.VoxyyBranding = { apply: applyBranding };
-  window.applyBranding = applyBranding;

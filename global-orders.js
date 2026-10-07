@@ -219,19 +219,26 @@ async function addOrder(order) {
   if (!_db) return { ok: true, mode: "local" };
   const key = kodeKey(order.kode);
   try {
-    // bukti terpisah jika besar
+    // Simpan foto bukti asli. Duplikasi ke order_bukti untuk cadangan.
     let payload = { ...full };
-    if (payload.bukti && String(payload.bukti).length > 100000) {
+    if (payload.bukti && String(payload.bukti).indexOf("data:") === 0) {
       try {
         await _db.ref("order_bukti/" + key).set({
           bukti: payload.bukti,
           at: Date.now(),
           kode: order.kode,
         });
-        payload = { ...payload, hasBukti: true, bukti: "[fb]" };
-      } catch (e) {
-        // kalau gagal simpan bukti, tetap simpan order tanpa bukti base64
-        payload = { ...payload, hasBukti: true, bukti: "[fb-fail]" };
+      } catch (e) {}
+      payload = { ...payload, hasBukti: true };
+      // tetap kirim data:image di orders agar admin langsung tampil
+      try {
+        await _db.ref("orders/" + key).set(stripMeta(payload));
+        return { ok: true, mode: "global" };
+      } catch (eBig) {
+        // terlalu besar: order tanpa base64, foto di order_bukti
+        payload = { ...payload, bukti: "", hasBukti: true };
+        await _db.ref("orders/" + key).set(stripMeta(payload));
+        return { ok: true, mode: "global-bukti-side" };
       }
     }
     await _db.ref("orders/" + key).set(stripMeta(payload));
@@ -252,12 +259,14 @@ async function addOrder(order) {
 async function getBuktiByKode(kode) {
   if (!kode) return "";
   const key = kodeKey(kode);
+  const up = String(kode).toUpperCase();
   try {
     const orders = await getOrders();
     const o = (orders || []).find(function (x) {
-      return String(x.kode || "").toUpperCase() === String(kode).toUpperCase();
+      return String(x.kode || "").toUpperCase() === up;
     });
     if (o && o.bukti && String(o.bukti).indexOf("data:") === 0) return o.bukti;
+    if (o && o.bukti && /^https?:\/\//i.test(String(o.bukti))) return o.bukti;
   } catch (e) {}
   if (!isGlobalConfigured()) return "";
   initFirebase();
@@ -265,7 +274,12 @@ async function getBuktiByKode(kode) {
   try {
     const snap = await _db.ref("order_bukti/" + key).once("value");
     const v = snap.val();
-    if (v && v.bukti) return v.bukti;
+    if (v && v.bukti && String(v.bukti).length > 20) return v.bukti;
+  } catch (e) {}
+  try {
+    const snap2 = await _db.ref("orders/" + key).once("value");
+    const o2 = snap2.val();
+    if (o2 && o2.bukti && String(o2.bukti).indexOf("data:") === 0) return o2.bukti;
   } catch (e) {}
   return "";
 }
@@ -321,6 +335,12 @@ async function updateOrderByKode(kode, patch) {
       // merge full supaya field file pasti masuk
       const cur = snap.val() || {};
       const merged = stripMeta({ ...cur, ...patch, kode: cur.kode || kode });
+      // jangan hapus bukti/file lama kalau patch kosong / placeholder
+      if ((!patch.bukti || String(patch.bukti).indexOf("[") === 0 || patch.bukti === "") && cur.bukti && String(cur.bukti).indexOf("data:") === 0) {
+        merged.bukti = cur.bukti;
+      }
+      if (!patch.file && cur.file) merged.file = cur.file;
+      if (!patch.download && cur.download) merged.download = cur.download;
       await ref.set(merged);
     }
     return { ok: true, mode: "global" };
@@ -424,8 +444,13 @@ async function getSettings() {
   if (!isGlobalConfigured()) return local;
   initFirebase();
   if (!_db) return local;
-  if (_lastSettings) return { ...local, ..._lastSettings };
+  // cloud SELALU diutamakan supaya semua device sama
   try {
+    if (_lastSettings && Object.keys(_lastSettings).length) {
+      const merged = { ...local, ..._lastSettings };
+      setLocalSettings(merged);
+      return merged;
+    }
     const snap = await _db.ref("settings").once("value");
     const val = snap.val() || {};
     _lastSettings = val;
@@ -446,13 +471,55 @@ async function saveSettingsGlobal(obj) {
   _lastSettings = next;
   if (!isGlobalConfigured()) return { ok: true, mode: "local" };
   initFirebase();
-  if (!_db) return { ok: true, mode: "local" };
+  if (!_db) return { ok: false, mode: "local", error: "db null" };
   try {
-    await _db.ref("settings").update(next);
+    // logo/banner besar: simpan terpisah agar settings ringan
+    const payload = { ...next };
+    if (payload.logoUrl && String(payload.logoUrl).indexOf("data:") === 0 && String(payload.logoUrl).length > 80000) {
+      try {
+        await _db.ref("branding_assets/logo").set({ data: payload.logoUrl, at: Date.now() });
+        payload.logoUrl = "firebase:branding_assets/logo";
+        payload.hasLogoAsset = true;
+      } catch (e) {}
+    }
+    if (payload.bannerUrl && String(payload.bannerUrl).indexOf("data:") === 0 && String(payload.bannerUrl).length > 80000) {
+      try {
+        await _db.ref("branding_assets/banner").set({ data: payload.bannerUrl, at: Date.now() });
+        payload.bannerUrl = "firebase:branding_assets/banner";
+        payload.hasBannerAsset = true;
+      } catch (e) {}
+    }
+    if (payload.qrisUrl && String(payload.qrisUrl).indexOf("data:") === 0 && String(payload.qrisUrl).length > 80000) {
+      try {
+        await _db.ref("branding_assets/qris").set({ data: payload.qrisUrl, at: Date.now() });
+        payload.qrisUrl = "firebase:branding_assets/qris";
+        payload.hasQrisAsset = true;
+      } catch (e) {}
+    }
+    await _db.ref("settings").set(payload);
+    _lastSettings = payload;
+    setLocalSettings({ ...next, ...payload });
     return { ok: true, mode: "global" };
   } catch (e) {
-    return { ok: true, mode: "local", error: String(e) };
+    console.error("[settings] save", e);
+    return { ok: false, mode: "local", error: String(e && e.message ? e.message : e) };
   }
+}
+
+async function resolveBrandingAsset(url) {
+  if (!url || typeof url !== "string") return url || "";
+  if (url.indexOf("data:") === 0 || url.indexOf("http") === 0 || url.indexOf("blob:") === 0) return url;
+  if (url.indexOf("firebase:branding_assets/") !== 0) return url;
+  const key = url.replace("firebase:", "");
+  if (!isGlobalConfigured()) return "";
+  initFirebase();
+  if (!_db) return "";
+  try {
+    const snap = await _db.ref(key).once("value");
+    const v = snap.val();
+    if (v && v.data) return v.data;
+  } catch (e) {}
+  return "";
 }
 
 async function getProdukGlobal() {
@@ -554,6 +621,7 @@ window.VoxyyOrders = {
   initFirebase,
   getSettings,
   saveSettingsGlobal,
+  resolveBrandingAsset,
   getProdukGlobal,
   saveProdukGlobal,
   onSettingsChange,

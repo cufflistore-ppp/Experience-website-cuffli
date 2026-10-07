@@ -491,14 +491,31 @@
 
       // ===== SUNTIK: simpan ke Firebase (status Menunggu Link) supaya semua device bisa lanjut =====
       if (isSuntik) {
+        // Foto bukti TF = gambar dari galeri pembeli
         var buktiData = _buktiDataUrl;
-        // kompres bukti biar tidak gagal di Firebase / localStorage
-        /* bukti apa adanya — yang penting order + link berhasil */
-
+        try {
+          if (buktiData && buktiData.length > 250000) {
+            buktiData = await new Promise(function (resolve) {
+              var img = new Image();
+              img.onload = function () {
+                var c = document.createElement("canvas");
+                var max = 1200;
+                var w = img.width, h = img.height;
+                if (w > max) { h = Math.round((h * max) / w); w = max; }
+                c.width = w; c.height = h;
+                c.getContext("2d").drawImage(img, 0, 0, w, h);
+                resolve(c.toDataURL("image/jpeg", 0.82));
+              };
+              img.onerror = function () { resolve(_buktiDataUrl); };
+              img.src = _buktiDataUrl;
+            });
+          }
+        } catch (e) { buktiData = _buktiDataUrl; }
 
         var draft = Object.assign({}, order, {
           bukti: buktiData,
           buktiAt: Date.now(),
+          hasBukti: true,
           status: "Menunggu Link",
           isJasa: true,
           isSuntik: true,
@@ -512,22 +529,37 @@
           if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
             try { window.VoxyyOrders.initFirebase(); } catch (e) {}
           }
-          var saveRes = null;
-          if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
-            saveRes = await window.VoxyyOrders.addOrder(draft);
-          } else if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
-            saveRes = await window.VoxyyOrders.updateOrderByKode(draft.kode, draft);
-          } else {
-            throw new Error("Sistem order belum siap");
-          }
-          if (saveRes && saveRes.ok === false) {
-            // coba tanpa bukti base64 — tetap lanjut ke isi link
+          var bk = String(draft.kode || "").trim().toUpperCase().replace(/[.#$\[\]]/g, "_");
+          // Simpan foto asli ke Firebase supaya admin lihat gambarnya
+          if (window.firebase && firebase.apps && firebase.apps.length && bk && buktiData) {
+            var db = firebase.database();
             try {
-              var light = Object.assign({}, draft, { hasBukti: true, bukti: "" });
-              saveRes = await window.VoxyyOrders.addOrder(light);
-            } catch (e2) {}
-            // jangan blok user — link page yang penting
+              await db.ref("order_bukti/" + bk).set({
+                bukti: buktiData,
+                at: Date.now(),
+                kode: draft.kode,
+              });
+            } catch (e1) { console.warn("order_bukti", e1); }
+            try {
+              await db.ref("orders/" + bk).set(Object.assign({}, draft, {
+                bukti: buktiData,
+                hasBukti: true,
+              }));
+            } catch (e2) {
+              try {
+                await db.ref("orders/" + bk).set(Object.assign({}, draft, {
+                  bukti: "",
+                  hasBukti: true,
+                }));
+              } catch (e3) {}
+            }
           }
+          try {
+            if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
+              await window.VoxyyOrders.addOrder(draft);
+            }
+          } catch (eAdd) {}
+
           // backup lokal (tanpa bukti besar jika gagal)
           try {
             sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify({
@@ -576,10 +608,40 @@
 
       // ===== NON-SUNTIK: langsung ke admin =====
       try {
+        var buktiNS = _buktiDataUrl;
+        try {
+          if (buktiNS && buktiNS.length > 250000) {
+            buktiNS = await new Promise(function (resolve) {
+              var img = new Image();
+              img.onload = function () {
+                var c = document.createElement("canvas");
+                var max = 1200;
+                var w = img.width, h = img.height;
+                if (w > max) { h = Math.round((h * max) / w); w = max; }
+                c.width = w; c.height = h;
+                c.getContext("2d").drawImage(img, 0, 0, w, h);
+                resolve(c.toDataURL("image/jpeg", 0.82));
+              };
+              img.onerror = function () { resolve(_buktiDataUrl); };
+              img.src = _buktiDataUrl;
+            });
+          }
+        } catch (eC) { buktiNS = _buktiDataUrl; }
+
+        var bkNS = String(order.kode || "").trim().toUpperCase().replace(/[.#$\[\]]/g, "_");
+        if (window.firebase && firebase.apps && firebase.apps.length && bkNS && buktiNS) {
+          try {
+            await firebase.database().ref("order_bukti/" + bkNS).set({
+              bukti: buktiNS, at: Date.now(), kode: order.kode
+            });
+          } catch (eB) {}
+        }
+
         if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
           await window.VoxyyOrders.updateOrderByKode(order.kode, {
             status: "Menunggu Verifikasi",
-            bukti: _buktiDataUrl,
+            bukti: buktiNS,
+            hasBukti: true,
             buktiAt: Date.now(),
             finalAmount: order.finalAmount,
             total: order.total,
@@ -594,7 +656,8 @@
           });
           if (idx >= 0) {
             orders[idx].status = "Menunggu Verifikasi";
-            orders[idx].bukti = _buktiDataUrl;
+            orders[idx].bukti = buktiNS;
+            orders[idx].hasBukti = true;
             orders[idx].buktiAt = Date.now();
             localStorage.setItem("voxyy_orders", JSON.stringify(orders));
           }

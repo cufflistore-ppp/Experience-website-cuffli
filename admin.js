@@ -605,6 +605,76 @@ function toggleFormOrder() {
 }
 
 
+
+function isRealBuktiUrl(b) {
+  if (!b || typeof b !== "string") return false;
+  var s = b.trim();
+  if (s.indexOf("data:image") === 0) return true;
+  if (s.indexOf("http://") === 0 || s.indexOf("https://") === 0) return true;
+  if (s.indexOf("blob:") === 0) return true;
+  return false;
+}
+
+function buktiBlockHtml(o) {
+  var b = (o && (o.bukti || o.buktiTf || o.buktiURL)) || "";
+  var kode = (o && o.kode) || "";
+  if (isRealBuktiUrl(b)) {
+    return (
+      '<div style="margin-top:8px;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div>' +
+      '<a href="' + escapeHtml(b) + '" target="_blank" rel="noopener">' +
+      '<img src="' + escapeHtml(b) + '" alt="Bukti TF" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #1e2a45;display:block;object-fit:contain;background:#0a0e18;" onerror="this.style.display=\'none\';this.nextSibling&&(this.nextSibling.style.display=\'block\');">' +
+      '<span style="display:none;font-size:12px;color:#ef9a9a;">Gagal muat gambar</span></a></div>'
+    );
+  }
+  // placeholder / pending load from Firebase
+  if (o && (o.hasBukti || b === "[fb]" || b === "[stored]" || b === "[retry]" || b === "[fb-fail]")) {
+    return (
+      '<div style="margin-top:8px;" id="buktiWrap_' + escapeHtml(kode) + '">' +
+      '<div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div>' +
+      '<div style="font-size:12px;color:#8aa0b8;">Memuat foto bukti…</div></div>'
+    );
+  }
+  return '<div style="margin-top:6px;font-size:11px;color:#ef9a9a;">Belum ada bukti TF</div>';
+}
+
+async function enrichBuktiImages(orders) {
+  if (!orders || !orders.length) return;
+  for (var i = 0; i < orders.length; i++) {
+    var o = orders[i];
+    if (!o || !o.kode) continue;
+    if (isRealBuktiUrl(o.bukti)) {
+      // pastikan img ada di DOM (kalau sudah dari buktiBlockHtml, skip)
+      continue;
+    }
+    try {
+      var url = "";
+      if (window.VoxyyOrders && typeof window.VoxyyOrders.getBuktiByKode === "function") {
+        url = await window.VoxyyOrders.getBuktiByKode(o.kode);
+      }
+      if (!isRealBuktiUrl(url)) continue;
+      o.bukti = url;
+      var wrap = document.getElementById("buktiWrap_" + o.kode);
+      var html =
+        '<div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div>' +
+        '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' +
+        '<img src="' + escapeHtml(url) + '" alt="Bukti TF" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #1e2a45;display:block;object-fit:contain;background:#0a0e18;"></a>';
+      if (wrap) {
+        wrap.innerHTML = html;
+      } else {
+        // cari card by kode text
+        var cards = document.querySelectorAll(".order-card");
+        for (var c = 0; c < cards.length; c++) {
+          if ((cards[c].textContent || "").indexOf(o.kode) >= 0) {
+            var slot = cards[c].querySelector("[id^=buktiWrap_]") || null;
+            if (slot) slot.innerHTML = html;
+            break;
+          }
+        }
+      }
+    } catch (e) {}
+  }
+}
+
 async function loadPesanan(force) {
   // Jangan re-render list kalau admin lagi pilih file / ketik URL / lagi kirim
   // (re-render = file input hilang → keluar-masuk kesal)
@@ -676,7 +746,7 @@ async function loadPesanan(force) {
             <br><small style="color:#cfd8e3;font-weight:600;">${escapeHtml(o.paket || "-")}</small>
             <br><small style="color:#90caf9;">Harga: ${escapeHtml(String(total))}</small>
             <br><small style="color:#6a7a90;">${escapeHtml(String(o.waktu || ""))}</small>
-            ${o.bukti ? `<div style="margin-top:8px;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div><a href="${escapeHtml(o.bukti)}" target="_blank"><img src="${escapeHtml(o.bukti)}" alt="Bukti TF" style="max-width:100%;max-height:160px;border-radius:8px;border:1px solid #1e2a45;display:block;"></a></div>` : `<div style="margin-top:6px;font-size:11px;color:#ef9a9a;">Belum ada bukti TF</div>`}
+            ${buktiBlockHtml(o)}
             ${(o.targetLink || o.linkTarget || o.linkJasa) ? `<div style="margin-top:10px;padding:10px;background:#0a0e18;border-radius:10px;border:1px solid #1e2a45;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">🔗 Link target jasa</div><div style="font-size:12px;color:#e3eaf2;word-break:break-all;margin-bottom:8px;">${escapeHtml(o.targetLink || o.linkTarget || o.linkJasa)}</div><button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;font-size:12px;" onclick="navigator.clipboard.writeText('${escapeHtml(String(o.targetLink || o.linkTarget || o.linkJasa).replace(/'/g, ""))}').then(function(){if(window.showAdmToast)showAdmToast('Link disalin');else alert('Link disalin');})"><i class="fa-solid fa-copy"></i> Salin link</button></div>` : (isOrderJasa(o) ? `<div style="margin-top:8px;font-size:11px;color:#ffb74d;">Menunggu pembeli isi link target…</div>` : "")}
           </div>
           <div style="text-align:right;">
@@ -1520,7 +1590,7 @@ function pilihWarna(el) {
   localStorage.setItem("voxyy_bg_color", c);
 }
 
-function simpanTampilan() {
+async function simpanTampilan() {
   const bg = document.getElementById("bgColorHex").value.trim() || "#0a0e18";
   let logo = document.getElementById("logoUrl").value.trim() || "logo.png";
   let banner = document.getElementById("bannerUrl").value.trim() || "banner.jpg";
@@ -1528,42 +1598,72 @@ function simpanTampilan() {
   const bannerText = (document.getElementById("bannerUrlText") || {}).value;
   if (logoText && String(logoText).trim()) logo = String(logoText).trim();
   if (bannerText && String(bannerText).trim()) banner = String(bannerText).trim();
-  saveSettings({
+
+  // kompres ringan logo/banner base64 biar kuat ke Firebase (tetap foto asli)
+  async function lightImg(dataUrl, max) {
+    if (!dataUrl || String(dataUrl).indexOf("data:") !== 0) return dataUrl;
+    if (String(dataUrl).length < 180000) return dataUrl;
+    return await new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement("canvas");
+        var w = img.width, h = img.height;
+        if (w > max) { h = Math.round((h * max) / w); w = max; }
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = function () { resolve(dataUrl); };
+      img.src = dataUrl;
+    });
+  }
+  try {
+    logo = await lightImg(logo, 512);
+    banner = await lightImg(banner, 1200);
+  } catch (e) {}
+
+  var payload = {
     logoUrl: logo,
     bannerUrl: banner,
     bgColor: bg,
-  });
+    updatedAt: Date.now(),
+  };
+  // local dulu
+  saveSettings(payload);
   document.body.style.background = bg;
   localStorage.setItem("voxyy_bg_color", bg);
   const pl = document.getElementById("previewLogo");
   const pb = document.getElementById("previewBanner");
   if (pl) pl.src = logo;
   if (pb) pb.src = banner;
-  alert("Foto logo & banner disimpan! Muncul di semua halaman & device.");
-  if (window.VoxyyBranding && window.VoxyyBranding.apply) {
-    window.VoxyyBranding.apply(getSettings());
-  } else if (window.applyBranding) {
-    window.applyBranding(getSettings());
-  }
-  // update admin header sekarang
+
+  var res = { ok: true, mode: "local" };
   try {
-    var s2 = getSettings();
-    var logo2 = s2.logoUrl || s2.logo || "logo.png";
-    var nama2 = s2.namaToko || "VOXY MARKET";
+    if (window.VoxyyOrders && window.VoxyyOrders.saveSettingsGlobal) {
+      res = await window.VoxyyOrders.saveSettingsGlobal(payload);
+    }
+  } catch (e) {
+    res = { ok: false, error: String(e && e.message ? e.message : e) };
+  }
+
+  if (window.VoxyyBranding && window.VoxyyBranding.apply) {
+    window.VoxyyBranding.apply(Object.assign({}, getSettings(), payload));
+  } else if (window.applyBranding) {
+    window.applyBranding(Object.assign({}, getSettings(), payload));
+  }
+  try {
     var el = document.getElementById("adminBrandLogo");
-    if (el) el.src = logo2;
+    if (el) el.src = logo;
     document.querySelectorAll(".adm-topnav .brand img").forEach(function (im) {
-      im.src = logo2;
+      im.src = logo;
     });
-    var t = document.getElementById("adminBrandTitle");
-    if (t) {
-      var base = String(nama2).replace(/\s*MARKET\s*$/i, "").trim() || "VOXY";
-      t.innerHTML = base + ' <span style="color:#64b5f6">ADMIN</span> <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
-    }
-    if (s2.bgColor) {
-      document.body.style.background = s2.bgColor;
-    }
   } catch (e) {}
+
+  if (res && res.mode === "global" && res.ok !== false) {
+    alert("Tersimpan ke server.\nLogo, banner, warna muncul di SEMUA device/pengunjung.");
+  } else {
+    alert("Tersimpan di HP ini, tapi gagal ke server.\nCek internet / Firebase.\n" + (res && res.error ? res.error : ""));
+  }
 }
 
 /* ========== PENGATURAN ========== */
@@ -2137,3 +2237,8 @@ window.loadLaporanAdm = loadLaporanAdm;
 window.simpanProduk = simpanProduk;
 window.toggleFormProduk = toggleFormProduk;
 window.loadProdukAdm = loadProdukAdm;
+
+window.gantiStatusSelect = gantiStatusSelect;
+window.ubahStatusKode = ubahStatusKode;
+window.loadPesanan = loadPesanan;
+window.buktiBlockHtml = buktiBlockHtml;
