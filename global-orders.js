@@ -260,26 +260,47 @@ async function getBuktiByKode(kode) {
   if (!kode) return "";
   const key = kodeKey(kode);
   const up = String(kode).toUpperCase();
+  function ok(b) {
+    return b && typeof b === "string" && (b.indexOf("data:image") === 0 || /^https?:\/\//i.test(b));
+  }
   try {
     const orders = await getOrders();
     const o = (orders || []).find(function (x) {
-      return String(x.kode || "").toUpperCase() === up;
+      return String(x.kode || "").toUpperCase() === up || String(x._id || "").toUpperCase() === up;
     });
-    if (o && o.bukti && String(o.bukti).indexOf("data:") === 0) return o.bukti;
-    if (o && o.bukti && /^https?:\/\//i.test(String(o.bukti))) return o.bukti;
+    if (o && ok(o.bukti)) return o.bukti;
+    if (o && ok(o.buktiTf)) return o.buktiTf;
+    if (o && ok(o.buktiURL)) return o.buktiURL;
   } catch (e) {}
   if (!isGlobalConfigured()) return "";
   initFirebase();
   if (!_db) return "";
-  try {
-    const snap = await _db.ref("order_bukti/" + key).once("value");
-    const v = snap.val();
-    if (v && v.bukti && String(v.bukti).length > 20) return v.bukti;
-  } catch (e) {}
+  // order_bukti paths
+  const paths = ["order_bukti/" + key, "order_bukti/" + up, "bukti/" + key];
+  for (var i = 0; i < paths.length; i++) {
+    try {
+      const snap = await _db.ref(paths[i]).once("value");
+      const v = snap.val();
+      if (v && ok(v.bukti)) return v.bukti;
+      if (v && ok(v.data)) return v.data;
+      if (ok(v)) return v;
+    } catch (e) {}
+  }
   try {
     const snap2 = await _db.ref("orders/" + key).once("value");
     const o2 = snap2.val();
-    if (o2 && o2.bukti && String(o2.bukti).indexOf("data:") === 0) return o2.bukti;
+    if (o2 && ok(o2.bukti)) return o2.bukti;
+  } catch (e) {}
+  // scan all orders for kode
+  try {
+    const all = await _db.ref("orders").once("value");
+    const val = all.val() || {};
+    var found = "";
+    Object.keys(val).forEach(function (k) {
+      var o = val[k] || {};
+      if (String(o.kode || k).toUpperCase() === up && ok(o.bukti)) found = o.bukti;
+    });
+    if (found) return found;
   } catch (e) {}
   return "";
 }

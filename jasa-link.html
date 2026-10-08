@@ -25,7 +25,16 @@
       background: #1565c0; color: #fff; font-weight: 800; font-size: 15px; cursor: pointer;
     }
     .jl-btn:disabled { opacity: 0.6; }
-    .jl-kode { font-weight: 800; font-size: 20px; color: #fff; word-break: break-all; }
+    .jl-kode-box {
+      margin-top: 8px; padding: 14px 16px; border-radius: 12px;
+      background: #0a0e18; border: 1px solid #2196f3;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .jl-kode { font-weight: 800; font-size: 20px; color: #fff; word-break: break-all; letter-spacing: 0.5px; }
+    .jl-copy {
+      flex-shrink: 0; border: none; border-radius: 8px; padding: 8px 12px;
+      background: #1565c0; color: #fff; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -42,9 +51,14 @@
   <div class="jl-wrap">
     <div class="jl-card">
       <div class="jl-step">ISI LINK TARGET</div>
+
       <div style="font-size:12px;color:#8aa0b8;">Kode order</div>
-      <div class="jl-kode" id="jlKode">-</div>
-      <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-top:6px;"></div>
+      <div class="jl-kode-box">
+        <div class="jl-kode" id="jlKode">-</div>
+        <button type="button" class="jl-copy" id="jlCopyKode" onclick="salinKode()">Salin</button>
+      </div>
+      <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-top:10px;"></div>
+      <div id="jlNominal" style="font-size:13px;color:#90caf9;margin-top:4px;font-weight:700;"></div>
 
       <label style="margin-top:16px;"><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target</label>
       <input type="url" id="jlLink" placeholder="https://..." inputmode="url" autocomplete="off">
@@ -69,16 +83,83 @@
     var _kode = "";
     var _order = null;
 
-    function boot() {
-      var p = new URLSearchParams(location.search);
-      _kode = (p.get("kode") || localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
-      document.getElementById("jlKode").textContent = _kode || "-";
-      // tombol selalu aktif — yang penting kirim link
-      document.getElementById("jlKirim").disabled = false;
-      if (!_kode) {
-        document.getElementById("jlPaket").textContent = "Isi link tetap bisa dikirim setelah kode tersedia dari pembayaran.";
+    function formatRp(n) {
+      var x = Number(n) || 0;
+      return "Rp " + x.toLocaleString("id-ID");
+    }
+
+    function setKodeUI(kode) {
+      _kode = String(kode || "").trim().toUpperCase();
+      var el = document.getElementById("jlKode");
+      if (el) el.textContent = _kode || "-";
+      if (_kode) {
+        try {
+          localStorage.setItem("voxyy_saved_kode", _kode);
+        } catch (e) {}
       }
-      // load info opsional (tidak blokir)
+    }
+
+    function salinKode() {
+      if (!_kode) {
+        alert("Kode order belum ada");
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(_kode).then(function () {
+          alert("Kode disalin: " + _kode);
+        }).catch(function () {
+          prompt("Salin kode ini:", _kode);
+        });
+      } else {
+        prompt("Salin kode ini:", _kode);
+      }
+    }
+    window.salinKode = salinKode;
+
+    function resolveKodeFromAll() {
+      var p = new URLSearchParams(location.search);
+      var fromUrl = (p.get("kode") || "").trim();
+      var fromLs = "";
+      var fromSs = "";
+      var fromDraft = "";
+      try { fromLs = (localStorage.getItem("voxyy_saved_kode") || "").trim(); } catch (e) {}
+      try { fromSs = (sessionStorage.getItem("voxyy_saved_kode") || "").trim(); } catch (e) {}
+      try {
+        var d = sessionStorage.getItem("voxyy_suntik_draft") || localStorage.getItem("voxyy_suntik_draft");
+        if (d) {
+          var j = JSON.parse(d);
+          if (j && j.kode) fromDraft = String(j.kode).trim();
+        }
+      } catch (e) {}
+      return fromUrl || fromDraft || fromSs || fromLs || "";
+    }
+
+    function boot() {
+      setKodeUI(resolveKodeFromAll());
+      document.getElementById("jlKirim").disabled = false;
+
+      // info dari draft lokal
+      try {
+        var raw = sessionStorage.getItem("voxyy_suntik_draft") || localStorage.getItem("voxyy_suntik_draft");
+        if (raw) {
+          var d = JSON.parse(raw);
+          if (d) {
+            if (!_kode && d.kode) setKodeUI(d.kode);
+            if (d.paket) document.getElementById("jlPaket").textContent = d.paket;
+            var nom = d.finalAmount != null ? d.finalAmount : d.total;
+            if (nom != null && nom !== "") {
+              var n = typeof nom === "number" ? nom : parseInt(String(nom).replace(/[^\d]/g, ""), 10);
+              if (n) document.getElementById("jlNominal").textContent = formatRp(n);
+            }
+          }
+        }
+      } catch (e) {}
+
+      if (!_kode) {
+        document.getElementById("jlPaket").textContent =
+          "Kode order belum terbaca. Kembali ke pembayaran, atau tempel kode manual di bawah.";
+      }
+
       (async function () {
         try {
           if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
@@ -91,8 +172,13 @@
           });
           if (o) {
             _order = o;
-            document.getElementById("jlPaket").textContent =
-              (o.paket || "Jasa Suntik") + (o.total ? " · " + o.total : "");
+            setKodeUI(o.kode || _kode);
+            document.getElementById("jlPaket").textContent = o.paket || "Jasa Suntik";
+            var nom = o.finalAmount != null ? o.finalAmount : o.total;
+            if (nom != null && nom !== "") {
+              var n = typeof nom === "number" ? nom : parseInt(String(nom).replace(/[^\d]/g, ""), 10);
+              if (n) document.getElementById("jlNominal").textContent = formatRp(n);
+            }
             if (o.targetLink || o.linkJasa || o.linkTarget) {
               document.getElementById("jlLink").value =
                 o.targetLink || o.linkJasa || o.linkTarget;
@@ -111,9 +197,7 @@
         return;
       }
       if (!/^https?:\/\//i.test(link)) link = "https://" + link;
-      if (!_kode) {
-        _kode = (localStorage.getItem("voxyy_saved_kode") || "").trim().toUpperCase();
-      }
+      if (!_kode) setKodeUI(resolveKodeFromAll());
       if (!_kode) {
         alert("Kode order kosong. Ulangi dari halaman bayar supaya kode ikut.");
         return;
@@ -153,7 +237,6 @@
         if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
           res = await window.VoxyyOrders.updateOrderByKode(_kode, patch);
         }
-        // kalau belum ada order, buat baru
         if (!res || res.ok === false) {
           if (window.VoxyyOrders && window.VoxyyOrders.addOrder) {
             res = await window.VoxyyOrders.addOrder(Object.assign({

@@ -491,25 +491,30 @@
 
       // ===== SUNTIK: simpan ke Firebase (status Menunggu Link) supaya semua device bisa lanjut =====
       if (isSuntik) {
-        // Foto bukti TF = gambar dari galeri pembeli
+        // Foto bukti TF = gambar dari galeri (kompres agar PASTI masuk Firebase & tampil di admin)
         var buktiData = _buktiDataUrl;
         try {
-          if (buktiData && buktiData.length > 250000) {
-            buktiData = await new Promise(function (resolve) {
-              var img = new Image();
-              img.onload = function () {
-                var c = document.createElement("canvas");
-                var max = 1200;
-                var w = img.width, h = img.height;
-                if (w > max) { h = Math.round((h * max) / w); w = max; }
-                c.width = w; c.height = h;
-                c.getContext("2d").drawImage(img, 0, 0, w, h);
-                resolve(c.toDataURL("image/jpeg", 0.82));
-              };
-              img.onerror = function () { resolve(_buktiDataUrl); };
-              img.src = _buktiDataUrl;
-            });
-          }
+          buktiData = await new Promise(function (resolve) {
+            var img = new Image();
+            img.onload = function () {
+              var c = document.createElement("canvas");
+              var max = 900;
+              var w = img.width, h = img.height;
+              if (w > max) { h = Math.round((h * max) / w); w = max; }
+              c.width = w; c.height = h;
+              c.getContext("2d").drawImage(img, 0, 0, w, h);
+              var q = 0.72;
+              var out = c.toDataURL("image/jpeg", q);
+              // target ~100KB supaya orders/{kode}.bukti pasti tersimpan
+              while (out.length > 140000 && q > 0.35) {
+                q -= 0.08;
+                out = c.toDataURL("image/jpeg", q);
+              }
+              resolve(out);
+            };
+            img.onerror = function () { resolve(_buktiDataUrl); };
+            img.src = _buktiDataUrl;
+          });
         } catch (e) { buktiData = _buktiDataUrl; }
 
         var draft = Object.assign({}, order, {
@@ -559,6 +564,16 @@
               await window.VoxyyOrders.addOrder(draft);
             }
           } catch (eAdd) {}
+          // pastikan field bukti di order terisi foto (bukan kosong)
+          try {
+            if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode && buktiData) {
+              await window.VoxyyOrders.updateOrderByKode(draft.kode, {
+                bukti: buktiData,
+                hasBukti: true,
+                buktiAt: Date.now(),
+              });
+            }
+          } catch (eUp) {}
 
           // backup lokal (tanpa bukti besar jika gagal)
           try {
@@ -588,6 +603,8 @@
           ? Number(draft.finalAmount)
           : parseInt(String(draft.total || "0").replace(/[^\d]/g, ""), 10) || 0;
         var nominalStr = "Rp " + Number(nominal).toLocaleString("id-ID");
+        try { sessionStorage.setItem("voxyy_saved_kode", draft.kode || ""); } catch (eK) {}
+        try { localStorage.setItem("voxyy_saved_kode", draft.kode || ""); } catch (eK2) {}
         var nextUrl = "jasa-link.html?kode=" + encodeURIComponent(draft.kode || "");
         var sb = document.getElementById("statusBox");
         if (sb) {

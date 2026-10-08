@@ -622,19 +622,14 @@ function buktiBlockHtml(o) {
     return (
       '<div style="margin-top:8px;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div>' +
       '<a href="' + escapeHtml(b) + '" target="_blank" rel="noopener">' +
-      '<img src="' + escapeHtml(b) + '" alt="Bukti TF" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #1e2a45;display:block;object-fit:contain;background:#0a0e18;" onerror="this.style.display=\'none\';this.nextSibling&&(this.nextSibling.style.display=\'block\');">' +
-      '<span style="display:none;font-size:12px;color:#ef9a9a;">Gagal muat gambar</span></a></div>'
+      '<img src="' + escapeHtml(b) + '" alt="Bukti TF" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #1e2a45;display:block;object-fit:contain;background:#0a0e18;"></a></div>'
     );
   }
-  // placeholder / pending load from Firebase
-  if (o && (o.hasBukti || b === "[fb]" || b === "[stored]" || b === "[retry]" || b === "[fb-fail]")) {
-    return (
-      '<div style="margin-top:8px;" id="buktiWrap_' + escapeHtml(kode) + '">' +
-      '<div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div>' +
-      '<div style="font-size:12px;color:#8aa0b8;">Memuat foto bukti…</div></div>'
-    );
-  }
-  return '<div style="margin-top:6px;font-size:11px;color:#ef9a9a;">Belum ada bukti TF</div>';
+  return (
+    '<div style="margin-top:8px;" id="buktiWrap_' + escapeHtml(kode) + '">' +
+    '<div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">📷 Bukti TF</div>' +
+    '<div style="font-size:12px;color:#8aa0b8;">Foto belum tersedia</div></div>'
+  );
 }
 
 async function enrichBuktiImages(orders) {
@@ -683,6 +678,24 @@ async function loadPesanan(force) {
     return;
   }
   const orders = await fetchOrders();
+  // Ambil foto bukti asli SEBELUM render (supaya langsung muncul gambar)
+  try {
+    for (var hi = 0; hi < (orders || []).length; hi++) {
+      var ho = orders[hi];
+      if (!ho || !ho.kode) continue;
+      if (isRealBuktiUrl(ho.bukti)) continue;
+      if (window.VoxyyOrders && window.VoxyyOrders.getBuktiByKode) {
+        try {
+          var hb = await window.VoxyyOrders.getBuktiByKode(ho.kode);
+          if (isRealBuktiUrl(hb)) {
+            ho.bukti = hb;
+            ho.hasBukti = true;
+          }
+        } catch (eH) {}
+      }
+    }
+  } catch (eHyd) {}
+
   const filter = (document.getElementById("filterStatus") || {}).value || "aktif";
   let filtered = orders.slice();
 
