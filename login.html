@@ -153,8 +153,12 @@
       if (q) {
         try {
           q = decodeURIComponent(q);
-          if (q.indexOf("://") < 0 && q.indexOf("login") < 0 && q.indexOf("daftar") < 0) {
-            target = q;
+          // tolak external & halaman auth
+          if (q.indexOf("://") < 0 && q.indexOf("//") !== 0) {
+            var low = q.toLowerCase();
+            if (low.indexOf("login") !== 0 && low.indexOf("daftar") !== 0) {
+              target = q; // contoh: jasa-link?kode=VM-xxx atau home.html
+            }
           }
         } catch (e) {}
       }
@@ -166,6 +170,29 @@
       el.textContent = msg || "";
       el.classList.toggle("show", !!msg);
     }
+
+    // Sudah login? Jangan tampil form — langsung masuk
+    (function alreadyLoggedInCheck() {
+      var n = 0;
+      function tick() {
+        n++;
+        try {
+          if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
+            window.VoxyyAuth.onAuthChange(function (user) {
+              if (user) {
+                try { afterLoginRedirect(user); } catch (e) {
+                  location.href = "home.html";
+                }
+              }
+            });
+            return;
+          }
+        } catch (e) {}
+        if (n < 50) setTimeout(tick, 100);
+      }
+      tick();
+    })();
+
     async function doLogin() {
       var email = (document.getElementById("loginEmail").value || "").trim();
       var pass = document.getElementById("loginPass").value || "";

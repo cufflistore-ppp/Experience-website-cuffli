@@ -108,10 +108,26 @@
     return null;
   }
 
+  function markLoggedIn(user) {
+    try {
+      if (user) {
+        localStorage.setItem("voxyy_logged_in", "1");
+        if (user.email) localStorage.setItem("voxyy_user_email", String(user.email));
+      }
+    } catch (e) {}
+  }
+  function markLoggedOut() {
+    try {
+      localStorage.removeItem("voxyy_logged_in");
+      localStorage.removeItem("voxyy_user_email");
+    } catch (e) {}
+  }
+
   async function logout() {
     const auth = ensureAuth();
     if (!auth) return;
     await auth.signOut();
+    markLoggedOut();
   }
 
   function onAuthChange(fn) {
