@@ -756,7 +756,7 @@ async function loadPesanan(force) {
             <br><small style="color:#90caf9;">Harga: ${escapeHtml(String(total))}</small>
             <br><small style="color:#6a7a90;">${escapeHtml(String(o.waktu || ""))}</small>
             ${buktiBlockHtml(o)}
-            ${(o.targetLink || o.linkTarget || o.linkJasa) ? `<div style="margin-top:10px;padding:10px;background:#0a0e18;border-radius:10px;border:1px solid #1e2a45;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">🔗 Link target jasa</div><div style="font-size:12px;color:#e3eaf2;word-break:break-all;margin-bottom:8px;">${escapeHtml(o.targetLink || o.linkTarget || o.linkJasa)}</div><button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;font-size:12px;" onclick="navigator.clipboard.writeText('${escapeHtml(String(o.targetLink || o.linkTarget || o.linkJasa).replace(/'/g, ""))}').then(function(){if(window.showAdmToast)showAdmToast('Link disalin');else alert('Link disalin');})"><i class="fa-solid fa-copy"></i> Salin link</button></div>` : (isOrderJasa(o) ? `<div style="margin-top:8px;font-size:11px;color:#ffb74d;">Menunggu pembeli isi link target…</div>` : "")}
+            ${(o.targetLink || o.linkTarget || o.linkJasa) ? `<div style="margin-top:10px;padding:10px;background:#0a0e18;border-radius:10px;border:1px solid #1e2a45;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">🔗 Link target jasa</div><div style="font-size:12px;color:#e3eaf2;word-break:break-all;margin-bottom:8px;">${escapeHtml(o.targetLink || o.linkTarget || o.linkJasa)}</div><button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;font-size:12px;" onclick="navigator.clipboard.writeText('${escapeHtml(String(o.targetLink || o.linkTarget || o.linkJasa).replace(/'/g, ""))}').then(function(){if(window.showAdmToast)showAdmToast('Link disalin');else alert('Link disalin');})"><i class="fa-solid fa-copy"></i> Salin link</button></div>` : (isOrderSuntik(o) ? `<div style="margin-top:8px;font-size:11px;color:#ffb74d;">Menunggu pembeli isi link target…</div>` : "")}
           </div>
           <div style="text-align:right;">
             <span class="badge-st ${cls}">${escapeHtml((function(st){st=String(st||"").trim();if(!st||/belum\s*bayar/i.test(st))return "Menunggu Verifikasi";return st;})(o.status))}</span>
@@ -765,7 +765,7 @@ async function loadPesanan(force) {
 
         ${isOrderJasa(o) ? `
         <div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e2a45;">
-          <div style="font-size:11px;color:#90caf9;margin-bottom:8px;font-weight:700;">Jasa suntik — salin link & ubah status saja</div>
+          <div style="font-size:11px;color:#90caf9;margin-bottom:8px;font-weight:700;">${isOrderSuntik(o) ? "Jasa suntik — salin link & ubah status saja" : "Jasa biasa — ubah status saja (tanpa file/URL)"}</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
             <select id="st_${kode}" style="flex:1;min-width:140px;padding:8px 10px;border-radius:8px;background:#0d1220;border:1px solid #1e2a45;color:#fff;font-size:12px;" onchange="gantiStatusSelect('${kode}', this.value)">
               <option value="Menunggu Verifikasi" ${!(String(o.status||'').toLowerCase().includes('sukses')||String(o.status||'').toLowerCase().includes('selesai')||String(o.status||'').toLowerCase().includes('tolak')||String(o.status||'').toLowerCase().includes('proses'))?'selected':''}>Menunggu Verifikasi</option>
@@ -959,12 +959,28 @@ async function tandaiSukses(kode) {
 }
 window.tandaiSukses = tandaiSukses;
 
-function isOrderJasa(o) {
-  // UI khusus (link + status, tanpa file) HANYA untuk suntik
+function isOrderSuntik(o) {
   if (!o) return false;
+  if (o.isSuntik) return true;
   var p = String(o.paket || o.judul || "").toLowerCase();
   return p.indexOf("suntik") >= 0;
 }
+
+function isOrderJasa(o) {
+  // Semua jasa (suntik + jasa biasa): admin cukup ubah status, tanpa file/URL
+  if (!o) return false;
+  if (isOrderSuntik(o)) return true;
+  if (o.isJasa) return true;
+  var p = String(o.paket || o.judul || "").toLowerCase();
+  var k = String(o.kategori || "").toLowerCase();
+  return (
+    k.indexOf("jasa") >= 0 ||
+    p.indexOf("jasa") >= 0 ||
+    p.indexOf("post") >= 0
+  );
+}
+window.isOrderSuntik = isOrderSuntik;
+
 
 
 async function gantiStatusSelect(kode, status) {
