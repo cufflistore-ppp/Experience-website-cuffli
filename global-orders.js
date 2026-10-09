@@ -305,6 +305,46 @@ async function getBuktiByKode(kode) {
   return "";
 }
 
+
+async function getDeliveryFileByKode(kode) {
+  if (!kode) return "";
+  const key = kodeKey(kode);
+  const up = String(kode).toUpperCase();
+  function ok(f) {
+    return f && typeof f === "string" && (
+      f.indexOf("data:") === 0 || /^https?:\/\//i.test(f) || f.indexOf("blob:") === 0
+    );
+  }
+  try {
+    const orders = await getOrders();
+    const o = (orders || []).find(function (x) {
+      return String(x.kode || "").toUpperCase() === up;
+    });
+    if (o) {
+      var f = o.file || o.download || o.fileUrl || "";
+      if (ok(f)) return f;
+      if (String(f).indexOf("firebase:order_files/") === 0) {
+        /* fallthrough */
+      }
+    }
+  } catch (e) {}
+  if (!isGlobalConfigured()) return "";
+  initFirebase();
+  if (!_db) return "";
+  try {
+    const snap = await _db.ref("order_files/" + key).once("value");
+    const v = snap.val();
+    if (v && ok(v.data)) return v.data;
+  } catch (e) {}
+  try {
+    const snap2 = await _db.ref("orders/" + key).once("value");
+    const o2 = snap2.val() || {};
+    var f2 = o2.file || o2.download || o2.fileUrl || "";
+    if (ok(f2)) return f2;
+  } catch (e) {}
+  return "";
+}
+
 async function updateOrderByKode(kode, patch) {
   if (!kode) return { ok: false, error: "kode kosong" };
   const t = String(kode).trim().toUpperCase();
@@ -346,22 +386,51 @@ async function updateOrderByKode(kode, patch) {
         snap = await ref.once("value");
       }
     }
+    async function putDeliveryFile(full) {
+      var f = full.file || full.download || full.fileUrl || "";
+      if (!f || String(f).indexOf("data:") !== 0) return full;
+      if (String(f).length < 120000) return full; // kecil: simpan di order
+      try {
+        await _db.ref("order_files/" + key).set({
+          data: f,
+          name: full.fileName || "produk",
+          at: Date.now(),
+          kode: kode,
+        });
+        full = {
+          ...full,
+          file: "firebase:order_files/" + key,
+          download: "firebase:order_files/" + key,
+          fileUrl: "firebase:order_files/" + key,
+          hasFile: true,
+        };
+      } catch (e) {
+        console.warn("[order_files]", e);
+      }
+      return full;
+    }
+
     if (!snap.exists()) {
-      const src =
+      let src =
         li >= 0
           ? { ...local[li], ...patch, kode: kode }
           : { kode: kode, createdAt: Date.now(), ...patch };
-      await ref.set(stripMeta(src));
+      src = await putDeliveryFile(stripMeta(src));
+      await ref.set(src);
+      // local tetap pakai data asli agar admin device ok
+      if (li >= 0 && patch.file) {
+        local[li] = { ...local[li], ...patch };
+        setLocalOrders(local);
+      }
     } else {
-      // merge full supaya field file pasti masuk
       const cur = snap.val() || {};
-      const merged = stripMeta({ ...cur, ...patch, kode: cur.kode || kode });
-      // jangan hapus bukti/file lama kalau patch kosong / placeholder
+      let merged = stripMeta({ ...cur, ...patch, kode: cur.kode || kode });
       if ((!patch.bukti || String(patch.bukti).indexOf("[") === 0 || patch.bukti === "") && cur.bukti && String(cur.bukti).indexOf("data:") === 0) {
         merged.bukti = cur.bukti;
       }
       if (!patch.file && cur.file) merged.file = cur.file;
       if (!patch.download && cur.download) merged.download = cur.download;
+      merged = await putDeliveryFile(merged);
       await ref.set(merged);
     }
     return { ok: true, mode: "global" };
@@ -630,6 +699,7 @@ window.VoxyyOrders = {
   saveOrders,
   addOrder,
   getBuktiByKode,
+  getDeliveryFileByKode,
   updateOrderByKode,
   updateOrderByIndex,
   updateOrder: updateOrderByKode,

@@ -123,26 +123,36 @@ function renderOrderCard(o) {
 
   let actionHtml = "";
   var stLow = String(o.status || "").toLowerCase();
+  var isHttp = /^https?:\/\//i.test(String(file || ""));
+  var isFbFile = String(file || "").indexOf("firebase:order_files/") === 0;
   if (!file && stLow.indexOf("menunggu link") >= 0) {
     actionHtml =
       '<a href="jasa-link.html?kode=' + encodeURIComponent(kode) + '" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:10px 14px;background:#1565c0;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
       '<i class="fa-solid fa-link"></i> Isi link target</a>';
-  } else if (file) {
-    // File/URL sudah masuk ke kode order ini — tanpa WA
-    const openLabel = isApk ? "Buka / Install APK" : isZip ? "Unduh ZIP" : "Unduh / Buka file";
+  } else if (file && !isFbFile) {
+    // URL http → biru Lihat; APK/ZIP/data → hijau Unduh
+    if (isHttp && !isApk && !isZip) {
+      actionHtml =
+        '<div style="font-size:12px;color:#64b5f6;margin-bottom:6px;font-weight:600;">✓ Link produk siap</div>' +
+        '<a href="' + escapeHtml(file) + '" target="_blank" rel="noopener" ' +
+        'style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#1565c0;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
+        '<i class="fa-solid fa-eye"></i> Lihat / Buka Link</a>';
+    } else {
+      const openLabel = isApk ? "Unduh / Install APK" : isZip ? "Unduh ZIP" : "Unduh file";
+      actionHtml =
+        '<div style="font-size:12px;color:#81c784;margin-bottom:6px;font-weight:600;">✓ Produk sudah di pesanan ini</div>' +
+        '<a href="' + escapeHtml(file) + '" ' +
+        (isData ? 'download="' + escapeHtml(fileName || "produk") + '"' : 'download="' + escapeHtml(fileName || "produk") + '" target="_blank" rel="noopener"') +
+        ' style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
+        '<i class="fa-solid fa-download"></i> ' + escapeHtml(openLabel) +
+        (fileName ? " · " + escapeHtml(fileName) : "") + "</a>";
+    }
+  } else if (file && isFbFile) {
     actionHtml =
-      '<div style="font-size:12px;color:#81c784;margin-bottom:6px;font-weight:600;">✓ Produk sudah masuk ke pesanan ini</div>' +
-      '<a href="' +
-      escapeHtml(file) +
-      '" ' +
-      (isData ? "" : 'target="_blank" rel="noopener"') +
-      ' download="' +
-      escapeHtml(fileName || "produk") +
-      '" style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
-      '<i class="fa-solid fa-download"></i> ' +
-      escapeHtml(openLabel) +
-      (fileName ? " · " + escapeHtml(fileName) : "") +
-      "</a>";
+      '<div style="font-size:12px;color:#81c784;margin-bottom:6px;font-weight:600;">✓ Produk siap</div>' +
+      '<button type="button" onclick="unduhFilePesanan(\'' + escapeHtml(kode) + '\')" ' +
+      'style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#2e7d32;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">' +
+      '<i class="fa-solid fa-download"></i> Unduh file</button>';
   } else if (st.cls === "sukses") {
     actionHtml =
       '<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Admin sedang proses. File akan muncul di kode ini setelah admin kirim.</div>';
@@ -204,11 +214,31 @@ async function renderAntrian() {
     console.warn(e);
   }
 
+  // resolve file APK/ZIP/URL di pesanan (semua device)
+  try {
+    var pre = filterMyOrders(orders);
+    await Promise.all((pre || []).slice(0, 15).map(async function (o) {
+      if (!o || !o.kode) return;
+      var f = o.file || o.download || o.fileUrl || "";
+      if (f && (String(f).indexOf("data:") === 0 || /^https?:\/\//i.test(f))) return;
+      if (window.VoxyyOrders && window.VoxyyOrders.getDeliveryFileByKode) {
+        try {
+          var real = await window.VoxyyOrders.getDeliveryFileByKode(o.kode);
+          if (real) {
+            o.file = real;
+            o.download = real;
+            o.fileUrl = real;
+          }
+        } catch (e) {}
+      }
+    }));
+  } catch (eH) {}
+
   const mine = filterMyOrders(orders);
   // terbaru dulu
   mine.sort((a, b) => {
-    const ta = Date.parse(a.createdAt || a.waktu || 0) || 0;
-    const tb = Date.parse(b.createdAt || b.waktu || 0) || 0;
+    const ta = Date.parse(a.createdAt || a.waktu || 0) || Number(a.dikirimTs || a.createdAt) || 0;
+    const tb = Date.parse(b.createdAt || b.waktu || 0) || Number(b.dikirimTs || b.createdAt) || 0;
     return tb - ta;
   });
 
@@ -255,6 +285,26 @@ async function cekStatus() {
 window.cekStatus = cekStatus;
 window.saveTrackedKode = saveTrackedKode;
 
+async function unduhFilePesanan(kode) {
+  try {
+    var url = "";
+    if (window.VoxyyOrders && window.VoxyyOrders.getDeliveryFileByKode) {
+      url = await window.VoxyyOrders.getDeliveryFileByKode(kode);
+    }
+    if (!url) { alert("File belum tersedia. Coba refresh."); return; }
+    if (/^https?:\/\//i.test(url)) { window.open(url, "_blank"); return; }
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "produk-" + kode;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (e) {
+    alert("Gagal unduh: " + (e.message || e));
+  }
+}
+window.unduhFilePesanan = unduhFilePesanan;
+
 document.addEventListener("DOMContentLoaded", function () {
   renderAntrian();
   if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
@@ -262,5 +312,5 @@ document.addEventListener("DOMContentLoaded", function () {
       renderAntrian();
     });
   }
-  setInterval(renderAntrian, 20000);
+  setInterval(renderAntrian, 8000);
 });

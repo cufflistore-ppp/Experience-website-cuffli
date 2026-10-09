@@ -1228,10 +1228,12 @@ async function kirimLangsung(kode) {
       download: fileUrl,
       fileUrl: fileUrl,
       fileName: fileName || "produk",
+      hasFile: true,
       catatanAdmin: catatan,
       dikirimAt: new Date().toLocaleString("id-ID"),
       dikirimTs: Date.now(),
       kirimVia: file ? "upload" : "url",
+      updatedAt: Date.now(),
     };
 
     const res = await window.VoxyyOrders.updateOrderByKode(kode, payload);
