@@ -1,6 +1,6 @@
 /**
- * Wajib login sebelum masuk website (kecuali login/daftar/index + jasa-link mid-checkout).
- * Sesi Firebase LOCAL — jangan minta login lagi kalau masih login.
+ * Wajib login (kecuali login/daftar/index/jasa-link).
+ * Cepat restore sesi — jangan delay / jangan blank lama.
  */
 (function () {
   function baseName(p) {
@@ -13,13 +13,8 @@
   }
 
   var path = baseName(location.pathname || "");
-  // jasa-link: lanjut isi link setelah bayar — jangan paksa login lagi
   var PUBLIC = ["login", "daftar", "index", "jasa-link"];
-
-  if (PUBLIC.indexOf(path) >= 0) {
-    try { document.documentElement.style.visibility = ""; } catch (e) {}
-    return;
-  }
+  if (PUBLIC.indexOf(path) >= 0) return;
   if (path === "admin") return;
 
   var redirected = false;
@@ -27,33 +22,40 @@
     if (redirected) return;
     redirected = true;
     var rawPath = (location.pathname || "/").replace(/^\//, "") || "home";
-    var next = encodeURIComponent(rawPath + (location.search || ""));
-    location.replace("login.html?next=" + next);
+    location.replace("login.html?next=" + encodeURIComponent(rawPath + (location.search || "")));
   }
 
   function showBody() {
     try { document.documentElement.style.visibility = ""; } catch (e) {}
   }
 
-  try { document.documentElement.style.visibility = "hidden"; } catch (e) {}
+  // Tampilkan segera kalau flag login ada (hindari blank di device lambat)
+  var softOk = false;
+  try {
+    if (localStorage.getItem("voxyy_logged_in") === "1") {
+      softOk = true;
+      showBody();
+    } else {
+      try { document.documentElement.style.visibility = "hidden"; } catch (e) {}
+    }
+  } catch (e) {
+    showBody();
+  }
 
   var settled = false;
-  function allow(user) {
+  function allow() {
     if (settled) return;
     settled = true;
     showBody();
   }
   function deny() {
     if (settled) return;
-    // Kalau flag lokal bilang masih login, JANGAN tendang — sesi Firebase mungkin belum restore
-    try {
-      if (localStorage.getItem("voxyy_logged_in") === "1") {
-        settled = true;
-        showBody();
-        // coba restore di background
-        return;
-      }
-    } catch (e) {}
+    if (softOk) {
+      // tetap biarkan browsing; Firebase restore di background
+      settled = true;
+      showBody();
+      return;
+    }
     settled = true;
     goLogin();
   }
@@ -63,19 +65,15 @@
     tries++;
     var auth = null;
     try {
-      if (window.VoxyyAuth && window.VoxyyAuth.ensureAuth) {
-        auth = window.VoxyyAuth.ensureAuth();
-      }
+      if (window.VoxyyAuth && window.VoxyyAuth.ensureAuth) auth = window.VoxyyAuth.ensureAuth();
     } catch (e) {}
     try {
       if (!auth && typeof firebase !== "undefined" && firebase.auth) {
         if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
           try { window.VoxyyOrders.initFirebase(); } catch (e) {}
         }
-        if (!firebase.apps || !firebase.apps.length) {
-          if (window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
-            try { firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG); } catch (e) {}
-          }
+        if ((!firebase.apps || !firebase.apps.length) && window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
+          try { firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG); } catch (e) {}
         }
         auth = firebase.auth();
         try { auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
@@ -83,34 +81,24 @@
     } catch (e) {}
 
     if (auth) {
-      if (auth.currentUser) {
-        allow(auth.currentUser);
-        return;
-      }
+      if (auth.currentUser) { allow(); return; }
       var done = false;
       var unsub = auth.onAuthStateChanged(function (user) {
         if (done) return;
         done = true;
         try { unsub && unsub(); } catch (e) {}
-        if (user) allow(user);
-        else {
-          // beri waktu sedikit lagi untuk restore
-          setTimeout(function () {
-            if (settled) return;
-            if (auth.currentUser) allow(auth.currentUser);
-            else deny();
-          }, 1500);
-        }
+        if (user) allow();
+        else deny();
       });
+      // max tunggu 2 detik (bukan 5)
       setTimeout(function () {
         if (done || settled) return;
-        if (auth.currentUser) allow(auth.currentUser);
+        if (auth.currentUser) allow();
         else deny();
-      }, 5000);
+      }, 2000);
       return;
     }
-
-    if (tries < 100) setTimeout(tick, 100);
+    if (tries < 40) setTimeout(tick, 50);
     else deny();
   }
   tick();

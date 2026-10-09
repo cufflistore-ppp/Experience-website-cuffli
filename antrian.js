@@ -72,11 +72,15 @@ function statusMeta(status, hasFile, order) {
   if (s.includes("menunggu link")) {
     return { label: "Isi link target", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
   }
-  if (s.includes("verifikasi") || s.includes("menunggu")) {
+  // semua status bayar / menunggu / kosong → Menunggu Verifikasi (jangan "Belum Bayar")
+  if (
+    s.includes("verifikasi") ||
+    s.includes("menunggu") ||
+    s.includes("bayar") ||
+    s.includes("belum") ||
+    !s
+  ) {
     return { label: "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
-  }
-  if (s.includes("bayar")) {
-    return { label: "Belum Bayar", cls: "belum", color: "#90a4ae", bg: "#1a2433" };
   }
   return { label: status || "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
 }

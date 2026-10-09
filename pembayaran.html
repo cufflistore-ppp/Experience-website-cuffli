@@ -389,16 +389,27 @@
       var pid = (params.get("pid") || "").trim();
       var katUrl = (params.get("kat") || "").trim().toLowerCase();
 
-      // Tampilkan dulu dari URL biar tidak stuck "Memuat..."
+      // Kode WAJIB langsung tampil (semua device)
+      if (!kode || kode === "VM-0000" || String(kode).indexOf("0000") >= 0) {
+        try { kode = localStorage.getItem("voxyy_pay_kode_tmp") || ""; } catch (e) {}
+        kode = (kode || "").trim();
+      }
       if (!kode || kode === "VM-0000" || String(kode).indexOf("0000") >= 0) {
         kode = makeKode();
       }
+      try { localStorage.setItem("voxyy_pay_kode_tmp", kode); } catch (e) {}
+      try { localStorage.setItem("voxyy_saved_kode", kode); } catch (e) {}
       showOrderOnUI({
         kode: kode,
         paket: paket || "Produk",
         finalAmount: totalNum,
-        total: totalNum > 0 ? formatRupiah(totalNum) : "Memuat...",
+        total: totalNum > 0 ? formatRupiah(totalNum) : "Rp …",
       });
+      // paksa DOM update
+      try {
+        var ek = document.getElementById("kodeOrder");
+        if (ek) ek.textContent = kode;
+      } catch (e) {}
 
       var resolved = await resolveHarga(pid, paket, totalNum);
       totalNum = resolved.totalNum;
@@ -482,7 +493,7 @@
           catatan: paket + (isJasa ? " — jasa, bayar dulu lalu isi link di halaman khusus" : " — order website, proses di panel admin"),
           total: formatRupiah(totalNum),
           paket: paket,
-          status: "Menunggu Pembayaran",
+          status: "Menunggu Verifikasi",
           waktu: new Date().toLocaleString("id-ID"),
           createdAt: Date.now(),
           finalAmount: totalNum,
@@ -673,7 +684,7 @@
         if (btn) btn.innerHTML = '<i class="fa-solid fa-link"></i> Ke isi link...';
         setTimeout(function () {
           window.location.href = nextUrl;
-        }, 400);
+        }, 200);
         return;
       }
 
@@ -793,7 +804,7 @@
 
       setTimeout(function () {
         location.href = "antrian.html";
-      }, 1500);
+      }, 400);
     }
 
     
@@ -825,7 +836,21 @@
 
     document.addEventListener("DOMContentLoaded", function () {
       applyPaySettings();
-      loadOrderData();
+      loadOrderData().catch(function (err) {
+        console.error(err);
+        var k = makeKode();
+        try { localStorage.setItem("voxyy_saved_kode", k); } catch (e) {}
+        showOrderOnUI({ kode: k, paket: "Produk", finalAmount: 0, total: "-" });
+      });
+      // safety: jangan stuck Memuat
+      setTimeout(function () {
+        var ek = document.getElementById("kodeOrder");
+        if (ek && (/memuat/i.test(ek.textContent || "") || !(ek.textContent || "").trim())) {
+          var k2 = makeKode();
+          ek.textContent = k2;
+          try { localStorage.setItem("voxyy_saved_kode", k2); } catch (e) {}
+        }
+      }, 400);
 
       var inp = document.getElementById("buktiTfInput");
       var btn = document.getElementById("btnKonfirmasi");

@@ -335,7 +335,7 @@ async function loadDashboard() {
             <strong>${escapeHtml(o.kode || "-")}</strong> · ${escapeHtml(o.nama || "Anonim")}
             <br><small style="color:#888;">${escapeHtml(o.paket || "-")} · ${escapeHtml(o.total || "-")}</small>
           </div>
-          <span class="badge-st ${cls}">${escapeHtml(o.status || "Menunggu Verifikasi")}</span>
+          <span class="badge-st ${cls}">${escapeHtml((function(st){st=String(st||"").trim();if(!st||/belum\s*bayar/i.test(st))return "Menunggu Verifikasi";return st;})(o.status))}</span>
         </div>
       </div>`;
     })
@@ -343,11 +343,12 @@ async function loadDashboard() {
 }
 
 function statusClass(status) {
-  const s = (status || "").toLowerCase();
+  const s = String(status || "").toLowerCase();
   if (s.includes("sukses") || s.includes("selesai")) return "sukses";
-  if (s.includes("proses") || s.includes("verifikasi")) return "proses";
   if (s.includes("tolak")) return "tolak";
-  return "belum";
+  if (s.includes("proses")) return "proses";
+  // jangan klasifikasi "belum" — tampilkan sebagai verifikasi
+  return "proses";
 }
 
 async function fetchOrders() {
@@ -758,7 +759,7 @@ async function loadPesanan(force) {
             ${(o.targetLink || o.linkTarget || o.linkJasa) ? `<div style="margin-top:10px;padding:10px;background:#0a0e18;border-radius:10px;border:1px solid #1e2a45;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">🔗 Link target jasa</div><div style="font-size:12px;color:#e3eaf2;word-break:break-all;margin-bottom:8px;">${escapeHtml(o.targetLink || o.linkTarget || o.linkJasa)}</div><button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;font-size:12px;" onclick="navigator.clipboard.writeText('${escapeHtml(String(o.targetLink || o.linkTarget || o.linkJasa).replace(/'/g, ""))}').then(function(){if(window.showAdmToast)showAdmToast('Link disalin');else alert('Link disalin');})"><i class="fa-solid fa-copy"></i> Salin link</button></div>` : (isOrderJasa(o) ? `<div style="margin-top:8px;font-size:11px;color:#ffb74d;">Menunggu pembeli isi link target…</div>` : "")}
           </div>
           <div style="text-align:right;">
-            <span class="badge-st ${cls}">${escapeHtml(o.status || "Menunggu Verifikasi")}</span>
+            <span class="badge-st ${cls}">${escapeHtml((function(st){st=String(st||"").trim();if(!st||/belum\s*bayar/i.test(st))return "Menunggu Verifikasi";return st;})(o.status))}</span>
           </div>
         </div>
 

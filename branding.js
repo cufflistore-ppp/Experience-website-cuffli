@@ -308,10 +308,9 @@
         loadFromCloud();
         bindRealtime();
         // reload lagi biar logo/banner cloud pasti nempel
-        setTimeout(loadFromCloud, 800);
-        setTimeout(loadFromCloud, 2500);
+        setTimeout(loadFromCloud, 300);
       } else if (tries < 50) {
-        setTimeout(tick, 150);
+        setTimeout(tick, 50);
       }
     };
     tick();
