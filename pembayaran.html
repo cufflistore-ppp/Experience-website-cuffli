@@ -688,27 +688,52 @@
         return;
       }
 
-      // ===== NON-SUNTIK: langsung ke admin =====
+      // ===== NON-SUNTIK: simpan order+bukti ke admin & pesanan, lalu jasa biasa → WA =====
       try {
         var buktiNS = _buktiDataUrl;
         try {
-          if (buktiNS && buktiNS.length > 250000) {
-            buktiNS = await new Promise(function (resolve) {
-              var img = new Image();
-              img.onload = function () {
-                var c = document.createElement("canvas");
-                var max = 1200;
-                var w = img.width, h = img.height;
-                if (w > max) { h = Math.round((h * max) / w); w = max; }
-                c.width = w; c.height = h;
-                c.getContext("2d").drawImage(img, 0, 0, w, h);
-                resolve(c.toDataURL("image/jpeg", 0.82));
-              };
-              img.onerror = function () { resolve(_buktiDataUrl); };
-              img.src = _buktiDataUrl;
-            });
-          }
+          buktiNS = await new Promise(function (resolve) {
+            var img = new Image();
+            img.onload = function () {
+              var c = document.createElement("canvas");
+              var max = 900;
+              var w = img.width, h = img.height;
+              if (w > max) { h = Math.round((h * max) / w); w = max; }
+              c.width = w; c.height = h;
+              c.getContext("2d").drawImage(img, 0, 0, w, h);
+              var q = 0.72, out = c.toDataURL("image/jpeg", q);
+              while (out.length > 140000 && q > 0.35) {
+                q -= 0.08;
+                out = c.toDataURL("image/jpeg", q);
+              }
+              resolve(out);
+            };
+            img.onerror = function () { resolve(_buktiDataUrl); };
+            img.src = _buktiDataUrl;
+          });
         } catch (eC) { buktiNS = _buktiDataUrl; }
+
+        var jasaBiasa = false;
+        try {
+          jasaBiasa = isJasaOrder(order) && !isSuntikName(order.paket, order.kategori);
+        } catch (eJB) {}
+
+        var patchNS = {
+          status: "Menunggu Verifikasi",
+          bukti: buktiNS,
+          hasBukti: true,
+          buktiAt: Date.now(),
+          finalAmount: order.finalAmount,
+          total: order.total,
+          paket: order.paket,
+          nama: order.nama,
+          kategori: order.kategori || (jasaBiasa ? "jasa" : order.kategori),
+          isJasa: !!jasaBiasa || !!order.isJasa,
+          isSuntik: false,
+          userEmail: order.userEmail || order.email || "",
+          email: order.email || order.userEmail || "",
+          updatedAt: Date.now(),
+        };
 
         var bkNS = String(order.kode || "").trim().toUpperCase().replace(/[.#$\[\]]/g, "_");
         if (window.firebase && firebase.apps && firebase.apps.length && bkNS && buktiNS) {
@@ -719,31 +744,44 @@
           } catch (eB) {}
         }
 
+        var saved = false;
         if (window.VoxyyOrders && window.VoxyyOrders.updateOrderByKode) {
-          await window.VoxyyOrders.updateOrderByKode(order.kode, {
-            status: "Menunggu Verifikasi",
-            bukti: buktiNS,
-            hasBukti: true,
-            buktiAt: Date.now(),
-            finalAmount: order.finalAmount,
-            total: order.total,
-            paket: order.paket,
-            nama: order.nama,
-            userEmail: order.userEmail || order.email || "",
-          });
-        } else {
-          var orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-          var idx = orders.findIndex(function (o) {
-            return o.kode === order.kode;
-          });
-          if (idx >= 0) {
-            orders[idx].status = "Menunggu Verifikasi";
-            orders[idx].bukti = buktiNS;
-            orders[idx].hasBukti = true;
-            orders[idx].buktiAt = Date.now();
-            localStorage.setItem("voxyy_orders", JSON.stringify(orders));
-          }
+          try {
+            var ur = await window.VoxyyOrders.updateOrderByKode(order.kode, patchNS);
+            if (ur && ur.ok !== false) saved = true;
+          } catch (eU) {}
         }
+        if (!saved && window.VoxyyOrders && window.VoxyyOrders.addOrder) {
+          try {
+            await window.VoxyyOrders.addOrder(Object.assign({}, order, patchNS, {
+              kode: order.kode,
+              createdAt: order.createdAt || Date.now(),
+              waktu: order.waktu || new Date().toLocaleString("id-ID"),
+            }));
+            saved = true;
+          } catch (eA) {}
+        }
+        if (!saved) {
+          try {
+            var orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+            var idx = orders.findIndex(function (o) {
+              return String(o.kode || "").toUpperCase() === String(order.kode || "").toUpperCase();
+            });
+            if (idx >= 0) {
+              Object.assign(orders[idx], patchNS);
+            } else {
+              orders.unshift(Object.assign({}, order, patchNS));
+            }
+            localStorage.setItem("voxyy_orders", JSON.stringify(orders));
+          } catch (eL) {}
+        }
+
+        // supaya muncul di Pesanan Saya (semua device akun ini)
+        try { saveTrackedKode(order.kode); } catch (eT) {}
+        try {
+          localStorage.setItem("voxyy_saved_kode", order.kode || "");
+          sessionStorage.setItem("voxyy_saved_kode", order.kode || "");
+        } catch (eS) {}
       } catch (e) {
         alert("Gagal kirim: " + (e.message || e));
         if (btn) {
@@ -753,17 +791,49 @@
         return;
       }
 
-      saveTrackedKode(order.kode);
-
-      var nominal = order.finalAmount != null
+      var nominalDone = order.finalAmount != null
         ? Number(order.finalAmount)
         : parseInt(String(order.total || "0").replace(/[^\d]/g, ""), 10) || 0;
-      var nominalStr = "Rp " + Number(nominal).toLocaleString("id-ID");
+      var nominalStr = "Rp " + Number(nominalDone).toLocaleString("id-ID");
 
       var sb = document.getElementById("statusBox");
       if (sb) sb.classList.add("show");
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Terkirim';
 
+      // Jasa biasa (BUKAN suntik) → WA admin + order tetap di admin & Pesanan
+      var jasaNonSuntik = false;
+      try {
+        jasaNonSuntik = isJasaOrder(order) && !isSuntikName(order.paket, order.kategori);
+      } catch (e) {}
+      if (jasaNonSuntik) {
+        var wa = window._waAdmin || "6285151982250";
+        try {
+          var st = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
+          if (st.waAdmin) wa = String(st.waAdmin).replace(/\D/g, "") || wa;
+        } catch (eW) {}
+        // Catatan: WhatsApp (wa.me) hanya bisa isi teks otomatis, tidak bisa lampirkan foto bukti TF.
+        // Foto bukti tetap masuk panel admin & pesanan.
+        var msg =
+          "Halo Admin VOXY MARKET, saya sudah bayar\n\n" +
+          "Kode order : " + (order.kode || "-") + "\n" +
+          "Nama jasa : " + (order.paket || "-") + "\n" +
+          "Nominal : " + nominalStr;
+        var waUrl = "https://wa.me/" + wa + "?text=" + encodeURIComponent(msg);
+        if (sb) {
+          sb.innerHTML =
+            '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
+            "<b>Pesanan + bukti masuk admin.</b><br>Kode: <b>" + (order.kode || "-") + "</b><br>" +
+            "Bisa dicek di menu <b>Pesanan</b>. Lanjut chat admin.</div>" +
+            '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:block;margin-top:10px;text-align:center;padding:12px;background:#25d366;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> Chat Admin WA</a>' +
+            '<a href="antrian.html" style="display:block;margin-top:8px;text-align:center;padding:10px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Lihat Pesanan Saya</a>';
+        }
+        setTimeout(function () {
+          window.open(waUrl, "_blank");
+        }, 300);
+        return;
+      }
 
+      // Produk digital / lainnya → halaman pesanan
       if (sb) {
         sb.innerHTML =
           '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
@@ -772,42 +842,11 @@
           "</b><br>Cek status di menu <b>Pesanan</b>.</div>" +
           '<a href="antrian.html" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Lihat Pesanan Saya</a>';
       }
-      if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Terkirim';
-
-      // Jasa BUKAN suntik → langsung WA admin (setelah bukti + konfirmasi)
-      var jasaNonSuntik = false;
-      try {
-        jasaNonSuntik = isJasaOrder(order) && !isSuntikName(order.paket, order.kategori);
-      } catch (e) {}
-      if (jasaNonSuntik) {
-        var wa = window._waAdmin || "6285151982250";
-        var nominal = order.finalAmount != null
-          ? Number(order.finalAmount)
-          : parseInt(String(order.total || "0").replace(/[^\d]/g, ""), 10) || 0;
-        var text =
-          "Halo Admin VOXY MARKET, saya sudah bayar & upload bukti TF.%0A" +
-          "Kode: " + encodeURIComponent(order.kode || "-") + "%0A" +
-          "Jasa: " + encodeURIComponent(order.paket || "-") + "%0A" +
-          "Nominal: Rp " + encodeURIComponent(String(nominal.toLocaleString("id-ID")));
-        var waUrl = "https://wa.me/" + wa + "?text=" + text;
-        if (sb) {
-          sb.innerHTML =
-            '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
-            "<b>Bukti terkirim.</b> Lanjut chat admin untuk jasa ini.</div>" +
-            '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#25d366;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> Chat Admin WA</a>';
-        }
-        setTimeout(function () {
-          window.location.href = waUrl;
-        }, 600);
-        return;
-      }
-
       setTimeout(function () {
         location.href = "antrian.html";
       }, 400);
     }
 
-    
     function isJasaOrder(order) {
       if (!order) return false;
       if (order.isJasa) return true;
