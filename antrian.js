@@ -69,13 +69,16 @@ function statusMeta(status, hasFile, order) {
   if (s.includes("proses")) {
     return { label: "Diproses Admin", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
   }
+  if (s.includes("menunggu link")) {
+    return { label: "Isi link target", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
+  }
   if (s.includes("verifikasi") || s.includes("menunggu")) {
     return { label: "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
   }
   if (s.includes("bayar")) {
     return { label: "Belum Bayar", cls: "belum", color: "#90a4ae", bg: "#1a2433" };
   }
-  return { label: status || "Pesanan Masuk", cls: "belum", color: "#90a4ae", bg: "#1a2433" };
+  return { label: status || "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
 }
 
 function filterMyOrders(orders) {
@@ -90,8 +93,8 @@ function filterMyOrders(orders) {
     // Pesanan ditolak admin → hilang dari list pembeli
     const st = String(o.status || "").toLowerCase();
     if (st.includes("tolak")) return false;
-    // belum isi link suntik → jangan tampil dulu di pesanan
-    if (st.includes("menunggu link") || st.includes("draft suntik") || st.includes("draft")) return false;
+    // draft kosong saja yang disembunyikan
+    if (st === "draft" || st.includes("draft suntik") && !o.bukti && !o.hasBukti) return false;
     const kode = String(o.kode || "").toUpperCase();
     if (tracked.has(kode)) return true;
     if (email && String(o.email || "").toLowerCase() === email) return true;
@@ -115,7 +118,12 @@ function renderOrderCard(o) {
   const isZip = /\.(zip|rar|7z)(\?|$)/i.test(fileName) || /\.(zip|rar|7z)(\?|$)/i.test(String(file));
 
   let actionHtml = "";
-  if (file) {
+  var stLow = String(o.status || "").toLowerCase();
+  if (!file && stLow.indexOf("menunggu link") >= 0) {
+    actionHtml =
+      '<a href="jasa-link.html?kode=' + encodeURIComponent(kode) + '" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:10px 14px;background:#1565c0;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
+      '<i class="fa-solid fa-link"></i> Isi link target</a>';
+  } else if (file) {
     // File/URL sudah masuk ke kode order ini — tanpa WA
     const openLabel = isApk ? "Buka / Install APK" : isZip ? "Unduh ZIP" : "Unduh / Buka file";
     actionHtml =

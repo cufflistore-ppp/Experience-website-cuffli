@@ -138,7 +138,7 @@
       <div class="rincian" id="rincianBayar" style="display:none;"></div>
 
       <!-- FOTO PAYLATER (static) -->
-      <div class="qris-box-big" id="qrisContainer">
+      <div class="qris-box-big" id="qrisBox">
         <img src="qris.png" alt="QRIS" id="qrisImg"
              onerror="this.style.display='none'; document.getElementById('qrisFallback').style.display='block';">
         <div id="qrisFallback" style="display:none;padding:30px 10px;color:#333;font-size:13px;font-weight:600;">
@@ -236,16 +236,70 @@
 
     function applyPaySettings() {
       var s = getPaySettings();
-      var qris = s.qrisUrl || "qris.png";
+      var qris = String(s.qrisUrl || "").trim();
+      var rek = String(s.rekeningInfo || "").trim();
+      var cat = String(s.catatanBayar || "").trim();
+      // default file lokal hanya jika belum pernah diset kosong sengaja
+      var useQris = s.useQris != null ? !!s.useQris : !!qris;
+      var useRek = s.useRekening != null ? !!s.useRekening : !!rek;
+      if (!qris && s.qrisUrl === undefined) {
+        qris = "qris.png";
+        useQris = true;
+      }
+
+      var box = document.getElementById("qrisBox") || document.querySelector(".qris-box-big");
       var img = document.getElementById("qrisImg");
-      if (img) {
-        img.style.display = "";
-        img.src = qris;
-        img.onerror = function () {
-          this.style.display = "none";
-          var fb = document.getElementById("qrisFallback");
-          if (fb) fb.style.display = "block";
-        };
+      var rekEl = document.getElementById("rekeningInfoBox") || document.getElementById("rekeningBox");
+      var catEl = document.getElementById("catatanBayarBox");
+      var qrisLabel = document.querySelector(".qris-label");
+      var payTitle = document.querySelector(".pay-card h2");
+
+      if (useQris && qris) {
+        if (box) box.style.display = "";
+        if (qrisLabel) qrisLabel.style.display = "";
+        if (img) {
+          img.style.display = "";
+          img.src = qris;
+          img.onerror = function () {
+            this.style.display = "none";
+            if (box) box.style.display = "none";
+            if (qrisLabel) qrisLabel.style.display = "none";
+          };
+        }
+        if (payTitle && !useRek) payTitle.textContent = "Scan QRIS untuk Bayar";
+      } else {
+        if (box) box.style.display = "none";
+        if (img) img.style.display = "none";
+        if (qrisLabel) qrisLabel.style.display = "none";
+        if (payTitle && useRek) payTitle.textContent = "Transfer Manual";
+      }
+
+      if (rekEl) {
+        if (useRek && rek) {
+          rekEl.style.display = "";
+          rekEl.innerHTML = "<b>Transfer ke:</b><br>" + rek.replace(/</g, "&lt;");
+        } else {
+          rekEl.style.display = "none";
+        }
+      }
+      if (catEl) {
+        if (cat) {
+          catEl.style.display = "";
+          catEl.textContent = cat;
+        } else {
+          catEl.style.display = "none";
+        }
+      }
+      // info steps menyesuaikan
+      var info = document.getElementById("infoBayar");
+      if (info) {
+        var steps = [];
+        if (useQris && qris) steps.push("1. Scan <b>QRIS</b> di atas pakai e-wallet / mobile banking");
+        if (useRek && rek) steps.push((steps.length+1) + ". Transfer ke rekening/e-wallet yang tertera");
+        steps.push((steps.length+1) + ". Transfer <b>sesuai nominal total</b> di atas");
+        steps.push((steps.length+1) + ". Upload <b>foto bukti TF</b> di bawah (wajib)");
+        steps.push((steps.length+1) + ". Klik <b>Konfirmasi Pembayaran</b>");
+        info.innerHTML = steps.join("<br>");
       }
       window._waAdmin = String(s.waAdmin || "6285151982250").replace(/\D/g, "");
     }
@@ -428,7 +482,7 @@
           catatan: paket + (isJasa ? " — jasa, bayar dulu lalu isi link di halaman khusus" : " — order website, proses di panel admin"),
           total: formatRupiah(totalNum),
           paket: paket,
-          status: "Belum Bayar",
+          status: "Menunggu Pembayaran",
           waktu: new Date().toLocaleString("id-ID"),
           createdAt: Date.now(),
           finalAmount: totalNum,
@@ -708,6 +762,35 @@
           '<a href="antrian.html" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#1565c0;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;">Lihat Pesanan Saya</a>';
       }
       if (btn) btn.innerHTML = '<i class="fa-solid fa-check"></i> Konfirmasi Terkirim';
+
+      // Jasa BUKAN suntik → langsung WA admin (setelah bukti + konfirmasi)
+      var jasaNonSuntik = false;
+      try {
+        jasaNonSuntik = isJasaOrder(order) && !isSuntikName(order.paket, order.kategori);
+      } catch (e) {}
+      if (jasaNonSuntik) {
+        var wa = window._waAdmin || "6285151982250";
+        var nominal = order.finalAmount != null
+          ? Number(order.finalAmount)
+          : parseInt(String(order.total || "0").replace(/[^\d]/g, ""), 10) || 0;
+        var text =
+          "Halo Admin VOXY MARKET, saya sudah bayar & upload bukti TF.%0A" +
+          "Kode: " + encodeURIComponent(order.kode || "-") + "%0A" +
+          "Jasa: " + encodeURIComponent(order.paket || "-") + "%0A" +
+          "Nominal: Rp " + encodeURIComponent(String(nominal.toLocaleString("id-ID")));
+        var waUrl = "https://wa.me/" + wa + "?text=" + text;
+        if (sb) {
+          sb.innerHTML =
+            '<div style="padding:12px;background:#0d3d1a;border-radius:12px;color:#a5d6a7;font-size:13px;line-height:1.5;">' +
+            "<b>Bukti terkirim.</b> Lanjut chat admin untuk jasa ini.</div>" +
+            '<a href="' + waUrl + '" target="_blank" rel="noopener" style="display:block;margin-top:12px;text-align:center;padding:12px;background:#25d366;color:#fff;border-radius:10px;font-weight:700;text-decoration:none;"><i class="fa-brands fa-whatsapp"></i> Chat Admin WA</a>';
+        }
+        setTimeout(function () {
+          window.location.href = waUrl;
+        }, 600);
+        return;
+      }
+
       setTimeout(function () {
         location.href = "antrian.html";
       }, 1500);

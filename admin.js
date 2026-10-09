@@ -335,7 +335,7 @@ async function loadDashboard() {
             <strong>${escapeHtml(o.kode || "-")}</strong> · ${escapeHtml(o.nama || "Anonim")}
             <br><small style="color:#888;">${escapeHtml(o.paket || "-")} · ${escapeHtml(o.total || "-")}</small>
           </div>
-          <span class="badge-st ${cls}">${escapeHtml(o.status || "Belum Bayar")}</span>
+          <span class="badge-st ${cls}">${escapeHtml(o.status || "Menunggu Verifikasi")}</span>
         </div>
       </div>`;
     })
@@ -678,21 +678,17 @@ async function loadPesanan(force) {
     return;
   }
   const orders = await fetchOrders();
-  // Ambil foto bukti asli SEBELUM render (supaya langsung muncul gambar)
+  // Hydrate bukti paralel (cepat) — max 12 order tanpa foto
   try {
-    for (var hi = 0; hi < (orders || []).length; hi++) {
-      var ho = orders[hi];
-      if (!ho || !ho.kode) continue;
-      if (isRealBuktiUrl(ho.bukti)) continue;
-      if (window.VoxyyOrders && window.VoxyyOrders.getBuktiByKode) {
-        try {
-          var hb = await window.VoxyyOrders.getBuktiByKode(ho.kode);
-          if (isRealBuktiUrl(hb)) {
-            ho.bukti = hb;
-            ho.hasBukti = true;
-          }
-        } catch (eH) {}
-      }
+    var need = (orders || []).filter(function (ho) {
+      return ho && ho.kode && !isRealBuktiUrl(ho.bukti);
+    }).slice(0, 12);
+    if (need.length && window.VoxyyOrders && window.VoxyyOrders.getBuktiByKode) {
+      await Promise.all(need.map(function (ho) {
+        return window.VoxyyOrders.getBuktiByKode(ho.kode).then(function (hb) {
+          if (isRealBuktiUrl(hb)) { ho.bukti = hb; ho.hasBukti = true; }
+        }).catch(function () {});
+      }));
     }
   } catch (eHyd) {}
 
@@ -700,12 +696,11 @@ async function loadPesanan(force) {
   let filtered = orders.slice();
 
   function isDone(o) {
-    // Aktif: Proses & Menunggu Verifikasi tampil.
-    // Sukses/Tolak hilang. "Menunggu Link" (belum isi link suntik) disembunyikan dari admin.
+    // Aktif: Menunggu Link / Verifikasi / Proses tampil. Sukses & Tolak hilang.
     const s = String(o.status || "").toLowerCase();
     if (s.includes("tolak")) return true;
     if (s.includes("sukses") || s.includes("selesai")) return true;
-    if (s.includes("menunggu link") || s.includes("draft")) return true;
+    if (s.includes("draft") && !s.includes("link")) return true;
     return false;
   }
 
@@ -763,7 +758,7 @@ async function loadPesanan(force) {
             ${(o.targetLink || o.linkTarget || o.linkJasa) ? `<div style="margin-top:10px;padding:10px;background:#0a0e18;border-radius:10px;border:1px solid #1e2a45;"><div style="font-size:11px;color:#90caf9;font-weight:700;margin-bottom:4px;">🔗 Link target jasa</div><div style="font-size:12px;color:#e3eaf2;word-break:break-all;margin-bottom:8px;">${escapeHtml(o.targetLink || o.linkTarget || o.linkJasa)}</div><button type="button" class="btn-adm outline" style="margin:0;padding:8px 12px;font-size:12px;" onclick="navigator.clipboard.writeText('${escapeHtml(String(o.targetLink || o.linkTarget || o.linkJasa).replace(/'/g, ""))}').then(function(){if(window.showAdmToast)showAdmToast('Link disalin');else alert('Link disalin');})"><i class="fa-solid fa-copy"></i> Salin link</button></div>` : (isOrderJasa(o) ? `<div style="margin-top:8px;font-size:11px;color:#ffb74d;">Menunggu pembeli isi link target…</div>` : "")}
           </div>
           <div style="text-align:right;">
-            <span class="badge-st ${cls}">${escapeHtml(o.status || "Belum Bayar")}</span>
+            <span class="badge-st ${cls}">${escapeHtml(o.status || "Menunggu Verifikasi")}</span>
           </div>
         </div>
 
@@ -1385,26 +1380,41 @@ window.onQrisFilePicked = onQrisFilePicked;
 
 async function simpanPembayaran() {
   const qrisEl = document.getElementById("qrisUrl");
-  const qris = (qrisEl && qrisEl.value ? qrisEl.value : "").trim() || "qris.png";
+  let qris = (qrisEl && qrisEl.value ? qrisEl.value : "").trim();
+  // kosong = tidak pakai QRIS
+  const rek = String((document.getElementById("rekeningInfo") || {}).value || "").trim();
+  const cat = String((document.getElementById("catatanBayar") || {}).value || "").trim();
   const payload = {
     qrisUrl: qris,
-    rekeningInfo: (document.getElementById("rekeningInfo") || {}).value || "",
-    catatanBayar: (document.getElementById("catatanBayar") || {}).value || "",
+    rekeningInfo: rek,
+    catatanBayar: cat,
+    useQris: !!qris,
+    useRekening: !!rek,
+    updatedAt: Date.now(),
   };
-  payload.rekeningInfo = String(payload.rekeningInfo).trim();
-  payload.catatanBayar = String(payload.catatanBayar).trim();
   saveSettings(payload);
   var prev = document.getElementById("previewQris");
-  if (prev) prev.src = qris;
+  if (prev) {
+    if (qris) {
+      prev.style.display = "";
+      prev.src = qris;
+    } else {
+      prev.style.display = "none";
+    }
+  }
+  var res = { mode: "local" };
   try {
     if (window.VoxyyOrders && window.VoxyyOrders.saveSettingsGlobal) {
-      await window.VoxyyOrders.saveSettingsGlobal(payload);
+      res = await window.VoxyyOrders.saveSettingsGlobal(payload);
     }
   } catch (e) {
-    console.warn(e);
+    res = { mode: "local", error: String(e) };
   }
-  if (window.showAdmToast) showAdmToast("QRIS dari galeri tersimpan — semua device ikut");
-  else alert("QRIS & pembayaran disimpan!");
+  if (res && res.mode === "global") {
+    alert("Metode bayar tersimpan ke server.\nQRIS: " + (qris ? "aktif" : "mati") + " · Rekening/Dana: " + (rek ? "aktif" : "mati"));
+  } else {
+    alert("Tersimpan lokal. Cek internet bila ingin semua device sama.\n" + (res && res.error ? res.error : ""));
+  }
 }
 window.simpanPembayaran = simpanPembayaran;
 
@@ -1690,9 +1700,82 @@ function loadPengaturan() {
   set("linkCs", s.linkCs || "");
   set("linkTelegram", s.linkTelegram || "");
   set("linkIg", s.linkIg || "");
+  renderCustomLinksAdmin();
 }
 
-function simpanPengaturan() {
+function getCustomLinks() {
+  var s = getSettings();
+  var list = s.customLinks;
+  if (!Array.isArray(list)) list = [];
+  // migrate legacy fixed links into list if custom empty
+  if (!list.length) {
+    if (s.linkChannel) list.push({ id: "ch", name: "Saluran / Channel", url: s.linkChannel });
+    if (s.linkCs) list.push({ id: "cs", name: "CS WhatsApp", url: s.linkCs });
+    if (s.linkTelegram) list.push({ id: "tg", name: "Telegram", url: s.linkTelegram });
+    if (s.linkIg) list.push({ id: "ig", name: "Instagram", url: s.linkIg });
+  }
+  return list;
+}
+
+function renderCustomLinksAdmin() {
+  var box = document.getElementById("customLinksList");
+  if (!box) return;
+  var list = getCustomLinks();
+  if (!list.length) {
+    box.innerHTML = '<p style="color:#6a7a90;font-size:12px;">Belum ada link. Tambah di bawah.</p>';
+    return;
+  }
+  box.innerHTML = list.map(function (L, i) {
+    return (
+      '<div style="display:flex;gap:8px;align-items:center;padding:10px;background:#0a0e18;border:1px solid #1e2a45;border-radius:10px;margin-bottom:8px;">' +
+      '<div style="flex:1;min-width:0;">' +
+      '<div style="font-weight:700;font-size:13px;color:#e3eaf2;">' + escapeHtml(L.name || "Link") + '</div>' +
+      '<div style="font-size:11px;color:#64b5f6;word-break:break-all;">' + escapeHtml(L.url || "") + '</div>' +
+      '</div>' +
+      '<button type="button" class="btn-adm danger" style="margin:0;padding:8px 10px;font-size:12px;" onclick="hapusCustomLink(' + i + ')">Hapus</button>' +
+      '</div>'
+    );
+  }).join("");
+}
+
+function tambahCustomLink() {
+  var name = String((document.getElementById("newLinkName") || {}).value || "").trim();
+  var url = String((document.getElementById("newLinkUrl") || {}).value || "").trim();
+  if (!name || !url) {
+    alert("Isi nama dan URL link.");
+    return;
+  }
+  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+  var list = getCustomLinks();
+  list.push({ id: "L" + Date.now(), name: name, url: url });
+  saveSettings({ customLinks: list });
+  if (window.VoxyyOrders && window.VoxyyOrders.saveSettingsGlobal) {
+    window.VoxyyOrders.saveSettingsGlobal({ customLinks: list }).catch(function () {});
+  }
+  if (document.getElementById("newLinkName")) document.getElementById("newLinkName").value = "";
+  if (document.getElementById("newLinkUrl")) document.getElementById("newLinkUrl").value = "";
+  renderCustomLinksAdmin();
+  if (window.showAdmToast) showAdmToast("Link ditambah — muncul di Tentang");
+}
+
+function hapusCustomLink(i) {
+  var list = getCustomLinks();
+  if (i < 0 || i >= list.length) return;
+  if (!confirm("Hapus link \"" + (list[i].name || "") + "\"?")) return;
+  list.splice(i, 1);
+  saveSettings({ customLinks: list });
+  if (window.VoxyyOrders && window.VoxyyOrders.saveSettingsGlobal) {
+    window.VoxyyOrders.saveSettingsGlobal({ customLinks: list }).catch(function () {});
+  }
+  renderCustomLinksAdmin();
+  if (window.showAdmToast) showAdmToast("Link dihapus");
+}
+window.tambahCustomLink = tambahCustomLink;
+window.hapusCustomLink = hapusCustomLink;
+window.renderCustomLinksAdmin = renderCustomLinksAdmin;
+
+
+async function simpanPengaturan() {
   const val = (id) => {
     const el = document.getElementById(id);
     return el ? String(el.value || "").trim() : "";
@@ -1705,9 +1788,16 @@ function simpanPengaturan() {
     linkCs: val("linkCs"),
     linkTelegram: val("linkTelegram"),
     linkIg: val("linkIg"),
+    customLinks: getCustomLinks(),
+    updatedAt: Date.now(),
   };
   saveSettings(data);
-  alert("Pengaturan disimpan. Nama & link aktif di semua halaman termasuk admin.");
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders.saveSettingsGlobal) {
+      await window.VoxyyOrders.saveSettingsGlobal(data);
+    }
+  } catch (e) {}
+  alert("Pengaturan disimpan. Nama & link aktif di semua device (termasuk Tentang).");
   if (window.VoxyyBranding && window.VoxyyBranding.apply) {
     window.VoxyyBranding.apply(getSettings());
   }
@@ -1717,9 +1807,10 @@ function simpanPengaturan() {
     var t = document.getElementById("adminBrandTitle");
     if (t) {
       var base = String(nama).replace(/\s*MARKET\s*$/i, "").trim() || "VOXY";
-      t.innerHTML = base + ' ADMIN <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
+      t.innerHTML = base + ' <span style="color:#64b5f6">ADMIN</span> <i class="fa-solid fa-circle-check verified" style="color:#2196f3;font-size:12px;"></i>';
     }
   } catch (e) {}
+  renderCustomLinksAdmin();
 }
 
 

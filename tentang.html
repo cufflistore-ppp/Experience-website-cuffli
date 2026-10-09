@@ -16,7 +16,7 @@
       background:#12182a; border:1px solid #1e2a45; border-radius:14px;
       padding:14px 16px; margin:10px 12px; font-size:13px; color:#cfd8e3; line-height:1.55;
     }
-    .contact-list { padding:0 12px 20px; display:flex; flex-direction:column; gap:10px; }
+    .contact-list { padding:0 12px 90px; display:flex; flex-direction:column; gap:10px; }
     .contact-item {
       display:flex; align-items:center; gap:12px; padding:12px 14px;
       background:#12182a; border:1px solid #1e2a45; border-radius:12px;
@@ -47,14 +47,12 @@
   </div>
 
   <div class="about-card" id="aboutDesc">
-    <strong>VOXY MARKET</strong> adalah pusat produk digital & jasa. Order, bayar QRIS, dan unduh produk langsung dari website. Admin memproses pesanan dari panel — cepat dan terpusat.
+    <strong id="aboutCopy">VOXY MARKET</strong> adalah pusat produk digital &amp; jasa. Order, bayar, dan terima produk langsung dari website.
   </div>
 
-  <h3 style="padding:8px 14px 0;font-size:14px;color:#90caf9;">Kontak & Saluran</h3>
-  <p style="padding:0 14px;font-size:12px;color:#6a7a90;margin:4px 0 8px;">Link bisa diganti admin di Pengaturan.</p>
+  <h3 style="padding:8px 14px 0;font-size:14px;color:#90caf9;">Kontak &amp; Saluran</h3>
+  <p style="padding:0 14px;font-size:12px;color:#6a7a90;margin:4px 0 8px;">Dikelola admin — update otomatis di semua device.</p>
   <div class="contact-list" id="contactList"></div>
-
-  <p style="text-align:center;font-size:11px;color:#6a7a90;padding-bottom:80px;">© <span id="aboutCopy">VOXY MARKET</span></p>
 
   <nav class="bottom-nav nav-5">
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
@@ -68,40 +66,103 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="auth.js"></script>
+  <script src="auth-guard.js"></script>
   <script src="branding.js"></script>
-  <script src="script.js"></script>
   <script>
-  async function loadTentang() {
-    var s = {};
-    try {
-      if (window.VoxyyOrders && window.VoxyyOrders.getSettings) s = await window.VoxyyOrders.getSettings() || {};
-      else s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
-    } catch (e) {}
-    var nama = s.namaToko || "VOXY MARKET";
-    document.getElementById("aboutNama").textContent = nama;
-    document.getElementById("aboutCopy").textContent = nama;
-    document.getElementById("aboutDesc").innerHTML =
-      "<strong>" + nama + "</strong> adalah pusat produk digital & jasa. Order, bayar QRIS, dan unduh produk langsung dari website. Admin memproses pesanan dari panel.";
+    function iconFor(name, url) {
+      var n = String(name || "").toLowerCase();
+      var u = String(url || "").toLowerCase();
+      if (n.indexOf("wa") >= 0 || u.indexOf("wa.me") >= 0 || u.indexOf("whatsapp") >= 0)
+        return { cls: "wa", icon: "fa-brands fa-whatsapp" };
+      if (n.indexOf("telegram") >= 0 || u.indexOf("t.me") >= 0)
+        return { cls: "", icon: "fa-brands fa-telegram" };
+      if (n.indexOf("instagram") >= 0 || u.indexOf("instagram") >= 0)
+        return { cls: "", icon: "fa-brands fa-instagram" };
+      if (n.indexOf("youtube") >= 0 || u.indexOf("youtube") >= 0 || u.indexOf("youtu.be") >= 0)
+        return { cls: "", icon: "fa-brands fa-youtube" };
+      if (n.indexOf("channel") >= 0 || n.indexOf("saluran") >= 0)
+        return { cls: "wa", icon: "fa-solid fa-bullhorn" };
+      return { cls: "", icon: "fa-solid fa-link" };
+    }
 
-    var wa = String(s.waAdmin || "6285151982250").replace(/\D/g, "");
-    var items = [];
-    var cs = s.linkCs || ("https://wa.me/" + wa);
-    items.push({ href: cs, icon: "fa-brands fa-whatsapp", cls: "wa", title: "CS WhatsApp", sub: "Chat admin" });
-    if (s.linkChannel) items.push({ href: s.linkChannel, icon: "fa-solid fa-bullhorn", cls: "", title: "Saluran / Channel", sub: "Info & update" });
-    if (s.linkTelegram) items.push({ href: s.linkTelegram, icon: "fa-brands fa-telegram", cls: "", title: "Telegram", sub: "Komunitas" });
-    if (s.linkIg) items.push({ href: s.linkIg, icon: "fa-brands fa-instagram", cls: "", title: "Instagram", sub: "Sosial media" });
+    function buildLinks(s) {
+      var list = [];
+      if (s.customLinks && Array.isArray(s.customLinks) && s.customLinks.length) {
+        s.customLinks.forEach(function (L) {
+          if (L && L.url) list.push({ name: L.name || "Link", url: L.url });
+        });
+      } else {
+        if (s.linkChannel) list.push({ name: "Saluran / Channel", url: s.linkChannel });
+        if (s.linkCs) list.push({ name: "CS WhatsApp", url: s.linkCs });
+        if (s.linkTelegram) list.push({ name: "Telegram", url: s.linkTelegram });
+        if (s.linkIg) list.push({ name: "Instagram", url: s.linkIg });
+      }
+      // WA admin selalu ada
+      var wa = String(s.waAdmin || "6285151982250").replace(/\D/g, "");
+      if (wa) {
+        var hasWa = list.some(function (x) {
+          return String(x.url || "").indexOf("wa.me") >= 0;
+        });
+        if (!hasWa) list.unshift({ name: "WhatsApp Admin", url: "https://wa.me/" + wa });
+      }
+      return list;
+    }
 
-    var box = document.getElementById("contactList");
-    box.innerHTML = items.map(function (it) {
-      return '<a href="' + it.href + '" class="contact-item">' +
-        '<div class="icon-wrap ' + it.cls + '"><i class="' + it.icon + '"></i></div>' +
-        '<div><strong>' + it.title + '</strong><div style="font-size:11px;color:#6a7a90;">' + it.sub + '</div></div></a>';
-    }).join("");
-  }
-  document.addEventListener("DOMContentLoaded", loadTentang);
+    function renderContacts(s) {
+      s = s || {};
+      var nama = s.namaToko || "VOXY MARKET";
+      var elN = document.getElementById("aboutNama");
+      var elC = document.getElementById("aboutCopy");
+      if (elN) elN.textContent = nama;
+      if (elC) elC.textContent = nama;
+      var box = document.getElementById("contactList");
+      if (!box) return;
+      var links = buildLinks(s);
+      if (!links.length) {
+        box.innerHTML = '<p style="color:#6a7a90;font-size:13px;padding:8px;">Belum ada link kontak.</p>';
+        return;
+      }
+      box.innerHTML = links.map(function (L) {
+        var ic = iconFor(L.name, L.url);
+        return (
+          '<a class="contact-item" href="' + String(L.url).replace(/"/g, "") + '" target="_blank" rel="noopener">' +
+          '<div class="icon-wrap ' + ic.cls + '"><i class="' + ic.icon + '"></i></div>' +
+          '<div><div style="font-weight:700;font-size:14px;">' + String(L.name || "Link").replace(/</g, "") + '</div>' +
+          '<div style="font-size:11px;color:#6a7a90;word-break:break-all;">' + String(L.url || "").replace(/</g, "") + '</div></div></a>'
+        );
+      }).join("");
+    }
+
+    async function boot() {
+      var s = {};
+      try {
+        s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
+      } catch (e) {}
+      renderContacts(s);
+      try {
+        if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) window.VoxyyOrders.initFirebase();
+        if (window.VoxyyOrders && window.VoxyyOrders.getSettings) {
+          var cloud = await window.VoxyyOrders.getSettings();
+          if (cloud && typeof cloud === "object") {
+            s = Object.assign({}, s, cloud);
+            localStorage.setItem("voxyy_settings", JSON.stringify(s));
+            renderContacts(s);
+          }
+        }
+        if (window.VoxyyOrders && window.VoxyyOrders.onSettingsChange) {
+          window.VoxyyOrders.onSettingsChange(function (ns) {
+            if (ns) {
+              localStorage.setItem("voxyy_settings", JSON.stringify(ns));
+              renderContacts(ns);
+            }
+          });
+        }
+      } catch (e) {}
+    }
+    document.addEventListener("DOMContentLoaded", boot);
   </script>
   <script src="bgm.js"></script>
-  <script src="notif.js"></script>
 </body>
 </html>

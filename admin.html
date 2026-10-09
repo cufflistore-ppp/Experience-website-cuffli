@@ -528,6 +528,15 @@
           <input type="text" id="linkTelegram" placeholder="https://t.me/...">
           <label>Link Instagram (opsional)</label>
           <input type="text" id="linkIg" placeholder="https://instagram.com/...">
+          <hr style="border:none;border-top:1px solid #1e2a45;margin:16px 0;">
+          <label style="font-weight:700;color:#90caf9;">Link tambahan (Tentang)</label>
+          <p style="font-size:11px;color:#6a7a90;margin:4px 0 10px;">Tambah nama + URL. Muncul otomatis di halaman Tentang. Bisa dihapus per item.</p>
+          <div id="customLinksList" style="margin-bottom:12px;"></div>
+          <label>Nama link</label>
+          <input type="text" id="newLinkName" placeholder="Contoh: YouTube / Grup WA">
+          <label>URL</label>
+          <input type="url" id="newLinkUrl" placeholder="https://...">
+          <button type="button" class="btn-adm" style="margin-top:8px;" onclick="tambahCustomLink()"><i class="fa-solid fa-plus"></i> Tambah Link</button>
           <p style="font-size:11px;color:#6a7a90;margin:8px 0;">Tempel URL lengkap. Tidak ada peringatan aneh — langsung tersimpan.</p>
           <button class="btn-adm success" onclick="simpanPengaturan()"><i class="fa-solid fa-save"></i> Simpan Pengaturan</button>
         </div>
