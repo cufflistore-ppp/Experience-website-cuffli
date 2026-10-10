@@ -201,17 +201,40 @@ function renderOrderCard(o) {
 }
 
 
-async function renderAntrian() {
+var _antrianFirst = true;
+var _antrianSig = "";
+var _antrianBusy = false;
+
+function orderListSignature(list) {
+  try {
+    return (list || [])
+      .map(function (o) {
+        return [
+          o.kode || "",
+          o.status || "",
+          o.file || o.download || o.fileUrl || "",
+          o.hasBukti ? "1" : "0",
+          o.dikirimTs || "",
+          o.updatedAt || "",
+        ].join(":");
+      })
+      .join("|");
+  } catch (e) {
+    return String(Date.now());
+  }
+}
+
+async function renderAntrian(force) {
   const list = document.getElementById("antrianList");
   if (!list) return;
+  if (_antrianBusy && !force) return;
+  _antrianBusy = true;
 
-  list.innerHTML = `<div style="text-align:center;color:#8aa0b8;padding:24px 12px;">Memuat pesanan...</div>`;
-  var loadWatch = setTimeout(function () {
-    if (list && /Memuat pesanan/i.test(list.innerHTML || "")) {
-      list.innerHTML = `<div style="text-align:center;color:#8aa0b8;padding:24px 12px;">Belum ada data / coba refresh.</div>`;
-    }
-  }, 3000);
-
+  // Hanya tampilkan "Memuat" saat pertama kali / list masih kosong
+  if (_antrianFirst && !list.querySelector(".order-status-card")) {
+    list.innerHTML =
+      '<div style="text-align:center;color:#8aa0b8;padding:24px 12px;">Memuat pesanan...</div>';
+  }
 
   let orders = [];
   try {
@@ -220,49 +243,62 @@ async function renderAntrian() {
     console.warn(e);
   }
 
-  // resolve file APK/ZIP/URL di pesanan (semua device)
+  // resolve file APK/ZIP/URL (tanpa flash UI)
   try {
     var pre = filterMyOrders(orders);
-    await Promise.all((pre || []).slice(0, 15).map(async function (o) {
-      if (!o || !o.kode) return;
-      var f = o.file || o.download || o.fileUrl || "";
-      if (f && (String(f).indexOf("data:") === 0 || /^https?:\/\//i.test(f))) return;
-      if (window.VoxyyOrders && window.VoxyyOrders.getDeliveryFileByKode) {
-        try {
-          var real = await window.VoxyyOrders.getDeliveryFileByKode(o.kode);
-          if (real) {
-            o.file = real;
-            o.download = real;
-            o.fileUrl = real;
-          }
-        } catch (e) {}
-      }
-    }));
+    await Promise.all(
+      (pre || []).slice(0, 15).map(async function (o) {
+        if (!o || !o.kode) return;
+        var f = o.file || o.download || o.fileUrl || "";
+        if (f && (String(f).indexOf("data:") === 0 || /^https?:\/\//i.test(f))) return;
+        if (window.VoxyyOrders && window.VoxyyOrders.getDeliveryFileByKode) {
+          try {
+            var real = await window.VoxyyOrders.getDeliveryFileByKode(o.kode);
+            if (real) {
+              o.file = real;
+              o.download = real;
+              o.fileUrl = real;
+            }
+          } catch (e) {}
+        }
+      })
+    );
   } catch (eH) {}
 
   const mine = filterMyOrders(orders);
-  // terbaru dulu
-  mine.sort((a, b) => {
-    const ta = Date.parse(a.createdAt || a.waktu || 0) || Number(a.dikirimTs || a.createdAt) || 0;
-    const tb = Date.parse(b.createdAt || b.waktu || 0) || Number(b.dikirimTs || b.createdAt) || 0;
+  mine.sort(function (a, b) {
+    var ta = Date.parse(a.createdAt || a.waktu || 0) || Number(a.dikirimTs || a.createdAt) || 0;
+    var tb = Date.parse(b.createdAt || b.waktu || 0) || Number(b.dikirimTs || b.createdAt) || 0;
     return tb - ta;
   });
 
-  try { clearTimeout(loadWatch); } catch (e) {}
+  var sig = orderListSignature(mine);
+  // Skip re-render kalau data sama (hindari kedip / refresh terus)
+  if (!force && sig === _antrianSig && !_antrianFirst) {
+    _antrianBusy = false;
+    return;
+  }
+  _antrianSig = sig;
+  _antrianFirst = false;
+
   if (!mine.length) {
-    list.innerHTML = `
-      <div style="text-align:center;padding:28px 16px;background:#12182a;border-radius:14px;border:1px solid #1e2a45;">
-        <div style="font-size:28px;margin-bottom:8px;">📋</div>
-        <strong style="color:#fff;">Belum ada pesanan</strong>
-        <p style="font-size:13px;color:#8aa0b8;margin-top:6px;line-height:1.45;">Order produk dari Home/Produk. Status & file unduhan muncul di sini otomatis.</p>
-        <a href="digital.html" style="display:inline-block;margin-top:12px;padding:10px 18px;background:#1565c0;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px;">Lihat Produk</a>
-      </div>`;
+    list.innerHTML =
+      '<div style="text-align:center;padding:28px 16px;background:#12182a;border-radius:14px;border:1px solid #1e2a45;">' +
+      '<div style="font-size:28px;margin-bottom:8px;">📋</div>' +
+      '<strong style="color:#fff;">Belum ada pesanan</strong>' +
+      '<p style="font-size:13px;color:#8aa0b8;margin-top:6px;line-height:1.45;">Order produk dari Home/Produk. Setelah bayar & konfirmasi, pesanan muncul di sini otomatis (tanpa refresh).</p>' +
+      '<a href="digital.html" style="display:inline-block;margin-top:12px;padding:10px 18px;background:#1565c0;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px;">Lihat Produk</a>' +
+      "</div>";
+    _antrianBusy = false;
     return;
   }
 
   list.innerHTML =
-    `<div style="font-size:12px;color:#8aa0b8;margin-bottom:10px;">${mine.length} pesanan · status realtime</div>` +
+    '<div style="font-size:12px;color:#8aa0b8;margin-bottom:10px;">' +
+    mine.length +
+    " pesanan · update otomatis</div>" +
     mine.map(renderOrderCard).join("");
+  _antrianBusy = false;
 }
 
 async function cekStatus() {
@@ -313,11 +349,19 @@ async function unduhFilePesanan(kode) {
 window.unduhFilePesanan = unduhFilePesanan;
 
 document.addEventListener("DOMContentLoaded", function () {
-  renderAntrian();
+  renderAntrian(true);
+  // Realtime Firebase: order baru + bukti TF + status langsung muncul tanpa refresh
   if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
+    var _deb;
     window.VoxyyOrders.onOrdersChange(function () {
-      renderAntrian();
+      clearTimeout(_deb);
+      _deb = setTimeout(function () {
+        renderAntrian(false);
+      }, 200);
     });
   }
-  setInterval(renderAntrian, 8000);
+  // Backup sangat jarang (bukan refresh terus)
+  setInterval(function () {
+    renderAntrian(false);
+  }, 60000);
 });
