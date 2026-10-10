@@ -503,23 +503,26 @@ async function simpanProduk() {
   } else {
     list.push(item);
   }
-  // Utamakan simpan ke Firebase terlebih dahulu. Jangan mengaku sukses global jika gagal.
-  let syncRes = { ok: false, mode: "local", error: "Fungsi penyimpanan global tidak tersedia" };
-  if (window.VoxyyOrders && typeof window.VoxyyOrders.saveProdukGlobal === "function") {
-    try { syncRes = await window.VoxyyOrders.saveProdukGlobal(list); }
-    catch (e) { syncRes = { ok: false, mode: "local", error: String(e && e.message ? e.message : e) }; }
+  var syncRes = await saveProdukAdmin(list);
+  try {
+    localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif")));
+  } catch (e) {}
+  if (window.VoxyyOrders && window.VoxyyOrders.saveProdukGlobal) {
+    try {
+      await window.VoxyyOrders.saveProdukGlobal(list);
+    } catch (e) {
+      console.warn(e);
+    }
   }
-  // Simpan cache lokal, tetapi jangan tutup form jika penyimpanan global gagal.
-  try { localStorage.setItem(PRODUK_KEY, JSON.stringify(list || [])); } catch (e) {}
-  try { localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif"))); } catch (e) {}
+  resetFormProduk();
+  document.getElementById("formProduk").style.display = "none";
   await loadProdukAdm();
-  if (syncRes && syncRes.mode === "global" && syncRes.ok !== false) {
-    resetFormProduk();
-    document.getElementById("formProduk").style.display = "none";
-    showAdmToast("✓ Produk tersimpan ke database dan dapat dilihat semua pengunjung.");
+  if (syncRes && syncRes.mode === "global") {
+    if (window.showAdmToast) showAdmToast("Produk tersimpan ke server — semua HP/device bisa lihat");
+    else alert("Produk tersimpan ke server — semua device bisa lihat");
   } else {
-    // Biarkan form tetap terbuka dan isinya tetap ada supaya admin tidak perlu mengetik ulang.
-    alert("GAGAL menyimpan produk ke database bersama. Data masih ada di form/perangkat ini, tetapi belum terlihat oleh pengunjung lain. Penyebab: " + ((syncRes && syncRes.error) || "Firebase menolak penyimpanan. Periksa Rules dan koneksi."));
+    if (window.showAdmToast) showAdmToast("Tersimpan lokal. Cek internet/Firebase rules agar semua device sama.");
+    else alert("Tersimpan di HP ini. Agar semua orang lihat: cek internet + Firebase rules.");
   }
 }
 

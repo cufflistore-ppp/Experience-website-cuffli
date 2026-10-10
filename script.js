@@ -185,7 +185,7 @@ async function buatPesanan() {
   if (waEl) waEl.value = "";
 
   // Redirect ke halaman pembayaran QRIS (Telegram dikirim saat customer klik "Saya Sudah Bayar")
-  window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}&paket=${encodeURIComponent(order.paket)}&resume=1`;
+  window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
 }
 
 // ========== LAPORAN ==========
