@@ -375,9 +375,11 @@
     }
 
     function makeKode() {
-      var rand = Math.floor(1000 + Math.random() * 9000);
-      var timePart = String(Date.now()).slice(-5);
-      return "VM-" + rand + timePart;
+      // Selalu unik tiap order (produk sama pun beda kode)
+      var rand = Math.floor(100000 + Math.random() * 900000);
+      var timePart = String(Date.now()).slice(-6);
+      var extra = Math.floor(Math.random() * 90 + 10);
+      return "VM-" + rand + timePart + extra;
     }
 
     async function loadOrderData() {
@@ -385,18 +387,24 @@
       var paket = (params.get("paket") || params.get("judul") || "").trim();
       var totalNum =
         parseInt(String(params.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
-      var kode = (params.get("kode") || "").trim();
+      // Kode dari URL HANYA jika lanjut order yang sama (eksplisit ?kode=)
+      // Pembelian baru dari produk → SELALU kode baru (produk sama pun beda kode)
+      var kodeFromUrl = (params.get("kode") || "").trim();
       var pid = (params.get("pid") || "").trim();
       var katUrl = (params.get("kat") || "").trim().toLowerCase();
+      var resume = params.get("resume") === "1" || params.get("lanjut") === "1";
 
-      // Kode WAJIB langsung tampil (semua device)
-      if (!kode || kode === "VM-0000" || String(kode).indexOf("0000") >= 0) {
-        try { kode = localStorage.getItem("voxyy_pay_kode_tmp") || ""; } catch (e) {}
-        kode = (kode || "").trim();
+      var kode = "";
+      if (kodeFromUrl && (resume || params.get("kode"))) {
+        // resume order lama hanya jika ada ?kode= + bukan dari katalog biasa
+        // katalog tidak kirim kode → selalu kode baru
+        if (resume) kode = kodeFromUrl;
       }
+      // Default: order baru = kode baru selalu
       if (!kode || kode === "VM-0000" || String(kode).indexOf("0000") >= 0) {
         kode = makeKode();
       }
+      // jangan pakai tmp lama (biar tidak numpang kode order sebelumnya)
       try { localStorage.setItem("voxyy_pay_kode_tmp", kode); } catch (e) {}
       try { localStorage.setItem("voxyy_saved_kode", kode); } catch (e) {}
       showOrderOnUI({
@@ -405,7 +413,6 @@
         finalAmount: totalNum,
         total: totalNum > 0 ? formatRupiah(totalNum) : "Rp …",
       });
-      // paksa DOM update
       try {
         var ek = document.getElementById("kodeOrder");
         if (ek) ek.textContent = kode;
@@ -414,10 +421,6 @@
       var resolved = await resolveHarga(pid, paket, totalNum);
       totalNum = resolved.totalNum;
       paket = resolved.paket || paket || "Produk Digital";
-
-      if (!kode || kode === "VM-0000" || kode.indexOf("0000") >= 0) {
-        kode = makeKode();
-      }
 
       var userEmail = "";
       var userName = "Customer";
@@ -444,11 +447,13 @@
       }
 
       var order = null;
-      if (params.get("kode")) {
-        var want = String(params.get("kode")).toUpperCase();
+      // Jangan ambil order lama berdasarkan produk — hanya resume eksplisit
+      if (resume && kodeFromUrl) {
+        var want = String(kodeFromUrl).toUpperCase();
         order = (orders || []).find(function (o) {
           return String(o.kode || "").toUpperCase() === want;
         }) || null;
+        if (order) kode = order.kode || kode;
       }
 
       if (!order) {
@@ -670,6 +675,7 @@
         var nominalStr = "Rp " + Number(nominal).toLocaleString("id-ID");
         try { sessionStorage.setItem("voxyy_saved_kode", draft.kode || ""); } catch (eK) {}
         try { localStorage.setItem("voxyy_saved_kode", draft.kode || ""); } catch (eK2) {}
+        try { localStorage.removeItem("voxyy_pay_kode_tmp"); } catch (eClr) {}
         var nextUrl = "jasa-link.html?kode=" + encodeURIComponent(draft.kode || "");
         var sb = document.getElementById("statusBox");
         if (sb) {
@@ -778,6 +784,7 @@
 
         // supaya muncul di Pesanan Saya (semua device akun ini)
         try { saveTrackedKode(order.kode); } catch (eT) {}
+        try { localStorage.removeItem("voxyy_pay_kode_tmp"); } catch (eClr) {}
         try {
           localStorage.setItem("voxyy_saved_kode", order.kode || "");
           sessionStorage.setItem("voxyy_saved_kode", order.kode || "");
