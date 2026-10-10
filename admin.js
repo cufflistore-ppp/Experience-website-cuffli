@@ -519,120 +519,127 @@ async function loadProdukAdm() {
 
 async function simpanProduk() {
   try {
-  const id = document.getElementById("produkId").value;
-  let imgVal = (document.getElementById("produkImg").value || "").trim();
-  const fotoFile = document.getElementById("produkFotoFile");
-  const f = fotoFile && fotoFile.files && fotoFile.files[0];
-  if (f) {
-    try {
-      if (f.size > 900000 && !f.type.startsWith("image/")) {
-        alert("File terlalu besar. Kompres atau pakai URL.");
-        return;
+    var idEl = document.getElementById("produkId");
+    var id = idEl ? String(idEl.value || "").trim() : "";
+    var imgVal = (document.getElementById("produkImg") && document.getElementById("produkImg").value || "").trim();
+    var fotoFile = document.getElementById("produkFotoFile");
+    var f = fotoFile && fotoFile.files && fotoFile.files[0];
+
+    // Foto: HANYA Realtime Database (kompres base64) — TANPA Firebase Storage
+    if (f) {
+      try {
+        if (f.type && f.type.indexOf("image/") === 0) {
+          imgVal = await compressImageFile(f, 400, 70);
+        } else {
+          // bukan gambar → abaikan file, pakai URL field / logo
+          if (!imgVal) imgVal = "logo.png";
+        }
+      } catch (eFoto) {
+        console.warn("[produk foto]", eFoto);
+        if (!imgVal) imgVal = "logo.png";
       }
-      if (f.type.startsWith("image/")) {
-        imgVal = await compressImageFile(f, 480, 90);
-      } else {
-        try {
-          const up = await uploadDeliveryFile("produk", f);
-          imgVal = up.url;
-        } catch (e) {
-          imgVal = await new Promise(function (res, rej) {
-            const r = new FileReader();
-            r.onload = function () { res(r.result); };
-            r.onerror = rej;
-            r.readAsDataURL(f);
+    }
+    if (!imgVal) imgVal = "logo.png";
+
+    var isNew = !id;
+    var newId = isNew
+      ? "p" + Date.now() + Math.floor(Math.random() * 900 + 100)
+      : id;
+
+    var item = {
+      id: newId,
+      judul: (document.getElementById("produkJudul").value || "").trim(),
+      kategori: (document.getElementById("produkKategori").value || "digital"),
+      label: (document.getElementById("produkKategori").value || "digital").toUpperCase(),
+      harga: Number(document.getElementById("produkHarga").value) || 0,
+      modal: Number(document.getElementById("produkModal").value) || 0,
+      stok: Number(document.getElementById("produkStok").value),
+      deskripsi: (document.getElementById("produkDeskripsi").value || "").trim(),
+      img: imgVal,
+      file: (document.getElementById("produkFile").value || "").trim(),
+      status: (document.getElementById("produkStatus").value || "aktif"),
+      updatedAt: Date.now(),
+    };
+    if (!item.judul) {
+      if (window.showAdmToast) showAdmToast("Judul wajib diisi");
+      else alert("Judul wajib diisi");
+      return;
+    }
+    if (isNaN(item.stok)) item.stok = -1;
+    if (item.harga < 0) item.harga = 0;
+
+    var list = getProdukAdmin() || [];
+    try {
+      if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
+        var remote = await window.VoxyyOrders.getProdukGlobal(true);
+        if (remote && remote.length) {
+          var map = {};
+          remote.forEach(function (p) {
+            if (p && p.id) map[String(p.id)] = p;
+          });
+          list.forEach(function (p) {
+            if (p && p.id) map[String(p.id)] = p;
+          });
+          list = Object.keys(map).map(function (k) {
+            return map[k];
           });
         }
       }
-    } catch (e) {
-      alert("Gagal baca foto: " + (e.message || e));
-      return;
+    } catch (eM) {}
+
+    if (!isNew) {
+      var idx = list.findIndex(function (p) {
+        return String(p.id) === String(id);
+      });
+      if (idx >= 0) list[idx] = Object.assign({}, list[idx], item);
+      else list.unshift(item);
+    } else {
+      list = list.filter(function (p) {
+        return String(p.id) !== String(item.id);
+      });
+      list.unshift(item);
     }
-  }
-  if (!imgVal) imgVal = "logo.png";
+    window._admProdukList = list.slice();
 
-  // Produk baru = id unik; edit = pakai id lama
-  var isNew = !id || String(id).trim() === "";
-  var newId = isNew
-    ? "p" + Date.now() + Math.floor(Math.random() * 900 + 100)
-    : String(id).trim();
-  const item = {
-    id: newId,
-    judul: document.getElementById("produkJudul").value.trim(),
-    kategori: document.getElementById("produkKategori").value || "digital",
-    label: (document.getElementById("produkKategori").value || "digital").toUpperCase(),
-    harga: Number(document.getElementById("produkHarga").value) || 0,
-    modal: Number(document.getElementById("produkModal").value) || 0,
-    stok: Number(document.getElementById("produkStok").value),
-    deskripsi: document.getElementById("produkDeskripsi").value.trim(),
-    img: imgVal,
-    file: document.getElementById("produkFile").value.trim(),
-    status: document.getElementById("produkStatus").value || "aktif",
-    updatedAt: Date.now(),
-  };
-  if (!item.judul) {
-    alert("Judul wajib diisi");
-    return;
-  }
-  if (isNaN(item.stok)) item.stok = -1;
-  if (item.harga < 0) item.harga = 0;
-
-  let list = getProdukAdmin();
-  // merge dari firebase kalau local kosong
-  try {
-    if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
-      const remote = await window.VoxyyOrders.getProdukGlobal();
-      if (remote && remote.length) {
-        // merge by id: remote base, local overrides
-        var map = {};
-        remote.forEach(function (p) { if (p && p.id) map[String(p.id)] = p; });
-        list.forEach(function (p) { if (p && p.id) map[String(p.id)] = p; });
-        list = Object.keys(map).map(function (k) { return map[k]; });
-      }
-    }
-  } catch (e) {}
-
-  if (!isNew) {
-    const idx = list.findIndex((p) => String(p.id) === String(id));
-    if (idx >= 0) list[idx] = Object.assign({}, list[idx], item);
-    else list.push(item);
-  } else {
-    // pastikan tidak dobel id
-    list = list.filter(function (p) {
-      return String(p.id) !== String(item.id);
-    });
-    list.unshift(item);
-  }
-  window._admProdukList = list.slice();
-  var syncRes = await saveProdukAdmin(list);
-  try {
-    localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif")));
-  } catch (e) {}
-  if (window.VoxyyOrders && window.VoxyyOrders.saveProdukGlobal) {
+    var syncRes = await saveProdukAdmin(list);
     try {
-      await window.VoxyyOrders.saveProdukGlobal(list);
-    } catch (e) {
-      console.warn(e);
-    }
-  }
-  resetFormProduk();
-  document.getElementById("formProduk").style.display = "none";
-  await loadProdukAdm();
-  if (syncRes && syncRes.mode === "global") {
-    if (window.showAdmToast) showAdmToast("Produk tersimpan ke server — semua HP/device bisa lihat");
-    else alert("Produk tersimpan ke server — semua device bisa lihat");
-  } else {
-    if (window.showAdmToast) showAdmToast("Tersimpan lokal. Cek internet/Firebase rules agar semua device sama.");
-    else alert("Tersimpan di HP ini. Agar semua orang lihat: cek internet + Firebase rules.");
-  }
+      localStorage.setItem(
+        "voxyy_joki_catalog",
+        JSON.stringify(list.filter(function (p) {
+          return p.status === "aktif";
+        }))
+      );
+    } catch (e) {}
 
+    try {
+      resetFormProduk();
+    } catch (e) {}
+    var form = document.getElementById("formProduk");
+    if (form) form.style.display = "none";
+    await loadProdukAdm();
+
+    if (syncRes && syncRes.mode === "global") {
+      if (window.showAdmToast) showAdmToast("Produk tersimpan — muncul di Home & semua device");
+    } else if (syncRes && syncRes.error) {
+      if (window.showAdmToast)
+        showAdmToast("Tersimpan lokal. Cek login & rules Firebase.");
+      else console.warn(syncRes.error);
+    } else {
+      if (window.showAdmToast) showAdmToast("Produk tersimpan");
+    }
   } catch (err) {
     console.error(err);
-    alert("Gagal simpan produk: " + (err && err.message ? err.message : err));
+    var msg = err && err.message ? String(err.message) : String(err);
+    // Jangan tampilkan error Storage / quota yang membingungkan
+    if (/storage|quota|setItem/i.test(msg)) {
+      if (window.showAdmToast)
+        showAdmToast("Foto terlalu besar — coba foto lebih kecil. Data produk tetap dicoba simpan.");
+    } else {
+      if (window.showAdmToast) showAdmToast("Gagal simpan: " + msg.slice(0, 80));
+      else alert("Gagal simpan produk");
+    }
   }
 }
-
-
 
 
 function editProduk(i) {
@@ -703,27 +710,33 @@ async function hapusProdukById(id, index) {
     (window._admProdukList && window._admProdukList.length
       ? window._admProdukList.slice()
       : null) || getProdukAdmin() || [];
+  var removedId = null;
   if (index != null && !isNaN(Number(index)) && list[Number(index)]) {
+    removedId = list[Number(index)].id;
     list.splice(Number(index), 1);
   } else if (id != null && id !== "") {
+    removedId = id;
     list = list.filter(function (x) {
       return String(x.id) !== String(id);
     });
   }
-  localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
+  window._admProdukList = list.slice();
   try {
-    if (window.VoxyyOrders && window.VoxyyOrders.saveProdukGlobal) {
-      await window.VoxyyOrders.saveProdukGlobal(list);
-    }
+    await saveProdukAdmin(list);
   } catch (e) {
     console.warn(e);
   }
-  // sync catalog keys
+  // hapus foto di Realtime Database
+  try {
+    if (removedId && window.firebase && firebase.apps && firebase.apps.length) {
+      await firebase.database().ref("produk_images/" + removedId).remove();
+    }
+  } catch (e) {}
   try {
     localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list));
     localStorage.setItem("voxyy_digital", JSON.stringify(list));
   } catch (e) {}
-  if (window.showAdmToast) showAdmToast("Produk dihapus");
+  if (window.showAdmToast) showAdmToast("Produk dihapus dari admin & Home");
   await loadProdukAdm();
 }
 window.editProduk = editProduk;
@@ -1653,10 +1666,20 @@ function compressImageFile(file, maxW, maxKB) {
         const c = document.createElement("canvas");
         c.width = w; c.height = h;
         c.getContext("2d").drawImage(img, 0, 0, w, h);
-        let q = 0.75, data = c.toDataURL("image/jpeg", q);
-        while (data.length > maxKB * 1024 && q > 0.35) {
-          q -= 0.1;
+        let q = 0.7, data = c.toDataURL("image/jpeg", q);
+        var limit = (maxKB || 70) * 1024;
+        while (data.length > limit && q > 0.25) {
+          q -= 0.08;
           data = c.toDataURL("image/jpeg", q);
+        }
+        // masih besar → perkecil dimensi
+        if (data.length > limit && w > 200) {
+          w = Math.round(w * 0.7);
+          h = Math.round(h * 0.7);
+          c.width = w;
+          c.height = h;
+          c.getContext("2d").drawImage(img, 0, 0, w, h);
+          data = c.toDataURL("image/jpeg", 0.55);
         }
         resolve(data);
       };
