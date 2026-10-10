@@ -60,6 +60,13 @@
       <div id="jlPaket" style="font-size:13px;color:#cfd8e3;margin-top:10px;"></div>
       <div id="jlNominal" style="font-size:13px;color:#90caf9;margin-top:4px;font-weight:700;"></div>
 
+      <label style="margin-top:12px;font-size:12px;color:#8aa0b8;">Kode manual (jika kosong)</label>
+      <div style="display:flex;gap:8px;margin-top:6px;">
+        <input type="text" id="jlKodeManual" placeholder="Tempel kode VM-..." autocomplete="off"
+          style="flex:1;padding:12px;border-radius:10px;border:1px solid #1e2a45;background:#0a0e18;color:#fff;font-size:14px;font-weight:700;">
+        <button type="button" class="jl-copy" onclick="pakaiKodeManual()" style="white-space:nowrap;">Pakai</button>
+      </div>
+
       <label style="margin-top:16px;"><i class="fa-solid fa-link" style="color:#2196f3;"></i> Link target</label>
       <input type="url" id="jlLink" placeholder="https://..." inputmode="url" autocomplete="off">
 
@@ -117,10 +124,14 @@
 
     function resolveKodeFromAll() {
       var p = new URLSearchParams(location.search);
-      var fromUrl = (p.get("kode") || "").trim();
-      var fromLs = "";
-      var fromSs = "";
-      var fromDraft = "";
+      var fromUrl = (p.get("kode") || p.get("order") || p.get("id") || "").trim();
+      var fromHash = "";
+      try {
+        var h = (location.hash || "").replace(/^#/, "");
+        if (h.indexOf("kode=") === 0) fromHash = decodeURIComponent(h.slice(5));
+        else if (/^VM-/i.test(h)) fromHash = h;
+      } catch (e) {}
+      var fromLs = "", fromSs = "", fromDraft = "", fromList = "";
       try { fromLs = (localStorage.getItem("voxyy_saved_kode") || "").trim(); } catch (e) {}
       try { fromSs = (sessionStorage.getItem("voxyy_saved_kode") || "").trim(); } catch (e) {}
       try {
@@ -130,7 +141,93 @@
           if (j && j.kode) fromDraft = String(j.kode).trim();
         }
       } catch (e) {}
-      return fromUrl || fromDraft || fromSs || fromLs || "";
+      try {
+        var arr = JSON.parse(localStorage.getItem("voxyy_saved_kodes") || "[]");
+        if (arr && arr[0]) fromList = String(arr[0]).trim();
+      } catch (e) {}
+      var man = "";
+      try {
+        var inp = document.getElementById("jlKodeManual");
+        if (inp) man = (inp.value || "").trim();
+      } catch (e) {}
+      return fromUrl || fromHash || fromDraft || fromSs || fromLs || fromList || man || "";
+    }
+
+    function pakaiKodeManual() {
+      var inp = document.getElementById("jlKodeManual");
+      var v = (inp && inp.value ? inp.value : "").trim().toUpperCase();
+      if (!v) {
+        alert("Tempel kode order dulu (contoh VM-123...)");
+        return;
+      }
+      setKodeUI(v);
+      loadOrderByKode(v);
+    }
+    window.pakaiKodeManual = pakaiKodeManual;
+
+    async function findKodeFromCloud() {
+      try {
+        if (!window.VoxyyOrders) return "";
+        if (window.VoxyyOrders.initFirebase) try { window.VoxyyOrders.initFirebase(); } catch (e) {}
+        var email = "";
+        try {
+          var u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser();
+          if (u) email = String(u.email || "").toLowerCase();
+        } catch (e) {}
+        var list = [];
+        if (window.VoxyyOrders.getOrders) list = (await window.VoxyyOrders.getOrders()) || [];
+        // prioritas: order suntik user ini yang belum ada link
+        var mine = (list || []).filter(function (o) {
+          if (!o || !o.kode) return false;
+          var st = String(o.status || "").toLowerCase();
+          var pak = String(o.paket || "").toLowerCase();
+          var isS =
+            o.isSuntik ||
+            pak.indexOf("suntik") >= 0 ||
+            st.indexOf("link") >= 0;
+          if (!isS) return false;
+          if (o.targetLink || o.linkTarget || o.linkJasa) return false;
+          if (email) {
+            var em = String(o.userEmail || o.email || "").toLowerCase();
+            if (em && em !== email) return false;
+          }
+          return true;
+        });
+        mine.sort(function (a, b) {
+          return (Number(b.createdAt) || 0) - (Number(a.createdAt) || 0);
+        });
+        if (mine[0] && mine[0].kode) {
+          _order = mine[0];
+          return String(mine[0].kode);
+        }
+      } catch (e) {}
+      return "";
+    }
+
+    async function loadOrderByKode(kode) {
+      if (!kode || !window.VoxyyOrders || !window.VoxyyOrders.getOrders) return;
+      try {
+        var list = await window.VoxyyOrders.getOrders();
+        var o = (list || []).find(function (x) {
+          return String(x.kode || "").toUpperCase() === String(kode).toUpperCase();
+        });
+        if (o) {
+          _order = o;
+          setKodeUI(o.kode || kode);
+          var jp = document.getElementById("jlPaket");
+          if (jp) jp.textContent = o.paket || "Jasa Suntik";
+          var nom = o.finalAmount != null ? o.finalAmount : o.total;
+          if (nom != null && nom !== "") {
+            var n = typeof nom === "number" ? nom : parseInt(String(nom).replace(/[^\d]/g, ""), 10);
+            var jn = document.getElementById("jlNominal");
+            if (n && jn) jn.textContent = formatRp(n);
+          }
+          if (o.targetLink || o.linkJasa || o.linkTarget) {
+            document.getElementById("jlLink").value =
+              o.targetLink || o.linkJasa || o.linkTarget;
+          }
+        }
+      } catch (e) {}
     }
 
     function boot() {
@@ -154,34 +251,24 @@
         }
       } catch (e) {}
 
-      if (!_kode) {
-        document.getElementById("jlPaket").textContent =
-          "Kode order belum terbaca. Kembali ke pembayaran, atau tempel kode manual di bawah.";
-      }
-
       (async function () {
         try {
           if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) {
             try { window.VoxyyOrders.initFirebase(); } catch (e) {}
           }
-          if (!_kode || !window.VoxyyOrders || !window.VoxyyOrders.getOrders) return;
-          var list = await window.VoxyyOrders.getOrders();
-          var o = (list || []).find(function (x) {
-            return String(x.kode || "").toUpperCase() === _kode;
-          });
-          if (o) {
-            _order = o;
-            setKodeUI(o.kode || _kode);
-            document.getElementById("jlPaket").textContent = o.paket || "Jasa Suntik";
-            var nom = o.finalAmount != null ? o.finalAmount : o.total;
-            if (nom != null && nom !== "") {
-              var n = typeof nom === "number" ? nom : parseInt(String(nom).replace(/[^\d]/g, ""), 10);
-              if (n) document.getElementById("jlNominal").textContent = formatRp(n);
-            }
-            if (o.targetLink || o.linkJasa || o.linkTarget) {
-              document.getElementById("jlLink").value =
-                o.targetLink || o.linkJasa || o.linkTarget;
-            }
+          // tunggu auth sebentar biar bisa cari order milik user
+          await new Promise(function (r) { setTimeout(r, 400); });
+          if (!_kode) {
+            var cloudKode = await findKodeFromCloud();
+            if (cloudKode) setKodeUI(cloudKode);
+          }
+          if (_kode) {
+            await loadOrderByKode(_kode);
+          } else {
+            var jp = document.getElementById("jlPaket");
+            if (jp)
+              jp.textContent =
+                "Kode belum terbaca. Tempel kode VM-... di kolom manual, atau ulangi dari pembayaran.";
           }
         } catch (e) {}
       })();

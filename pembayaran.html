@@ -708,10 +708,39 @@
           ? Number(draft.finalAmount)
           : parseInt(String(draft.total || "0").replace(/[^\d]/g, ""), 10) || 0;
         var nominalStr = "Rp " + Number(nominal).toLocaleString("id-ID");
+        // Pastikan kode TIDAK kosong sebelum ke jasa-link (semua device)
+        try {
+          var uiK = (document.getElementById("kodeOrder") && document.getElementById("kodeOrder").textContent) || "";
+          uiK = String(uiK).trim();
+          if ((!draft.kode || draft.kode === "-" || draft.kode === "VM-0000") && uiK && uiK !== "-") {
+            draft.kode = uiK;
+          }
+          if (!draft.kode || draft.kode === "-" ) {
+            draft.kode = makeKodeUnik ? makeKodeUnik() : makeKode();
+          }
+        } catch (eFix) {}
         try { sessionStorage.setItem("voxyy_saved_kode", draft.kode || ""); } catch (eK) {}
         try { localStorage.setItem("voxyy_saved_kode", draft.kode || ""); } catch (eK2) {}
+        try {
+          sessionStorage.setItem("voxyy_suntik_draft", JSON.stringify({
+            kode: draft.kode, paket: draft.paket, total: draft.total,
+            finalAmount: draft.finalAmount, status: draft.status || "Menunggu Link", hasBukti: true
+          }));
+          localStorage.setItem("voxyy_suntik_draft", JSON.stringify({
+            kode: draft.kode, paket: draft.paket, total: draft.total,
+            finalAmount: draft.finalAmount, status: draft.status || "Menunggu Link", hasBukti: true
+          }));
+        } catch (eD) {}
         try { localStorage.removeItem("voxyy_pay_kode_tmp"); } catch (eClr) {}
-        var nextUrl = "jasa-link.html?kode=" + encodeURIComponent(draft.kode || "");
+        var nextUrl = "jasa-link.html?kode=" + encodeURIComponent(String(draft.kode || "").trim());
+        if (!draft.kode) {
+          alert("Kode order gagal dibuat. Coba konfirmasi lagi.");
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran';
+          }
+          return;
+        }
         var sb = document.getElementById("statusBox");
         if (sb) {
           sb.classList.add("show");
