@@ -95,7 +95,7 @@
         if (done || settled) return;
         if (auth.currentUser) allow();
         else deny();
-      }, 2000);
+      }, 1500);
       return;
     }
     if (tries < 40) setTimeout(tick, 50);

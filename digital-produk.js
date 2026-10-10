@@ -155,7 +155,44 @@ function payUrl(judul, harga) {
   return "pembayaran.html?paket=" + encodeURIComponent(judul) + "&total=" + encodeURIComponent(String(Number(String(harga||"0").replace(/[^\d]/g,""))||0));
 }
 
+function mapAdminToDigital(p) {
+  if (!p || p.status === "nonaktif") return null;
+  var kat = String(p.kategori || p.label || "digital").toUpperCase();
+  if (kat.indexOf("JOKI") >= 0) kat = "DIGITAL";
+  return {
+    id: p.id,
+    slug: String(p.id || p.judul || "").toLowerCase().replace(/\s+/g, "-"),
+    label: (p.label || kat || "DIGITAL").toString().toUpperCase(),
+    judul: p.judul || p.nama || "Produk",
+    deskripsi: p.deskripsi || "Produk digital VOXY MARKET.",
+    harga: Number(p.harga) || 0,
+    status: p.status === "aktif" || !p.status ? "TERSEDIA" : "HABIS",
+    img: p.img || p.foto || "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp " + Number(p.harga || 0).toLocaleString("id-ID"), "Bayar QRIS di website", "Proses di panel admin"],
+    file: p.file || "",
+    kategori: (p.kategori || "").toLowerCase(),
+  };
+}
+
 function loadProdukDigital() {
+  // Prioritas: produk admin (Firebase/local) — biar tambah di admin langsung muncul di semua device
+  try {
+    var adminList = [];
+    var raw = localStorage.getItem("voxyy_produk_admin");
+    if (raw) {
+      var arr = JSON.parse(raw);
+      if (Array.isArray(arr)) adminList = arr;
+    }
+    if (adminList.length) {
+      var mapped = adminList.map(mapAdminToDigital).filter(Boolean);
+      if (mapped.length) {
+        produkDigital.length = 0;
+        mapped.forEach(function (p) { produkDigital.push(p); });
+        return;
+      }
+    }
+  } catch (e) {}
   try {
     if (localStorage.getItem("voxyy_digital_ver") !== DIGITAL_CATALOG_VER) {
       localStorage.removeItem("voxyy_digital");
@@ -168,6 +205,30 @@ function loadProdukDigital() {
         produkDigital.length = 0;
         parsed.forEach(p => produkDigital.push(p));
       }
+    }
+  } catch (e) {}
+}
+
+async function syncProdukDigitalFromCloud() {
+  try {
+    if (!window.VoxyyOrders) return;
+    if (window.VoxyyOrders.initFirebase) try { window.VoxyyOrders.initFirebase(); } catch (e) {}
+    if (window.VoxyyOrders.getProdukGlobal) {
+      var list = await window.VoxyyOrders.getProdukGlobal();
+      if (list && list.length) {
+        localStorage.setItem("voxyy_produk_admin", JSON.stringify(list));
+        loadProdukDigital();
+        renderDigitalList();
+      }
+    }
+    if (window.VoxyyOrders.onProdukChange) {
+      window.VoxyyOrders.onProdukChange(function (list) {
+        if (list && list.length) {
+          try { localStorage.setItem("voxyy_produk_admin", JSON.stringify(list)); } catch (e) {}
+          loadProdukDigital();
+          renderDigitalList();
+        }
+      });
     }
   } catch (e) {}
 }
@@ -257,4 +318,9 @@ function tambahProdukDigital(data) {
   renderDigitalList();
 }
 
-document.addEventListener("DOMContentLoaded", renderDigitalList);
+document.addEventListener("DOMContentLoaded", function () {
+  renderDigitalList();
+  syncProdukDigitalFromCloud();
+  // max loading feel 3s — pastikan list ter-render
+  setTimeout(function () { try { renderDigitalList(); } catch (e) {} }, 3000);
+});

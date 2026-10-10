@@ -173,3 +173,32 @@ window.renderDigitalList = function () {
   renderKatalog("digitalList", "digital");
 };
 window.renderKatalog = renderKatalog;
+
+
+async function syncKatalogFromCloud() {
+  try {
+    if (!window.VoxyyOrders) return;
+    if (window.VoxyyOrders.initFirebase) try { window.VoxyyOrders.initFirebase(); } catch (e) {}
+    if (window.VoxyyOrders.getProdukGlobal) {
+      var list = await window.VoxyyOrders.getProdukGlobal();
+      if (list && list.length) {
+        try { localStorage.setItem("voxyy_produk_admin", JSON.stringify(list)); } catch (e) {}
+        if (typeof renderKatalog === "function") renderKatalog();
+      }
+    }
+    if (window.VoxyyOrders.onProdukChange) {
+      window.VoxyyOrders.onProdukChange(function (list) {
+        if (list && list.length) {
+          try { localStorage.setItem("voxyy_produk_admin", JSON.stringify(list)); } catch (e) {}
+          if (typeof renderKatalog === "function") renderKatalog();
+        }
+      });
+    }
+  } catch (e) {}
+}
+window.syncKatalogFromCloud = syncKatalogFromCloud;
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", function () { syncKatalogFromCloud(); });
+} else {
+  syncKatalogFromCloud();
+}

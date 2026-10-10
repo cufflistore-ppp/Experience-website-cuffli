@@ -206,6 +206,12 @@ async function renderAntrian() {
   if (!list) return;
 
   list.innerHTML = `<div style="text-align:center;color:#8aa0b8;padding:24px 12px;">Memuat pesanan...</div>`;
+  var loadWatch = setTimeout(function () {
+    if (list && /Memuat pesanan/i.test(list.innerHTML || "")) {
+      list.innerHTML = `<div style="text-align:center;color:#8aa0b8;padding:24px 12px;">Belum ada data / coba refresh.</div>`;
+    }
+  }, 3000);
+
 
   let orders = [];
   try {
@@ -242,6 +248,7 @@ async function renderAntrian() {
     return tb - ta;
   });
 
+  try { clearTimeout(loadWatch); } catch (e) {}
   if (!mine.length) {
     list.innerHTML = `
       <div style="text-align:center;padding:28px 16px;background:#12182a;border-radius:14px;border:1px solid #1e2a45;">

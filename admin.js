@@ -43,13 +43,18 @@ function getProdukAdmin() {
   return [];
 }
 
-function saveProdukAdmin(list) {
+async function saveProdukAdmin(list) {
   localStorage.setItem(PRODUK_KEY, JSON.stringify(list || []));
+  var res = { mode: "local" };
   if (window.VoxyyOrders && typeof window.VoxyyOrders.saveProdukGlobal === "function") {
-    window.VoxyyOrders.saveProdukGlobal(list || []).then(function (r) {
-      console.log("[Admin] produk sync:", r && r.mode);
-    }).catch(function () {});
+    try {
+      res = await window.VoxyyOrders.saveProdukGlobal(list || []) || res;
+      console.log("[Admin] produk sync:", res && res.mode);
+    } catch (e) {
+      res = { mode: "local", error: String(e) };
+    }
   }
+  return res;
 }
 
 function escapeHtml(str) {
@@ -498,7 +503,7 @@ async function simpanProduk() {
   } else {
     list.push(item);
   }
-  saveProdukAdmin(list);
+  var syncRes = await saveProdukAdmin(list);
   try {
     localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif")));
   } catch (e) {}
@@ -512,8 +517,13 @@ async function simpanProduk() {
   resetFormProduk();
   document.getElementById("formProduk").style.display = "none";
   await loadProdukAdm();
-  if (window.showAdmToast) showAdmToast("Produk disimpan — muncul di semua device");
-  else alert("Produk disimpan!");
+  if (syncRes && syncRes.mode === "global") {
+    if (window.showAdmToast) showAdmToast("Produk tersimpan ke server — semua HP/device bisa lihat");
+    else alert("Produk tersimpan ke server — semua device bisa lihat");
+  } else {
+    if (window.showAdmToast) showAdmToast("Tersimpan lokal. Cek internet/Firebase rules agar semua device sama.");
+    else alert("Tersimpan di HP ini. Agar semua orang lihat: cek internet + Firebase rules.");
+  }
 }
 
 
