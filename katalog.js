@@ -18,18 +18,33 @@ let _mode = "home";
 
 function getCatalog() {
   let list = null;
-  if (window.VoxyyBrand && typeof window.VoxyyBrand.getProduk === "function") {
+  // 1) cache realtime VoxyyOrders
+  try {
+    if (window.VoxyyOrders && window.VoxyyOrders._lastProduk && window.VoxyyOrders._lastProduk.length) {
+      list = window.VoxyyOrders._lastProduk.slice();
+    }
+  } catch (e) {}
+  // 2) branding helper
+  if ((!list || !list.length) && window.VoxyyBrand && typeof window.VoxyyBrand.getProduk === "function") {
     list = window.VoxyyBrand.getProduk();
   }
+  // 3) localStorage admin
   if (!list || !list.length) {
     try {
       const raw = localStorage.getItem("voxyy_produk_admin");
       if (raw) {
         const arr = JSON.parse(raw);
-        if (Array.isArray(arr) && arr.length) list = arr.filter((p) => p.status !== "nonaktif");
+        if (Array.isArray(arr) && arr.length) list = arr;
       }
     } catch (e) {}
   }
+  // filter nonaktif
+  if (list && list.length) {
+    list = list.filter(function (p) {
+      return p && p.status !== "nonaktif" && p.status !== "habis";
+    });
+  }
+  // 4) default hanya jika benar-benar kosong
   if (!list || !list.length) list = DEFAULT_PRODUK.slice();
   return list.map((p) => ({
     id: p.id,
@@ -82,12 +97,40 @@ function filteredList() {
   return list;
 }
 
+async function resolveProdukImgs(list) {
+  if (!list || !list.length) return list;
+  if (!window.VoxyyOrders || !window.VoxyyOrders.getProdukImage) return list;
+  await Promise.all(
+    list.slice(0, 40).map(async function (p) {
+      if (!p || !p.img) return;
+      if (String(p.img).indexOf("firebase:produk_images/") === 0 || p.hasImg) {
+        try {
+          var real = await window.VoxyyOrders.getProdukImage(p.img || p.id);
+          if (real) p.img = real;
+        } catch (e) {}
+      }
+    })
+  );
+  return list;
+}
+
 function renderKatalog(gridId, mode) {
   if (gridId) _gridId = gridId;
   if (mode) _mode = mode;
   const box = document.getElementById(_gridId);
   if (!box) return;
-  const list = filteredList();
+  var list = filteredList();
+  // resolve foto dari Realtime DB async (jangan blok UI lama)
+  resolveProdukImgs(list).then(function (resolved) {
+    if (resolved && resolved.length) {
+      // re-render sekali setelah foto ready
+      try {
+        var box2 = document.getElementById(_gridId);
+        if (!box2) return;
+        // only update img src if already rendered
+      } catch (e) {}
+    }
+  });
   if (!list.length) {
     box.innerHTML = '<div class="market-empty"><i class="fa-solid fa-box-open" style="font-size:32px;display:block;margin-bottom:8px;"></i>Tidak ada produk ditemukan.</div>';
     return;
@@ -180,7 +223,7 @@ async function syncKatalogFromCloud() {
     if (!window.VoxyyOrders) return;
     if (window.VoxyyOrders.initFirebase) try { window.VoxyyOrders.initFirebase(); } catch (e) {}
     if (window.VoxyyOrders.getProdukGlobal) {
-      var list = await window.VoxyyOrders.getProdukGlobal();
+      var list = await window.VoxyyOrders.getProdukGlobal(true);
       if (list && list.length) {
         try { localStorage.setItem("voxyy_produk_admin", JSON.stringify(list)); } catch (e) {}
         if (typeof renderKatalog === "function") renderKatalog();

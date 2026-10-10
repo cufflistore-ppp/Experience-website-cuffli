@@ -523,10 +523,62 @@ function getLocalProduk() {
   }
 }
 
+function lightProdukItem(p) {
+  if (!p || typeof p !== "object") return p;
+  var x = { ...p };
+  // Jangan simpan base64 besar di localStorage (quota ~5MB)
+  if (x.img && String(x.img).indexOf("data:") === 0 && String(x.img).length > 4000) {
+    x.hasImg = true;
+    x.img = "firebase:produk_images/" + String(x.id || "x");
+  }
+  if (x.foto && String(x.foto).indexOf("data:") === 0 && String(x.foto).length > 4000) {
+    x.foto = x.img || "";
+  }
+  return x;
+}
+
 function setLocalProduk(list) {
   try {
-    localStorage.setItem(LOCAL_PRODUK_KEY, JSON.stringify(list || []));
-  } catch (e) {}
+    var light = (list || []).map(lightProdukItem);
+    localStorage.setItem(LOCAL_PRODUK_KEY, JSON.stringify(light));
+  } catch (e) {
+    // quota penuh: buang semua img base64 lalu coba lagi
+    try {
+      var lighter = (list || []).map(function (p) {
+        var x = { ...p };
+        if (x.img && String(x.img).indexOf("data:") === 0) {
+          x.hasImg = true;
+          x.img = "firebase:produk_images/" + String(x.id || "x");
+        }
+        return x;
+      });
+      localStorage.setItem(LOCAL_PRODUK_KEY, JSON.stringify(lighter));
+    } catch (e2) {
+      try {
+        localStorage.removeItem(LOCAL_PRODUK_KEY);
+        localStorage.setItem(
+          LOCAL_PRODUK_KEY,
+          JSON.stringify(
+            (list || []).map(function (p) {
+              return {
+                id: p.id,
+                judul: p.judul,
+                kategori: p.kategori,
+                label: p.label,
+                harga: p.harga,
+                modal: p.modal,
+                stok: p.stok,
+                deskripsi: (p.deskripsi || "").slice(0, 200),
+                status: p.status,
+                img: "logo.png",
+                file: p.file || "",
+              };
+            })
+          )
+        );
+      } catch (e3) {}
+    }
+  }
 }
 
 async function getSettings() {
@@ -612,29 +664,34 @@ async function resolveBrandingAsset(url) {
   return "";
 }
 
-async function getProdukGlobal() {
+function parseProdukVal(val) {
+  let list = [];
+  if (Array.isArray(val)) list = val;
+  else if (val && typeof val === "object") {
+    list = Object.keys(val)
+      .map((k) => ({ ...val[k], id: (val[k] && val[k].id) || k }))
+      .filter(function (p) {
+        return p && (p.judul || p.nama);
+      });
+  }
+  return list;
+}
+
+async function getProdukGlobal(forceRefresh) {
   const local = getLocalProduk();
   if (!isGlobalConfigured()) return local;
   initFirebase();
   if (!_db) return local;
-  // cache hanya jika sudah ada isinya — jangan kunci list kosong
-  if (_lastProduk && _lastProduk.length) return _lastProduk;
+  // cache hanya jika ada isi & tidak force
+  if (!forceRefresh && _lastProduk && _lastProduk.length) return _lastProduk;
   try {
     const snap = await _db.ref("produk").once("value");
-    const val = snap.val();
-    let list = [];
-    if (Array.isArray(val)) list = val;
-    else if (val && typeof val === "object") {
-      list = Object.keys(val)
-        .map((k) => ({ ...val[k], id: (val[k] && val[k].id) || k }))
-        .filter(function (p) { return p && (p.judul || p.nama); });
-    }
+    const list = parseProdukVal(snap.val());
     if (list.length) {
       _lastProduk = list;
       setLocalProduk(list);
       return list;
     }
-    // cloud kosong → pakai local (jangan hapus produk yang sudah ada di HP)
     return local && local.length ? local : [];
   } catch (e) {
     return local && local.length ? local : [];
@@ -643,23 +700,79 @@ async function getProdukGlobal() {
 
 async function saveProdukGlobal(list) {
   const arr = Array.isArray(list) ? list : [];
-  setLocalProduk(arr);
-  _lastProduk = arr;
-  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  if (!isGlobalConfigured()) {
+    setLocalProduk(arr);
+    _lastProduk = arr;
+    return { ok: true, mode: "local" };
+  }
   initFirebase();
-  if (!_db) return { ok: true, mode: "local" };
+  if (!_db) {
+    setLocalProduk(arr);
+    _lastProduk = arr;
+    return { ok: true, mode: "local" };
+  }
   try {
-    // simpan sebagai object keyed by id biar stabil
     const map = {};
-    arr.forEach((p, i) => {
-      const id = String(p.id || "p" + i);
-      map[id] = { ...p, id };
-    });
+    for (var i = 0; i < arr.length; i++) {
+      var p = arr[i] || {};
+      var id = String(p.id || "p" + i);
+      var out = { ...p, id };
+      var img = out.img || out.foto || "";
+      // Foto besar → Realtime Database path produk_images (BUKAN Storage)
+      if (img && String(img).indexOf("data:") === 0 && String(img).length > 8000) {
+        try {
+          await _db.ref("produk_images/" + id).set({
+            data: img,
+            at: Date.now(),
+            id: id,
+          });
+          out.img = "firebase:produk_images/" + id;
+          out.hasImg = true;
+        } catch (eImg) {
+          console.warn("[produk_images]", eImg);
+          // tetap coba simpan ringkas
+          out.img = "logo.png";
+          out.hasImg = false;
+        }
+      }
+      map[id] = out;
+    }
     await _db.ref("produk").set(map);
+    var finalList = Object.keys(map).map(function (k) {
+      return map[k];
+    });
+    _lastProduk = finalList;
+    setLocalProduk(finalList);
+    // langsung beritahu Home/Produk di tab yang sama
+    (_produkListeners || []).forEach(function (f) {
+      try {
+        f(finalList);
+      } catch (e) {}
+    });
     return { ok: true, mode: "global" };
   } catch (e) {
-    return { ok: true, mode: "local", error: String(e) };
+    setLocalProduk(arr);
+    _lastProduk = arr;
+    return { ok: false, mode: "local", error: String(e && e.message ? e.message : e) };
   }
+}
+
+async function getProdukImage(idOrRef) {
+  if (!idOrRef) return "";
+  var id = String(idOrRef);
+  if (id.indexOf("firebase:produk_images/") === 0) {
+    id = id.replace("firebase:produk_images/", "");
+  }
+  if (id.indexOf("data:") === 0 || /^https?:\/\//i.test(id)) return id;
+  if (!isGlobalConfigured()) return "";
+  initFirebase();
+  if (!_db) return "";
+  try {
+    var snap = await _db.ref("produk_images/" + id).once("value");
+    var v = snap.val();
+    if (v && v.data && String(v.data).indexOf("data:") === 0) return v.data;
+  } catch (e) {}
+  return "";
 }
 
 function onSettingsChange(fn) {
@@ -682,20 +795,15 @@ function onProdukChange(fn) {
   initFirebase();
   if (!_db) return;
   _db.ref("produk").on("value", (snap) => {
-    const val = snap.val();
-    let list = [];
-    if (Array.isArray(val)) list = val;
-    else if (val && typeof val === "object") {
-      list = Object.keys(val)
-        .map((k) => ({ ...val[k], id: (val[k] && val[k].id) || k }))
-        .filter(function (p) { return p && (p.judul || p.nama); });
-    }
+    const list = parseProdukVal(snap.val());
     // Hanya update kalau ada data — jangan hapus katalog saat koneksi glitch
     if (list.length) {
       _lastProduk = list;
       setLocalProduk(list);
       _produkListeners.forEach((f) => {
-        try { f(list); } catch (e) {}
+        try {
+          f(list);
+        } catch (e) {}
       });
     }
   });
@@ -723,9 +831,19 @@ window.VoxyyOrders = {
   saveSettingsGlobal,
   resolveBrandingAsset,
   getProdukGlobal,
+  getProdukImage,
   saveProdukGlobal,
   onSettingsChange,
   onProdukChange,
   FIREBASE_CONFIG,
   GOOGLE_WEB_CLIENT_ID
 };
+
+try {
+  Object.defineProperty(window.VoxyyOrders, "_lastProduk", {
+    get: function () { return _lastProduk; },
+    set: function (v) { _lastProduk = v; },
+  });
+} catch (e) {
+  window.VoxyyOrders._lastProduk = null;
+}

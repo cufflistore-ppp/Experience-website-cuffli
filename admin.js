@@ -44,15 +44,49 @@ function getProdukAdmin() {
 }
 
 async function saveProdukAdmin(list) {
-  localStorage.setItem(PRODUK_KEY, JSON.stringify(list || []));
   var res = { mode: "local" };
+  // Utama: Firebase Realtime Database (bukan localStorage besar, bukan Storage)
   if (window.VoxyyOrders && typeof window.VoxyyOrders.saveProdukGlobal === "function") {
     try {
-      res = await window.VoxyyOrders.saveProdukGlobal(list || []) || res;
+      res = (await window.VoxyyOrders.saveProdukGlobal(list || [])) || res;
       console.log("[Admin] produk sync:", res && res.mode);
     } catch (e) {
-      res = { mode: "local", error: String(e) };
+      res = { mode: "local", error: String(e && e.message ? e.message : e) };
     }
+  }
+  // localStorage hanya versi ringan (tanpa base64 besar)
+  try {
+    var light = (list || []).map(function (p) {
+      var x = Object.assign({}, p);
+      if (x.img && String(x.img).indexOf("data:") === 0 && String(x.img).length > 4000) {
+        x.hasImg = true;
+        x.img = "firebase:produk_images/" + String(x.id || "x");
+      }
+      return x;
+    });
+    localStorage.setItem(PRODUK_KEY, JSON.stringify(light));
+  } catch (e) {
+    try {
+      localStorage.removeItem(PRODUK_KEY);
+      localStorage.setItem(
+        PRODUK_KEY,
+        JSON.stringify(
+          (list || []).map(function (p) {
+            return {
+              id: p.id,
+              judul: p.judul,
+              kategori: p.kategori,
+              label: p.label,
+              harga: p.harga,
+              stok: p.stok,
+              deskripsi: (p.deskripsi || "").slice(0, 120),
+              status: p.status,
+              img: "logo.png",
+            };
+          })
+        )
+      );
+    } catch (e2) {}
   }
   return res;
 }
@@ -496,7 +530,7 @@ async function simpanProduk() {
         return;
       }
       if (f.type.startsWith("image/")) {
-        imgVal = await compressImageFile(f, 800, 220);
+        imgVal = await compressImageFile(f, 480, 90);
       } else {
         try {
           const up = await uploadDeliveryFile("produk", f);

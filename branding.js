@@ -230,7 +230,7 @@
         }
       }
       if (window.VoxyyOrders.getProdukGlobal) {
-        var list = await window.VoxyyOrders.getProdukGlobal();
+        var list = await window.VoxyyOrders.getProdukGlobal(true);
         if (list && list.length) {
           localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
           if (typeof window.renderKatalog === "function") {
@@ -263,7 +263,23 @@
     if (typeof window.VoxyyOrders.onProdukChange === "function") {
       window.VoxyyOrders.onProdukChange(function (list) {
         if (list && list.length) {
-          localStorage.setItem(PRODUK_KEY, JSON.stringify(list));
+          try {
+            var light = list.map(function (p) {
+              var x = Object.assign({}, p);
+              if (x.img && String(x.img).indexOf("data:") === 0 && String(x.img).length > 4000) {
+                x.img = "firebase:produk_images/" + String(x.id || "x");
+                x.hasImg = true;
+              }
+              return x;
+            });
+            localStorage.setItem(PRODUK_KEY, JSON.stringify(light));
+          } catch (e) {
+            try {
+              localStorage.setItem(PRODUK_KEY, JSON.stringify(list.map(function (p) {
+                return { id: p.id, judul: p.judul, kategori: p.kategori, label: p.label, harga: p.harga, stok: p.stok, status: p.status, deskripsi: (p.deskripsi||"").slice(0,120), img: "logo.png" };
+              })));
+            } catch (e2) {}
+          }
         }
         if (typeof window.renderKatalog === "function") {
           try {
