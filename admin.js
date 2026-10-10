@@ -503,26 +503,22 @@ async function simpanProduk() {
   } else {
     list.push(item);
   }
-  var syncRes = await saveProdukAdmin(list);
-  try {
-    localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif")));
-  } catch (e) {}
-  if (window.VoxyyOrders && window.VoxyyOrders.saveProdukGlobal) {
-    try {
-      await window.VoxyyOrders.saveProdukGlobal(list);
-    } catch (e) {
-      console.warn(e);
-    }
+  // Utamakan simpan ke Firebase terlebih dahulu. Jangan mengaku sukses global jika gagal.
+  let syncRes = { ok: false, mode: "local", error: "Fungsi penyimpanan global tidak tersedia" };
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.saveProdukGlobal === "function") {
+    try { syncRes = await window.VoxyyOrders.saveProdukGlobal(list); }
+    catch (e) { syncRes = { ok: false, mode: "local", error: String(e && e.message ? e.message : e) }; }
   }
+  // Simpan salinan lokal sebagai cache, tetapi sumber utama lintas perangkat adalah Firebase.
+  localStorage.setItem(PRODUK_KEY, JSON.stringify(list || []));
+  try { localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif"))); } catch (e) {}
   resetFormProduk();
   document.getElementById("formProduk").style.display = "none";
   await loadProdukAdm();
-  if (syncRes && syncRes.mode === "global") {
-    if (window.showAdmToast) showAdmToast("Produk tersimpan ke server — semua HP/device bisa lihat");
-    else alert("Produk tersimpan ke server — semua device bisa lihat");
+  if (syncRes && syncRes.mode === "global" && syncRes.ok !== false) {
+    showAdmToast("✓ Produk tersimpan ke database dan dapat dilihat semua pengunjung.");
   } else {
-    if (window.showAdmToast) showAdmToast("Tersimpan lokal. Cek internet/Firebase rules agar semua device sama.");
-    else alert("Tersimpan di HP ini. Agar semua orang lihat: cek internet + Firebase rules.");
+    alert("Produk hanya tersimpan di perangkat ini; belum tersinkron untuk pengunjung lain. Penyebab: " + ((syncRes && syncRes.error) || "Periksa koneksi dan Firebase Realtime Database Rules."));
   }
 }
 
