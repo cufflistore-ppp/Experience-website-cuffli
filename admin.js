@@ -509,16 +509,17 @@ async function simpanProduk() {
     try { syncRes = await window.VoxyyOrders.saveProdukGlobal(list); }
     catch (e) { syncRes = { ok: false, mode: "local", error: String(e && e.message ? e.message : e) }; }
   }
-  // Simpan salinan lokal sebagai cache, tetapi sumber utama lintas perangkat adalah Firebase.
-  localStorage.setItem(PRODUK_KEY, JSON.stringify(list || []));
+  // Simpan cache lokal, tetapi jangan tutup form jika penyimpanan global gagal.
+  try { localStorage.setItem(PRODUK_KEY, JSON.stringify(list || [])); } catch (e) {}
   try { localStorage.setItem("voxyy_joki_catalog", JSON.stringify(list.filter((p) => p.status === "aktif"))); } catch (e) {}
-  resetFormProduk();
-  document.getElementById("formProduk").style.display = "none";
   await loadProdukAdm();
   if (syncRes && syncRes.mode === "global" && syncRes.ok !== false) {
+    resetFormProduk();
+    document.getElementById("formProduk").style.display = "none";
     showAdmToast("✓ Produk tersimpan ke database dan dapat dilihat semua pengunjung.");
   } else {
-    alert("Produk hanya tersimpan di perangkat ini; belum tersinkron untuk pengunjung lain. Penyebab: " + ((syncRes && syncRes.error) || "Periksa koneksi dan Firebase Realtime Database Rules."));
+    // Biarkan form tetap terbuka dan isinya tetap ada supaya admin tidak perlu mengetik ulang.
+    alert("GAGAL menyimpan produk ke database bersama. Data masih ada di form/perangkat ini, tetapi belum terlihat oleh pengunjung lain. Penyebab: " + ((syncRes && syncRes.error) || "Firebase menolak penyimpanan. Periksa Rules dan koneksi."));
   }
 }
 

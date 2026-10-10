@@ -214,9 +214,9 @@ async function addOrder(order) {
       }));
     } catch (e2) {}
   }
-  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  if (!isGlobalConfigured()) return { ok: false, mode: "local", error: "Konfigurasi Firebase belum lengkap" };
   initFirebase();
-  if (!_db) return { ok: true, mode: "local" };
+  if (!_db) return { ok: false, mode: "local", error: "Firebase SDK tidak termuat atau database belum berhasil diinisialisasi" };
   const key = kodeKey(order.kode);
   try {
     // Simpan foto bukti asli. Duplikasi ke order_bukti untuk cadangan.
@@ -452,9 +452,9 @@ async function deleteOrderByKode(kode) {
   setLocalOrders(
     getLocalOrders().filter((o) => String(o.kode || "").toUpperCase() !== t)
   );
-  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  if (!isGlobalConfigured()) return { ok: false, mode: "local", error: "Konfigurasi Firebase belum lengkap" };
   initFirebase();
-  if (!_db) return { ok: true, mode: "local" };
+  if (!_db) return { ok: false, mode: "local", error: "Firebase SDK tidak termuat atau database belum berhasil diinisialisasi" };
   try {
     await _db.ref("orders/" + kodeKey(kode)).remove();
     return { ok: true, mode: "global" };
@@ -645,9 +645,9 @@ async function saveProdukGlobal(list) {
   const arr = Array.isArray(list) ? list : [];
   setLocalProduk(arr);
   _lastProduk = arr;
-  if (!isGlobalConfigured()) return { ok: true, mode: "local" };
+  if (!isGlobalConfigured()) return { ok: false, mode: "local", error: "Konfigurasi Firebase belum lengkap" };
   initFirebase();
-  if (!_db) return { ok: true, mode: "local" };
+  if (!_db) return { ok: false, mode: "local", error: "Firebase SDK tidak termuat atau database belum berhasil diinisialisasi" };
   try {
     // simpan sebagai object keyed by id biar stabil
     const map = {};
@@ -658,7 +658,7 @@ async function saveProdukGlobal(list) {
     await _db.ref("produk").set(map);
     return { ok: true, mode: "global" };
   } catch (e) {
-    return { ok: true, mode: "local", error: String(e) };
+    return { ok: false, mode: "local", error: String(e && e.message ? e.message : e) };
   }
 }
 
