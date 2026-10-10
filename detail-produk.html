@@ -105,7 +105,16 @@
   <script src="katalog.js"></script>
     <script src="script.js"></script>
   <script>
-    function loadDetailProduk() {
+    async function loadDetailProduk() {
+      try {
+        if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
+          var remote = await window.VoxyyOrders.getProdukGlobal();
+          if (remote && remote.length) {
+            localStorage.setItem("voxyy_produk_admin", JSON.stringify(remote));
+          }
+        }
+      } catch (e) {}
+
       const params = new URLSearchParams(window.location.search);
       const id = params.get("id") || "";
       const paketQ = params.get("paket") || "";

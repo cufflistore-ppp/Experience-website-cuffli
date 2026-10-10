@@ -238,6 +238,11 @@
               window.renderKatalog();
             } catch (e) {}
           }
+          if (typeof window.renderDigitalList === "function") {
+            try {
+              window.renderDigitalList();
+            } catch (e) {}
+          }
         }
       }
     } catch (e) {
@@ -263,6 +268,11 @@
         if (typeof window.renderKatalog === "function") {
           try {
             window.renderKatalog();
+          } catch (e) {}
+        }
+        if (typeof window.renderDigitalList === "function") {
+          try {
+            window.renderDigitalList();
           } catch (e) {}
         }
       });

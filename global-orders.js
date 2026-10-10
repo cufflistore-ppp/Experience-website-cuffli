@@ -617,23 +617,27 @@ async function getProdukGlobal() {
   if (!isGlobalConfigured()) return local;
   initFirebase();
   if (!_db) return local;
-  if (_lastProduk) return _lastProduk;
+  // cache hanya jika sudah ada isinya — jangan kunci list kosong
+  if (_lastProduk && _lastProduk.length) return _lastProduk;
   try {
     const snap = await _db.ref("produk").once("value");
     const val = snap.val();
     let list = [];
     if (Array.isArray(val)) list = val;
     else if (val && typeof val === "object") {
-      list = Object.keys(val).map((k) => ({ ...val[k], id: val[k].id || k }));
+      list = Object.keys(val)
+        .map((k) => ({ ...val[k], id: (val[k] && val[k].id) || k }))
+        .filter(function (p) { return p && (p.judul || p.nama); });
     }
     if (list.length) {
       _lastProduk = list;
       setLocalProduk(list);
       return list;
     }
-    return local;
+    // cloud kosong → pakai local (jangan hapus produk yang sudah ada di HP)
+    return local && local.length ? local : [];
   } catch (e) {
-    return local;
+    return local && local.length ? local : [];
   }
 }
 
@@ -682,13 +686,18 @@ function onProdukChange(fn) {
     let list = [];
     if (Array.isArray(val)) list = val;
     else if (val && typeof val === "object") {
-      list = Object.keys(val).map((k) => ({ ...val[k], id: val[k].id || k }));
+      list = Object.keys(val)
+        .map((k) => ({ ...val[k], id: (val[k] && val[k].id) || k }))
+        .filter(function (p) { return p && (p.judul || p.nama); });
     }
-    _lastProduk = list;
-    if (list.length) setLocalProduk(list);
-    _produkListeners.forEach((f) => {
-      try { f(list); } catch (e) {}
-    });
+    // Hanya update kalau ada data — jangan hapus katalog saat koneksi glitch
+    if (list.length) {
+      _lastProduk = list;
+      setLocalProduk(list);
+      _produkListeners.forEach((f) => {
+        try { f(list); } catch (e) {}
+      });
+    }
   });
 }
 

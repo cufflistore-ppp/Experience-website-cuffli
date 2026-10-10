@@ -101,6 +101,9 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       renderKatalog("homeGrid", "home");
+      if (window.syncKatalogFromCloud) window.syncKatalogFromCloud();
+      setTimeout(function () { try { renderKatalog("homeGrid", "home"); } catch (e) {} }, 800);
+      setTimeout(function () { try { renderKatalog("homeGrid", "home"); } catch (e) {} }, 2500);
     });
   </script>
   <script src="bgm.js"></script>
