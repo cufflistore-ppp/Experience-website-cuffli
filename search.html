@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cari Produk - VOXY MARKET</title>
+
+
+<link rel="stylesheet" href="css/search.css">
+
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+
+</head>
+
+
+<body>
+
+
+
+<header class="search-header">
+
+
+<a href="home.html">
+
+<i data-lucide="arrow-left"></i>
+
+</a>
+
+
+<h2>
+Cari Produk
+</h2>
+
+
+</header>
+
+
+
+
+
+
+
+<section class="search-area">
+
+
+<div class="search-box">
+
+
+<i data-lucide="search"></i>
+
+
+<input 
+id="searchInput"
+placeholder="Cari produk, game, atau layanan...">
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+<section class="category">
+
+
+<button class="active">
+Semua
+</button>
+
+
+<button>
+Premium
+</button>
+
+
+<button>
+Digital
+</button>
+
+
+<button>
+Jasa
+</button>
+
+
+</section>
+
+
+
+
+
+
+
+
+<section 
+class="products"
+id="productList">
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<nav>
+
+
+<a href="home.html">
+
+<i data-lucide="house"></i>
+
+Home
+
+</a>
+
+
+<a href="riwayat.html">
+
+<i data-lucide="clipboard-list"></i>
+
+Transaksi
+
+</a>
+
+
+<a href="akun.html">
+
+<i data-lucide="circle-user"></i>
+
+Akun
+
+</a>
+
+
+</nav>
+
+
+
+
+
+
+
+<script>
+
+
+lucide.createIcons();
+
+
+
+
+
+let produk=[
+
+
+{
+nama:"Akun Netflix Premium",
+harga:25000,
+gambar:"assets/produk4.png",
+kategori:"Premium"
+},
+
+
+
+{
+nama:"Spotify Premium",
+harga:15000,
+gambar:"assets/produk5.png",
+kategori:"Premium"
+},
+
+
+
+{
+nama:"APK Premium",
+harga:5000,
+gambar:"assets/produk3.png",
+kategori:"Digital"
+},
+
+
+
+{
+nama:"Jasa Suntik Pengikut Saluran",
+harga:10000,
+gambar:"assets/produk1.png",
+kategori:"Jasa"
+},
+
+
+
+{
+nama:"Jasa Suntik Reaction Saluran",
+harga:12000,
+gambar:"assets/produk2.png",
+kategori:"Jasa"
+}
+
+
+];
+
+
+
+
+
+
+
+function tampil(data){
+
+
+let list=document.getElementById("productList");
+
+
+list.innerHTML="";
+
+
+
+data.forEach((p,index)=>{
+
+
+list.innerHTML += `
+
+
+<div class="product-card"
+onclick="detail(${index})">
+
+
+<img src="${p.gambar}">
+
+
+<h3>
+
+${p.nama}
+
+</h3>
+
+
+<p>
+
+Rp${p.harga.toLocaleString("id-ID")}
+
+</p>
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+}
+
+
+
+
+
+tampil(produk);
+
+
+
+
+
+
+
+
+document
+.getElementById("searchInput")
+.addEventListener("input",function(){
+
+
+
+let keyword=this.value.toLowerCase();
+
+
+
+let hasil=produk.filter(p=>
+
+
+p.nama.toLowerCase()
+.includes(keyword)
+
+
+
+);
+
+
+
+tampil(hasil);
+
+
+
+});
+
+
+
+
+
+
+
+
+function detail(i){
+
+
+
+localStorage.setItem(
+
+"produkDetail",
+
+JSON.stringify(produk[i])
+
+);
+
+
+
+window.location.href=
+"detail-produk.html";
+
+
+
+}
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

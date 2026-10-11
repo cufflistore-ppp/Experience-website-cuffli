@@ -1,46 +1,82 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VOXY MARKET</title>
-  <script>
-    // Entry: langsung login. Jika sudah login → home.
-    (function () {
-      function go(url) { location.replace(url); }
-      var n = 0;
-      function tick() {
-        if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
-          window.VoxyyAuth.onAuthChange(function (user) {
-            var email = user && user.email ? String(user.email).toLowerCase() : "";
-            var admins = ["emailwebvixy@gmail.com", "voxymarket98@gmail.com"];
-            if (user && admins.indexOf(email) >= 0) go("admin.html");
-            else go(user ? "home.html" : "login.html");
-          });
-          return;
-        }
-        if (++n > 25) {
-          go("login.html");
-          return;
-        }
-        setTimeout(tick, 40);
-      }
-      // Load auth deps then check
-      tick();
-    })();
-  </script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script>
-  <script src="branding.js"></script>
-  <script src="auth.js"></script>
-  <style>
-    body { margin:0; background:#0b0b12; color:#7a7a8c; font-family:sans-serif;
-      display:flex;align-items:center;justify-content:center;min-height:100vh; }
-  </style>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VOXY MARKET</title>
+
+<link rel="stylesheet" href="css/style.css">
+
 </head>
+
+
 <body>
-  <p>Memuat...</p>
+
+
+<div class="loading">
+
+
+<div class="logo-box">
+
+<img 
+src="assets/logo.png" 
+class="logo"
+alt="VOXY MARKET">
+
+</div>
+
+
+
+<h1>
+VOXY MARKET
+</h1>
+
+
+<p>
+Tempatnya Kebutuhan Digital Kamu
+</p>
+
+
+
+<div class="loading-bar">
+
+<div class="progress"></div>
+
+</div>
+
+
+
+<span>
+Loading...
+</span>
+
+
+
+</div>
+
+
+
+
+<script>
+
+
+// pindah ke login setelah loading
+
+setTimeout(function(){
+
+window.location.href = "login.html";
+
+},3000);
+
+
+
+</script>
+
+
 </body>
+
 </html>

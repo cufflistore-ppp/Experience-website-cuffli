@@ -1,253 +1,145 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Login - VOXY MARKET</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body.auth-page {
-      background: #0a1628 !important;
-      background-image: none !important;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px 16px 40px;
-      padding-bottom: 40px;
-    }
-    .auth-logo-wrap { text-align: center; margin-bottom: 28px; }
-    .auth-logo {
-      width: 64px; height: 64px; border-radius: 16px;
-      object-fit: cover; margin: 0 auto 12px; display: block;
-      background: #1565c0;
-    }
-    .auth-logo.vx {
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 20px; color: #fff;
-      background: linear-gradient(145deg, #1976d2, #0d47a1);
-    }
-    .auth-brand { font-size: 22px; font-weight: 800; color: #fff; letter-spacing: 0.3px; }
-    .auth-brand .market-blue { color: #0d47a1; }
-    .auth-sub { font-size: 13px; color: #7a7a8c; margin-top: 4px; }
-    .auth-card {
-      width: 100%; max-width: 380px;
-      background: #0f1c2e;
-      border: 1px solid #1a2d45;
-      border-radius: 18px;
-      padding: 24px 20px 22px;
-    }
-    .auth-card h2 { font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 6px; }
-    .auth-card .hint { font-size: 13px; color: #7a7a8c; margin-bottom: 18px; line-height: 1.45; }
-    .auth-card label {
-      display: block; font-size: 13px; font-weight: 600; color: #c8c8d4;
-      margin: 12px 0 6px;
-    }
-    .auth-card input {
-      width: 100%; padding: 13px 14px; border-radius: 12px;
-      border: 1px solid #1e3348; background: #0a1420; color: #fff;
-      font-size: 14px; outline: none; box-sizing: border-box;
-    }
-    .auth-card input::placeholder { color: #5a5a6a; }
-    .auth-card input:focus { border-color: #1565c0; box-shadow: 0 0 0 3px rgba(21,101,192,0.2); }
-    .btn-auth {
-      width: 100%; margin-top: 18px; padding: 14px;
-      border: none; border-radius: 12px;
-      background: #1565c0; color: #fff;
-      font-size: 15px; font-weight: 700; letter-spacing: 0.5px;
-      cursor: pointer;
-    }
-    .btn-auth:active { background: #0d47a1; }
-    .btn-auth:disabled { opacity: 0.65; cursor: wait; }
-    .auth-footer {
-      text-align: center; margin-top: 16px; font-size: 13px; color: #7a7a8c;
-    }
-    .auth-footer a { color: #64b5f6; font-weight: 600; text-decoration: none; }
-    .btn-google {
-      width: 100%; margin-top: 12px; padding: 12px 14px;
-      display: flex; align-items: center; justify-content: center; gap: 10px;
-      background: #fff; color: #1f1f1f; border: none; border-radius: 12px;
-      font-size: 14px; font-weight: 600; cursor: pointer;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
-    .btn-google:active { background: #f3f3f3; }
-    .btn-google img { width: 20px; height: 20px; }
-    .auth-divider {
-      display: flex; align-items: center; gap: 10px;
-      margin: 16px 0 4px; color: #5a5a6a; font-size: 12px;
-    }
-    .auth-divider::before, .auth-divider::after {
-      content: ""; flex: 1; height: 1px; background: #2a2a3a;
-    }
-    .auth-err {
-      display: none; margin-top: 12px; padding: 10px 12px;
-      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 10px; color: #fca5a5; font-size: 12px; line-height: 1.4;
-    }
-    .auth-err.show { display: block; }
-  </style>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login VOXY MARKET</title>
+
+<link rel="stylesheet" href="css/login.css">
+
 </head>
-<body class="auth-page">
-  <div class="auth-logo-wrap">
-    <img src="logo.png" alt="VOXY" class="auth-logo" id="authLogo" onerror="this.style.display='none';document.getElementById('authLogoVx').style.display='flex'">
-    <div class="auth-logo vx" id="authLogoVx" style="display:none;">VX</div>
-    <div class="auth-brand">VOXY <span class="market-blue">MARKET</span></div>
-    <div class="auth-sub">Digital Store</div>
-  </div>
 
-  <div class="auth-card">
-    <h2>Login</h2>
-    <p class="hint">Masuk ke akun VOXY MARKET kamu.</p>
 
-    <label>Email</label>
-    <input type="email" id="loginEmail" placeholder="Masukkan email" autocomplete="email">
+<body>
 
-    <label>Password</label>
-    <input type="password" id="loginPass" placeholder="Masukkan password" autocomplete="current-password">
 
-    <button type="button" class="btn-auth" id="btnLogin" onclick="doLogin()">LOGIN</button>
+<div class="login-box">
 
-    <div class="auth-divider">atau</div>
 
-    <button type="button" class="btn-google" id="btnGoogle" onclick="doGoogle()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-      <span>Masuk dengan Google</span>
-    </button>
+<img src="assets/logo.png" class="login-logo">
 
-    <div class="auth-err" id="authErr"></div>
 
-    <p class="auth-footer">Belum punya akun? <a href="daftar.html">Daftar</a></p>
-  </div>
+<h1>
+VOXY MARKET
+</h1>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script>
-  <script src="branding.js"></script>
-  <script src="auth.js"></script>
-  <script>
-    function afterLoginRedirect(user) {
-      // Admin email → langsung panel admin (tanpa login lagi)
-      try {
-        var u = user || (window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser());
-        var email = u && u.email ? String(u.email).toLowerCase() : "";
-        if (window.VoxyyAuth && window.VoxyyAuth.isAdminEmail && window.VoxyyAuth.isAdminEmail(email)) {
-          localStorage.setItem("voxyy_admin_email", email);
-          location.href = "admin.html";
-          return;
-        }
-        // fallback: cek list lokal
-        var admins = ["emailwebvixy@gmail.com", "voxymarket98@gmail.com"];
-        if (email && admins.indexOf(email) >= 0) {
-          localStorage.setItem("voxyy_admin_email", email);
-          location.href = "admin.html";
-          return;
-        }
-      } catch (e) {}
 
-      var q = new URLSearchParams(location.search).get("next") || "";
-      var target = "home.html";
-      if (q) {
-        try {
-          q = decodeURIComponent(q);
-          // tolak external & halaman auth
-          if (q.indexOf("://") < 0 && q.indexOf("//") !== 0) {
-            var low = q.toLowerCase();
-            if (low.indexOf("login") !== 0 && low.indexOf("daftar") !== 0) {
-              target = q; // contoh: jasa-link?kode=VM-xxx atau home.html
-            }
-          }
-        } catch (e) {}
-      }
-      location.href = target;
-    }
+<p>
+Login untuk melanjutkan
+</p>
 
-    function showErr(msg) {
-      var el = document.getElementById("authErr");
-      el.textContent = msg || "";
-      el.classList.toggle("show", !!msg);
-    }
 
-    // Sudah login? Jangan tampil form — langsung masuk
-    (function alreadyLoggedInCheck() {
-      var n = 0;
-      function tick() {
-        n++;
-        try {
-          if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
-            window.VoxyyAuth.onAuthChange(function (user) {
-              if (user) {
-                try { afterLoginRedirect(user); } catch (e) {
-                  location.href = "home.html";
-                }
-              }
-            });
-            return;
-          }
-        } catch (e) {}
-        if (n < 50) setTimeout(tick, 100);
-      }
-      tick();
-    })();
 
-    async function doLogin() {
-      var email = (document.getElementById("loginEmail").value || "").trim();
-      var pass = document.getElementById("loginPass").value || "";
-      if (!email || !pass) { showErr("Isi email dan password."); return; }
-      var btn = document.getElementById("btnLogin");
-      btn.disabled = true; btn.textContent = "Memproses...";
-      showErr("");
-      try {
-        var user = await window.VoxyyAuth.loginEmail(email, pass);
-        afterLoginRedirect(user);
-      } catch (e) {
-        var m = (e && e.message) ? e.message : String(e);
-        if (/user-not-found|invalid-credential|wrong-password/i.test(m)) m = "Email atau password salah.";
-        else if (/too-many/i.test(m)) m = "Terlalu banyak percobaan. Coba lagi nanti.";
-        showErr(m);
-      }
-      btn.disabled = false; btn.textContent = "LOGIN";
-    }
-    async function doGoogle() {
-      showErr("");
-      var btn = document.getElementById("btnGoogle");
-      btn.disabled = true;
-      try {
-        var user = await window.VoxyyAuth.loginGoogle();
-        afterLoginRedirect(user);
-      } catch (e) {
-        showErr((e && e.message) ? e.message : String(e));
-      }
-      btn.disabled = false;
-    }
-    document.getElementById("loginPass").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") doLogin();
-    });
-    // Sudah login? ke akun
-    document.addEventListener("DOMContentLoaded", function () {
-      var n = 0;
-      var t = setInterval(function () {
-        if (window.VoxyyAuth && window.VoxyyAuth.onAuthChange) {
-          clearInterval(t);
-          window.VoxyyAuth.onAuthChange(function (u) {
-            if (u) afterLoginRedirect(u);
-          });
-        } else if (++n > 30) clearInterval(t);
-      }, 150);
-      // logo dari settings
-      try {
-        var s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
-        if (s.logoUrl) {
-          var img = document.getElementById("authLogo");
-          img.src = s.logoUrl;
-          img.style.display = "block";
-          document.getElementById("authLogoVx").style.display = "none";
-        }
-      } catch (e) {}
-    });
-  </script>
+<input 
+id="email"
+type="email"
+placeholder="Masukkan Email">
+
+
+
+<input 
+id="password"
+type="password"
+placeholder="Masukkan Password">
+
+
+
+<button onclick="login()">
+LOGIN
+</button>
+
+
+
+<div class="divider">
+atau
+</div>
+
+
+
+<button class="google">
+🔵 Login Google
+</button>
+
+
+
+<p class="register">
+
+Belum punya akun?
+
+<a href="daftar.html">
+Daftar
+</a>
+
+</p>
+
+
+</div>
+
+
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+
+<script src="js/global-orders.js"></script>
+
+<script src="js/auth.js"></script>
+
+
+
+<script>
+
+
+function login(){
+
+
+let email =
+document.getElementById("email").value;
+
+
+let password =
+document.getElementById("password").value;
+
+
+
+loginUser(email,password)
+
+.then(()=>{
+
+
+alert("Login berhasil");
+
+
+window.location.href="home.html";
+
+
+})
+
+
+.catch((error)=>{
+
+
+alert(error.message);
+
+
+});
+
+
+}
+
+
+
+</script>
+
+
+
 </body>
+
 </html>

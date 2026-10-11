@@ -1,174 +1,455 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <script src="auth-guard.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Detail Produk - VOXY MARKET</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-  <style>
-    .produk-detail-img {
-      width: 100%;
-      aspect-ratio: 4 / 5;
-      height: auto;
-      max-height: none;
-      object-fit: cover;
-      object-position: center;
-      border-radius: 12px;
-      background: #1e2a45;
-      margin-bottom: 14px;
-      display: block;
-    }
-    .produk-detail-card {
-      background: #12182a;
-      border: 1px solid #1e2a45;
-      border-radius: 14px;
-      padding: 16px;
-    }
-    .produk-detail-card h2 {
-      font-size: 20px;
-      margin: 8px 0;
-    }
-    .produk-status {
-      display: inline-block;
-      background: #0d2137;
-      color: #64b5f6;
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      margin-bottom: 6px;
-    }
-    .produk-harga-big {
-      font-size: 26px;
-      font-weight: 800;
-      color: #0d47a1;
-      margin: 12px 0;
-    }
-    .fitur-list {
-      list-style: none;
-      margin: 12px 0;
-    }
-    .fitur-list li {
-      padding: 8px 0;
-      border-bottom: 1px solid #1e2a45;
-      font-size: 13px;
-      color: #ccc;
-    }
-    .fitur-list li i {
-      color: #0d47a1;
-      margin-right: 8px;
-    }
-    .fitur-list li:last-child { border-bottom: none; }
-  </style>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Detail Produk - VOXY MARKET</title>
+
+
+<link rel="stylesheet" href="css/detail-produk.css">
+
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
 </head>
+
+
 <body>
-  <header class="header">
-    <div class="brand">
-      <img src="logo.png" alt="VOXY MARKET" class="logo"  >
-      <div>
-        <h1>VOXY MARKET <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Detail Produk Digital</p>
-      </div>
-    </div>
-  </header>
 
-  <div class="top-notif" id="topNotif" style="display:none;"></div>
 
-  <div class="page-content">
-    <a href="digital.html" class="back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Produk Digital</a>
+<!-- HEADER -->
 
-    <div id="detailProduk">
-      <p style="color:#aaa;text-align:center;">Memuat produk...</p>
-    </div>
-  </div>
+<header class="detail-header">
 
-  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
 
-              <nav class="bottom-nav nav-5">
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
-    <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
-    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-circle-user"></i><span>Akun</span></a>
-  </nav>
+<a href="home.html">
 
-  <script src="digital-produk.js"></script>
+<i data-lucide="arrow-left"></i>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="auth.js"></script>
-  <script src="branding.js"></script>
-  <script src="katalog.js"></script>
-    <script src="script.js"></script>
-  <script>
-    async function loadDetailProduk() {
-      try {
-        if (window.VoxyyOrders && window.VoxyyOrders.getProdukGlobal) {
-          var remote = await window.VoxyyOrders.getProdukGlobal();
-          if (remote && remote.length) {
-            localStorage.setItem("voxyy_produk_admin", JSON.stringify(remote));
-          }
-        }
-      } catch (e) {}
+</a>
 
-      const params = new URLSearchParams(window.location.search);
-      const id = params.get("id") || "";
-      const paketQ = params.get("paket") || "";
-      const el = document.getElementById("detailProduk");
-      if (!el) return;
-      let list = [];
-      try {
-        if (window.VoxyyBrand && window.VoxyyBrand.getProduk) list = window.VoxyyBrand.getProduk() || [];
-      } catch (e) {}
-      if (!list.length) {
-        try { list = JSON.parse(localStorage.getItem("voxyy_produk_admin") || "[]"); } catch (e) {}
-      }
-      if (!list.length && typeof getCatalog === "function") {
-        try { list = getCatalog(); } catch (e) {}
-      }
-      let item = null;
-      if (id) item = list.find(function (p) { return String(p.id) === String(id); });
-      if (!item && paketQ) {
-        item = list.find(function (p) {
-          return String(p.judul || "").toLowerCase() === String(paketQ).toLowerCase();
-        });
-      }
-      if (!item) {
-        el.innerHTML = "<p style='color:#aaa;'>Produk tidak ditemukan. <a href='home.html' style='color:#1565c0;'>Kembali</a></p>";
-        return;
-      }
-      const hargaNum = Number(String(item.harga || "0").replace(/[^\d]/g, "")) || 0;
-      const harga = "Rp " + hargaNum.toLocaleString("id-ID");
-      const stok = item.stok == null || Number(item.stok) < 0 ? "Unlimited" : String(item.stok);
-      const buy =
-        "pembayaran.html?paket=" + encodeURIComponent(item.judul || "") +
-        "&total=" + encodeURIComponent(String(hargaNum)) +
-        "&pid=" + encodeURIComponent(item.id || "") +
-        "&kat=" + encodeURIComponent(item.kategori || "");
-      el.innerHTML =
-        '<div class="produk-detail-card">' +
-        (item.img
-          ? '<img src="' + String(item.img).replace(/"/g, "&quot;") + '" alt="" class="produk-detail-img" onerror="this.style.display=\'none\'">'
-          : "") +
-        '<span class="produk-status">' + String(item.kategori || "produk").toUpperCase() + " · " + (item.status || "aktif") + "</span>" +
-        "<h2>" + String(item.judul || "Produk") + "</h2>" +
-        '<p style="font-size:13px;color:#bbb;line-height:1.5;">' + String(item.deskripsi || "") + "</p>" +
-        '<div class="produk-harga-big">' + harga + "</div>" +
-        '<p style="font-size:12px;color:#8aa0b8;">Stok: ' + stok + "</p>" +
-        '<a href="' + buy + '" style="display:block;text-align:center;text-decoration:none;margin-top:16px;padding:14px;background:#1565c0;color:#fff;border-radius:12px;font-weight:800;">Pesan Sekarang</a>' +
-        "</div>";
-    }
 
-    document.addEventListener("DOMContentLoaded", function () {
-      setTimeout(loadDetailProduk, 100);
-      setTimeout(loadDetailProduk, 400);
-    });
-  </script>
-  <script src="bgm.js"></script>
-  <script src="notif.js"></script>
+
+<img class="logo-detail"
+src="assets/logo.png">
+
+
+
+<div>
+
+<h2>
+VOXY MARKET
+</h2>
+
+
+<p>
+Produk Digital Premium
+</p>
+
+
+</div>
+
+
+</header>
+
+
+
+
+
+
+
+<!-- DETAIL PRODUK -->
+
+
+<main class="product-detail">
+
+
+
+<img 
+class="product-image"
+id="produkImage"
+src="assets/produk2.png">
+
+
+
+
+
+
+<div class="category-badge">
+
+
+<i data-lucide="crown"></i>
+
+
+<span id="kategori">
+
+Jasa Suntik
+
+</span>
+
+
+</div>
+
+
+
+
+
+
+
+<h1 id="namaProduk">
+
+Jasa Suntik Reaction Saluran
+
+</h1>
+
+
+
+
+
+<p class="description"
+id="deskripsi">
+
+
+Produk Jasa Suntik Reaction Saluran tersedia di VOXY MARKET. Proses cepat, aman, dan mudah.
+
+
+</p>
+
+
+
+
+
+
+
+<h2 class="price"
+id="harga">
+
+
+Rp12.000
+
+</h2>
+
+
+
+
+
+
+
+
+
+<section class="feature-box">
+
+
+
+<div class="feature">
+
+
+<i data-lucide="zap"></i>
+
+
+<span>
+Proses Cepat
+</span>
+
+
+</div>
+
+
+
+
+
+<div class="feature">
+
+
+<i data-lucide="shield-check"></i>
+
+
+<span>
+Aman & Bergaransi
+</span>
+
+
+</div>
+
+
+
+
+
+<div class="feature">
+
+
+<i data-lucide="headphones"></i>
+
+
+<span>
+Support Admin
+</span>
+
+
+</div>
+
+
+
+</section><!-- CARA PROSES -->
+
+<section class="process-box">
+
+
+<h2>
+Cara Proses
+</h2>
+
+
+<p>
+
+Setelah pembayaran berhasil, pesanan akan masuk ke riwayat transaksi. 
+Admin akan memproses pesanan dan mengirimkan hasil sesuai produk yang dibeli.
+
+</p>
+
+
+</section>
+
+
+
+
+
+
+
+<!-- BUTTON BELI -->
+
+
+<a href="pembayaran.html"
+class="buy-button"
+onclick="buatPesanan()">
+
+
+<i data-lucide="shopping-cart"></i>
+
+
+<span>
+Beli Sekarang
+</span>
+
+
+</a>
+
+
+
+</main>
+
+
+
+
+
+
+
+
+
+<!-- CHAT ADMIN -->
+
+
+<a href="https://wa.me/6285726337940"
+class="chat-admin">
+
+
+<img src="assets/chat-admin.png">
+
+
+</a>
+
+
+
+
+
+
+
+
+
+<!-- NAVBAR -->
+
+
+<nav>
+
+
+<a href="home.html">
+
+
+<i data-lucide="house"></i>
+
+
+<span>
+Home
+</span>
+
+
+</a>
+
+
+
+
+
+
+<a href="riwayat.html">
+
+
+<i data-lucide="clipboard-list"></i>
+
+
+<span>
+Transaksi
+</span>
+
+
+</a>
+
+
+
+
+
+
+<a href="akun.html">
+
+
+<i data-lucide="circle-user"></i>
+
+
+<span>
+Akun
+</span>
+
+
+</a>
+
+
+</nav><script>
+
+
+lucide.createIcons();
+
+
+
+
+
+// DATA PRODUK SEMENTARA
+
+let produk = {
+
+    nama:"Jasa Suntik Reaction Saluran",
+
+    harga:12000,
+
+    gambar:"assets/produk2.png",
+
+    kategori:"Jasa Suntik"
+
+};
+
+
+
+
+
+
+
+
+// SIMPAN PESANAN SAAT BELI
+
+
+function buatPesanan(){
+
+
+let kode =
+"VX" + Math.floor(100000 + Math.random()*900000);
+
+
+
+let transaksi = {
+
+
+kode:kode,
+
+
+namaProduk:produk.nama,
+
+
+harga:produk.harga,
+
+
+gambar:produk.gambar,
+
+
+tanggal:new Date()
+.toLocaleDateString("id-ID"),
+
+
+
+status:"Menunggu Verifikasi",
+
+
+
+tipe:"jasa",
+
+
+
+catatan:"Belum ada catatan"
+
+
+
+};
+
+
+
+
+
+
+
+let riwayat = JSON.parse(
+
+localStorage.getItem("riwayatTransaksi")
+
+) || [];
+
+
+
+
+
+riwayat.push(transaksi);
+
+
+
+
+
+localStorage.setItem(
+
+"riwayatTransaksi",
+
+JSON.stringify(riwayat)
+
+);
+
+
+
+}
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
+
 </body>
+
+
 </html>

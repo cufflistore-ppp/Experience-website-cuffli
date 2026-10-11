@@ -1,60 +1,465 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riwayat Pesanan — CUFFLI SOCIAL</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Riwayat Transaksi - VOXY MARKET</title>
+
+
+<link rel="stylesheet" href="css/riwayat.css">
+
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+
 </head>
+
+
 <body>
-  <div id="loading-screen">
-    <div class="loading-logo">CUFFLI SOCIAL</div>
-    <div class="loading-text">Loading...</div>
-  </div>
 
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Beranda</a></li>
-        <li><a href="layanan.html">Layanan</a></li>
-        <li><a href="order.html">Pesanan</a></li>
-        <li><a href="riwayat.html" class="active">Riwayat</a></li>
-        <li><a href="profil.html">Profil</a></li>
-      </ul>
-      <div class="nav-actions">
-        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login">Login</a>
-        <a href="profil.html" class="btn btn-primary btn-sm hidden" id="nav-profile">Profil</a>
-      </div>
-    </div>
-  </nav>
 
-  <div class="page-header">
-    <h1>Riwayat <span style="color:var(--neon)">Pesanan</span></h1>
-    <p>Pantau status semua pesananmu di sini.</p>
-  </div>
 
-  <section class="section" style="padding-top:10px">
-    <div class="container" id="riwayat-content">
-      <!-- Filled by JS -->
-    </div>
-  </section>
+<!-- ================= HEADER ================= -->
 
-  <footer class="footer">
-    <div class="footer-bottom" style="border:none;padding-top:0">© 2026 CUFFLI SOCIAL. All Rights Reserved.</div>
-  </footer>
 
-  <nav class="bottom-nav">
-    <a href="index.html"><i class="fa-solid fa-house"></i> Beranda</a>
-    <a href="layanan.html"><i class="fa-solid fa-store"></i> Layanan</a>
-    <a href="order.html"><i class="fa-solid fa-cart-shopping"></i> Pesanan</a>
-    <a href="profil.html"><i class="fa-solid fa-user"></i> Profil</a>
-  </nav>
+<header class="transaction-header">
 
-  <script src="js/app.js"></script>
-  <script src="js/riwayat.js"></script>
+
+<div class="logo-area">
+
+<img src="assets/logo.png">
+
+</div>
+
+
+
+<div>
+
+<h2>
+Riwayat Transaksi
+</h2>
+
+
+<p>
+Pantau pesanan kamu
+</p>
+
+
+</div>
+
+
+
+</header>
+
+
+
+
+
+
+
+
+
+<!-- ================= FILTER ================= -->
+
+
+<section class="filter">
+
+
+<button class="active">
+
+Semua
+
+</button>
+
+
+<button>
+
+Menunggu
+
+</button>
+
+
+<button>
+
+Diproses
+
+</button>
+
+
+<button>
+
+Selesai
+
+</button>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- ================= LIST TRANSAKSI ================= -->
+
+
+<section 
+class="transaction-list"
+id="transactionList">
+
+
+</section><!-- ================= CHAT ADMIN ================= -->
+
+
+<a href="https://wa.me/6285726337940"
+class="chat-admin">
+
+
+<img src="assets/chat-admin.png">
+
+
+</a>
+
+
+
+
+
+
+
+
+
+<!-- ================= NAVBAR ================= -->
+
+
+<nav>
+
+
+<a href="home.html">
+
+
+<i data-lucide="house"></i>
+
+
+<span>
+Home
+</span>
+
+
+</a>
+
+
+
+
+
+
+<a href="riwayat.html"
+class="active">
+
+
+<i data-lucide="clipboard-list"></i>
+
+
+<span>
+Transaksi
+</span>
+
+
+</a>
+
+
+
+
+
+
+
+<a href="akun.html">
+
+
+<i data-lucide="circle-user"></i>
+
+
+<span>
+Akun
+</span>
+
+
+</a>
+
+
+
+</nav>
+
+
+
+
+
+
+
+
+
+<!-- ================= SCRIPT ================= -->
+
+
+<script>
+
+
+lucide.createIcons();
+
+
+
+
+
+// ================= LOAD TRANSAKSI =================
+
+
+
+let dataTransaksi = JSON.parse(
+
+localStorage.getItem("riwayatTransaksi")
+
+) || [];
+
+
+
+
+
+let list = document.getElementById(
+"transactionList"
+);
+
+
+
+
+
+if(dataTransaksi.length === 0){
+
+
+
+list.innerHTML = `
+
+
+<div class="empty">
+
+
+<i data-lucide="clipboard-x"></i>
+
+
+<h3>
+Belum ada transaksi
+</h3>
+
+
+<p>
+Pesanan kamu akan muncul di sini
+</p>
+
+
+</div>
+
+
+`;
+
+
+
+}
+
+else{
+
+
+
+dataTransaksi.reverse().forEach((item,index)=>{
+
+
+
+
+
+list.innerHTML += `
+
+
+
+<div class="transaction-card">
+
+
+
+<div class="product-top">
+
+
+
+<img src="${item.gambar || 'assets/logo.png'}">
+
+
+
+
+
+<div>
+
+
+<h3>
+
+${item.namaProduk}
+
+</h3>
+
+
+
+<p>
+
+Kode Pesanan:
+
+<b>
+
+${item.kode}
+
+</b>
+
+</p>
+
+
+
+<p>
+
+${item.tanggal}
+
+</p>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="status waiting">
+
+
+<i data-lucide="clock"></i>
+
+
+${item.status}
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="transaction-bottom">
+
+
+
+<strong>
+
+Rp${Number(item.harga)
+.toLocaleString("id-ID")}
+
+</strong>
+
+
+
+
+
+
+
+<button onclick="lihatDetail(${index})">
+
+Detail
+
+</button>
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+
+lucide.createIcons();
+
+
+
+
+
+
+
+
+
+// ================= DETAIL =================
+
+
+
+function lihatDetail(index){
+
+
+
+let data = dataTransaksi[index];
+
+
+
+localStorage.setItem(
+
+"detailTransaksi",
+
+JSON.stringify(data)
+
+);
+
+
+
+
+
+window.location.href =
+"detail-transaksi.html";
+
+
+
+}
+
+
+
+</script>
+
 </body>
+
 </html>

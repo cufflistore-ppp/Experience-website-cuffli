@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Detail Pesanan - VOXY MARKET</title>
+
+
+<link rel="stylesheet" href="css/detail-transaksi.css">
+
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+</head>
+
+
+<body>
+
+
+
+
+
+<!-- HEADER -->
+
+
+<header class="detail-header">
+
+
+<a href="riwayat.html">
+
+<i data-lucide="arrow-left"></i>
+
+</a>
+
+
+
+<div>
+
+<h2>
+Detail Pesanan
+</h2>
+
+<p>
+Informasi transaksi kamu
+</p>
+
+</div>
+
+
+</header>
+
+
+
+
+
+
+
+
+
+<!-- PRODUK -->
+
+
+<section class="order-card">
+
+
+<img 
+id="gambarProduk"
+src="assets/logo.png">
+
+
+
+<div>
+
+
+<h2 id="namaProduk">
+Nama Produk
+</h2>
+
+
+
+<p>
+Kode Pesanan:
+<b id="kodePesanan">
+-
+</b>
+</p>
+
+
+
+<p id="tanggal">
+-
+</p>
+
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- STATUS -->
+
+
+<section class="status-card">
+
+
+<i data-lucide="clock"></i>
+
+
+<div>
+
+
+<h3>
+Status Pesanan
+</h3>
+
+
+<p id="statusPesanan">
+Menunggu Verifikasi
+</p>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- HASIL PESANAN -->
+
+
+<section class="result-card">
+
+
+<h2>
+
+Hasil Pesanan
+
+</h2>
+
+
+
+
+
+
+
+<!-- AKUN -->
+
+
+<div 
+id="akunArea"
+class="result-item"
+style="display:none;">
+
+
+<h3>
+Email & Password
+</h3>
+
+
+
+<div class="info-box">
+
+
+<p>
+Email
+</p>
+
+
+<b id="emailAkun">
+-
+</b>
+
+
+</div>
+
+
+
+
+
+<div class="info-box">
+
+
+<p>
+Password
+</p>
+
+
+<b id="passwordAkun">
+-
+</b>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- FILE -->
+
+
+<div 
+id="fileArea"
+class="result-item"
+style="display:none;">
+
+
+
+<h3>
+File Produk
+</h3>
+
+
+
+<a 
+id="fileProduk"
+class="action-button"
+href="#">
+
+<i data-lucide="download"></i>
+
+Download File
+
+</a>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- LINK -->
+
+
+<div 
+id="linkArea"
+class="result-item"
+style="display:none;">
+
+
+
+<h3>
+Link Produk
+</h3>
+
+
+
+
+<a 
+id="linkProduk"
+class="action-button"
+href="#"
+target="_blank">
+
+
+<i data-lucide="external-link"></i>
+
+
+Buka Link
+
+
+</a>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- CATATAN -->
+
+
+<div class="note-box">
+
+
+<h3>
+Catatan Admin
+</h3>
+
+
+
+<p id="catatanAdmin">
+
+Belum ada catatan
+
+</p>
+
+
+</div>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- BANTUAN -->
+
+
+<a href="https://wa.me/6285726337940"
+class="help-button">
+
+
+<i data-lucide="message-circle"></i>
+
+
+Bantuan Admin
+
+
+</a>
+
+
+
+
+
+
+
+
+
+<!-- NAVBAR -->
+
+
+<nav>
+
+
+<a href="home.html">
+
+<i data-lucide="house"></i>
+
+<span>
+Home
+</span>
+
+</a>
+
+
+
+
+
+<a href="riwayat.html"
+class="active">
+
+<i data-lucide="clipboard-list"></i>
+
+<span>
+Transaksi
+</span>
+
+</a>
+
+
+
+
+
+<a href="akun.html">
+
+<i data-lucide="circle-user"></i>
+
+<span>
+Akun
+</span>
+
+</a>
+
+
+</nav>
+
+
+
+
+
+
+
+
+
+<script>
+
+
+lucide.createIcons();
+
+
+
+
+
+let transaksi = JSON.parse(
+
+localStorage.getItem("detailTransaksi")
+
+);
+
+
+
+
+
+if(transaksi){
+
+
+
+document.getElementById("gambarProduk").src =
+transaksi.gambar || "assets/logo.png";
+
+
+
+document.getElementById("namaProduk").innerHTML =
+transaksi.namaProduk;
+
+
+
+document.getElementById("kodePesanan").innerHTML =
+transaksi.kode;
+
+
+
+document.getElementById("tanggal").innerHTML =
+transaksi.tanggal;
+
+
+
+document.getElementById("statusPesanan").innerHTML =
+transaksi.status;
+
+
+
+
+
+// AKUN
+
+
+if(transaksi.tipe=="akun"){
+
+
+document.getElementById("akunArea").style.display="block";
+
+
+document.getElementById("emailAkun").innerHTML =
+transaksi.email || "-";
+
+
+document.getElementById("passwordAkun").innerHTML =
+transaksi.password || "-";
+
+
+}
+
+
+
+
+
+
+// FILE
+
+
+if(transaksi.tipe=="file"){
+
+
+document.getElementById("fileArea").style.display="block";
+
+
+document.getElementById("fileProduk").href =
+transaksi.file;
+
+
+}
+
+
+
+
+
+
+// LINK
+
+
+if(transaksi.tipe=="link"){
+
+
+document.getElementById("linkArea").style.display="block";
+
+
+document.getElementById("linkProduk").href =
+transaksi.link;
+
+
+}
+
+
+
+
+
+document.getElementById("catatanAdmin").innerHTML =
+transaksi.catatan || "Belum ada catatan";
+
+
+
+}
+
+
+
+</script>
+
+
+
+
+
+</body>
+
+</html>

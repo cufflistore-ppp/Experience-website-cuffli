@@ -1,0 +1,839 @@
+/* =====================================
+   VOXY MARKET - PEMBAYARAN CSS
+===================================== */
+
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+
+html,
+body{
+
+    width:100%;
+    min-height:100%;
+
+    overflow-x:hidden;
+
+    background:#f3f8ff;
+
+    color:#08245c;
+
+}
+
+
+
+
+
+
+/* ================= HEADER ================= */
+
+
+.payment-header{
+
+    height:90px;
+
+    background:white;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    padding:0 25px;
+
+    border-radius:0 0 30px 30px;
+
+}
+
+
+
+.payment-header a{
+
+    color:#006cff;
+
+}
+
+
+.payment-header svg{
+
+    width:32px;
+    height:32px;
+
+}
+
+
+.payment-header h2{
+
+    font-size:24px;
+
+}
+
+
+.payment-header p{
+
+    color:#718096;
+
+    margin-top:5px;
+
+}
+
+
+
+
+
+
+/* ================= ORDER CARD ================= */
+
+
+.order-card{
+
+
+    background:white;
+
+    margin:25px 20px;
+
+    padding:25px;
+
+    border-radius:30px;
+
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.08);
+
+
+}
+
+
+
+
+.product{
+
+
+    display:flex;
+
+    gap:18px;
+
+    align-items:center;
+
+
+}
+
+
+
+.product img{
+
+
+    width:80px;
+
+    height:80px;
+
+    object-fit:cover;
+
+    border-radius:20px;
+
+
+}
+
+
+
+.product h3{
+
+    font-size:20px;
+
+}
+
+
+.product p{
+
+    color:#64748b;
+
+    margin-top:8px;
+
+}
+
+
+
+.product b{
+
+    color:#006cff;
+
+}
+
+
+
+
+
+.price-box{
+
+
+    margin-top:25px;
+
+    padding-top:20px;
+
+    border-top:1px solid #eee;
+
+
+}
+
+
+
+.price-box span{
+
+    color:#64748b;
+
+}
+
+
+.price-box h1{
+
+
+    margin-top:10px;
+
+    color:#006cff;
+
+    font-size:34px;
+
+
+}
+
+
+
+
+
+
+
+/* ================= PAYMENT BOX ================= */
+
+
+.payment-box{
+
+
+    background:white;
+
+
+    margin:20px;
+
+
+    padding:30px 25px;
+
+
+    border-radius:35px;
+
+
+    box-shadow:
+    0 10px 30px rgba(0,0,0,.08);
+
+
+}
+
+
+
+.payment-box h2{
+
+    font-size:26px;
+
+    margin-bottom:25px;
+
+
+}
+
+
+
+
+
+
+/* METODE */
+
+
+.method{
+
+
+    width:100%;
+
+    border:3px solid #006cff;
+
+    background:#eef5ff;
+
+
+    padding:20px;
+
+
+    border-radius:25px;
+
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+
+}
+
+
+
+.method svg{
+
+
+    width:35px;
+
+    height:35px;
+
+    color:#006cff;
+
+
+}
+
+
+
+.method h3{
+
+    font-size:22px;
+
+}
+
+
+.method p{
+
+    color:#718096;
+
+    margin-top:5px;
+
+}
+
+
+
+
+
+
+/* QRIS */
+
+
+.qris{
+
+
+    text-align:center;
+
+    margin:35px 0;
+
+
+}
+
+
+.qris img{
+
+
+    width:220px;
+
+    height:220px;
+
+    object-fit:contain;
+
+
+}
+
+
+
+.qris p{
+
+    color:#64748b;
+
+    margin-top:15px;
+
+}
+
+
+
+
+
+
+
+/* UPLOAD */
+
+
+.upload{
+
+
+    border:3px dashed #b8d7ff;
+
+
+    height:220px;
+
+
+    border-radius:30px;
+
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    gap:15px;
+
+
+    cursor:pointer;
+
+
+}
+
+
+
+.upload svg{
+
+    width:45px;
+
+    height:45px;
+
+    color:#006cff;
+
+}
+
+
+.upload p{
+
+    color:#64748b;
+
+    font-size:18px;
+
+}
+
+
+
+.upload input{
+
+
+    width:80%;
+
+}
+
+
+
+
+
+
+.preview img{
+
+
+    width:100%;
+
+    margin-top:20px;
+
+    border-radius:20px;
+
+
+}
+
+
+
+
+
+
+
+/* BUTTON */
+
+
+.confirm{
+
+
+    margin-top:35px;
+
+
+    width:100%;
+
+
+    height:70px;
+
+
+    border:none;
+
+
+    border-radius:25px;
+
+
+    background:#006cff;
+
+
+    color:white;
+
+
+    font-size:22px;
+
+
+    font-weight:bold;
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:15px;
+
+
+}
+
+
+
+.confirm svg{
+
+    width:30px;
+
+}
+
+
+
+
+
+
+
+
+/* CHAT ADMIN */
+
+
+.chat-admin{
+
+
+    position:fixed;
+
+    right:20px;
+
+    bottom:110px;
+
+
+    z-index:1000;
+
+
+}
+
+
+
+.chat-admin img{
+
+
+    width:90px;
+
+
+}
+
+
+
+
+
+
+
+
+/* ================= NAVBAR ================= */
+
+
+nav{
+
+
+    position:fixed;
+
+
+    bottom:0;
+
+
+    left:0;
+
+
+    width:100%;
+
+
+    height:85px;
+
+
+    background:white;
+
+
+    border-radius:30px 30px 0 0;
+
+
+    display:flex;
+
+
+    justify-content:space-around;
+
+
+    align-items:center;
+
+
+    box-shadow:
+    0 -5px 20px rgba(0,0,0,.1);
+
+
+    z-index:999;
+
+
+}
+
+
+
+
+
+nav a{
+
+
+    text-decoration:none;
+
+
+    color:#64748b;
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    align-items:center;
+
+
+    gap:5px;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+nav svg{
+
+
+    width:28px;
+
+    height:28px;
+
+
+}/* =================================
+ FIX FINAL PEMBAYARAN MOBILE
+================================= */
+
+
+/* supaya tombol tidak ketutup navbar */
+
+body{
+
+    padding-bottom:120px;
+
+}
+
+
+
+/* ================= CHAT ADMIN ================= */
+
+
+.chat-admin{
+
+    position:fixed;
+
+    right:18px;
+
+    bottom:125px;
+
+    z-index:2000;
+
+    animation:floatChat 2.5s ease-in-out infinite;
+
+}
+
+
+
+.chat-admin img{
+
+    width:85px;
+
+    filter:drop-shadow(0 8px 15px rgba(0,0,0,.25));
+
+}
+
+
+
+
+@keyframes floatChat{
+
+
+0%{
+
+transform:translateY(0);
+
+}
+
+
+50%{
+
+transform:translateY(-12px);
+
+}
+
+
+100%{
+
+transform:translateY(0);
+
+}
+
+
+}
+
+
+
+
+
+
+
+/* ================= BUTTON KONFIRMASI ================= */
+
+
+.confirm{
+
+
+    width:100%;
+
+    height:65px;
+
+
+    margin-top:25px;
+
+
+    border-radius:22px;
+
+
+    font-size:20px;
+
+
+    position:relative;
+
+
+    z-index:5;
+
+
+}
+
+
+
+
+
+.confirm span{
+
+    white-space:nowrap;
+
+}
+
+
+
+
+
+/* ================= NAVBAR FIX ================= */
+
+
+nav{
+
+
+    height:80px;
+
+
+    padding-bottom:5px;
+
+
+}
+
+
+
+
+
+nav a{
+
+    font-size:13px;
+
+}
+
+
+
+nav svg{
+
+    width:26px;
+
+    height:26px;
+
+}
+
+
+
+
+
+
+
+/* ================= FILE INPUT ================= */
+
+
+.upload input{
+
+
+    width:90%;
+
+    height:40px;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+
+
+/* ================= MOBILE ================= */
+
+
+@media(max-width:480px){
+
+
+
+.payment-box{
+
+
+    margin-bottom:40px;
+
+
+}
+
+
+
+.confirm{
+
+
+    font-size:18px;
+
+    height:60px;
+
+
+}
+
+
+
+.chat-admin img{
+
+
+    width:75px;
+
+
+}
+
+
+}
