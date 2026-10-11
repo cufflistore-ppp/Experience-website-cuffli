@@ -1,572 +1,109 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>Pembayaran - VOXY MARKET</title>
-
-
-<link rel="stylesheet" href="css/pembayaran.css">
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
 <body>
-
-
-
-
-
-<!-- ================= HEADER ================= -->
-
-
-<header class="payment-header">
-
-
-<a href="detail-produk.html">
-
-<i data-lucide="arrow-left"></i>
-
-</a>
-
-
-
-
-<div>
-
-<h2>
-Pembayaran
-</h2>
-
-
-<p>
-Selesaikan pesanan kamu
-</p>
-
-
-</div>
-
-
-</header>
-
-
-
-
-
-
-
-
-
-<!-- ================= DETAIL PESANAN ================= -->
-
-
-<section class="order-card">
-
-
-
-
-
-<div class="product">
-
-
-<img 
-id="gambarProduk"
-src="assets/produk4.png">
-
-
-
-
-
-<div>
-
-
-<h3 id="namaProduk">
-
-Akun Netflix Premium
-
-</h3>
-
-
-
-
-<p>
-
-Kode Pesanan:
-
-<b id="kodePesanan">
-
-VX000000
-
-</b>
-
-</p>
-
-
-
-
-<p id="kategoriProduk">
-
-Akun Sosmed Premium
-
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="price-box">
-
-
-<span>
-
-Total Pembayaran
-
-</span>
-
-
-
-<h1 id="hargaProduk">
-
-Rp25.000
-
-</h1>
-
-
-</div>
-
-
-
-
-
-
-</section><!-- ================= METODE PEMBAYARAN ================= -->
-
-
-<section class="payment-box">
-
-
-
-
-
-<h2>
-Metode Pembayaran
-</h2>
-
-
-
-
-
-
-
-<div class="method active">
-
-
-<i data-lucide="qr-code"></i>
-
-
-<div>
-
-
-<h3>
-QRIS
-</h3>
-
-
-<p>
-Scan QR untuk pembayaran
-</p>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- ================= QRIS ================= -->
-
-
-<div class="qris">
-
-
-<img 
-src="assets/qris.jpg"
-alt="QRIS">
-
-
-<p>
-Scan QRIS lalu upload bukti pembayaran
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- ================= UPLOAD BUKTI ================= -->
-
-
-<h2>
-Upload Bukti Pembayaran
-</h2>
-
-
-
-
-
-<div class="upload">
-
-
-<i data-lucide="image"></i>
-
-
-
-<p>
-Pilih foto bukti pembayaran
-</p>
-
-
-
-<input 
-id="buktiPembayaran"
-type="file"
-accept="image/*">
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- PREVIEW FOTO -->
-
-
-<div class="preview">
-
-
-<img 
-id="previewBukti"
-style="display:none;">
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- ================= KONFIRMASI ================= -->
-
-
-<button 
-class="confirm"
-onclick="konfirmasiPembayaran()">
-
-
-
-<i data-lucide="check"></i>
-
-
-
-<span>
-Konfirmasi Pembayaran
-</span>
-
-
-
-</button>
-
-
-
-
-
-</section><!-- ================= CHAT ADMIN ================= -->
-
-
-<a href="https://wa.me/6285726337940"
-class="chat-admin">
-
-
-<img src="assets/chat-admin.png">
-
-
-</a>
-
-
-
-
-
-
-
-
-
-<!-- ================= NAVBAR ================= -->
-
-
-<nav>
-
-
-<a href="home.html">
-
-
-<i data-lucide="house"></i>
-
-
-<span>
-Home
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="riwayat.html">
-
-
-<i data-lucide="clipboard-list"></i>
-
-
-<span>
-Transaksi
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="akun.html">
-
-
-<i data-lucide="circle-user"></i>
-
-
-<span>
-Akun
-</span>
-
-
-</a>
-
-
-
-</nav>
-
-
-
-
-
-
-
-
-
-<!-- ================= SCRIPT ================= -->
-
-
-<script src="js/pembayaran.js"></script>
-
-
-
-
-
-<script>
-
-
-lucide.createIcons();
-
-
-
-
-
-
-// ================= AMBIL DATA PRODUK =================
-
-
-
-let produk = JSON.parse(
-
-localStorage.getItem("produkDipilih")
-
-);
-
-
-
-
-
-let kode =
-"VX" + Math.floor(Math.random()*900000+100000);
-
-
-
-
-
-
-if(produk){
-
-
-
-document.getElementById("gambarProduk").src =
-produk.gambar;
-
-
-
-
-
-document.getElementById("namaProduk").innerHTML =
-produk.nama;
-
-
-
-
-
-document.getElementById("kategoriProduk").innerHTML =
-produk.kategori;
-
-
-
-
-
-document.getElementById("hargaProduk").innerHTML =
-"Rp" + Number(produk.harga)
-.toLocaleString("id-ID");
-
-
-
-}
-
-
-
-
-
-document.getElementById("kodePesanan").innerHTML =
-kode;
-
-
-
-
-
-
-
-
-
-// ================= PREVIEW BUKTI =================
-
-
-
-let upload =
-document.getElementById("buktiPembayaran");
-
-
-
-upload.addEventListener(
-"change",
-function(){
-
-
-
-let file = this.files[0];
-
-
-
-if(file){
-
-
-let reader = new FileReader();
-
-
-
-reader.onload=function(e){
-
-
-
-let img =
-document.getElementById("previewBukti");
-
-
-
-img.src=e.target.result;
-
-
-img.style.display="block";
-
-
-
-}
-
-
-
-reader.readAsDataURL(file);
-
-
-
-}
-
-
-
-}
-
-);
-
-
-
-
-
-</script>
-
-
-
-
-
-
-
+  <header class="app-header">
+    <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span>Pembayaran</span></div>
+    <div style="width:40px"></div>
+  </header>
+  <main class="page">
+    <div class="pay-card">
+      <h2>Ringkasan Pesanan</h2>
+      <div class="pay-row"><span>Produk</span><span id="namaProduk">-</span></div>
+      <div class="pay-row"><span>Kategori</span><span id="kategori">-</span></div>
+      <div class="pay-row"><span>Total</span><span id="totalHarga">-</span></div>
+    </div>
+    <div class="pay-card">
+      <h2>Transfer / QRIS</h2>
+      <div class="qris-box">
+        <img id="qrisImg" src="qris.jpg" alt="QRIS" onerror="this.style.display='none'">
+        <p style="font-size:13px;color:var(--muted)">Scan QRIS atau transfer ke rekening di bawah</p>
+      </div>
+      <div class="rekening" id="rekeningBox">Memuat info rekening...</div>
+    </div>
+    <div class="pay-card">
+      <h2>Upload Bukti Transfer</h2>
+      <label class="upload-area">
+        <i data-lucide="upload" style="width:28px;height:28px;margin-bottom:8px"></i>
+        <div>Klik untuk upload foto bukti</div>
+        <input type="file" id="buktiFile" accept="image/*">
+      </label>
+      <img id="previewBukti" class="preview-bukti hidden" alt="Preview">
+    </div>
+    <button class="btn" style="width:100%;margin-top:8px" id="btnKonfirmasi" onclick="konfirmasi()">Konfirmasi Pembayaran</button>
+  </main>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var produk = null, buktiDataUrl = null;
+    VOXY.requireAuth().then(function (user) {
+      try { produk = JSON.parse(sessionStorage.getItem("produkDipilih") || "null"); } catch (e) { produk = null; }
+      if (!produk) { alert("Produk tidak ditemukan"); window.location.href = "home.html"; return; }
+      document.getElementById("namaProduk").textContent = produk.nama || "-";
+      document.getElementById("kategori").textContent = produk.kategori || "-";
+      document.getElementById("totalHarga").textContent = VOXY.formatRp(produk.harga);
+      VOXY.getSettings().then(function (s) {
+        s = s || {};
+        document.getElementById("rekeningBox").innerHTML = "<b>Rekening:</b><br>" + (s.rekening || "Belum diset admin") +
+          (s.waAdmin ? "<br><br><b>WA Admin:</b> " + s.waAdmin : "");
+        if (s.qrisUrl) document.getElementById("qrisImg").src = s.qrisUrl;
+      });
+    });
+    document.getElementById("buktiFile").addEventListener("change", function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      VOXY.fileToDataURL(file).then(function (url) {
+        buktiDataUrl = url;
+        var prev = document.getElementById("previewBukti");
+        prev.src = url; prev.classList.remove("hidden");
+      }).catch(function () { alert("Gagal membaca file"); });
+    });
+    function konfirmasi() {
+      if (!produk) return;
+      if (!buktiDataUrl) { alert("Upload bukti transfer dulu"); return; }
+      var btn = document.getElementById("btnKonfirmasi");
+      btn.disabled = true; btn.textContent = "Mengirim...";
+      var user = VOXY.getCurrentUser();
+      var order = {
+        kode: VOXY.generateKode(),
+        produkId: produk.id || "",
+        namaProduk: produk.nama || "",
+        kategori: produk.kategori || "",
+        harga: Number(produk.harga) || 0,
+        gambar: produk.gambar || "",
+        status: "Menunggu",
+        email: user ? user.email : "",
+        uid: user ? user.uid : "",
+        linkTarget: "",
+        catatan: ""
+      };
+      VOXY.simpanOrder(order).then(function (kode) {
+        return VOXY.simpanBukti(kode, buktiDataUrl).then(function () { return kode; });
+      }).then(function (kode) {
+        sessionStorage.removeItem("produkDipilih");
+        var kat = (produk.kategori || "").toLowerCase();
+        if (kat.indexOf("suntik") !== -1 || kat.indexOf("jasa") !== -1 || produk.butuhTarget) {
+          sessionStorage.setItem("kodePesanan", kode);
+          window.location.href = "isi-target.html?kode=" + encodeURIComponent(kode);
+          return;
+        }
+        alert("Pembayaran berhasil dikirim. Menunggu verifikasi admin.");
+        window.location.href = "riwayat.html";
+      }).catch(function (err) {
+        alert(err.message || "Gagal menyimpan pesanan");
+        btn.disabled = false; btn.textContent = "Konfirmasi Pembayaran";
+      });
+    }
+  </script>
 </body>
-
 </html>

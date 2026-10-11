@@ -1,82 +1,23 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>VOXY MARKET</title>
-
-<link rel="stylesheet" href="css/style.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
-
-
-<div class="loading">
-
-
-<div class="logo-box">
-
-<img 
-src="assets/logo.png" 
-class="logo"
-alt="VOXY MARKET">
-
-</div>
-
-
-
-<h1>
-VOXY MARKET
-</h1>
-
-
-<p>
-Tempatnya Kebutuhan Digital Kamu
-</p>
-
-
-
-<div class="loading-bar">
-
-<div class="progress"></div>
-
-</div>
-
-
-
-<span>
-Loading...
-</span>
-
-
-
-</div>
-
-
-
-
-<script>
-
-
-// pindah ke login setelah loading
-
-setTimeout(function(){
-
-window.location.href = "login.html";
-
-},3000);
-
-
-
-</script>
-
-
+  <div class="loading-page">
+    <div class="loading-box">
+      <div class="logo-circle"><img src="logo.png" alt="VOXY MARKET"></div>
+      <h1>VOXY MARKET</h1>
+      <p>Tempatnya Kebutuhan Digital Kamu</p>
+      <div class="bar"><div class="bar-fill"></div></div>
+      <span style="font-size:13px;opacity:.8">Loading...</span>
+    </div>
+  </div>
+  <script>
+    setTimeout(function () { window.location.href = "login.html"; }, 2800);
+  </script>
 </body>
-
 </html>

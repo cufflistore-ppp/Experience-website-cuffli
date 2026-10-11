@@ -1,455 +1,55 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>Detail Produk - VOXY MARKET</title>
-
-
-<link rel="stylesheet" href="css/detail-produk.css">
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Produk - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
 <body>
-
-
-<!-- HEADER -->
-
-<header class="detail-header">
-
-
-<a href="home.html">
-
-<i data-lucide="arrow-left"></i>
-
-</a>
-
-
-
-<img class="logo-detail"
-src="assets/logo.png">
-
-
-
-<div>
-
-<h2>
-VOXY MARKET
-</h2>
-
-
-<p>
-Produk Digital Premium
-</p>
-
-
-</div>
-
-
-</header>
-
-
-
-
-
-
-
-<!-- DETAIL PRODUK -->
-
-
-<main class="product-detail">
-
-
-
-<img 
-class="product-image"
-id="produkImage"
-src="assets/produk2.png">
-
-
-
-
-
-
-<div class="category-badge">
-
-
-<i data-lucide="crown"></i>
-
-
-<span id="kategori">
-
-Jasa Suntik
-
-</span>
-
-
-</div>
-
-
-
-
-
-
-
-<h1 id="namaProduk">
-
-Jasa Suntik Reaction Saluran
-
-</h1>
-
-
-
-
-
-<p class="description"
-id="deskripsi">
-
-
-Produk Jasa Suntik Reaction Saluran tersedia di VOXY MARKET. Proses cepat, aman, dan mudah.
-
-
-</p>
-
-
-
-
-
-
-
-<h2 class="price"
-id="harga">
-
-
-Rp12.000
-
-</h2>
-
-
-
-
-
-
-
-
-
-<section class="feature-box">
-
-
-
-<div class="feature">
-
-
-<i data-lucide="zap"></i>
-
-
-<span>
-Proses Cepat
-</span>
-
-
-</div>
-
-
-
-
-
-<div class="feature">
-
-
-<i data-lucide="shield-check"></i>
-
-
-<span>
-Aman & Bergaransi
-</span>
-
-
-</div>
-
-
-
-
-
-<div class="feature">
-
-
-<i data-lucide="headphones"></i>
-
-
-<span>
-Support Admin
-</span>
-
-
-</div>
-
-
-
-</section><!-- CARA PROSES -->
-
-<section class="process-box">
-
-
-<h2>
-Cara Proses
-</h2>
-
-
-<p>
-
-Setelah pembayaran berhasil, pesanan akan masuk ke riwayat transaksi. 
-Admin akan memproses pesanan dan mengirimkan hasil sesuai produk yang dibeli.
-
-</p>
-
-
-</section>
-
-
-
-
-
-
-
-<!-- BUTTON BELI -->
-
-
-<a href="pembayaran.html"
-class="buy-button"
-onclick="buatPesanan()">
-
-
-<i data-lucide="shopping-cart"></i>
-
-
-<span>
-Beli Sekarang
-</span>
-
-
-</a>
-
-
-
-</main>
-
-
-
-
-
-
-
-
-
-<!-- CHAT ADMIN -->
-
-
-<a href="https://wa.me/6285726337940"
-class="chat-admin">
-
-
-<img src="assets/chat-admin.png">
-
-
-</a>
-
-
-
-
-
-
-
-
-
-<!-- NAVBAR -->
-
-
-<nav>
-
-
-<a href="home.html">
-
-
-<i data-lucide="house"></i>
-
-
-<span>
-Home
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="riwayat.html">
-
-
-<i data-lucide="clipboard-list"></i>
-
-
-<span>
-Transaksi
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="akun.html">
-
-
-<i data-lucide="circle-user"></i>
-
-
-<span>
-Akun
-</span>
-
-
-</a>
-
-
-</nav><script>
-
-
-lucide.createIcons();
-
-
-
-
-
-// DATA PRODUK SEMENTARA
-
-let produk = {
-
-    nama:"Jasa Suntik Reaction Saluran",
-
-    harga:12000,
-
-    gambar:"assets/produk2.png",
-
-    kategori:"Jasa Suntik"
-
-};
-
-
-
-
-
-
-
-
-// SIMPAN PESANAN SAAT BELI
-
-
-function buatPesanan(){
-
-
-let kode =
-"VX" + Math.floor(100000 + Math.random()*900000);
-
-
-
-let transaksi = {
-
-
-kode:kode,
-
-
-namaProduk:produk.nama,
-
-
-harga:produk.harga,
-
-
-gambar:produk.gambar,
-
-
-tanggal:new Date()
-.toLocaleDateString("id-ID"),
-
-
-
-status:"Menunggu Verifikasi",
-
-
-
-tipe:"jasa",
-
-
-
-catatan:"Belum ada catatan"
-
-
-
-};
-
-
-
-
-
-
-
-let riwayat = JSON.parse(
-
-localStorage.getItem("riwayatTransaksi")
-
-) || [];
-
-
-
-
-
-riwayat.push(transaksi);
-
-
-
-
-
-localStorage.setItem(
-
-"riwayatTransaksi",
-
-JSON.stringify(riwayat)
-
-);
-
-
-
-}
-
-
-
-
-
-
-</script>
-
-
-
-
-
-
-
+  <header class="app-header">
+    <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span>Detail Produk</span></div>
+    <div style="width:40px"></div>
+  </header>
+  <main class="page" id="detailPage"><div class="empty-state">Memuat...</div></main>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var produkData = null;
+    VOXY.requireAuth().then(function () {
+      var id = new URLSearchParams(location.search).get("id");
+      if (!id) {
+        document.getElementById("detailPage").innerHTML = '<div class="empty-state">Produk tidak ditemukan</div>';
+        return;
+      }
+      VOXY.getProdukList().then(function (list) {
+        produkData = list.find(function (p) { return p.id === id; });
+        if (!produkData) {
+          document.getElementById("detailPage").innerHTML = '<div class="empty-state">Produk tidak ditemukan</div>';
+          return;
+        }
+        var p = produkData;
+        var img = p.gambar || "produk1.png";
+        document.getElementById("detailPage").innerHTML =
+          '<div class="detail-hero"><img src="' + img + '" onerror="this.src=\'produk1.png\'"></div>' +
+          '<div class="detail-info">' +
+          '<div style="font-size:12px;color:var(--muted)">' + (p.kategori || "Digital") + '</div>' +
+          '<h1>' + (p.nama || "-") + '</h1>' +
+          '<div class="price">' + VOXY.formatRp(p.harga) + '</div>' +
+          '<p class="desc">' + (p.deskripsi || "Produk digital VOXY MARKET") + '</p>' +
+          '<button class="btn" style="width:100%" onclick="beliSekarang()">Beli Sekarang</button></div>';
+      });
+    });
+    function beliSekarang() {
+      if (!produkData) return;
+      sessionStorage.setItem("produkDipilih", JSON.stringify(produkData));
+      window.location.href = "pembayaran.html";
+    }
+  </script>
 </body>
-
-
 </html>

@@ -1,812 +1,442 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>Admin Panel - VOXY MARKET</title>
-
-
-<link rel="stylesheet" href="css/admin.css">
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
-<body>
-
-
-<!-- ================= SIDEBAR ================= -->
-
-
-<div class="admin-sidebar" id="sidebar">
-
-
-<div class="admin-profile">
-
-
-<img src="assets/logo.png">
-
-
-<h2>
-VOXY ADMIN
-</h2>
-
-
-<p>
-Panel Management
-</p>
-
-
-</div>
-
-
-
-
-
-<a href="admin.html" class="active">
-
-<i data-lucide="layout-dashboard"></i>
-
-Dashboard
-
-</a>
-
-
-
-
-
-<a href="admin-pesanan.html">
-
-<i data-lucide="shopping-bag"></i>
-
-Pesanan
-
-</a>
-
-
-
-
-
-<a href="admin-produk.html">
-
-<i data-lucide="package"></i>
-
-Produk
-
-</a>
-
-
-
-
-
-<a href="admin-user.html">
-
-<i data-lucide="users"></i>
-
-User
-
-</a>
-
-
-
-
-
-<a href="admin-pengaturan.html">
-
-<i data-lucide="settings"></i>
-
-Pengaturan
-
-</a>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-<!-- OVERLAY -->
-
-
-<div class="admin-overlay"
-id="overlay"
-onclick="closeSidebar()">
-
-</div>
-
-
-
-
-
-
-
-<!-- ================= MAIN ================= -->
-
-
-<div class="admin-main">
-
-
-
-
-
-
-<!-- HEADER -->
-
-
-<header class="admin-header">
-
-
-<button class="menu-btn"
-onclick="openSidebar()">
-
-
-<i data-lucide="menu"></i>
-
-
-</button>
-
-
-
-
-
-<div>
-
-
-<h1>
-Dashboard
-</h1>
-
-
-<p>
-Selamat datang kembali Admin VOXY MARKET
-</p>
-
-
-</div>
-
-
-
-</header><!-- ================= STATISTIC ================= -->
-
-
-<section class="dashboard-stats">
-
-
-<div class="stat-box">
-
-
-<div class="stat-icon blue">
-
-<i data-lucide="shopping-cart"></i>
-
-</div>
-
-
-<div>
-
-<p>Total Pesanan</p>
-
-<h2 id="totalOrder">
-125
-</h2>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="stat-box">
-
-
-<div class="stat-icon orange">
-
-<i data-lucide="clock"></i>
-
-</div>
-
-
-<div>
-
-<p>Menunggu</p>
-
-<h2 id="waitingOrder">
-12
-</h2>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<div class="stat-box">
-
-
-<div class="stat-icon purple">
-
-<i data-lucide="loader"></i>
-
-</div>
-
-
-<div>
-
-<p>Diproses</p>
-
-<h2 id="processOrder">
-30
-</h2>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="stat-box">
-
-
-<div class="stat-icon green">
-
-<i data-lucide="circle-check"></i>
-
-</div>
-
-
-<div>
-
-<p>Selesai</p>
-
-<h2 id="doneOrder">
-83
-</h2>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="stat-box money">
-
-
-<div class="stat-icon blue">
-
-<i data-lucide="wallet"></i>
-
-</div>
-
-
-<div>
-
-
-<p>Total Pendapatan</p>
-
-
-<h2 id="income">
-Rp 3.250.000
-</h2>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-<!-- ================= MENU UTAMA ================= -->
-
-
-
-<section class="admin-menu">
-
-
-
-<h2>
-Menu Utama
-</h2>
-
-
-
-<div class="menu-grid">
-
-
-
-<a href="admin-pesanan.html">
-
-
-<i data-lucide="clipboard-list"></i>
-
-
-<span>
-Pesanan
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="admin-produk.html">
-
-
-<i data-lucide="package"></i>
-
-
-<span>
-Produk
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="admin-user.html">
-
-
-<i data-lucide="users"></i>
-
-
-<span>
-User
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="admin-pengaturan.html">
-
-
-<i data-lucide="settings"></i>
-
-
-<span>
-Pengaturan
-</span>
-
-
-</a>
-
-
-
-
-
-</div>
-
-
-</section><!-- ================= PESANAN TERBARU ================= -->
-
-
-<section class="latest-order">
-
-
-<div class="section-head">
-
-
-<h2>
-Pesanan Terbaru
-</h2>
-
-
-<a href="admin-pesanan.html">
-Lihat Semua
-</a>
-
-
-</div>
-
-
-
-
-
-
-<div class="order-list">
-
-
-
-
-
-<div class="order-card">
-
-
-
-<img src="assets/netflix.png">
-
-
-
-
-
-<div class="order-info">
-
-
-<h3>
-VX102938
-</h3>
-
-
-<p>
-Akun Netflix Premium
-</p>
-
-
-<span>
-10 Oktober 2026
-</span>
-
-
-
-</div>
-
-
-
-
-
-
-<div class="order-status waiting">
-
-
-Menunggu
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="order-card">
-
-
-
-<img src="assets/followers.png">
-
-
-
-
-
-<div class="order-info">
-
-
-<h3>
-VX102939
-</h3>
-
-
-<p>
-Jasa Suntik Pengikut Saluran
-</p>
-
-
-<span>
-10 Oktober 2026
-</span>
-
-
-
-</div>
-
-
-
-
-
-
-<div class="order-status process">
-
-
-Diproses
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="order-card">
-
-
-
-<img src="assets/premium.png">
-
-
-
-
-
-<div class="order-info">
-
-
-<h3>
-VX102940
-</h3>
-
-
-<p>
-Produk Digital Premium
-</p>
-
-
-<span>
-10 Oktober 2026
-</span>
-
-
-
-</div>
-
-
-
-
-
-
-<div class="order-status done">
-
-
-Selesai
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-<!-- ================= QUICK ACTION ================= -->
-
-
-<section class="quick-action">
-
-
-<h2>
-Aksi Cepat
-</h2>
-
-
-
-<div class="action-grid">
-
-
-
-<button>
-
-
-<i data-lucide="plus"></i>
-
-
-Tambah Produk
-
-
-</button>
-
-
-
-
-
-<button>
-
-
-<i data-lucide="upload"></i>
-
-
-Upload File
-
-
-</button>
-
-
-
-
-
-<button>
-
-
-<i data-lucide="message-circle"></i>
-
-
-Chat User
-
-
-</button>
-
-
-
-</div>
-
-
-
-</section><!-- ================= FOOTER ================= -->
-
-
-<footer class="admin-footer">
-
-
-<p>
-© 2026 VOXY MARKET Admin Panel
-</p>
-
-
-</footer>
-
-
-
-
-
-</div>
-<!-- END ADMIN MAIN -->
-
-
-
-
-
-
-
-
-
-<!-- ================= SCRIPT ================= -->
-
-
-<script>
-
-
-lucide.createIcons();
-
-
-
-
-
-
-function openSidebar(){
-
-
-document
-.getElementById("sidebar")
-.classList.add("show");
-
-
-
-document
-.getElementById("overlay")
-.classList.add("show");
-
-
-
-}
-
-
-
-
-
-
-
-
-function closeSidebar(){
-
-
-document
-.getElementById("sidebar")
-.classList.remove("show");
-
-
-
-document
-.getElementById("overlay")
-.classList.remove("show");
-
-
-
-}
-
-
-
-
-
-</script>
-
-
-
-
-
-<script src="js/admin.js"></script>
-
-
-
-
-
+<body class="admin-body">
+  <div class="admin-overlay" id="overlay" onclick="closeSidebar()"></div>
+  <aside class="admin-sidebar" id="sidebar">
+    <div class="profile">
+      <img src="logo.png" alt="VOXY">
+      <h2>VOXY ADMIN</h2>
+      <p>Panel Management</p>
+    </div>
+    <nav>
+      <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="#" data-tab="pesanan" onclick="switchTab('pesanan',this)"><i data-lucide="shopping-bag"></i> Pesanan</a>
+      <a href="#" data-tab="produk" onclick="switchTab('produk',this)"><i data-lucide="package"></i> Produk</a>
+      <a href="#" data-tab="chat" onclick="switchTab('chat',this)">
+        <i data-lucide="message-circle"></i> Chat User
+        <span class="nav-badge hidden" id="chatNavBadge">0</span>
+      </a>
+      <a href="#" data-tab="pengaturan" onclick="switchTab('pengaturan',this)"><i data-lucide="settings"></i> Pengaturan</a>
+      <a href="home.html"><i data-lucide="store"></i> Ke Toko</a>
+      <a href="#" onclick="doLogout()"><i data-lucide="log-out"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-header">
+      <button class="menu-toggle" onclick="openSidebar()"><i data-lucide="menu"></i></button>
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p>Panel admin VOXY MARKET</p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="revenue-note">💰 Pendapatan dihitung dari pesanan <b>Selesai</b> dalam 30 hari terakhir (rolling otomatis).</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue"><i data-lucide="shopping-cart"></i></div><div><div class="num" id="statTotal">0</div><div class="label">Total Pesanan</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i data-lucide="clock"></i></div><div><div class="num" id="statMenunggu">0</div><div class="label">Menunggu</div></div></div>
+        <div class="stat-card"><div class="stat-icon cyan"><i data-lucide="loader"></i></div><div><div class="num" id="statProses">0</div><div class="label">Diproses</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i data-lucide="check-circle"></i></div><div><div class="num" id="statSelesai">0</div><div class="label">Selesai</div></div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon green"><i data-lucide="wallet"></i></div><div><div class="num" id="statPendapatan">Rp0</div><div class="label">Pendapatan 30 Hari</div></div></div>
+        <div class="stat-card"><div class="stat-icon cyan"><i data-lucide="package"></i></div><div><div class="num" id="statProduk">0</div><div class="label">Total Produk</div></div></div>
+      </div>
+    </div>
+
+    <!-- PESANAN -->
+    <div class="panel" id="panel-pesanan">
+      <div class="search-box-admin">
+        <input id="cariKode" type="text" placeholder="Cari kode / email / produk...">
+        <button class="btn btn-sm" onclick="renderPesanan()">Cari</button>
+      </div>
+      <div class="filter-row" id="filterStatus">
+        <button class="active" onclick="setFilterStatus('semua',this)">Semua</button>
+        <button onclick="setFilterStatus('Menunggu',this)">Menunggu</button>
+        <button onclick="setFilterStatus('Diproses',this)">Diproses</button>
+        <button onclick="setFilterStatus('Selesai',this)">Selesai</button>
+        <button onclick="setFilterStatus('Ditolak',this)">Ditolak</button>
+      </div>
+      <div class="admin-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Kode</th><th>Produk</th><th>Email</th><th>Harga</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+            <tbody id="tabelPesanan"><tr><td colspan="7" class="empty-state">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="admin-card hidden" id="detailPesananBox">
+        <h2>Detail Pesanan <span id="detailKode"></span></h2>
+        <div id="detailContent"></div>
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="ubahStatus('Diproses')">Proses</button>
+          <button class="btn btn-sm btn-success" onclick="ubahStatus('Selesai')">Selesai</button>
+          <button class="btn btn-sm btn-danger" onclick="ubahStatus('Ditolak')">Tolak</button>
+          <button class="btn btn-sm btn-outline" onclick="tutupDetail()">Tutup</button>
+        </div>
+        <div class="form-group" style="margin-top:16px"><label>Catatan Admin</label><input id="catatanAdmin" type="text" placeholder="Catatan untuk user"></div>
+        <div class="form-group"><label>Upload File Hasil</label><input type="file" id="fileHasil"><button class="btn btn-sm" style="margin-top:8px" onclick="uploadHasil()">Kirim File Hasil</button></div>
+        <div id="buktiAdmin" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- PRODUK -->
+    <div class="panel" id="panel-produk">
+      <div class="admin-card">
+        <h2>Tambah / Edit Produk</h2>
+        <input type="hidden" id="produkId">
+        <div class="form-grid">
+          <div class="form-group"><label>Nama Produk</label><input id="pNama" type="text"></div>
+          <div class="form-group"><label>Kategori</label><input id="pKategori" type="text" placeholder="Jasa Suntik, Akun, dll"></div>
+          <div class="form-group"><label>Harga</label><input id="pHarga" type="number" min="0"></div>
+          <div class="form-group"><label>URL Gambar</label><input id="pGambar" type="text" placeholder="produk1.png atau https://..."></div>
+          <div class="form-group full"><label>Deskripsi</label><textarea id="pDeskripsi" rows="3"></textarea></div>
+          <div class="form-group full"><label>Upload Gambar</label><input type="file" id="pGambarFile" accept="image/*"></div>
+          <div class="form-group full"><label><input type="checkbox" id="pButuhTarget"> Butuh link target dari user</label></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-sm" onclick="simpanProdukForm()">Simpan Produk</button>
+          <button class="btn btn-sm btn-outline" onclick="resetProdukForm()">Reset</button>
+        </div>
+      </div>
+      <div class="admin-card">
+        <h2>Daftar Produk</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Gambar</th><th>Nama</th><th>Kategori</th><th>Harga</th><th>Aksi</th></tr></thead>
+            <tbody id="tabelProduk"><tr><td colspan="5" class="empty-state">Memuat...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHAT USER -->
+    <div class="panel" id="panel-chat">
+      <div class="admin-card">
+        <h2>💬 Chat User — Kelola pesan customer</h2>
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px" id="chatLayout">
+          <div>
+            <div class="chat-list-admin" id="chatList"><div class="empty-state">Belum ada chat</div></div>
+          </div>
+          <div>
+            <div id="chatDetailEmpty" class="empty-state">Pilih chat di kiri</div>
+            <div id="chatDetail" class="hidden">
+              <div style="margin-bottom:8px;font-size:13px;color:var(--muted)">Chat dengan: <b id="chatWithEmail">-</b></div>
+              <div class="admin-chat-view">
+                <div class="chat-messages" id="adminMessages"></div>
+                <div class="chat-input-bar" style="padding:0;border:none;background:transparent">
+                  <input id="adminReply" type="text" placeholder="Tulis balasan...">
+                  <button onclick="kirimBalasanAdmin()" class="btn btn-sm" style="width:auto;border-radius:12px;padding:12px 16px">➤</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENGATURAN -->
+    <div class="panel" id="panel-pengaturan">
+      <div class="admin-card">
+        <h2>Pengaturan Toko</h2>
+        <div class="form-group"><label>Nama Toko</label><input id="sNamaToko" type="text" placeholder="VOXY MARKET"></div>
+        <div class="form-group"><label>WA Admin (628xxx)</label><input id="sWa" type="text" placeholder="628xxxxxxxxxx"></div>
+        <div class="form-group"><label>Rekening / Info Transfer</label><textarea id="sRekening" rows="3" placeholder="Bank BCA 123456789 a/n Nama"></textarea></div>
+        <div class="form-group"><label>URL QRIS (opsional)</label><input id="sQris" type="text" placeholder="https://... atau kosong = pakai qris.jpg"></div>
+        <button class="btn btn-sm" onclick="simpanPengaturan()">Simpan Pengaturan</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var allOrders = [], filterStatus = "semua", selectedKode = null;
+    var selectedChatUid = null, allChats = [];
+
+    VOXY.requireAdmin().then(function () {
+      VOXY.listenOrders(function (list) {
+        allOrders = list || [];
+        updateDashboard();
+        renderPesanan();
+      });
+      loadProdukAdmin();
+      loadPengaturan();
+      VOXY.listenAllChats(function (list) {
+        allChats = list || [];
+        renderChatList();
+        var unread = allChats.filter(function (c) { return c.unreadAdmin; }).length;
+        var badge = document.getElementById("chatNavBadge");
+        if (unread > 0) {
+          badge.textContent = unread;
+          badge.classList.remove("hidden");
+        } else {
+          badge.classList.add("hidden");
+        }
+      });
+    });
+
+    function openSidebar() {
+      document.getElementById("sidebar").classList.add("open");
+      document.getElementById("overlay").classList.add("show");
+    }
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("overlay").classList.remove("show");
+    }
+    function switchTab(name, el) {
+      document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+      document.getElementById("panel-" + name).classList.add("active");
+      document.querySelectorAll(".admin-sidebar nav a[data-tab]").forEach(function (a) { a.classList.remove("active"); });
+      if (el) el.classList.add("active");
+      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", produk: "Kelola Produk", chat: "Chat User", pengaturan: "Pengaturan" };
+      document.getElementById("pageTitle").textContent = titles[name] || "Admin";
+      closeSidebar();
+      if (name === "produk") loadProdukAdmin();
+      if (name === "pengaturan") loadPengaturan();
+    }
+
+    function updateDashboard() {
+      var menunggu = 0, proses = 0, selesai = 0;
+      allOrders.forEach(function (o) {
+        var s = (o.status || "").toLowerCase();
+        if (s.indexOf("menunggu") !== -1) menunggu++;
+        else if (s.indexOf("proses") !== -1) proses++;
+        else if (s.indexOf("selesai") !== -1) selesai++;
+      });
+      document.getElementById("statTotal").textContent = allOrders.length;
+      document.getElementById("statMenunggu").textContent = menunggu;
+      document.getElementById("statProses").textContent = proses;
+      document.getElementById("statSelesai").textContent = selesai;
+      var rev = VOXY.hitungPendapatan30Hari(allOrders);
+      document.getElementById("statPendapatan").textContent = VOXY.formatRp(rev.total);
+    }
+
+    function setFilterStatus(s, el) {
+      filterStatus = s;
+      document.querySelectorAll("#filterStatus button").forEach(function (b) { b.classList.remove("active"); });
+      if (el) el.classList.add("active");
+      renderPesanan();
+    }
+
+    function renderPesanan() {
+      var q = (document.getElementById("cariKode").value || "").trim().toLowerCase();
+      var list = allOrders.slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+      if (filterStatus !== "semua") {
+        list = list.filter(function (o) {
+          return (o.status || "").toLowerCase().indexOf(filterStatus.toLowerCase()) !== -1;
+        });
+      }
+      if (q) {
+        list = list.filter(function (o) {
+          return (o.kode || "").toLowerCase().indexOf(q) !== -1 ||
+                 (o.email || "").toLowerCase().indexOf(q) !== -1 ||
+                 (o.namaProduk || "").toLowerCase().indexOf(q) !== -1;
+        });
+      }
+      var tbody = document.getElementById("tabelPesanan");
+      if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Tidak ada pesanan</td></tr>'; return; }
+      tbody.innerHTML = list.map(function (o) {
+        var st = o.status || "Menunggu";
+        var cls = "menunggu";
+        var sl = st.toLowerCase();
+        if (sl.indexOf("proses") !== -1) cls = "diproses";
+        else if (sl.indexOf("selesai") !== -1) cls = "selesai";
+        else if (sl.indexOf("tolak") !== -1) cls = "ditolak";
+        return "<tr><td><b>" + (o.kode || "-") + "</b></td><td>" + (o.namaProduk || "-") + "</td><td>" + (o.email || "-") + "</td><td>" +
+          VOXY.formatRp(o.harga) + "</td><td><span class=\"badge " + cls + "\">" + st + "</span></td><td>" +
+          VOXY.formatTanggal(o.createdAt) + "</td><td><button class=\"btn btn-sm\" onclick=\"bukaDetail('" + o.kode + "')\">Detail</button></td></tr>";
+      }).join("");
+    }
+
+    function bukaDetail(kode) {
+      selectedKode = kode;
+      var o = allOrders.find(function (x) { return x.kode === kode; });
+      if (!o) return;
+      document.getElementById("detailPesananBox").classList.remove("hidden");
+      document.getElementById("detailKode").textContent = kode;
+      document.getElementById("catatanAdmin").value = o.catatanAdmin || "";
+      document.getElementById("detailContent").innerHTML =
+        "<div class=\"pay-row\"><span>Produk</span><span>" + (o.namaProduk || "-") + "</span></div>" +
+        "<div class=\"pay-row\"><span>Kategori</span><span>" + (o.kategori || "-") + "</span></div>" +
+        "<div class=\"pay-row\"><span>Email</span><span>" + (o.email || "-") + "</span></div>" +
+        "<div class=\"pay-row\"><span>Harga</span><span>" + VOXY.formatRp(o.harga) + "</span></div>" +
+        "<div class=\"pay-row\"><span>Status</span><span>" + (o.status || "-") + "</span></div>" +
+        (o.linkTarget ? "<div class=\"pay-row\"><span>Link Target</span><span style=\"word-break:break-all\">" + o.linkTarget + "</span></div>" : "") +
+        (o.catatan ? "<div class=\"pay-row\"><span>Catatan User</span><span>" + o.catatan + "</span></div>" : "");
+      VOXY.getBukti(kode).then(function (data) {
+        var box = document.getElementById("buktiAdmin");
+        box.innerHTML = data
+          ? "<p style=\"font-size:13px;margin-bottom:6px\">Bukti Transfer:</p><img src=\"" + data + "\" style=\"max-width:280px;border-radius:10px\">"
+          : "<p style=\"font-size:13px;color:var(--muted)\">Belum ada bukti</p>";
+      });
+    }
+    function tutupDetail() { selectedKode = null; document.getElementById("detailPesananBox").classList.add("hidden"); }
+    function ubahStatus(status) {
+      if (!selectedKode) return;
+      var catatan = document.getElementById("catatanAdmin").value.trim();
+      VOXY.updateOrder(selectedKode, { status: status, catatanAdmin: catatan }).then(function () {
+        alert("Status diubah ke: " + status);
+      }).catch(function (e) { alert(e.message); });
+    }
+    function uploadHasil() {
+      if (!selectedKode) return;
+      var file = document.getElementById("fileHasil").files[0];
+      if (!file) { alert("Pilih file dulu"); return; }
+      VOXY.fileToDataURL(file).then(function (url) {
+        return VOXY.simpanOrderFile(selectedKode, url, file.name);
+      }).then(function () { alert("File hasil terkirim"); }).catch(function (e) { alert(e.message); });
+    }
+
+    /* Produk */
+    function loadProdukAdmin() {
+      VOXY.getProdukList().then(function (list) {
+        document.getElementById("statProduk").textContent = (list || []).length;
+        var tbody = document.getElementById("tabelProduk");
+        if (!list || !list.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada produk</td></tr>'; return; }
+        tbody.innerHTML = list.map(function (p) {
+          var img = p.gambar || "produk1.png";
+          return "<tr><td><img src=\"" + img + "\" style=\"width:48px;height:48px;object-fit:cover;border-radius:8px\" onerror=\"this.src='produk1.png'\"></td>" +
+            "<td>" + (p.nama || "-") + "</td><td>" + (p.kategori || "-") + "</td><td>" + VOXY.formatRp(p.harga) + "</td>" +
+            "<td class=\"action-btns\"><button class=\"btn btn-sm\" onclick=\"editProduk('" + p.id + "')\">Edit</button> " +
+            "<button class=\"btn btn-sm btn-danger\" onclick=\"hapusProdukId('" + p.id + "')\">Hapus</button></td></tr>";
+        }).join("");
+      });
+    }
+    function resetProdukForm() {
+      document.getElementById("produkId").value = "";
+      document.getElementById("pNama").value = "";
+      document.getElementById("pKategori").value = "";
+      document.getElementById("pHarga").value = "";
+      document.getElementById("pGambar").value = "";
+      document.getElementById("pDeskripsi").value = "";
+      document.getElementById("pButuhTarget").checked = false;
+      document.getElementById("pGambarFile").value = "";
+    }
+    function editProduk(id) {
+      VOXY.getProdukList().then(function (list) {
+        var p = list.find(function (x) { return x.id === id; });
+        if (!p) return;
+        document.getElementById("produkId").value = p.id;
+        document.getElementById("pNama").value = p.nama || "";
+        document.getElementById("pKategori").value = p.kategori || "";
+        document.getElementById("pHarga").value = p.harga || 0;
+        document.getElementById("pGambar").value = p.gambar || "";
+        document.getElementById("pDeskripsi").value = p.deskripsi || "";
+        document.getElementById("pButuhTarget").checked = !!p.butuhTarget;
+        switchTab("produk", document.querySelector('[data-tab="produk"]'));
+        window.scrollTo(0, 0);
+      });
+    }
+    function simpanProdukForm() {
+      var id = document.getElementById("produkId").value || null;
+      var nama = document.getElementById("pNama").value.trim();
+      if (!nama) { alert("Nama produk wajib"); return; }
+      var file = document.getElementById("pGambarFile").files[0];
+      var promise = Promise.resolve(document.getElementById("pGambar").value.trim());
+      if (file) promise = VOXY.fileToDataURL(file);
+      promise.then(function (imgUrl) {
+        return VOXY.simpanProduk(id, {
+          nama: nama,
+          kategori: document.getElementById("pKategori").value.trim(),
+          harga: Number(document.getElementById("pHarga").value) || 0,
+          gambar: imgUrl || "produk1.png",
+          deskripsi: document.getElementById("pDeskripsi").value.trim(),
+          butuhTarget: document.getElementById("pButuhTarget").checked
+        });
+      }).then(function () {
+        alert("Produk tersimpan");
+        resetProdukForm();
+        loadProdukAdmin();
+      }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+    }
+    function hapusProdukId(id) {
+      if (!confirm("Hapus produk ini?")) return;
+      VOXY.hapusProduk(id).then(function () { loadProdukAdmin(); }).catch(function (e) { alert(e.message); });
+    }
+
+    /* Chat Admin */
+    var unsubMsg = null;
+    function renderChatList() {
+      var box = document.getElementById("chatList");
+      if (!allChats.length) { box.innerHTML = '<div class="empty-state">Belum ada chat</div>'; return; }
+      box.innerHTML = allChats.map(function (c) {
+        var initial = (c.email || "?")[0].toUpperCase();
+        var active = selectedChatUid === c.uid ? " active" : "";
+        return '<div class="chat-list-item' + active + '" onclick="bukaChat(\'' + c.uid + '\',\'' + (c.email || "").replace(/'/g, "") + '\')">' +
+          '<div class="avatar-sm">' + initial + '</div>' +
+          '<div class="info"><h4>' + (c.email || c.uid) + '</h4><p>' + (c.lastMessage || "") + '</p></div>' +
+          (c.unreadAdmin ? '<div class="unread"></div>' : '') + '</div>';
+      }).join("");
+    }
+    function bukaChat(uid, email) {
+      selectedChatUid = uid;
+      document.getElementById("chatDetailEmpty").classList.add("hidden");
+      document.getElementById("chatDetail").classList.remove("hidden");
+      document.getElementById("chatWithEmail").textContent = email || uid;
+      VOXY.markChatReadByAdmin(uid);
+      if (unsubMsg) unsubMsg();
+      unsubMsg = VOXY.listenChatMessages(uid, function (list) {
+        var box = document.getElementById("adminMessages");
+        if (!list.length) { box.innerHTML = '<div class="empty-state">Belum ada pesan</div>'; return; }
+        box.innerHTML = list.map(function (m) {
+          var cls = m.from === "admin" ? "msg-admin" : "msg-user";
+          var t = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          return '<div class="msg ' + cls + '">' + t + '<small>' + VOXY.formatTanggal(m.at) + '</small></div>';
+        }).join("");
+        box.scrollTop = box.scrollHeight;
+      });
+      renderChatList();
+    }
+    function kirimBalasanAdmin() {
+      if (!selectedChatUid) return;
+      var input = document.getElementById("adminReply");
+      var text = (input.value || "").trim();
+      if (!text) return;
+      VOXY.kirimPesanAdmin(selectedChatUid, text).then(function () {
+        input.value = "";
+      }).catch(function (e) { alert(e.message); });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && document.activeElement && document.activeElement.id === "adminReply") {
+        kirimBalasanAdmin();
+      }
+    });
+
+    /* Pengaturan */
+    function loadPengaturan() {
+      VOXY.getSettings().then(function (s) {
+        s = s || {};
+        document.getElementById("sNamaToko").value = s.namaToko || "";
+        document.getElementById("sWa").value = s.waAdmin || "";
+        document.getElementById("sRekening").value = s.rekening || "";
+        document.getElementById("sQris").value = s.qrisUrl || "";
+      });
+    }
+    function simpanPengaturan() {
+      VOXY.simpanSettings({
+        namaToko: document.getElementById("sNamaToko").value.trim(),
+        waAdmin: document.getElementById("sWa").value.trim(),
+        rekening: document.getElementById("sRekening").value.trim(),
+        qrisUrl: document.getElementById("sQris").value.trim()
+      }).then(function () { alert("Pengaturan tersimpan"); }).catch(function (e) { alert(e.message); });
+    }
+    function doLogout() {
+      if (!confirm("Logout admin?")) return;
+      VOXY.logoutUser().then(function () { window.location.href = "login.html"; });
+    }
+  </script>
 </body>
-
 </html>

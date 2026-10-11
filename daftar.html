@@ -1,122 +1,46 @@
 <!DOCTYPE html>
-
-<html>
-
+<html lang="id">
 <head>
-
-<title>Daftar VOXY MARKET</title>
-
-<link rel="stylesheet" href="css/login.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
 <body>
-
-
-<div class="login-box">
-
-
-<img src="assets/logo.png" class="login-logo">
-
-
-<h1>
-Buat Akun
-</h1>
-
-
-<input id="email"
-placeholder="Email">
-
-
-<input id="password"
-type="password"
-placeholder="Password">
-
-
-
-<button onclick="register()">
-
-DAFTAR
-
-</button>
-
-
-
-<p>
-Sudah punya akun?
-
-<a href="login.html">
-Login
-</a>
-
-</p>
-
-
-</div>
-
-
-
-<script>
-
-
-function register(){
-
-
-let email =
-document.getElementById("email").value;
-
-
-let password =
-document.getElementById("password").value;
-
-
-
-daftarUser(
-email,
-password
-)
-
-.then(()=>{
-
-
-alert(
-"Akun berhasil dibuat"
-);
-
-
-location.href="login.html";
-
-
-})
-
-
-.catch(e=>{
-
-
-alert(e.message);
-
-
-});
-
-
-}
-
-
-</script>
-
-
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-
-
-<script src="js/global-orders.js"></script>
-
-<script src="js/auth.js"></script>
-
-
-
+  <div class="auth-page">
+    <div class="auth-card">
+      <img src="logo.png" alt="VOXY">
+      <h1>Buat Akun</h1>
+      <p class="sub">Daftar untuk mulai belanja</p>
+      <input id="email" type="email" placeholder="Email" autocomplete="email">
+      <input id="password" type="password" placeholder="Password (min 6 karakter)" autocomplete="new-password">
+      <input id="password2" type="password" placeholder="Ulangi Password" autocomplete="new-password">
+      <button class="btn" id="btnDaftar" onclick="doDaftar()">DAFTAR</button>
+      <p class="auth-footer">Sudah punya akun? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+  <script src="global-orders.js"></script>
+  <script>
+    function doDaftar() {
+      var email = document.getElementById("email").value.trim();
+      var password = document.getElementById("password").value;
+      var password2 = document.getElementById("password2").value;
+      if (!email || !password) { alert("Isi email dan password"); return; }
+      if (password.length < 6) { alert("Password minimal 6 karakter"); return; }
+      if (password !== password2) { alert("Password tidak sama"); return; }
+      var btn = document.getElementById("btnDaftar");
+      btn.disabled = true; btn.textContent = "Loading...";
+      VOXY.daftarUser(email, password).then(function () {
+        alert("Akun berhasil dibuat! Silakan login.");
+        window.location.href = "login.html";
+      }).catch(function (err) {
+        alert(err.message || "Gagal daftar");
+        btn.disabled = false; btn.textContent = "DAFTAR";
+      });
+    }
+  </script>
 </body>
-
 </html>

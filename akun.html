@@ -1,239 +1,63 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Akun - VOXY MARKET</title>
-
-<link rel="stylesheet" href="css/akun.css">
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Akun - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
 <body>
-
-
-<header class="account-header">
-
-
-<div class="logo">
-
-<img src="assets/logo.png">
-
-</div>
-
-
-<div>
-
-<h2>VOXY MARKET</h2>
-
-<p>Akun Saya</p>
-
-</div>
-
-
-</header>
-
-
-
-
-
-<section class="profile-card">
-
-
-<img src="assets/logo.png">
-
-
-<h2>
-Guest User
-</h2>
-
-
-<p>
-Belum Login
-</p>
-
-
-
-<button onclick="location.href='login.html'">
-
-Login Sekarang
-
-</button>
-
-
-</section>
-
-
-
-
-
-
-
-<section class="menu">
-
-
-<div class="menu-item">
-
-<i data-lucide="user"></i>
-
-<span>
-Profil Saya
-</span>
-
-</div>
-
-
-
-
-<div class="menu-item"
-onclick="location.href='riwayat.html'">
-
-<i data-lucide="clipboard-list"></i>
-
-<span>
-Riwayat Transaksi
-</span>
-
-</div>
-
-
-
-
-
-<div class="menu-item">
-
-
-<i data-lucide="package"></i>
-
-
-<span>
-Pesanan Saya
-</span>
-
-
-</div>
-
-
-
-
-
-
-<div class="menu-item">
-
-
-<i data-lucide="credit-card"></i>
-
-
-<span>
-Pembayaran
-</span>
-
-
-</div>
-
-
-
-
-
-
-<div class="menu-item">
-
-
-<i data-lucide="headphones"></i>
-
-
-<span>
-Bantuan Admin
-</span>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="menu-item">
-
-
-<i data-lucide="settings"></i>
-
-
-<span>
-Pengaturan
-</span>
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-<nav>
-
-
-<a href="home.html">
-
-<i data-lucide="house"></i>
-
-Home
-
-</a>
-
-
-
-<a href="riwayat.html">
-
-<i data-lucide="clipboard-list"></i>
-
-Transaksi
-
-</a>
-
-
-
-
-<a class="active">
-
-<i data-lucide="circle-user"></i>
-
-Akun
-
-</a>
-
-
-
-</nav>
-
-
-
-
-
-
-
-
-<script>
-
-lucide.createIcons();
-
-</script>
-
-
+  <header class="app-header">
+    <div class="logo-area">
+      <img src="logo.png" alt="VOXY">
+      <span class="badge-dot" id="logoBadge"></span>
+      <span>Akun</span>
+    </div>
+  </header>
+  <main class="page">
+    <div class="profile-card">
+      <div class="avatar" id="avatar">U</div>
+      <h2 id="namaUser">User</h2>
+      <p id="emailUser" style="color:var(--muted);font-size:14px">-</p>
+    </div>
+    <div class="menu-list">
+      <a class="menu-item" href="riwayat.html"><i data-lucide="clock"></i> Riwayat Transaksi</a>
+      <a class="menu-item" href="chat.html"><i data-lucide="message-circle"></i> Chat / Laporan</a>
+      <a class="menu-item" href="home.html"><i data-lucide="home"></i> Beranda</a>
+      <a class="menu-item" id="adminLink" href="admin.html" style="display:none"><i data-lucide="shield"></i> Panel Admin</a>
+      <button class="menu-item" onclick="doLogout()" style="width:100%;text-align:left;color:var(--danger)">
+        <i data-lucide="log-out"></i> Logout
+      </button>
+    </div>
+  </main>
+  <nav class="bottom-nav">
+    <a href="home.html"><i data-lucide="home"></i>Home</a>
+    <a href="search.html"><i data-lucide="search"></i>Cari</a>
+    <a href="riwayat.html"><i data-lucide="clock"></i>Riwayat</a>
+    <a href="akun.html" class="active"><i data-lucide="user"></i>Akun</a>
+  </nav>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    VOXY.requireAuth().then(function (user) {
+      var email = user.email || "-";
+      document.getElementById("emailUser").textContent = email;
+      document.getElementById("namaUser").textContent = email.split("@")[0];
+      document.getElementById("avatar").textContent = (email[0] || "U").toUpperCase();
+      if (VOXY.isAdmin(email)) document.getElementById("adminLink").style.display = "flex";
+      VOXY.listenUserUnread(user.uid, function (unread) {
+        var el = document.getElementById("logoBadge");
+        if (el) el.classList.toggle("show", !!unread);
+      });
+    });
+    function doLogout() {
+      if (!confirm("Yakin logout?")) return;
+      VOXY.logoutUser().then(function () { window.location.href = "login.html"; });
+    }
+  </script>
 </body>
-
 </html>

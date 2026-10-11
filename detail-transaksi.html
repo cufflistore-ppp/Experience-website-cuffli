@@ -1,555 +1,69 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>Detail Pesanan - VOXY MARKET</title>
-
-
-<link rel="stylesheet" href="css/detail-transaksi.css">
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Transaksi - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
 <body>
-
-
-
-
-
-<!-- HEADER -->
-
-
-<header class="detail-header">
-
-
-<a href="riwayat.html">
-
-<i data-lucide="arrow-left"></i>
-
-</a>
-
-
-
-<div>
-
-<h2>
-Detail Pesanan
-</h2>
-
-<p>
-Informasi transaksi kamu
-</p>
-
-</div>
-
-
-</header>
-
-
-
-
-
-
-
-
-
-<!-- PRODUK -->
-
-
-<section class="order-card">
-
-
-<img 
-id="gambarProduk"
-src="assets/logo.png">
-
-
-
-<div>
-
-
-<h2 id="namaProduk">
-Nama Produk
-</h2>
-
-
-
-<p>
-Kode Pesanan:
-<b id="kodePesanan">
--
-</b>
-</p>
-
-
-
-<p id="tanggal">
--
-</p>
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- STATUS -->
-
-
-<section class="status-card">
-
-
-<i data-lucide="clock"></i>
-
-
-<div>
-
-
-<h3>
-Status Pesanan
-</h3>
-
-
-<p id="statusPesanan">
-Menunggu Verifikasi
-</p>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- HASIL PESANAN -->
-
-
-<section class="result-card">
-
-
-<h2>
-
-Hasil Pesanan
-
-</h2>
-
-
-
-
-
-
-
-<!-- AKUN -->
-
-
-<div 
-id="akunArea"
-class="result-item"
-style="display:none;">
-
-
-<h3>
-Email & Password
-</h3>
-
-
-
-<div class="info-box">
-
-
-<p>
-Email
-</p>
-
-
-<b id="emailAkun">
--
-</b>
-
-
-</div>
-
-
-
-
-
-<div class="info-box">
-
-
-<p>
-Password
-</p>
-
-
-<b id="passwordAkun">
--
-</b>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- FILE -->
-
-
-<div 
-id="fileArea"
-class="result-item"
-style="display:none;">
-
-
-
-<h3>
-File Produk
-</h3>
-
-
-
-<a 
-id="fileProduk"
-class="action-button"
-href="#">
-
-<i data-lucide="download"></i>
-
-Download File
-
-</a>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- LINK -->
-
-
-<div 
-id="linkArea"
-class="result-item"
-style="display:none;">
-
-
-
-<h3>
-Link Produk
-</h3>
-
-
-
-
-<a 
-id="linkProduk"
-class="action-button"
-href="#"
-target="_blank">
-
-
-<i data-lucide="external-link"></i>
-
-
-Buka Link
-
-
-</a>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- CATATAN -->
-
-
-<div class="note-box">
-
-
-<h3>
-Catatan Admin
-</h3>
-
-
-
-<p id="catatanAdmin">
-
-Belum ada catatan
-
-</p>
-
-
-</div>
-
-
-
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- BANTUAN -->
-
-
-<a href="https://wa.me/6285726337940"
-class="help-button">
-
-
-<i data-lucide="message-circle"></i>
-
-
-Bantuan Admin
-
-
-</a>
-
-
-
-
-
-
-
-
-
-<!-- NAVBAR -->
-
-
-<nav>
-
-
-<a href="home.html">
-
-<i data-lucide="house"></i>
-
-<span>
-Home
-</span>
-
-</a>
-
-
-
-
-
-<a href="riwayat.html"
-class="active">
-
-<i data-lucide="clipboard-list"></i>
-
-<span>
-Transaksi
-</span>
-
-</a>
-
-
-
-
-
-<a href="akun.html">
-
-<i data-lucide="circle-user"></i>
-
-<span>
-Akun
-</span>
-
-</a>
-
-
-</nav>
-
-
-
-
-
-
-
-
-
-<script>
-
-
-lucide.createIcons();
-
-
-
-
-
-let transaksi = JSON.parse(
-
-localStorage.getItem("detailTransaksi")
-
-);
-
-
-
-
-
-if(transaksi){
-
-
-
-document.getElementById("gambarProduk").src =
-transaksi.gambar || "assets/logo.png";
-
-
-
-document.getElementById("namaProduk").innerHTML =
-transaksi.namaProduk;
-
-
-
-document.getElementById("kodePesanan").innerHTML =
-transaksi.kode;
-
-
-
-document.getElementById("tanggal").innerHTML =
-transaksi.tanggal;
-
-
-
-document.getElementById("statusPesanan").innerHTML =
-transaksi.status;
-
-
-
-
-
-// AKUN
-
-
-if(transaksi.tipe=="akun"){
-
-
-document.getElementById("akunArea").style.display="block";
-
-
-document.getElementById("emailAkun").innerHTML =
-transaksi.email || "-";
-
-
-document.getElementById("passwordAkun").innerHTML =
-transaksi.password || "-";
-
-
-}
-
-
-
-
-
-
-// FILE
-
-
-if(transaksi.tipe=="file"){
-
-
-document.getElementById("fileArea").style.display="block";
-
-
-document.getElementById("fileProduk").href =
-transaksi.file;
-
-
-}
-
-
-
-
-
-
-// LINK
-
-
-if(transaksi.tipe=="link"){
-
-
-document.getElementById("linkArea").style.display="block";
-
-
-document.getElementById("linkProduk").href =
-transaksi.link;
-
-
-}
-
-
-
-
-
-document.getElementById("catatanAdmin").innerHTML =
-transaksi.catatan || "Belum ada catatan";
-
-
-
-}
-
-
-
-</script>
-
-
-
-
-
+  <header class="app-header">
+    <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span>Detail Transaksi</span></div>
+    <div style="width:40px"></div>
+  </header>
+  <main class="page" id="content"><div class="empty-state">Memuat...</div></main>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    function statusClass(s) {
+      s = (s || "").toLowerCase();
+      if (s.indexOf("menunggu") !== -1) return "menunggu";
+      if (s.indexOf("proses") !== -1) return "diproses";
+      if (s.indexOf("selesai") !== -1) return "selesai";
+      if (s.indexOf("tolak") !== -1) return "ditolak";
+      return "menunggu";
+    }
+    VOXY.requireAuth().then(function (user) {
+      var kode = new URLSearchParams(location.search).get("kode");
+      if (!kode) {
+        document.getElementById("content").innerHTML = '<div class="empty-state">Kode tidak ditemukan</div>';
+        return;
+      }
+      VOXY.getOrder(kode).then(function (o) {
+        if (!o) {
+          document.getElementById("content").innerHTML = '<div class="empty-state">Pesanan tidak ditemukan</div>';
+          return;
+        }
+        if (o.email !== user.email && o.uid !== user.uid && !VOXY.isAdmin(user.email)) {
+          document.getElementById("content").innerHTML = '<div class="empty-state">Akses ditolak</div>';
+          return;
+        }
+        document.getElementById("content").innerHTML =
+          '<div class="pay-card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+          '<h2 style="margin:0">Pesanan ' + (o.kode || "") + '</h2>' +
+          '<span class="badge ' + statusClass(o.status) + '">' + (o.status || "-") + '</span></div>' +
+          '<div class="pay-row"><span>Produk</span><span>' + (o.namaProduk || "-") + '</span></div>' +
+          '<div class="pay-row"><span>Kategori</span><span>' + (o.kategori || "-") + '</span></div>' +
+          '<div class="pay-row"><span>Harga</span><span>' + VOXY.formatRp(o.harga) + '</span></div>' +
+          '<div class="pay-row"><span>Tanggal</span><span>' + VOXY.formatTanggal(o.createdAt) + '</span></div>' +
+          (o.linkTarget ? '<div class="pay-row"><span>Link Target</span><span style="word-break:break-all">' + o.linkTarget + '</span></div>' : '') +
+          (o.catatan ? '<div class="pay-row"><span>Catatan</span><span>' + o.catatan + '</span></div>' : '') +
+          (o.catatanAdmin ? '<div class="pay-row"><span>Catatan Admin</span><span>' + o.catatanAdmin + '</span></div>' : '') +
+          '</div><div class="pay-card" id="fileHasil"><p style="font-size:13px;color:var(--muted)">File hasil akan muncul di sini jika admin sudah mengirim.</p></div>';
+        VOXY.getOrderFile(kode).then(function (f) {
+          if (f && f.data) {
+            var box = document.getElementById("fileHasil");
+            if (box) box.innerHTML = '<a class="btn btn-sm" href="' + f.data + '" download="' + (f.nama || "hasil") + '">Download Hasil</a>';
+          }
+        });
+      });
+    });
+  </script>
 </body>
-
 </html>

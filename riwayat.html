@@ -1,465 +1,59 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>Riwayat Transaksi - VOXY MARKET</title>
-
-
-<link rel="stylesheet" href="css/riwayat.css">
-
-
-<script src="https://unpkg.com/lucide@latest"></script>
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riwayat - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
 <body>
-
-
-
-<!-- ================= HEADER ================= -->
-
-
-<header class="transaction-header">
-
-
-<div class="logo-area">
-
-<img src="assets/logo.png">
-
-</div>
-
-
-
-<div>
-
-<h2>
-Riwayat Transaksi
-</h2>
-
-
-<p>
-Pantau pesanan kamu
-</p>
-
-
-</div>
-
-
-
-</header>
-
-
-
-
-
-
-
-
-
-<!-- ================= FILTER ================= -->
-
-
-<section class="filter">
-
-
-<button class="active">
-
-Semua
-
-</button>
-
-
-<button>
-
-Menunggu
-
-</button>
-
-
-<button>
-
-Diproses
-
-</button>
-
-
-<button>
-
-Selesai
-
-</button>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- ================= LIST TRANSAKSI ================= -->
-
-
-<section 
-class="transaction-list"
-id="transactionList">
-
-
-</section><!-- ================= CHAT ADMIN ================= -->
-
-
-<a href="https://wa.me/6285726337940"
-class="chat-admin">
-
-
-<img src="assets/chat-admin.png">
-
-
-</a>
-
-
-
-
-
-
-
-
-
-<!-- ================= NAVBAR ================= -->
-
-
-<nav>
-
-
-<a href="home.html">
-
-
-<i data-lucide="house"></i>
-
-
-<span>
-Home
-</span>
-
-
-</a>
-
-
-
-
-
-
-<a href="riwayat.html"
-class="active">
-
-
-<i data-lucide="clipboard-list"></i>
-
-
-<span>
-Transaksi
-</span>
-
-
-</a>
-
-
-
-
-
-
-
-<a href="akun.html">
-
-
-<i data-lucide="circle-user"></i>
-
-
-<span>
-Akun
-</span>
-
-
-</a>
-
-
-
-</nav>
-
-
-
-
-
-
-
-
-
-<!-- ================= SCRIPT ================= -->
-
-
-<script>
-
-
-lucide.createIcons();
-
-
-
-
-
-// ================= LOAD TRANSAKSI =================
-
-
-
-let dataTransaksi = JSON.parse(
-
-localStorage.getItem("riwayatTransaksi")
-
-) || [];
-
-
-
-
-
-let list = document.getElementById(
-"transactionList"
-);
-
-
-
-
-
-if(dataTransaksi.length === 0){
-
-
-
-list.innerHTML = `
-
-
-<div class="empty">
-
-
-<i data-lucide="clipboard-x"></i>
-
-
-<h3>
-Belum ada transaksi
-</h3>
-
-
-<p>
-Pesanan kamu akan muncul di sini
-</p>
-
-
-</div>
-
-
-`;
-
-
-
-}
-
-else{
-
-
-
-dataTransaksi.reverse().forEach((item,index)=>{
-
-
-
-
-
-list.innerHTML += `
-
-
-
-<div class="transaction-card">
-
-
-
-<div class="product-top">
-
-
-
-<img src="${item.gambar || 'assets/logo.png'}">
-
-
-
-
-
-<div>
-
-
-<h3>
-
-${item.namaProduk}
-
-</h3>
-
-
-
-<p>
-
-Kode Pesanan:
-
-<b>
-
-${item.kode}
-
-</b>
-
-</p>
-
-
-
-<p>
-
-${item.tanggal}
-
-</p>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="status waiting">
-
-
-<i data-lucide="clock"></i>
-
-
-${item.status}
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="transaction-bottom">
-
-
-
-<strong>
-
-Rp${Number(item.harga)
-.toLocaleString("id-ID")}
-
-</strong>
-
-
-
-
-
-
-
-<button onclick="lihatDetail(${index})">
-
-Detail
-
-</button>
-
-
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-`;
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-
-lucide.createIcons();
-
-
-
-
-
-
-
-
-
-// ================= DETAIL =================
-
-
-
-function lihatDetail(index){
-
-
-
-let data = dataTransaksi[index];
-
-
-
-localStorage.setItem(
-
-"detailTransaksi",
-
-JSON.stringify(data)
-
-);
-
-
-
-
-
-window.location.href =
-"detail-transaksi.html";
-
-
-
-}
-
-
-
-</script>
-
+  <header class="app-header">
+    <div class="logo-area"><img src="logo.png" alt="VOXY"><span>Riwayat</span></div>
+  </header>
+  <main class="page">
+    <div class="order-list" id="listRiwayat"><div class="empty-state">Memuat...</div></div>
+  </main>
+  <nav class="bottom-nav">
+    <a href="home.html"><i data-lucide="home"></i>Home</a>
+    <a href="search.html"><i data-lucide="search"></i>Cari</a>
+    <a href="riwayat.html" class="active"><i data-lucide="clock"></i>Riwayat</a>
+    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
+  </nav>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    function statusClass(s) {
+      s = (s || "").toLowerCase();
+      if (s.indexOf("menunggu") !== -1) return "menunggu";
+      if (s.indexOf("proses") !== -1) return "diproses";
+      if (s.indexOf("selesai") !== -1) return "selesai";
+      if (s.indexOf("tolak") !== -1) return "ditolak";
+      return "menunggu";
+    }
+    VOXY.requireAuth().then(function (user) {
+      VOXY.listenOrders(function (orders) {
+        var mine = (orders || []).filter(function (o) {
+          return o.email === user.email || o.uid === user.uid;
+        });
+        mine.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+        var el = document.getElementById("listRiwayat");
+        if (!mine.length) { el.innerHTML = '<div class="empty-state">Belum ada transaksi</div>'; return; }
+        el.innerHTML = mine.map(function (o) {
+          var img = o.gambar || "produk1.png";
+          var st = o.status || "Menunggu";
+          return '<a class="order-item" href="detail-transaksi.html?kode=' + encodeURIComponent(o.kode) + '">' +
+            '<img class="thumb" src="' + img + '" onerror="this.src=\'produk1.png\'">' +
+            '<div class="info"><h3>' + (o.namaProduk || "-") + '</h3>' +
+            '<div class="meta">' + (o.kode || "") + ' · ' + VOXY.formatTanggal(o.createdAt) + '</div>' +
+            '<div class="meta" style="margin-top:4px">' + VOXY.formatRp(o.harga) +
+            ' · <span class="badge ' + statusClass(st) + '">' + st + '</span></div></div></a>';
+        }).join("");
+      });
+    });
+  </script>
 </body>
-
 </html>

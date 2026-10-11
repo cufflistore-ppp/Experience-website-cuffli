@@ -1,165 +1,51 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<title>Isi Link Target - VOXY MARKET</title>
-
-
-<link rel="stylesheet" href="css/home.css">
-
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isi Link Target - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-
-
-
 <body>
-
-
-
-<div class="order-card">
-
-
-
-<h2>
-Isi Link Target
-</h2>
-
-
-
-
-<p>
-
-Kode Pesanan:
-
-<br>
-
-<b id="kodePesanan">
-
--
-
-</b>
-
-</p>
-
-
-
-
-
-
-
-
-<p>
-
-Produk:
-
-<br>
-
-<b id="namaProduk">
-
--
-
-</b>
-
-</p>
-
-
-
-
-
-
-
-
-<label>
-
-Link Target
-
-</label>
-
-
-
-
-<br><br>
-
-
-
-<input
-
-type="text"
-
-id="linkTarget"
-
-placeholder="https://contoh.com"
-
-style="
-width:100%;
-padding:15px;
-border-radius:15px;
-border:1px solid #ddd;
-font-size:16px;
-"
-
->
-
-
-
-
-
-
-
-<br><br>
-
-
-
-
-<button
-
-onclick="kirimLink()"
-
-style="
-width:100%;
-height:50px;
-border:none;
-border-radius:20px;
-background:#006cff;
-color:white;
-font-weight:bold;
-font-size:16px;
-"
-
->
-
-
-Kirim Pesanan
-
-
-</button>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<script src="js/link-target.js"></script>
-
-
-
-
+  <header class="app-header">
+    <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span>Link Target</span></div>
+    <div style="width:40px"></div>
+  </header>
+  <main class="page">
+    <div class="pay-card">
+      <h2>Isi Link / Target</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Masukkan link atau data target untuk pesanan ini.</p>
+      <div class="form-group"><label>Kode Pesanan</label><input id="kode" type="text" readonly></div>
+      <div class="form-group"><label>Link / Target</label><textarea id="linkTarget" placeholder="https://... atau data target" rows="3"></textarea></div>
+      <div class="form-group"><label>Catatan (opsional)</label><input id="catatan" type="text" placeholder="Catatan tambahan"></div>
+      <button class="btn" style="width:100%" onclick="simpanTarget()">Simpan & Lanjut</button>
+    </div>
+  </main>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var kode = "";
+    VOXY.requireAuth().then(function () {
+      kode = new URLSearchParams(location.search).get("kode") || sessionStorage.getItem("kodePesanan") || "";
+      document.getElementById("kode").value = kode || "-";
+      if (!kode) { alert("Kode pesanan tidak ditemukan"); window.location.href = "riwayat.html"; }
+    });
+    function simpanTarget() {
+      var link = document.getElementById("linkTarget").value.trim();
+      var catatan = document.getElementById("catatan").value.trim();
+      if (!link) { alert("Isi link / target dulu"); return; }
+      if (!kode) return;
+      VOXY.updateOrder(kode, { linkTarget: link, catatan: catatan }).then(function () {
+        sessionStorage.removeItem("kodePesanan");
+        alert("Data tersimpan. Menunggu proses admin.");
+        window.location.href = "riwayat.html";
+      }).catch(function (err) { alert(err.message || "Gagal menyimpan"); });
+    }
+  </script>
 </body>
-
-
 </html>
