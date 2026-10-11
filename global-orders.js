@@ -32,7 +32,7 @@ function isAdmin(email) {
 }
 
 function generateKode() {
-  return "VX" + Math.floor(100000 + Math.random() * 900000);
+  return "VM-" + Math.floor(100000 + Math.random() * 900000);
 }
 
 function formatRp(n) {

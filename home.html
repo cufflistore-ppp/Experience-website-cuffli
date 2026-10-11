@@ -15,12 +15,8 @@
     <div class="logo-area">
       <img src="logo.png" alt="VOXY">
       <span class="badge-dot" id="logoBadge"></span>
-      <span>VOXY</span>
+      <span>VOXY MARKET</span>
     </div>
-    <a href="search.html" class="search-pill">
-      <i data-lucide="search" style="width:16px;height:16px"></i>
-      Cari produk...
-    </a>
     <div class="header-actions">
       <a href="chat.html" class="icon-btn" title="Chat">
         <i data-lucide="message-circle"></i>
@@ -31,100 +27,173 @@
   </header>
 
   <main class="page">
-    <div class="banner-slider">
-      <img src="banner.png" alt="Banner" id="bannerImg">
+    <div class="feature-row">
+      <div class="feature-chip">
+        <div class="ic"><i data-lucide="shield-check"></i></div>
+        <div><h4>Transaksi Aman</h4><p>Pembayaran terpercaya</p></div>
+      </div>
+      <div class="feature-chip">
+        <div class="ic"><i data-lucide="zap"></i></div>
+        <div><h4>Proses Cepat</h4><p>Pesanan diproses</p></div>
+      </div>
     </div>
-    <div class="section-title"><span>Produk Digital</span></div>
+
+    <div class="banner-wrap" id="bannerWrap">
+      <div class="banner-track" id="bannerTrack">
+        <img src="banner.png" alt="Banner 1">
+        <img src="banner2.png" alt="Banner 2">
+        <img src="banner3.png" alt="Banner 3">
+      </div>
+      <div class="banner-dots" id="bannerDots">
+        <span class="active"></span><span></span><span></span>
+      </div>
+    </div>
+
+    <a href="search.html" class="home-search">
+      <i data-lucide="search" style="width:18px;height:18px"></i>
+      Cari produk, game, atau layanan...
+    </a>
+
+    <div class="cat-tabs" id="catTabs">
+      <button class="active" data-cat="all" onclick="filterCat(this)">Populer</button>
+      <button data-cat="terbaru" onclick="filterCat(this)">Terbaru</button>
+      <button data-cat="all" onclick="filterCat(this)">Premium</button>
+    </div>
+
+    <div class="section-title">
+      <div>
+        <h2>Produk Populer</h2>
+        <p>Produk pilihan VOXY MARKET</p>
+      </div>
+    </div>
     <div class="product-grid" id="produkGrid">
       <div class="empty-state" style="grid-column:1/-1">Memuat produk...</div>
     </div>
   </main>
 
-  <!-- FAB Laporan / Chat -->
-  <div class="fab-chat" id="fabChat" onclick="bukaLaporanSheet()" title="Laporan / Chat">
-    <img src="chat-admin.png" alt="Chat" onerror="this.style.display='none'">
+  <div class="fab-chat" id="fabChat" title="Chat Admin">
+    <img src="chat-admin.png" alt="Chat">
     <span class="badge-dot" id="fabBadge"></span>
   </div>
 
-  <!-- Bottom sheet pilih cara laporan -->
-  <div class="laporan-sheet" id="laporanSheet" onclick="if(event.target===this)tutupLaporanSheet()">
+  <div class="laporan-sheet" id="laporanSheet" onclick="if(event.target===this)tutupLaporan()">
     <div class="laporan-panel">
       <h3>Kirim Laporan / Tanya</h3>
       <p>Pilih cara menghubungi admin</p>
       <div class="laporan-options">
-        <button class="btn" onclick="location.href='chat.html'">💬 Chat via Website</button>
-        <button class="btn btn-wa" onclick="laporWA()">📱 Chat via WhatsApp</button>
-        <button class="btn btn-outline" onclick="tutupLaporanSheet()">Batal</button>
+        <button class="btn" onclick="location.href=\'chat.html\'">Chat via Website</button>
+        <button class="btn btn-wa" onclick="laporWA()">Chat via WhatsApp</button>
+        <button class="btn btn-outline" onclick="tutupLaporan()">Batal</button>
       </div>
     </div>
   </div>
 
   <nav class="bottom-nav">
     <a href="home.html" class="active"><i data-lucide="home"></i>Home</a>
-    <a href="search.html"><i data-lucide="search"></i>Cari</a>
-    <a href="riwayat.html"><i data-lucide="clock"></i>Riwayat</a>
+    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
     <a href="akun.html"><i data-lucide="user"></i>Akun</a>
   </nav>
 
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
-    var waAdmin = "";
+    var waAdmin = "", allProduk = [], bi = 0, banners = 3;
+
+    /* Banner auto slide */
+    function startBanner() {
+      setInterval(function () {
+        bi = (bi + 1) % banners;
+        document.getElementById("bannerTrack").style.transform = "translateX(-" + (bi * 100) + "%)";
+        var dots = document.querySelectorAll("#bannerDots span");
+        dots.forEach(function (d, i) { d.classList.toggle("active", i === bi); });
+      }, 3500);
+    }
+
+    /* Draggable FAB - no blue dots, only red badge */
+    (function () {
+      var fab = document.getElementById("fabChat");
+      var x = window.innerWidth - 80, y = window.innerHeight - 160;
+      var dragging = false, moved = false, sx, sy, ox, oy;
+      function place() {
+        fab.style.left = x + "px";
+        fab.style.top = y + "px";
+        fab.style.right = "auto";
+        fab.style.bottom = "auto";
+      }
+      place();
+      function start(e) {
+        dragging = true; moved = false;
+        var t = e.touches ? e.touches[0] : e;
+        sx = t.clientX; sy = t.clientY; ox = x; oy = y;
+        e.preventDefault();
+      }
+      function move(e) {
+        if (!dragging) return;
+        var t = e.touches ? e.touches[0] : e;
+        var dx = t.clientX - sx, dy = t.clientY - sy;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+        x = Math.max(0, Math.min(window.innerWidth - 62, ox + dx));
+        y = Math.max(0, Math.min(window.innerHeight - 62, oy + dy));
+        place();
+      }
+      function end() {
+        if (!dragging) return;
+        dragging = false;
+        if (!moved) bukaLaporan();
+      }
+      fab.addEventListener("mousedown", start);
+      fab.addEventListener("touchstart", start, { passive: false });
+      window.addEventListener("mousemove", move);
+      window.addEventListener("touchmove", move, { passive: false });
+      window.addEventListener("mouseup", end);
+      window.addEventListener("touchend", end);
+    })();
+
+    function bukaLaporan() { document.getElementById("laporanSheet").classList.add("show"); }
+    function tutupLaporan() { document.getElementById("laporanSheet").classList.remove("show"); }
+    function laporWA() {
+      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET, saya mau tanya/lapor:");
+      tutupLaporan();
+    }
+
+    function renderProduk(list) {
+      var grid = document.getElementById("produkGrid");
+      if (!list || !list.length) {
+        grid.innerHTML = \'<div class="empty-state" style="grid-column:1/-1">Belum ada produk</div>\';
+        return;
+      }
+      grid.innerHTML = list.map(function (p) {
+        var img = p.gambar || "produk1.png";
+        return \'<a class="product-card" href="detail-produk.html?id=\' + encodeURIComponent(p.id) + \'">\' +
+          \'<div class="thumb"><img src="\' + img + \'" alt="" onerror="this.src=\\\'produk1.png\\\'"></div>\' +
+          \'<div class="body"><h3>\' + (p.nama || "-") + \'</h3>\' +
+          \'<div class="desc">\' + (p.deskripsi || p.kategori || "") + \'</div>\' +
+          \'<div class="bottom"><span class="price">\' + VOXY.formatRp(p.harga) + \'</span>\' +
+          \'<span class="cart-btn"><i data-lucide="shopping-cart" style="width:14px;height:14px"></i></span></div></div></a>\';
+      }).join("");
+      lucide.createIcons();
+    }
+
+    function filterCat(btn) {
+      document.querySelectorAll("#catTabs button").forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      renderProduk(allProduk);
+    }
 
     VOXY.requireAuth().then(function (user) {
-      loadProduk();
       startBanner();
-      VOXY.getSettings().then(function (s) {
-        waAdmin = (s && s.waAdmin) || "";
+      VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
+      VOXY.listenProduk(function (list) {
+        allProduk = list || [];
+        renderProduk(allProduk);
       });
-      // Badge merah kalau admin sudah balas
       VOXY.listenUserUnread(user.uid, function (unread) {
-        var show = !!unread;
         ["logoBadge", "chatBadge", "fabBadge"].forEach(function (id) {
           var el = document.getElementById(id);
-          if (el) el.classList.toggle("show", show);
+          if (el) el.classList.toggle("show", !!unread);
         });
       });
     });
-
-    var banners = ["banner.png", "banner2.png", "banner3.png"];
-    var bi = 0;
-    function startBanner() {
-      setInterval(function () {
-        bi = (bi + 1) % banners.length;
-        var img = document.getElementById("bannerImg");
-        if (img) img.src = banners[bi];
-      }, 4000);
-    }
-
-    function loadProduk() {
-      VOXY.listenProduk(function (list) {
-        var grid = document.getElementById("produkGrid");
-        if (!list || !list.length) {
-          grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Belum ada produk. Admin belum menambahkan.</div>';
-          return;
-        }
-        grid.innerHTML = list.map(function (p) {
-          var img = p.gambar || "produk1.png";
-          return '<a class="product-card" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
-            '<div class="thumb"><img src="' + img + '" alt="" onerror="this.src=\'produk1.png\'"></div>' +
-            '<div class="body"><div class="cat">' + (p.kategori || "Digital") + '</div>' +
-            '<h3>' + (p.nama || "-") + '</h3>' +
-            '<div class="price">' + VOXY.formatRp(p.harga) + '</div></div></a>';
-        }).join("");
-      });
-    }
-
-    function bukaLaporanSheet() {
-      document.getElementById("laporanSheet").classList.add("show");
-    }
-    function tutupLaporanSheet() {
-      document.getElementById("laporanSheet").classList.remove("show");
-    }
-    function laporWA() {
-      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET, saya mau tanya/lapor:");
-      tutupLaporanSheet();
-    }
   </script>
 </body>
 </html>

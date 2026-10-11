@@ -1,0 +1,25 @@
+=== PENTING: Error PERMISSION_DENIED di Chat ===
+
+Buka Firebase Console → project voxyyjoki → Realtime Database → tab Rules
+Ganti SELURUH rules dengan ini, lalu klik Publish:
+
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "orders": { ".read": "auth != null", ".write": "auth != null" },
+    "order_bukti": { ".read": "auth != null", ".write": "auth != null" },
+    "order_files": { ".read": "auth != null", ".write": "auth != null" },
+    "produk": { ".read": true, ".write": "auth != null" },
+    "produk_images": { ".read": true, ".write": "auth != null" },
+    "settings": { ".read": true, ".write": "auth != null" },
+    "branding_assets": { ".read": true, ".write": "auth != null" },
+    "laporan": { ".read": "auth != null", ".write": "auth != null" },
+    "chat": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
+
+Tanpa rules chat di atas, chat SELALU PERMISSION_DENIED.

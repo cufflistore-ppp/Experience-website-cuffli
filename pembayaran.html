@@ -94,7 +94,7 @@
         var kat = (produk.kategori || "").toLowerCase();
         if (kat.indexOf("suntik") !== -1 || kat.indexOf("jasa") !== -1 || produk.butuhTarget) {
           sessionStorage.setItem("kodePesanan", kode);
-          window.location.href = "isi-target.html?kode=" + encodeURIComponent(kode);
+          window.location.href = "jasa-link.html?kode=" + encodeURIComponent(kode);
           return;
         }
         alert("Pembayaran berhasil dikirim. Menunggu verifikasi admin.");

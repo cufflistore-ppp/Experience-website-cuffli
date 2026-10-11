@@ -82,7 +82,11 @@
         btn.disabled = false;
         input.focus();
       }).catch(function (e) {
-        alert(e.message || "Gagal kirim");
+        var msg = e.message || "Gagal kirim";
+        if (String(msg).indexOf("PERMISSION") !== -1) {
+          msg = "PERMISSION_DENIED: Path chat belum diizinkan di Firebase Rules. Buka Firebase Console → Realtime Database → Rules, paste rules dari file FIREBASE-RULES.txt lalu Publish.";
+        }
+        alert(msg);
         btn.disabled = false;
       });
     }
