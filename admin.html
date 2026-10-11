@@ -86,8 +86,25 @@
           <button class="btn btn-sm btn-danger" onclick="ubahStatus('Ditolak')">Tolak</button>
           <button class="btn btn-sm btn-outline" onclick="tutupDetail()">Tutup</button>
         </div>
-        <div class="form-group" style="margin-top:16px"><label>Catatan Admin</label><input id="catatanAdmin" type="text" placeholder="Catatan untuk user"></div>
-        <div class="form-group"><label>Upload File Hasil</label><input type="file" id="fileHasil"><button class="btn btn-sm" style="margin-top:8px" onclick="uploadHasil()">Kirim File Hasil</button></div>
+        <div class="form-group" style="margin-top:16px"><label>Catatan Admin</label><input id="catatanAdmin" type="text" placeholder="Catatan status / info singkat"></div>
+
+        <div class="admin-card" style="margin-top:12px;background:#f8fafc">
+          <h2 style="margin-bottom:8px">📦 Kirim Hasil ke Pembeli</h2>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Bisa isi <b>link/URL</b>, <b>file</b>, atau keduanya. Pembeli akan melihat tombol <b>Lihat</b> &amp; <b>Download</b>.</p>
+          <div class="form-group">
+            <label>Link / URL hasil (APK, Google Drive, website, dll)</label>
+            <input id="hasilUrl" type="url" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Petunjuk untuk pembeli (muncul sebelum Lihat/Download)</label>
+            <textarea id="hasilCatatan" rows="3" placeholder="Contoh: 1) Download APK dulu lewat tombol Download 2) Install APK 3) Baru tekan Lihat untuk buka konten"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Upload file (opsional — APK, zip, gambar, dll)</label>
+            <input type="file" id="fileHasil">
+          </div>
+          <button class="btn btn-sm btn-success" onclick="kirimHasil()">Kirim Hasil ke Pembeli</button>
+        </div>
         <div id="buktiAdmin" style="margin-top:12px"></div>
       </div>
     </div>
@@ -154,8 +171,42 @@
         <div class="form-group"><label>Nama Toko</label><input id="sNamaToko" type="text" placeholder="VOXY MARKET"></div>
         <div class="form-group"><label>WA Admin (628xxx)</label><input id="sWa" type="text" placeholder="628xxxxxxxxxx"></div>
         <div class="form-group"><label>Rekening / Info Transfer</label><textarea id="sRekening" rows="3" placeholder="Bank BCA 123456789 a/n Nama"></textarea></div>
-        <div class="form-group"><label>URL QRIS (opsional)</label><input id="sQris" type="text" placeholder="https://... atau kosong = pakai qris.jpg"></div>
-        <button class="btn btn-sm" onclick="simpanPengaturan()">Simpan Pengaturan</button>
+        <button class="btn btn-sm" onclick="simpanPengaturan()">Simpan Info Toko</button>
+      </div>
+
+      <div class="admin-card">
+        <h2>🖼️ Ganti Logo, Banner & QRIS</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Upload dari file foto di HP/PC. Kosongkan = tetap pakai gambar default.</p>
+
+        <div class="form-group">
+          <label>Logo toko</label>
+          <input type="file" id="fileLogo" accept="image/*">
+          <img id="prevLogo" class="brand-preview logo" src="logo.png" alt="Logo">
+        </div>
+
+        <div class="form-group">
+          <label>Banner 1</label>
+          <input type="file" id="fileBanner1" accept="image/*">
+          <img id="prevBanner1" class="brand-preview" src="banner.png" alt="Banner 1">
+        </div>
+        <div class="form-group">
+          <label>Banner 2</label>
+          <input type="file" id="fileBanner2" accept="image/*">
+          <img id="prevBanner2" class="brand-preview" src="banner2.png" alt="Banner 2">
+        </div>
+        <div class="form-group">
+          <label>Banner 3</label>
+          <input type="file" id="fileBanner3" accept="image/*">
+          <img id="prevBanner3" class="brand-preview" src="banner3.png" alt="Banner 3">
+        </div>
+
+        <div class="form-group">
+          <label>Foto QRIS</label>
+          <input type="file" id="fileQris" accept="image/*">
+          <img id="prevQris" class="brand-preview qris" src="qris.jpg" alt="QRIS">
+        </div>
+
+        <button class="btn btn-sm btn-success" onclick="simpanBranding()">Simpan Logo / Banner / QRIS</button>
       </div>
     </div>
   </div>
@@ -268,6 +319,10 @@
       document.getElementById("detailPesananBox").classList.remove("hidden");
       document.getElementById("detailKode").textContent = kode;
       document.getElementById("catatanAdmin").value = o.catatanAdmin || "";
+      var hu = document.getElementById("hasilUrl");
+      var hc = document.getElementById("hasilCatatan");
+      if (hu) hu.value = o.hasilUrl || "";
+      if (hc) hc.value = o.hasilCatatan || "";
       document.getElementById("detailContent").innerHTML =
         "<div class=\"pay-row\"><span>Produk</span><span>" + (o.namaProduk || "-") + "</span></div>" +
         "<div class=\"pay-row\"><span>Kategori</span><span>" + (o.kategori || "-") + "</span></div>" +
@@ -288,17 +343,42 @@
       if (!selectedKode) return;
       var catatan = document.getElementById("catatanAdmin").value.trim();
       VOXY.updateOrder(selectedKode, { status: status, catatanAdmin: catatan }).then(function () {
-        alert("Status diubah ke: " + status);
+        if (VOXY.showToast) VOXY.showToast("Status: " + status); else alert("Status: " + status);
       }).catch(function (e) { alert(e.message); });
     }
-    function uploadHasil() {
+    function kirimHasil() {
       if (!selectedKode) return;
+      var url = (document.getElementById("hasilUrl").value || "").trim();
+      var catatan = (document.getElementById("hasilCatatan").value || "").trim();
       var file = document.getElementById("fileHasil").files[0];
-      if (!file) { alert("Pilih file dulu"); return; }
-      VOXY.fileToDataURL(file).then(function (url) {
-        return VOXY.simpanOrderFile(selectedKode, url, file.name);
-      }).then(function () { alert("File hasil terkirim"); }).catch(function (e) { alert(e.message); });
+      if (!url && !file) {
+        alert("Isi link/URL atau pilih file (bisa keduanya)");
+        return;
+      }
+      if (!catatan) {
+        catatan = "Sebelum membuka konten: unduh dulu file/APK lewat tombol Download (jika ada), install jika perlu, lalu tekan Lihat untuk membuka link hasil.";
+      }
+      var opts = { url: url, catatan: catatan, status: "Selesai" };
+      var go = function () {
+        return VOXY.simpanHasilPesanan(selectedKode, opts).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Hasil terkirim. Status: Selesai"); else alert("Hasil terkirim. Status: Selesai");
+          document.getElementById("hasilUrl").value = "";
+          document.getElementById("hasilCatatan").value = "";
+          document.getElementById("fileHasil").value = "";
+        });
+      };
+      if (file) {
+        VOXY.fileToDataURL(file).then(function (dataUrl) {
+          opts.fileData = dataUrl;
+          opts.fileNama = file.name;
+          return go();
+        }).catch(function (e) { alert(e.message || "Gagal baca file"); });
+      } else {
+        go().catch(function (e) { alert(e.message || "Gagal kirim"); });
+      }
     }
+
+    function uploadHasil() { kirimHasil(); }
 
     /* Produk */
     function loadProdukAdmin() {
@@ -422,16 +502,79 @@
         document.getElementById("sNamaToko").value = s.namaToko || "";
         document.getElementById("sWa").value = s.waAdmin || "";
         document.getElementById("sRekening").value = s.rekening || "";
-        document.getElementById("sQris").value = s.qrisUrl || "";
       });
+      VOXY.getBranding().then(function (b) {
+        b = b || {};
+        if (b.logo) document.getElementById("prevLogo").src = b.logo;
+        if (b.banner1) document.getElementById("prevBanner1").src = b.banner1;
+        if (b.banner2) document.getElementById("prevBanner2").src = b.banner2;
+        if (b.banner3) document.getElementById("prevBanner3").src = b.banner3;
+        if (b.qris) document.getElementById("prevQris").src = b.qris;
+      });
+      // live preview on file pick
+      function bindPrev(inputId, imgId) {
+        var inp = document.getElementById(inputId);
+        if (!inp) return;
+        inp.onchange = function () {
+          var f = inp.files[0];
+          if (!f) return;
+          VOXY.fileToDataURL(f).then(function (url) {
+            document.getElementById(imgId).src = url;
+          });
+        };
+      }
+      bindPrev("fileLogo", "prevLogo");
+      bindPrev("fileBanner1", "prevBanner1");
+      bindPrev("fileBanner2", "prevBanner2");
+      bindPrev("fileBanner3", "prevBanner3");
+      bindPrev("fileQris", "prevQris");
     }
     function simpanPengaturan() {
       VOXY.simpanSettings({
         namaToko: document.getElementById("sNamaToko").value.trim(),
         waAdmin: document.getElementById("sWa").value.trim(),
-        rekening: document.getElementById("sRekening").value.trim(),
-        qrisUrl: document.getElementById("sQris").value.trim()
-      }).then(function () { alert("Pengaturan tersimpan"); }).catch(function (e) { alert(e.message); });
+        rekening: document.getElementById("sRekening").value.trim()
+      }).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Info toko tersimpan");
+        else alert("Info toko tersimpan");
+      }).catch(function (e) { alert(e.message); });
+    }
+    function simpanBranding() {
+      var keys = [
+        ["fileLogo", "logo"],
+        ["fileBanner1", "banner1"],
+        ["fileBanner2", "banner2"],
+        ["fileBanner3", "banner3"],
+        ["fileQris", "qris"]
+      ];
+      var data = {};
+      var chain = Promise.resolve();
+      keys.forEach(function (pair) {
+        var input = document.getElementById(pair[0]);
+        var f = input && input.files[0];
+        if (f) {
+          chain = chain.then(function () {
+            return VOXY.fileToDataURL(f).then(function (url) {
+              data[pair[1]] = url;
+            });
+          });
+        }
+      });
+      chain.then(function () {
+        if (!Object.keys(data).length) {
+          alert("Pilih minimal 1 foto untuk diganti");
+          return;
+        }
+        return VOXY.simpanBranding(data).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Logo / Banner / QRIS tersimpan");
+          else alert("Logo / Banner / QRIS tersimpan");
+          // clear file inputs
+          keys.forEach(function (pair) {
+            var input = document.getElementById(pair[0]);
+            if (input) input.value = "";
+          });
+        });
+      }).catch(function (e) { alert(e.message || "Gagal simpan branding"); });
     }
     function doLogout() {
       if (!confirm("Logout admin?")) return;

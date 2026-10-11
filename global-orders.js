@@ -167,6 +167,46 @@ function getOrderFile(kode) {
   return db.ref("order_files/" + kode).once("value").then(function (s) { return s.val(); });
 }
 
+/* Hasil pesanan: link URL + file + catatan untuk user */
+function simpanHasilPesanan(kode, opts) {
+  if (!db) return Promise.reject(new Error("Database belum siap"));
+  opts = opts || {};
+  var updates = {
+    updatedAt: Date.now()
+  };
+  if (opts.url !== undefined) updates.hasilUrl = opts.url || "";
+  if (opts.catatan !== undefined) updates.hasilCatatan = opts.catatan || "";
+  if (opts.status) updates.status = opts.status;
+  var p = db.ref("orders/" + kode).update(updates);
+  if (opts.fileData) {
+    p = p.then(function () {
+      return db.ref("order_files/" + kode).set({
+        data: opts.fileData,
+        nama: opts.fileNama || "file",
+        at: Date.now()
+      });
+    });
+  }
+  return p;
+}
+
+function getHasilPesanan(kode) {
+  if (!db) return Promise.resolve({});
+  return Promise.all([
+    db.ref("orders/" + kode).once("value"),
+    db.ref("order_files/" + kode).once("value")
+  ]).then(function (arr) {
+    var o = arr[0].val() || {};
+    var f = arr[1].val() || null;
+    return {
+      url: o.hasilUrl || "",
+      catatan: o.hasilCatatan || "",
+      file: f,
+      status: o.status || ""
+    };
+  });
+}
+
 /* ---------- Produk ---------- */
 function getProdukList() {
   if (!db) return Promise.resolve([]);
@@ -353,6 +393,51 @@ function bukaWhatsApp(nomor, pesan) {
   window.open(url, "_blank");
 }
 
+
+/* ---------- Branding (logo, banner x3, qris) ---------- */
+function getBranding() {
+  if (!db) return Promise.resolve({});
+  return db.ref("branding_assets").once("value").then(function (s) { return s.val() || {}; });
+}
+
+function simpanBranding(data) {
+  if (!db) return Promise.reject(new Error("Database belum siap"));
+  return db.ref("branding_assets").update(Object.assign({}, data, { updatedAt: Date.now() }));
+}
+
+function applyBrandingToPage() {
+  return getBranding().then(function (b) {
+    if (!b) return b;
+    document.querySelectorAll("img[data-brand=logo], .logo-area img, .auth-card img, .admin-sidebar .profile img").forEach(function (img) {
+      if (b.logo) img.src = b.logo;
+    });
+    var track = document.getElementById("bannerTrack");
+    if (track) {
+      var imgs = track.querySelectorAll("img");
+      if (imgs[0] && b.banner1) imgs[0].src = b.banner1;
+      if (imgs[1] && b.banner2) imgs[1].src = b.banner2;
+      if (imgs[2] && b.banner3) imgs[2].src = b.banner3;
+    }
+    var q = document.getElementById("qrisImg");
+    if (q && b.qris) q.src = b.qris;
+    return b;
+  }).catch(function () { return {}; });
+}
+
+function showToast(msg, ms) {
+  ms = ms || 2500;
+  var el = document.getElementById("voxyToast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "voxyToast";
+    el.className = "toast-ok";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(function () { el.classList.remove("show"); }, ms);
+}
+
 window.VOXY = {
   FIREBASE_CONFIG: FIREBASE_CONFIG,
   GOOGLE_WEB_CLIENT_ID: GOOGLE_WEB_CLIENT_ID,
@@ -379,6 +464,12 @@ window.VOXY = {
   getBukti: getBukti,
   simpanOrderFile: simpanOrderFile,
   getOrderFile: getOrderFile,
+  simpanHasilPesanan: simpanHasilPesanan,
+  getHasilPesanan: getHasilPesanan,
+  getBranding: getBranding,
+  simpanBranding: simpanBranding,
+  applyBrandingToPage: applyBrandingToPage,
+  showToast: showToast,
   getProdukList: getProdukList,
   listenProduk: listenProduk,
   simpanProduk: simpanProduk,

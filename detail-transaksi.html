@@ -43,7 +43,7 @@
           document.getElementById("content").innerHTML = '<div class="empty-state">Akses ditolak</div>';
           return;
         }
-        document.getElementById("content").innerHTML =
+        var html =
           '<div class="pay-card">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
           '<h2 style="margin:0">Pesanan ' + (o.kode || "") + '</h2>' +
@@ -55,12 +55,43 @@
           (o.linkTarget ? '<div class="pay-row"><span>Link Target</span><span style="word-break:break-all">' + o.linkTarget + '</span></div>' : '') +
           (o.catatan ? '<div class="pay-row"><span>Catatan</span><span>' + o.catatan + '</span></div>' : '') +
           (o.catatanAdmin ? '<div class="pay-row"><span>Catatan Admin</span><span>' + o.catatanAdmin + '</span></div>' : '') +
-          '</div><div class="pay-card" id="fileHasil"><p style="font-size:13px;color:var(--muted)">File hasil akan muncul di sini jika admin sudah mengirim.</p></div>';
-        VOXY.getOrderFile(kode).then(function (f) {
-          if (f && f.data) {
-            var box = document.getElementById("fileHasil");
-            if (box) box.innerHTML = '<a class="btn btn-sm" href="' + f.data + '" download="' + (f.nama || "hasil") + '">Download Hasil</a>';
+          '</div>' +
+          '<div class="pay-card" id="boxHasil">' +
+          '<p style="font-size:13px;color:var(--muted)">Hasil akan muncul di sini setelah admin mengirim.</p></div>';
+        document.getElementById("content").innerHTML = html;
+
+        VOXY.getHasilPesanan(kode).then(function (h) {
+          var box = document.getElementById("boxHasil");
+          if (!box) return;
+          var hasUrl = !!(h.url && h.url.trim());
+          var hasFile = !!(h.file && h.file.data);
+          if (!hasUrl && !hasFile) return;
+
+          var catatan = h.catatan || "Sebelum membuka konten: unduh dulu lewat tombol Download (jika tersedia), install APK/file jika perlu, lalu tekan Lihat untuk membuka hasil.";
+          var parts = [];
+          parts.push('<h2 style="margin-bottom:8px">📦 Hasil Pesanan</h2>');
+          parts.push('<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;color:#1e40af;line-height:1.5">');
+          parts.push('<b>Petunjuk:</b><br>' + catatan.replace(/</g,"&lt;").replace(/\n/g,"<br>"));
+          parts.push('</div>');
+          parts.push('<div style="display:flex;gap:8px;flex-wrap:wrap">');
+          if (hasUrl) {
+            parts.push('<a class="btn" href="' + h.url.replace(/"/g,"") + '" target="_blank" rel="noopener">👁️ Lihat</a>');
           }
+          if (hasFile) {
+            var nama = (h.file.nama || "hasil").replace(/"/g,"");
+            parts.push('<a class="btn btn-outline" href="' + h.file.data + '" download="' + nama + '">⬇️ Download</a>');
+          } else if (hasUrl) {
+            // URL saja: Download juga bisa buka link yang sama (misal APK di drive)
+            parts.push('<a class="btn btn-outline" href="' + h.url.replace(/"/g,"") + '" target="_blank" rel="noopener">⬇️ Download</a>');
+          }
+          parts.push('</div>');
+          if (hasUrl) {
+            parts.push('<p style="font-size:11px;color:var(--muted);margin-top:10px;word-break:break-all">Link: ' + h.url.replace(/</g,"&lt;") + '</p>');
+          }
+          if (hasFile) {
+            parts.push('<p style="font-size:11px;color:var(--muted);margin-top:6px">File: ' + (h.file.nama || "file") + '</p>');
+          }
+          box.innerHTML = parts.join("");
         });
       });
     });

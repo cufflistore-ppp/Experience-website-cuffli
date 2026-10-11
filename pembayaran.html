@@ -47,6 +47,7 @@
     lucide.createIcons();
     var produk = null, buktiDataUrl = null;
     VOXY.requireAuth().then(function (user) {
+      VOXY.applyBrandingToPage();
       try { produk = JSON.parse(sessionStorage.getItem("produkDipilih") || "null"); } catch (e) { produk = null; }
       if (!produk) { alert("Produk tidak ditemukan"); window.location.href = "home.html"; return; }
       document.getElementById("namaProduk").textContent = produk.nama || "-";
@@ -97,8 +98,8 @@
           window.location.href = "jasa-link.html?kode=" + encodeURIComponent(kode);
           return;
         }
-        alert("Pembayaran berhasil dikirim. Menunggu verifikasi admin.");
-        window.location.href = "riwayat.html";
+        if (VOXY.showToast) VOXY.showToast("Pesanan terkirim. Menunggu verifikasi admin.");
+        setTimeout(function(){ window.location.href = "riwayat.html"; }, 900);
       }).catch(function (err) {
         alert(err.message || "Gagal menyimpan pesanan");
         btn.disabled = false; btn.textContent = "Konfirmasi Pembayaran";

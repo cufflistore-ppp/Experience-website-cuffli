@@ -25,7 +25,7 @@
       <p id="emailUser" style="color:var(--muted);font-size:14px">-</p>
     </div>
     <div class="menu-list">
-      <a class="menu-item" href="riwayat.html"><i data-lucide="clock"></i> Riwayat Transaksi</a>
+      <a class="menu-item" href="riwayat.html"><i data-lucide="clock"></i> Pesanan Saya</a>
       <a class="menu-item" href="chat.html"><i data-lucide="message-circle"></i> Chat / Laporan</a>
       <a class="menu-item" href="home.html"><i data-lucide="home"></i> Beranda</a>
       <a class="menu-item" id="adminLink" href="admin.html" style="display:none"><i data-lucide="shield"></i> Panel Admin</a>
@@ -34,13 +34,13 @@
       </button>
     </div>
   </main>
-  <nav class="bottom-nav">
+    <nav class="bottom-nav">
     <a href="home.html"><i data-lucide="home"></i>Home</a>
-    <a href="search.html"><i data-lucide="search"></i>Cari</a>
-    <a href="riwayat.html"><i data-lucide="clock"></i>Riwayat</a>
+    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
     <a href="akun.html" class="active"><i data-lucide="user"></i>Akun</a>
   </nav>
   <script src="global-orders.js"></script>
+  <script>document.addEventListener("DOMContentLoaded",function(){if(window.VOXY&&VOXY.applyBrandingToPage)VOXY.applyBrandingToPage();});</script>
   <script>
     lucide.createIcons();
     VOXY.requireAuth().then(function (user) {
