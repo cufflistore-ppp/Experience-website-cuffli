@@ -192,18 +192,17 @@
       var stok = (p.stokHabis) ? '<span class="stok-badge habis">Habis</span>' : '<span class="stok-badge">Tersedia</span>';
       var normal = Number(p.harga) || 0;
       var now = hargaTampil(p);
-      var flash = isFlash(p) && now < normal && normal > 0;
-      var disc = flash ? Math.round((1 - now / normal) * 100) : 0;
+      /* Harga hanya untuk flash sale */
+      var flash = isFlash(p);
       var price = '';
       if (flash) {
+        var disc = (normal > 0 && now < normal) ? Math.round((1 - now / normal) * 100) : 0;
         price =
           '<div class="card-price-wrap">' +
             (disc > 0 ? '<span class="disc-badge">-' + disc + '%</span>' : '') +
-            '<div class="flash-old">' + VOXY.formatRp(normal) + '</div>' +
+            (now < normal ? '<div class="flash-old">' + VOXY.formatRp(normal) + '</div>' : '') +
             '<div class="flash-price">' + VOXY.formatRp(now) + '</div>' +
           '</div>';
-      } else {
-        price = '<div class="card-price-wrap"><div class="flash-price" style="color:var(--primary)">' + VOXY.formatRp(now) + '</div></div>';
       }
       return (
         '<a class="product-icon-card" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
