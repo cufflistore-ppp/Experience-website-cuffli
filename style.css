@@ -204,11 +204,11 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase}
 }
 
 /* Catalog product icon cards */
-.product-grid-icons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.product-grid-icons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .product-icon-card{background:#fff;border-radius:14px;border:1px solid var(--border);padding:10px 8px 12px;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden}
 .product-icon-card .thumb{width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#f1f5f9;margin-bottom:8px}
 .product-icon-card .thumb img{width:100%;height:100%;object-fit:cover}
-.product-icon-card h3{font-size:11px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-icon-card h3{font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 .product-icon-card .stok-badge{position:absolute;top:14px;left:12px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;background:#dcfce7;color:#15803d}
 .product-icon-card .stok-badge.habis{background:#fee2e2;color:#b91c1c}
 .cat-scroll{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch}
@@ -251,3 +251,37 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase}
 .admin-order-card .top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
 .admin-order-card .meta{font-size:12px;color:var(--muted);line-height:1.4}
 .admin-order-card .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+
+@keyframes fab-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.fab-chat {
+  animation: fab-bob 2.2s ease-in-out infinite;
+}
+.fab-chat.dragging {
+  animation: none;
+}
+
+.voxy-landing-footer{text-align:left;padding:28px 16px 110px;background:transparent}
+.voxy-lf-brand{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.voxy-lf-brand img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+.voxy-lf-name{font-weight:800;font-size:15px;color:var(--text)}
+.voxy-lf-tag{font-size:11px;color:var(--muted)}
+.voxy-lf-desc{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 14px}
+.voxy-lf-cta{display:inline-flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:99px;font-weight:700;font-size:14px;margin-bottom:18px;text-decoration:none;background:var(--primary)!important;color:#fff!important;border:none;min-width:140px}
+.voxy-lf-sec{font-size:13px;font-weight:800;margin:0 0 6px;color:var(--text)}
+.voxy-lf-links{font-size:12px;line-height:1.9;margin-bottom:14px}
+.voxy-lf-links a{display:block;color:var(--muted);text-decoration:none}
+.voxy-lf-list{font-size:12px;color:var(--muted);line-height:1.9;margin-bottom:18px}
+.voxy-lf-copy{font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+.voxy-lf-copy a{color:var(--primary);font-weight:600}
+
+.product-icon-card{padding:10px 10px 12px}
+.product-icon-card .thumb{aspect-ratio:1;border-radius:14px;margin-bottom:8px}
+.product-icon-card h3{font-size:13px;text-align:left;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+.card-price-wrap{margin-top:6px;text-align:left}
+.disc-badge{display:inline-block;background:#ffedd5;color:#c2410c;font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;margin-bottom:2px}
+.flash-old{font-size:11px;color:var(--muted);text-decoration:line-through}
+.flash-price{font-size:14px;font-weight:800;color:var(--primary)}
+.flash-box .product-icon-card{min-width:130px;max-width:140px}

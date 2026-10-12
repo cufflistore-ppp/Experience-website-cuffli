@@ -17,13 +17,41 @@
     <div style="width:40px"></div>
   </header>
   <main class="page" id="detailPage"><div class="empty-state">Memuat...</div></main>
-  <div class="site-footer">Copyright &copy; 2026 VOXY MARKET<br>Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a></div>
+    <div class="site-footer voxy-landing-footer">
+    <div class="voxy-lf-brand">
+      <img src="logo.png" alt="">
+      <div>
+        <div class="voxy-lf-name">VOXY MARKET</div>
+        <div class="voxy-lf-tag">Produk Digital, Akun Premium &amp; Jasa</div>
+      </div>
+    </div>
+    <p class="voxy-lf-desc">Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.</p>
+    <a href="home.html" class="btn voxy-lf-cta">Lihat Produk</a>
+    <div class="voxy-lf-sec">Bantuan</div>
+    <div class="voxy-lf-links">
+      <a href="riwayat.html">Cek Pesanan</a>
+      <a href="home.html">Buat Pesanan</a>
+      <a href="chat.html">Chat Admin</a>
+    </div>
+    <div class="voxy-lf-sec">Layanan</div>
+    <div class="voxy-lf-list">
+      Akun Premium<br>
+      Produk Digital / APK<br>
+      Jasa Suntik<br>
+      Jasa Lainnya
+    </div>
+    <div class="voxy-lf-copy">
+      Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
+      Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+    </div>
+  </div>
+
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
     var produkData = null;
     function isFlash(p) {
-      return p && p.flashSale && p.flashEnd && Date.now() < Number(p.flashEnd);
+      if (!p || !p.flashSale) return false; var end = Number(p.flashEnd || 0); if (!end) return true; return Date.now() < end;
     }
     VOXY.auth.onAuthStateChanged(function (user) {
       if (!user) { location.href = "login.html"; return; }
@@ -43,9 +71,11 @@
         var img = p.gambar || "produk1.png";
         var harga = isFlash(p) && p.flashHarga ? Number(p.flashHarga) : Number(p.harga) || 0;
         var hargaHtml = VOXY.formatRp(harga);
-        if (isFlash(p) && p.flashHarga) {
+        if (isFlash(p) && p.flashHarga && Number(p.flashHarga) > 0 && Number(p.flashHarga) < Number(p.harga)) {
+          var disc = Math.round((1 - Number(p.flashHarga) / Number(p.harga)) * 100);
           hargaHtml = '<span style="text-decoration:line-through;color:var(--muted);font-size:14px;font-weight:500;margin-right:8px">' +
-            VOXY.formatRp(p.harga) + '</span>' + VOXY.formatRp(p.flashHarga);
+            VOXY.formatRp(p.harga) + '</span>' + VOXY.formatRp(p.flashHarga) +
+            ' <span style="background:#ffedd5;color:#c2410c;font-size:12px;padding:2px 8px;border-radius:6px;font-weight:700">-' + disc + '%</span>';
         }
         var tipe = p.tipeKirim || "link";
         document.getElementById("detailPage").innerHTML =

@@ -519,7 +519,7 @@
       promise.then(function (imgUrl) {
         var flashOn = document.getElementById("pFlashSale").checked;
         var flashEndVal = document.getElementById("pFlashEnd").value;
-        var flashEnd = flashOn && flashEndVal ? new Date(flashEndVal).getTime() : null;
+        var flashEnd = flashOn && flashEndVal ? new Date(flashEndVal).getTime() : (flashOn ? (Date.now() + 7*24*3600*1000) : null);
         return VOXY.simpanProduk(id, {
           nama: nama,
           kategori: document.getElementById("pKategori").value,

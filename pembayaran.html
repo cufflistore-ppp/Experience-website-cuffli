@@ -42,7 +42,35 @@
     </div>
     <button class="btn" style="width:100%;margin-top:8px" id="btnKonfirmasi" onclick="konfirmasi()">Konfirmasi Pembayaran</button>
   </main>
-  <div class="site-footer">Copyright &copy; 2026 VOXY MARKET<br>Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a></div>
+    <div class="site-footer voxy-landing-footer">
+    <div class="voxy-lf-brand">
+      <img src="logo.png" alt="">
+      <div>
+        <div class="voxy-lf-name">VOXY MARKET</div>
+        <div class="voxy-lf-tag">Produk Digital, Akun Premium &amp; Jasa</div>
+      </div>
+    </div>
+    <p class="voxy-lf-desc">Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.</p>
+    <a href="home.html" class="btn voxy-lf-cta">Lihat Produk</a>
+    <div class="voxy-lf-sec">Bantuan</div>
+    <div class="voxy-lf-links">
+      <a href="riwayat.html">Cek Pesanan</a>
+      <a href="home.html">Buat Pesanan</a>
+      <a href="chat.html">Chat Admin</a>
+    </div>
+    <div class="voxy-lf-sec">Layanan</div>
+    <div class="voxy-lf-list">
+      Akun Premium<br>
+      Produk Digital / APK<br>
+      Jasa Suntik<br>
+      Jasa Lainnya
+    </div>
+    <div class="voxy-lf-copy">
+      Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
+      Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+    </div>
+  </div>
+
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
@@ -56,8 +84,9 @@
       document.getElementById("totalHarga").textContent = VOXY.formatRp(produk.harga);
       VOXY.getSettings().then(function (s) {
         s = s || {};
-        document.getElementById("rekeningBox").innerHTML = "<b>Rekening:</b><br>" + (s.rekening || "Belum diset admin") +
-          (s.waAdmin ? "<br><br><b>WA Admin:</b> " + s.waAdmin : "");
+        document.getElementById("rekeningBox").innerHTML = s.rekening
+          ? ("<b>Rekening:</b><br>" + s.rekening)
+          : "";
         if (s.qrisUrl) document.getElementById("qrisImg").src = s.qrisUrl;
       });
     });
@@ -81,7 +110,12 @@
         produkId: produk.id || "",
         namaProduk: produk.nama || "",
         kategori: produk.kategori || "",
-        harga: (produk.flashSale && produk.flashEnd && Date.now() < Number(produk.flashEnd) && produk.flashHarga) ? Number(produk.flashHarga) : (Number(produk.harga) || 0),
+        harga: (function(){
+          var flash = produk.flashSale && (!produk.flashEnd || Date.now() < Number(produk.flashEnd));
+          var fh = Number(produk.flashHarga);
+          if (flash && fh > 0) return fh;
+          return Number(produk.harga) || 0;
+        })(),
         hargaAsli: Number(produk.harga) || 0,
         gambar: produk.gambar || "",
         status: "Menunggu",
