@@ -111,10 +111,14 @@
         namaProduk: produk.nama || "",
         kategori: produk.kategori || "",
         harga: (function(){
-          var flash = produk.flashSale && (!produk.flashEnd || Date.now() < Number(produk.flashEnd));
+          var flash = produk.flashSale === true || produk.flashSale === "true" || produk.flashSale === 1;
+          if (flash && produk.flashEnd && Date.now() >= Number(produk.flashEnd)) flash = false;
+          var normal = Number(produk.harga) || 0;
+          var disc = Number(produk.flashDiskon) || 0;
+          if (flash && disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
           var fh = Number(produk.flashHarga);
           if (flash && fh > 0) return fh;
-          return Number(produk.harga) || 0;
+          return normal;
         })(),
         hargaAsli: Number(produk.harga) || 0,
         gambar: produk.gambar || "",

@@ -176,16 +176,20 @@
     })();
 
     function isFlash(p) {
-      if (!p || !p.flashSale) return false;
+      if (!p) return false;
+      var on = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1 || p.flashSale === "1";
+      if (!on) return false;
       var end = Number(p.flashEnd || 0);
-      if (!end) return true; /* aktif tanpa batas waktu */
+      if (!end) return true;
       return Date.now() < end;
     }
     function hargaTampil(p) {
-      if (isFlash(p) && p.flashHarga != null && p.flashHarga !== "" && Number(p.flashHarga) > 0) {
-        return Number(p.flashHarga);
-      }
-      return Number(p.harga) || 0;
+      var normal = Number(p.harga) || 0;
+      if (!isFlash(p)) return normal;
+      var disc = Number(p.flashDiskon) || 0;
+      if (disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
+      if (p.flashHarga != null && Number(p.flashHarga) > 0) return Number(p.flashHarga);
+      return normal;
     }
     function iconCard(p) {
       var img = p.gambar || "produk1.png";
@@ -202,7 +206,7 @@
       var flash = isFlash(p);
       var price = '';
       if (flash) {
-        var disc = (normal > 0 && now < normal) ? Math.round((1 - now / normal) * 100) : 0;
+        var disc = Number(p.flashDiskon) || ((normal > 0 && now < normal) ? Math.round((1 - now / normal) * 100) : 0);
         price =
           '<div class="card-price-wrap">' +
             (disc > 0 ? '<span class="disc-badge">-' + disc + '%</span>' : '') +
@@ -313,7 +317,12 @@
         VOXY.applyBrandingToPage();
         startBanner();
         VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
+        var loadTimeout = setTimeout(function () {
+          var el = document.getElementById("catSections");
+          if (el && !allProduk.length) el.innerHTML = '<div class="empty-state">Memuat produk... jika lama, cek koneksi / Rules Firebase</div>';
+        }, 3000);
         VOXY.listenProduk(function (list) {
+          clearTimeout(loadTimeout);
           allProduk = list || [];
           renderAll();
         });

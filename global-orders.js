@@ -252,15 +252,22 @@ function listenProduk(callback) {
 function simpanProduk(id, data) {
   if (!db) return Promise.reject(new Error("Database belum siap"));
   var payload = Object.assign({}, data, { updatedAt: Date.now() });
-  /* pastikan boolean flash */
-  if (payload.flashSale !== undefined) payload.flashSale = !!payload.flashSale;
-  if (payload.flashHarga != null) payload.flashHarga = Number(payload.flashHarga) || 0;
-  if (payload.flashEnd != null) payload.flashEnd = Number(payload.flashEnd) || null;
+  payload.flashSale = !!payload.flashSale;
+  payload.flashDiskon = Math.min(99, Math.max(0, Number(payload.flashDiskon) || 0));
+  payload.flashHarga = Number(payload.flashHarga) || 0;
+  payload.flashEnd = Number(payload.flashEnd) || 0;
+  payload.stok = Math.max(0, Number(payload.stok) || 0);
+  payload.stokHabis = !!payload.stokHabis || payload.stok <= 0;
+  /* hapus undefined */
+  Object.keys(payload).forEach(function (k) {
+    if (payload[k] === undefined || payload[k] === null) delete payload[k];
+  });
   if (id) {
     return db.ref("produk/" + id).update(payload).then(function () { return id; });
   }
   var key = db.ref("produk").push().key;
   payload.id = key;
+  if (!payload.gambar) payload.gambar = "produk1.png";
   return db.ref("produk/" + key).set(payload).then(function () { return key; });
 }
 

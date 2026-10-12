@@ -22,6 +22,7 @@
       <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><i data-lucide="layout-dashboard"></i> Dashboard</a>
       <a href="#" data-tab="pesanan" onclick="switchTab('pesanan',this)"><i data-lucide="shopping-bag"></i> Pesanan</a>
       <a href="#" data-tab="produk" onclick="switchTab('produk',this)"><i data-lucide="package"></i> Produk</a>
+      <a href="#" data-tab="flash" onclick="switchTab('flash',this)"><i data-lucide="zap"></i> Flash Sale</a>
       <a href="#" data-tab="chat" onclick="switchTab('chat',this)">
         <i data-lucide="message-circle"></i> Chat User
         <span class="nav-badge hidden" id="chatNavBadge">0</span>
@@ -142,8 +143,8 @@
           <div class="form-group full"><label style="font-size:12px;color:var(--muted)">Stok otomatis berkurang saat ada order. Stok 0 = Habis.</label></div>
           <div class="form-group full"><label><input type="checkbox" id="pFlashSale" onchange="toggleFlash()"> Aktifkan Flash Sale</label></div>
           <div class="form-group" id="flashFields" style="display:none">
-            <label>Harga flash sale</label>
-            <input id="pFlashHarga" type="number" min="0" placeholder="Harga diskon">
+            <label>Diskon Flash Sale (%)</label>
+            <input id="pFlashDiskon" type="number" min="1" max="99" placeholder="Contoh: 20 = potong 20%">
           </div>
           <div class="form-group" id="flashFields2" style="display:none">
             <label>Flash sale berakhir</label>
@@ -167,6 +168,34 @@
     </div>
 
     <!-- CHAT USER -->
+    
+    <div class="panel" id="panel-flash">
+      <div class="admin-card">
+        <h2>⚡ Flash Sale Massal</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
+          Pilih produk, isi <b>satu diskon %</b> dan <b>satu waktu berakhir</b>, lalu terapkan ke semua yang dicentang.
+          Tidak perlu edit produk satu-satu.
+        </p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Diskon untuk semua yang dipilih (%)</label>
+            <input id="fsDiskon" type="number" min="1" max="99" placeholder="Contoh: 20">
+          </div>
+          <div class="form-group">
+            <label>Berakhir pada</label>
+            <input id="fsEnd" type="datetime-local">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px">
+          <button type="button" class="btn btn-sm btn-success" onclick="terapkanFlashSale()">Terapkan Flash Sale</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="matikanFlashSale()">Matikan Flash (yang dicentang)</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="pilihSemuaFlash(true)">Centang semua</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="pilihSemuaFlash(false)">Hapus centang</button>
+        </div>
+        <div id="flashProdukList"><div class="empty-state">Memuat produk...</div></div>
+      </div>
+    </div>
+
     <div class="panel" id="panel-chat">
       <div class="admin-card">
         <h2>💬 Chat User — Kelola pesan customer</h2>
@@ -285,11 +314,12 @@
       document.getElementById("panel-" + name).classList.add("active");
       document.querySelectorAll(".admin-sidebar nav a[data-tab]").forEach(function (a) { a.classList.remove("active"); });
       if (el) el.classList.add("active");
-      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", produk: "Kelola Produk", chat: "Chat User", pengaturan: "Pengaturan" };
+      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", produk: "Kelola Produk", flash: "Flash Sale", chat: "Chat User", pengaturan: "Pengaturan" };
       document.getElementById("pageTitle").textContent = titles[name] || "Admin";
       closeSidebar();
       if (name === "produk") loadProdukAdmin();
       if (name === "pengaturan") loadPengaturan();
+      if (name === "flash") loadFlashList();
     }
 
     function updateDashboard() {
@@ -471,7 +501,7 @@
       document.getElementById("pDeskripsi").value = "";
       document.getElementById("pStok").value = "10";
       document.getElementById("pFlashSale").checked = false;
-      document.getElementById("pFlashHarga").value = "";
+      document.getElementById("pFlashDiskon").value = "";
       document.getElementById("pFlashEnd").value = "";
       document.getElementById("pGambarFile").value = "";
       toggleFlash();
@@ -488,7 +518,7 @@
         document.getElementById("pDeskripsi").value = p.deskripsi || "";
         document.getElementById("pStok").value = (p.stok != null ? p.stok : (p.stokHabis ? 0 : 10));
         document.getElementById("pFlashSale").checked = !!p.flashSale;
-        document.getElementById("pFlashHarga").value = p.flashHarga || "";
+        document.getElementById("pFlashDiskon").value = p.flashDiskon || p.flashHarga || "";
         if (p.flashEnd) {
           try {
             var d = new Date(Number(p.flashEnd));
@@ -507,41 +537,60 @@
       var id = document.getElementById("produkId").value || null;
       var nama = document.getElementById("pNama").value.trim();
       if (!nama) { alert("Nama produk wajib"); return; }
-      var file = document.getElementById("pGambarFile").files[0];
-      var existingGambar = null;
-      var promise = Promise.resolve(null);
-      if (file) {
-        promise = VOXY.fileToDataURL(file);
-      } else if (id) {
-        promise = VOXY.getProdukList().then(function (list) {
-          var p = (list || []).find(function (x) { return x.id === id; });
-          return p ? p.gambar : null;
-        });
+      var flashOn = !!document.getElementById("pFlashSale").checked;
+      var flashHarga = Number(document.getElementById("pFlashDiskon").value) || 0;
+      var flashEndVal = document.getElementById("pFlashEnd").value;
+      var flashEnd = null;
+      if (flashOn) {
+        if (flashEndVal) {
+          flashEnd = new Date(flashEndVal).getTime();
+          if (isNaN(flashEnd)) flashEnd = Date.now() + 7 * 24 * 3600 * 1000;
+        } else {
+          flashEnd = Date.now() + 7 * 24 * 3600 * 1000;
+        }
+        if (flashHarga <= 0) {
+          alert("Isi persen diskon Flash Sale (1–99)");
+          return;
+        }
       }
-      promise.then(function (imgUrl) {
-        var flashOn = document.getElementById("pFlashSale").checked;
-        var flashEndVal = document.getElementById("pFlashEnd").value;
-        var flashEnd = flashOn && flashEndVal ? new Date(flashEndVal).getTime() : (flashOn ? (Date.now() + 7*24*3600*1000) : null);
-        return VOXY.simpanProduk(id, {
-          nama: nama,
-          kategori: document.getElementById("pKategori").value,
-          harga: Number(document.getElementById("pHarga").value) || 0,
-          gambar: imgUrl || "produk1.png",
-          deskripsi: document.getElementById("pDeskripsi").value.trim(),
-          tipeKirim: document.getElementById("pTipeKirim").value,
-          stok: Math.max(0, Number(document.getElementById("pStok").value) || 0),
-          stokHabis: (Math.max(0, Number(document.getElementById("pStok").value) || 0) <= 0),
-          flashSale: !!flashOn,
-          flashHarga: flashOn ? (Number(document.getElementById("pFlashHarga").value) || 0) : null,
-          flashEnd: flashEnd,
-          butuhTarget: document.getElementById("pTipeKirim").value === "link_target"
+      var data = {
+        nama: nama,
+        kategori: document.getElementById("pKategori").value,
+        harga: Number(document.getElementById("pHarga").value) || 0,
+        deskripsi: document.getElementById("pDeskripsi").value.trim(),
+        tipeKirim: document.getElementById("pTipeKirim").value,
+        stok: Math.max(0, Number(document.getElementById("pStok").value) || 0),
+        stokHabis: (Math.max(0, Number(document.getElementById("pStok").value) || 0) <= 0),
+        flashSale: flashOn,
+        flashDiskon: flashOn ? flashHarga : 0,
+          flashHarga: 0,
+        flashEnd: flashOn ? flashEnd : 0,
+        butuhTarget: document.getElementById("pTipeKirim").value === "link_target"
+      };
+      var file = document.getElementById("pGambarFile").files[0];
+      var go = function (imgUrl) {
+        if (imgUrl) data.gambar = imgUrl;
+        else if (!id) data.gambar = "produk1.png";
+        /* edit tanpa ganti foto: jangan sentuh field gambar */
+        return VOXY.simpanProduk(id, data).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Produk tersimpan" + (flashOn ? " · Flash Sale ON" : ""));
+          else alert("Produk tersimpan" + (flashOn ? " · Flash Sale ON" : ""));
+          resetProdukForm();
+          loadProdukAdmin();
         });
-      }).then(function () {
-        if (VOXY.showToast) VOXY.showToast("Produk tersimpan");
-        else alert("Produk tersimpan");
-        resetProdukForm();
-        loadProdukAdmin();
-      }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+      };
+      var btn = document.querySelector('#panel-produk button.btn.btn-sm');
+      if (file) {
+        if (VOXY.showToast) VOXY.showToast("Menyimpan...");
+        VOXY.compressChatImage(file).then(function (url) {
+          return go(url);
+        }).catch(function (e) {
+          /* fallback tanpa kompres */
+          return VOXY.fileToDataURL(file).then(go);
+        }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+      } else {
+        go(null).catch(function (e) { alert(e.message || "Gagal simpan"); });
+      }
     }
     function hapusProdukId(id) {
       if (!confirm("Hapus produk ini?")) return;
@@ -612,6 +661,90 @@
         kirimBalasanAdmin();
       }
     });
+
+
+    function loadFlashList() {
+      VOXY.getProdukList().then(function (list) {
+        var box = document.getElementById("flashProdukList");
+        if (!list || !list.length) {
+          box.innerHTML = '<div class="empty-state">Belum ada produk. Tambah di tab Produk dulu.</div>';
+          return;
+        }
+        list.sort(function (a, b) { return (a.nama || "").localeCompare(b.nama || ""); });
+        box.innerHTML = list.map(function (p) {
+          var on = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1;
+          var disc = Number(p.flashDiskon) || 0;
+          var badge = on
+            ? '<span class="badge selesai">Flash -' + disc + '%</span>'
+            : '<span class="badge menunggu">Normal</span>';
+          return (
+            '<label class="admin-order-card" style="display:flex;align-items:center;gap:12px;cursor:pointer">' +
+              '<input type="checkbox" class="fs-check" value="' + p.id + '" style="width:18px;height:18px">' +
+              '<img src="' + (p.gambar || "produk1.png") + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover" onerror="this.src=\'produk1.png\'">' +
+              '<div style="flex:1;min-width:0">' +
+                '<div style="font-weight:700;font-size:13px">' + (p.nama || "-") + '</div>' +
+                '<div style="font-size:12px;color:var(--muted)">' + (p.kategori || "") + ' · ' + VOXY.formatRp(p.harga) + '</div>' +
+              '</div>' + badge +
+            '</label>'
+          );
+        }).join("");
+      }).catch(function (e) {
+        document.getElementById("flashProdukList").innerHTML = '<div class="empty-state">' + (e.message || "Gagal muat") + '</div>';
+      });
+    }
+    function pilihSemuaFlash(on) {
+      document.querySelectorAll(".fs-check").forEach(function (c) { c.checked = !!on; });
+    }
+    function getFlashSelectedIds() {
+      return Array.prototype.slice.call(document.querySelectorAll(".fs-check:checked")).map(function (c) { return c.value; });
+    }
+    function terapkanFlashSale() {
+      var ids = getFlashSelectedIds();
+      if (!ids.length) { alert("Centang minimal 1 produk"); return; }
+      var disc = Number(document.getElementById("fsDiskon").value) || 0;
+      if (disc < 1 || disc > 99) { alert("Isi diskon 1–99%"); return; }
+      var endVal = document.getElementById("fsEnd").value;
+      var end = endVal ? new Date(endVal).getTime() : (Date.now() + 7 * 24 * 3600 * 1000);
+      if (isNaN(end)) end = Date.now() + 7 * 24 * 3600 * 1000;
+      var chain = Promise.resolve();
+      ids.forEach(function (id) {
+        chain = chain.then(function () {
+          return VOXY.simpanProduk(id, {
+            flashSale: true,
+            flashDiskon: disc,
+            flashHarga: 0,
+            flashEnd: end
+          });
+        });
+      });
+      chain.then(function () {
+        if (VOXY.showToast) VOXY.showToast("Flash Sale -" + disc + "% diterapkan ke " + ids.length + " produk");
+        else alert("Flash Sale diterapkan ke " + ids.length + " produk");
+        loadFlashList();
+        if (typeof loadProdukAdmin === "function") loadProdukAdmin();
+      }).catch(function (e) { alert(e.message || "Gagal menerapkan"); });
+    }
+    function matikanFlashSale() {
+      var ids = getFlashSelectedIds();
+      if (!ids.length) { alert("Centang produk yang mau dimatikan flash-nya"); return; }
+      if (!confirm("Matikan Flash Sale untuk " + ids.length + " produk?")) return;
+      var chain = Promise.resolve();
+      ids.forEach(function (id) {
+        chain = chain.then(function () {
+          return VOXY.simpanProduk(id, {
+            flashSale: false,
+            flashDiskon: 0,
+            flashHarga: 0,
+            flashEnd: 0
+          });
+        });
+      });
+      chain.then(function () {
+        if (VOXY.showToast) VOXY.showToast("Flash Sale dimatikan");
+        else alert("Flash Sale dimatikan");
+        loadFlashList();
+      }).catch(function (e) { alert(e.message || "Gagal"); });
+    }
 
     /* Pengaturan */
     function loadPengaturan() {
