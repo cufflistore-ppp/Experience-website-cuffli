@@ -175,6 +175,7 @@ function simpanHasilPesanan(kode, opts) {
     updatedAt: Date.now()
   };
   if (opts.url !== undefined) updates.hasilUrl = opts.url || "";
+  if (opts.teks !== undefined) updates.hasilTeks = opts.teks || "";
   if (opts.catatan !== undefined) updates.hasilCatatan = opts.catatan || "";
   if (opts.status) updates.status = opts.status;
   var p = db.ref("orders/" + kode).update(updates);
@@ -200,6 +201,7 @@ function getHasilPesanan(kode) {
     var f = arr[1].val() || null;
     return {
       url: o.hasilUrl || "",
+      teks: o.hasilTeks || "",
       catatan: o.hasilCatatan || "",
       file: f,
       status: o.status || ""

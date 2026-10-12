@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chat - VOXY MARKET</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Chat Admin - VOXY MARKET</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -11,23 +11,23 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
 <body>
-  <header class="app-header">
-    <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
-    <div class="logo-area">
-      <img src="logo.png" alt="VOXY">
-      <span class="badge-dot" id="logoBadge"></span>
-      <span>Chat Admin</span>
-    </div>
-    <button class="icon-btn" onclick="laporWA()" title="WhatsApp"><i data-lucide="phone"></i></button>
-  </header>
-
   <div class="chat-wrap">
+    <header class="app-header">
+      <button type="button" class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
+      <div class="logo-area">
+        <img src="logo.png" alt="VOXY" id="chatLogo">
+        <span>Chat Admin</span>
+      </div>
+      <button type="button" class="icon-btn" id="btnWA" title="WhatsApp"><i data-lucide="phone"></i></button>
+    </header>
+
     <div class="chat-messages" id="messages">
       <div class="empty-state">Belum ada pesan. Tulis laporan atau pertanyaanmu.</div>
     </div>
+
     <div class="chat-input-bar">
-      <input id="inputMsg" type="text" placeholder="Tulis pesan / laporan..." autocomplete="off">
-      <button onclick="kirim()" id="btnKirim"><i data-lucide="send"></i></button>
+      <input id="inputMsg" type="text" placeholder="Tulis pesan..." autocomplete="off">
+      <button type="button" id="btnKirim"><i data-lucide="send"></i></button>
     </div>
   </div>
 
@@ -36,20 +36,13 @@
     lucide.createIcons();
     var currentUser = null;
     var waAdmin = "";
+    var logoSrc = "logo.png";
 
-    VOXY.requireAuth().then(function (user) {
-      currentUser = user;
-      VOXY.markChatReadByUser(user.uid);
-      VOXY.listenChatMessages(user.uid, renderMessages);
-      VOXY.listenUserUnread(user.uid, function (unread) {
-        var el = document.getElementById("logoBadge");
-        if (el) el.classList.toggle("show", !!unread);
-        if (unread) VOXY.markChatReadByUser(user.uid);
-      });
-      VOXY.getSettings().then(function (s) {
-        waAdmin = (s && s.waAdmin) || "";
-      });
-    });
+    function esc(s) {
+      var d = document.createElement("div");
+      d.textContent = s || "";
+      return d.innerHTML;
+    }
 
     function renderMessages(list) {
       var box = document.getElementById("messages");
@@ -58,17 +51,26 @@
         return;
       }
       box.innerHTML = list.map(function (m) {
-        var cls = m.from === "admin" ? "msg-admin" : "msg-user";
-        return '<div class="msg ' + cls + '">' + escapeHtml(m.text || "") +
-          '<small>' + VOXY.formatTanggal(m.at) + '</small></div>';
+        var isAdmin = m.from === "admin";
+        var rowClass = isAdmin ? "msg-row" : "msg-row mine";
+        var label = isAdmin ? "Admin VOXY" : "Kamu";
+        var avatar = isAdmin
+          ? '<img class="msg-avatar admin" src="' + logoSrc + '" alt="Admin">'
+          : '<div class="msg-avatar" style="display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;background:#64748b">' +
+              ((currentUser && currentUser.email) ? currentUser.email[0].toUpperCase() : "U") + "</div>";
+        var bubbleClass = isAdmin ? "msg msg-admin" : "msg msg-user";
+        return (
+          '<div class="' + rowClass + '">' +
+            avatar +
+            '<div class="msg-bubble-wrap">' +
+              '<div class="msg-label">' + label + "</div>" +
+              '<div class="' + bubbleClass + '">' + esc(m.text) +
+                "<small>" + VOXY.formatTanggal(m.at) + "</small></div>" +
+            "</div>" +
+          "</div>"
+        );
       }).join("");
       box.scrollTop = box.scrollHeight;
-    }
-
-    function escapeHtml(s) {
-      var d = document.createElement("div");
-      d.textContent = s;
-      return d.innerHTML;
     }
 
     function kirim() {
@@ -77,27 +79,44 @@
       if (!text || !currentUser) return;
       var btn = document.getElementById("btnKirim");
       btn.disabled = true;
-      VOXY.kirimPesanUser(currentUser.uid, currentUser.email, text).then(function () {
-        input.value = "";
-        btn.disabled = false;
-        input.focus();
-      }).catch(function (e) {
-        var msg = e.message || "Gagal kirim";
-        if (String(msg).indexOf("PERMISSION") !== -1) {
-          msg = "PERMISSION_DENIED: Path chat belum diizinkan di Firebase Rules. Buka Firebase Console → Realtime Database → Rules, paste rules dari file FIREBASE-RULES.txt lalu Publish.";
-        }
-        alert(msg);
-        btn.disabled = false;
-      });
+      VOXY.kirimPesanUser(currentUser.uid, currentUser.email, text)
+        .then(function () {
+          input.value = "";
+          btn.disabled = false;
+          input.focus();
+        })
+        .catch(function (e) {
+          var msg = e.message || "Gagal kirim";
+          if (String(msg).indexOf("PERMISSION") !== -1) {
+            msg = "PERMISSION_DENIED: Path chat belum diizinkan di Firebase Rules.";
+          }
+          alert(msg);
+          btn.disabled = false;
+        });
     }
 
+    document.getElementById("btnKirim").onclick = kirim;
     document.getElementById("inputMsg").addEventListener("keydown", function (e) {
       if (e.key === "Enter") kirim();
     });
+    document.getElementById("btnWA").onclick = function () {
+      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET:");
+    };
 
-    function laporWA() {
-      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET, saya mau tanya/lapor:");
-    }
+    VOXY.auth.onAuthStateChanged(function (user) {
+      if (!user) { location.href = "login.html"; return; }
+      currentUser = user;
+      VOXY.applyBrandingToPage().then(function (b) {
+        if (b && b.logo) {
+          logoSrc = b.logo;
+          var img = document.getElementById("chatLogo");
+          if (img) img.src = b.logo;
+        }
+      });
+      VOXY.markChatReadByUser(user.uid);
+      VOXY.listenChatMessages(user.uid, renderMessages);
+      VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
+    });
   </script>
 </body>
 </html>

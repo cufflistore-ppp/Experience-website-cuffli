@@ -18,6 +18,7 @@
       <span>VOXY MARKET</span>
     </div>
     <div class="header-actions">
+      <a href="search.html" class="icon-btn"><i data-lucide="search"></i></a>
       <a href="akun.html" class="icon-btn"><i data-lucide="user"></i></a>
     </div>
   </header>
@@ -25,61 +26,45 @@
   <main class="page">
     <div class="banner-wrap">
       <div class="banner-track" id="bannerTrack">
-        <img src="banner.png" alt="Banner 1">
-        <img src="banner2.png" alt="Banner 2">
-        <img src="banner3.png" alt="Banner 3">
+        <img src="banner.png" alt="1">
+        <img src="banner2.png" alt="2">
+        <img src="banner3.png" alt="3">
       </div>
-      <div class="banner-dots" id="bannerDots">
-        <span class="active"></span><span></span><span></span>
+      <div class="banner-dots" id="bannerDots"><span class="active"></span><span></span><span></span></div>
+    </div>
+
+    <div class="landing-intro" style="text-align:center;padding:4px 8px 12px">
+      <p style="font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 8px">Pusat layanan produk digital, akun premium, jasa suntik, dan order cepat untuk kebutuhanmu.</p>
+      <div class="trust-row" style="margin:0">
+        <span>Transaksi Aman</span>
+        <span>Proses Cepat</span>
+        <span>Produk Premium</span>
       </div>
     </div>
 
-    <div class="feature-row">
-      <div class="feature-chip">
-        <div class="ic"><i data-lucide="zap"></i></div>
-        <div><h4>Proses Cepat</h4><p>Pesanan diproses cepat</p></div>
+    <!-- Kategori geser horizontal -->
+    <div class="cat-scroll" id="catScroll"></div>
+
+    <!-- Flash Sale -->
+    <div class="flash-box" id="flashBox" style="display:none">
+      <div class="flash-top">
+        <h2>FLASH SALE</h2>
+        <div class="flash-timer" id="flashTimer">--:--:--</div>
       </div>
-      <div class="feature-chip">
-        <div class="ic"><i data-lucide="crown"></i></div>
-        <div><h4>Produk Premium</h4><p>Produk digital pilihan</p></div>
-      </div>
+      <div class="flash-row" id="flashRow"></div>
     </div>
 
-    <a href="search.html" class="home-search">
-      <i data-lucide="search" style="width:18px;height:18px"></i>
-      Cari produk, game, atau layanan...
-    </a>
-
-    <div class="cat-tabs" id="catTabs">
-      <button type="button" class="active" data-f="populer">Populer</button>
-      <button type="button" data-f="terbaru">Terbaru</button>
-      <button type="button" data-f="premium">Premium</button>
-    </div>
-
-    <div class="section-title" id="secPopuler">
-      <div>
-        <h2>Produk Populer</h2>
-        <p>Produk pilihan VOXY MARKET</p>
-      </div>
-    </div>
-    <div class="product-grid" id="gridPopuler">
-      <div class="empty-state" style="grid-column:1/-1">Memuat...</div>
-    </div>
-
-    <div class="section-title" id="secTerbaru" style="margin-top:22px">
-      <div>
-        <h2>Produk Terbaru</h2>
-        <p>Produk yang ditambahkan admin</p>
-      </div>
-    </div>
-    <div class="product-grid" id="gridTerbaru">
-      <div class="empty-state" style="grid-column:1/-1">Memuat...</div>
-    </div>
+    <!-- Sections by category -->
+    <div id="catSections"></div>
   </main>
 
-  <!-- FAB kanan bawah: foto saja, tekan = pilih WA/Website -->
-  <div class="fab-chat" id="fabChat" title="Chat Admin" style="right:14px;bottom:90px;left:auto;top:auto">
-    <img src="chat-admin.png" alt="Chat Admin">
+  <div class="site-footer">
+    Copyright &copy; 2026 VOXY MARKET<br>
+    Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+  </div>
+
+  <div class="fab-chat" id="fabChat" title="Chat Admin">
+    <img src="chat-admin.png" alt="Chat">
     <span class="badge-dot" id="fabBadge"></span>
   </div>
 
@@ -104,11 +89,10 @@
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
-
     var waAdmin = "";
     var allProduk = [];
+    var activeCat = "semua";
     var bi = 0;
-    var filterMode = "populer";
 
     function startBanner() {
       setInterval(function () {
@@ -121,58 +105,41 @@
       }, 3500);
     }
 
-    function bukaLaporan() {
-      document.getElementById("laporanSheet").classList.add("show");
-    }
-    function tutupLaporan() {
-      document.getElementById("laporanSheet").classList.remove("show");
-    }
-
+    function bukaLaporan() { document.getElementById("laporanSheet").classList.add("show"); }
+    function tutupLaporan() { document.getElementById("laporanSheet").classList.remove("show"); }
     document.getElementById("laporanSheet").addEventListener("click", function (e) {
       if (e.target === this) tutupLaporan();
     });
-    document.getElementById("btnChatWeb").onclick = function () {
-      location.href = "chat.html";
-    };
+    document.getElementById("btnChatWeb").onclick = function () { location.href = "chat.html"; };
     document.getElementById("btnChatWA").onclick = function () {
       VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET, saya mau tanya/lapor:");
       tutupLaporan();
     };
     document.getElementById("btnChatBatal").onclick = tutupLaporan;
-
-    /* FAB geser + posisi kanan */
+    /* FAB: hanya naik-turun di sisi kanan */
     (function () {
       var fab = document.getElementById("fabChat");
-      var x = window.innerWidth - 86;
       var y = window.innerHeight - 160;
-      var dragging = false, moved = false, sx, sy, ox, oy;
-
+      var dragging = false, moved = false, sy, oy;
       function place() {
-        fab.style.left = x + "px";
+        fab.style.right = "14px";
+        fab.style.left = "auto";
         fab.style.top = y + "px";
-        fab.style.right = "auto";
         fab.style.bottom = "auto";
       }
       place();
-
       function onStart(e) {
-        dragging = true;
-        moved = false;
+        dragging = true; moved = false;
         var t = e.touches ? e.touches[0] : e;
-        sx = t.clientX;
-        sy = t.clientY;
-        ox = x;
-        oy = y;
+        sy = t.clientY; oy = y;
         e.preventDefault();
       }
       function onMove(e) {
         if (!dragging) return;
         var t = e.touches ? e.touches[0] : e;
-        var dx = t.clientX - sx;
         var dy = t.clientY - sy;
-        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
-        x = Math.max(4, Math.min(window.innerWidth - 72, ox + dx));
-        y = Math.max(4, Math.min(window.innerHeight - 72, oy + dy));
+        if (Math.abs(dy) > 6) moved = true;
+        y = Math.max(56, Math.min(window.innerHeight - 80, oy + dy));
         place();
       }
       function onEnd() {
@@ -188,107 +155,122 @@
       window.addEventListener("touchend", onEnd);
     })();
 
-    function cardHtml(p) {
+    function isFlash(p) {
+      if (!p.flashSale || !p.flashEnd) return false;
+      return Date.now() < Number(p.flashEnd);
+    }
+    function hargaTampil(p) {
+      if (isFlash(p) && p.flashHarga) return Number(p.flashHarga);
+      return Number(p.harga) || 0;
+    }
+    function iconCard(p) {
       var img = p.gambar || "produk1.png";
-      var nama = p.nama || "-";
-      var desc = p.deskripsi || p.kategori || "";
-      var id = encodeURIComponent(p.id);
+      var stok = (p.stokHabis) ? '<span class="stok-badge habis">Habis</span>' : '<span class="stok-badge">Tersedia</span>';
+      var price = "";
+      if (isFlash(p) && p.flashHarga) {
+        price = '<div class="flash-old">' + VOXY.formatRp(p.harga) + '</div><div class="flash-price">' + VOXY.formatRp(p.flashHarga) + '</div>';
+      }
       return (
-        '<a class="product-card" href="detail-produk.html?id=' + id + '">' +
-          '<div class="thumb"><img src="' + img + '" alt="" onerror="this.src=\'produk1.png\'"></div>' +
-          '<div class="body">' +
-            '<h3>' + nama + '</h3>' +
-            '<div class="desc">' + desc + '</div>' +
-            '<div class="bottom">' +
-              '<span class="price">' + VOXY.formatRp(p.harga) + '</span>' +
-              '<span class="cart-btn"><i data-lucide="shopping-cart" style="width:14px;height:14px"></i></span>' +
-            '</div>' +
-          '</div>' +
+        '<a class="product-icon-card" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
+          stok +
+          '<div class="thumb"><img src="' + img + '" alt=""></div>' +
+          '<h3>' + (p.nama || "-") + '</h3>' + price +
         '</a>'
       );
     }
 
-    function renderAll() {
-      var list = allProduk.slice();
-      var pop = list;
-      if (filterMode === "premium") {
-        pop = list.filter(function (p) {
-          var k = ((p.kategori || "") + " " + (p.nama || "")).toLowerCase();
-          return k.indexOf("premium") !== -1 || k.indexOf("akun") !== -1;
+    function buildCategories(list) {
+      var cats = {};
+      list.forEach(function (p) {
+        var c = (p.kategori || "Lainnya").trim() || "Lainnya";
+        cats[c] = (cats[c] || 0) + 1;
+      });
+      var html = '<button type="button" class="cat-chip' + (activeCat === "semua" ? " active" : "") + '" data-cat="semua">Semua</button>';
+      Object.keys(cats).sort().forEach(function (c) {
+        html += '<button type="button" class="cat-chip' + (activeCat === c ? " active" : "") + '" data-cat="' + c.replace(/"/g, "") + '">' + c + '</button>';
+      });
+      var el = document.getElementById("catScroll");
+      el.innerHTML = html;
+      el.querySelectorAll(".cat-chip").forEach(function (btn) {
+        btn.onclick = function () {
+          activeCat = btn.getAttribute("data-cat");
+          renderAll();
+        };
+      });
+    }
+
+    function renderFlash(list) {
+      var flash = list.filter(isFlash);
+      var box = document.getElementById("flashBox");
+      var row = document.getElementById("flashRow");
+      if (!flash.length) {
+        box.style.display = "none";
+        return;
+      }
+      box.style.display = "block";
+      var nearest = Math.min.apply(null, flash.map(function (p) { return Number(p.flashEnd); }));
+      function tick() {
+        var left = nearest - Date.now();
+        if (left <= 0) {
+          document.getElementById("flashTimer").textContent = "00:00:00";
+          renderAll();
+          return;
+        }
+        var h = Math.floor(left / 3600000);
+        var m = Math.floor((left % 3600000) / 60000);
+        var s = Math.floor((left % 60000) / 1000);
+        document.getElementById("flashTimer").textContent =
+          (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+      }
+      tick();
+      if (window._flashInterval) clearInterval(window._flashInterval);
+      window._flashInterval = setInterval(tick, 1000);
+      row.innerHTML = flash.map(iconCard).join("");
+    }
+
+    function renderSections(list) {
+      var filtered = list;
+      if (activeCat !== "semua") {
+        filtered = list.filter(function (p) {
+          return ((p.kategori || "Lainnya").trim() || "Lainnya") === activeCat;
         });
       }
-
-      var gridP = document.getElementById("gridPopuler");
-      var gridT = document.getElementById("gridTerbaru");
-      var secP = document.getElementById("secPopuler");
-      var secT = document.getElementById("secTerbaru");
-
-      if (filterMode === "terbaru") {
-        secP.style.display = "none";
-        gridP.style.display = "none";
-        secT.style.display = "block";
-        gridT.style.display = "grid";
-      } else if (filterMode === "premium") {
-        secP.style.display = "block";
-        gridP.style.display = "grid";
-        secT.style.display = "none";
-        gridT.style.display = "none";
-        secP.querySelector("h2").textContent = "Produk Premium";
-        secP.querySelector("p").textContent = "Produk digital pilihan";
-      } else {
-        secP.style.display = "block";
-        gridP.style.display = "grid";
-        secT.style.display = "block";
-        gridT.style.display = "grid";
-        secP.querySelector("h2").textContent = "Produk Populer";
-        secP.querySelector("p").textContent = "Produk pilihan VOXY MARKET";
-      }
-
-      gridP.innerHTML = pop.length
-        ? pop.map(cardHtml).join("")
-        : '<div class="empty-state" style="grid-column:1/-1">Belum ada produk</div>';
-
-      var terbaru = list.slice().sort(function (a, b) {
-        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      var groups = {};
+      filtered.forEach(function (p) {
+        var c = (p.kategori || "Lainnya").trim() || "Lainnya";
+        if (!groups[c]) groups[c] = [];
+        groups[c].push(p);
       });
-      gridT.innerHTML = terbaru.length
-        ? terbaru.map(cardHtml).join("")
-        : '<div class="empty-state" style="grid-column:1/-1">Belum ada produk</div>';
+      var keys = Object.keys(groups).sort();
+      var html = "";
+      if (!keys.length) {
+        html = '<div class="empty-state">Belum ada produk</div>';
+      } else {
+        keys.forEach(function (c) {
+          html += '<div class="section-head"><h2>' + c + '</h2><span class="count">' + groups[c].length + '</span></div>';
+          html += '<div class="product-grid-icons">' + groups[c].map(iconCard).join("") + '</div>';
+        });
+      }
+      document.getElementById("catSections").innerHTML = html;
+    }
 
+    function renderAll() {
+      buildCategories(allProduk);
+      renderFlash(allProduk);
+      renderSections(allProduk);
       lucide.createIcons();
     }
 
-    document.querySelectorAll("#catTabs button").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        document.querySelectorAll("#catTabs button").forEach(function (b) {
-          b.classList.remove("active");
-        });
-        btn.classList.add("active");
-        filterMode = btn.getAttribute("data-f") || "populer";
-        renderAll();
-      });
-    });
-
-    function loadProdukTanpaAuth() {
-      VOXY.listenProduk(function (list) {
-        allProduk = list || [];
-        renderAll();
-      });
-    }
-
-    /* Jangan blokir home kalau auth lambat: tampilkan produk dulu */
     if (VOXY.auth) {
       VOXY.auth.onAuthStateChanged(function (user) {
-        if (!user) {
-          window.location.href = "login.html";
-          return;
-        }
+        if (!user) { location.href = "login.html"; return; }
         VOXY.applyBrandingToPage();
         startBanner();
-        VOXY.getSettings().then(function (s) {
-          waAdmin = (s && s.waAdmin) || "";
+        VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
+        VOXY.listenProduk(function (list) {
+          allProduk = list || [];
+          renderAll();
         });
-        loadProdukTanpaAuth();
         VOXY.listenUserUnread(user.uid, function (unread) {
           ["logoBadge", "fabBadge"].forEach(function (id) {
             var el = document.getElementById(id);
@@ -296,9 +278,6 @@
           });
         });
       });
-    } else {
-      startBanner();
-      loadProdukTanpaAuth();
     }
   </script>
 </body>

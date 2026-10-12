@@ -42,6 +42,7 @@
     </div>
     <button class="btn" style="width:100%;margin-top:8px" id="btnKonfirmasi" onclick="konfirmasi()">Konfirmasi Pembayaran</button>
   </main>
+  <div class="site-footer">Copyright &copy; 2026 VOXY MARKET<br>Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a></div>
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
@@ -80,20 +81,23 @@
         produkId: produk.id || "",
         namaProduk: produk.nama || "",
         kategori: produk.kategori || "",
-        harga: Number(produk.harga) || 0,
+        harga: (produk.flashSale && produk.flashEnd && Date.now() < Number(produk.flashEnd) && produk.flashHarga) ? Number(produk.flashHarga) : (Number(produk.harga) || 0),
+        hargaAsli: Number(produk.harga) || 0,
         gambar: produk.gambar || "",
         status: "Menunggu",
         email: user ? user.email : "",
         uid: user ? user.uid : "",
         linkTarget: "",
-        catatan: ""
+        catatan: "",
+        tipeKirim: produk.tipeKirim || "link"
       };
       VOXY.simpanOrder(order).then(function (kode) {
         return VOXY.simpanBukti(kode, buktiDataUrl).then(function () { return kode; });
       }).then(function (kode) {
         sessionStorage.removeItem("produkDipilih");
+        var tipe = produk.tipeKirim || "";
         var kat = (produk.kategori || "").toLowerCase();
-        if (kat.indexOf("suntik") !== -1 || kat.indexOf("jasa") !== -1 || produk.butuhTarget) {
+        if (tipe === "link_target" || produk.butuhTarget || kat.indexOf("suntik") !== -1) {
           sessionStorage.setItem("kodePesanan", kode);
           window.location.href = "jasa-link.html?kode=" + encodeURIComponent(kode);
           return;

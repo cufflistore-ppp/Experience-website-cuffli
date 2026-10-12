@@ -13,42 +13,74 @@
 <body>
   <header class="app-header">
     <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
-    <div class="logo-area"><span>Detail Produk</span></div>
+    <div class="logo-area"><img src="logo.png" alt=""><span>VOXY MARKET</span></div>
     <div style="width:40px"></div>
   </header>
   <main class="page" id="detailPage"><div class="empty-state">Memuat...</div></main>
+  <div class="site-footer">Copyright &copy; 2026 VOXY MARKET<br>Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a></div>
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
     var produkData = null;
-    VOXY.requireAuth().then(function () {
+    function isFlash(p) {
+      return p && p.flashSale && p.flashEnd && Date.now() < Number(p.flashEnd);
+    }
+    VOXY.auth.onAuthStateChanged(function (user) {
+      if (!user) { location.href = "login.html"; return; }
+      VOXY.applyBrandingToPage();
       var id = new URLSearchParams(location.search).get("id");
       if (!id) {
         document.getElementById("detailPage").innerHTML = '<div class="empty-state">Produk tidak ditemukan</div>';
         return;
       }
       VOXY.getProdukList().then(function (list) {
-        produkData = list.find(function (p) { return p.id === id; });
+        produkData = (list || []).find(function (p) { return p.id === id; });
         if (!produkData) {
           document.getElementById("detailPage").innerHTML = '<div class="empty-state">Produk tidak ditemukan</div>';
           return;
         }
         var p = produkData;
         var img = p.gambar || "produk1.png";
+        var harga = isFlash(p) && p.flashHarga ? Number(p.flashHarga) : Number(p.harga) || 0;
+        var hargaHtml = VOXY.formatRp(harga);
+        if (isFlash(p) && p.flashHarga) {
+          hargaHtml = '<span style="text-decoration:line-through;color:var(--muted);font-size:14px;font-weight:500;margin-right:8px">' +
+            VOXY.formatRp(p.harga) + '</span>' + VOXY.formatRp(p.flashHarga);
+        }
+        var tipe = p.tipeKirim || "link";
         document.getElementById("detailPage").innerHTML =
-          '<div class="detail-hero"><img src="' + img + '" onerror="this.src=\'produk1.png\'"></div>' +
+          '<div class="detail-hero"><img src="' + img + '" alt=""></div>' +
           '<div class="detail-info">' +
-          '<div style="font-size:12px;color:var(--muted)">' + (p.kategori || "Digital") + '</div>' +
-          '<h1>' + (p.nama || "-") + '</h1>' +
-          '<div class="price">' + VOXY.formatRp(p.harga) + '</div>' +
-          '<p class="desc">' + (p.deskripsi || "Produk digital VOXY MARKET") + '</p>' +
-          '<button class="btn" style="width:100%" onclick="beliSekarang()">Beli Sekarang</button></div>';
+            '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">' + (p.kategori || "") + ' · ' + tipeLabel(tipe) + '</div>' +
+            '<h1>' + (p.nama || "-") + '</h1>' +
+            '<div class="price">' + hargaHtml + '</div>' +
+            '<p class="desc">' + (p.deskripsi || "Produk digital VOXY MARKET") + '</p>' +
+            (p.stokHabis ? '<button class="btn" style="width:100%;opacity:.5" disabled>Stok Habis</button>' :
+              '<button class="btn" style="width:100%" onclick="beli()">Beli Produk</button>') +
+          '</div>';
       });
     });
-    function beliSekarang() {
-      if (!produkData) return;
+    function tipeLabel(t) {
+      var m = {
+        "email_password": "Email + Password",
+        "apk_zip": "APK / ZIP",
+        "link": "Link",
+        "link_target": "Link Target (Jasa)",
+        "wa_admin": "WhatsApp Admin"
+      };
+      return m[t] || t;
+    }
+    function beli() {
+      if (!produkData || produkData.stokHabis) return;
       sessionStorage.setItem("produkDipilih", JSON.stringify(produkData));
-      window.location.href = "pembayaran.html";
+      var tipe = produkData.tipeKirim || "link";
+      if (tipe === "wa_admin") {
+        VOXY.getSettings().then(function (s) {
+          VOXY.bukaWhatsApp((s && s.waAdmin) || "", "Halo admin, saya mau order: " + (produkData.nama || ""));
+        });
+        return;
+      }
+      location.href = "pembayaran.html";
     }
   </script>
 </body>

@@ -43,7 +43,7 @@
       if (!link) { alert("Isi link target dulu"); return; }
       VOXY.updateOrder(kode, { linkTarget: link, catatan: catatan }).then(function () {
         sessionStorage.removeItem("kodePesanan");
-        alert("Link tersimpan. Menunggu proses admin.");
+        if (VOXY.showToast) VOXY.showToast("Link tersimpan. Menunggu proses admin."); else alert("Link tersimpan. Menunggu proses admin.");
         location.href = "riwayat.html";
       }).catch(function (e) { alert(e.message || "Gagal"); });
     }
