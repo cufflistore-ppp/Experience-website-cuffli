@@ -118,13 +118,10 @@
           <div class="form-group">
             <label>Kategori</label>
             <select id="pKategori">
-              <option value="Akun Premium">Akun Premium</option>
               <option value="Produk Digital">Produk Digital</option>
               <option value="Jasa Suntik">Jasa Suntik</option>
               <option value="Jasa">Jasa</option>
               <option value="Aplikasi Premium">Aplikasi Premium</option>
-              <option value="Streaming">Streaming</option>
-              <option value="Education">Education</option>
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
@@ -141,7 +138,8 @@
           </div>
           <div class="form-group full"><label>Deskripsi</label><textarea id="pDeskripsi" rows="3"></textarea></div>
           <div class="form-group full"><label>Upload foto produk</label><input type="file" id="pGambarFile" accept="image/*"></div>
-          <div class="form-group full"><label><input type="checkbox" id="pStokHabis"> Stok habis</label></div>
+          <div class="form-group"><label>Stok</label><input id="pStok" type="number" min="0" value="10" placeholder="Jumlah stok"></div>
+          <div class="form-group full"><label style="font-size:12px;color:var(--muted)">Stok otomatis berkurang saat ada order. Stok 0 = Habis.</label></div>
           <div class="form-group full"><label><input type="checkbox" id="pFlashSale" onchange="toggleFlash()"> Aktifkan Flash Sale</label></div>
           <div class="form-group" id="flashFields" style="display:none">
             <label>Harga flash sale</label>
@@ -467,11 +465,11 @@
     function resetProdukForm() {
       document.getElementById("produkId").value = "";
       document.getElementById("pNama").value = "";
-      document.getElementById("pKategori").value = "Akun Premium";
+      document.getElementById("pKategori").value = "Produk Digital";
       document.getElementById("pHarga").value = "";
       document.getElementById("pTipeKirim").value = "email_password";
       document.getElementById("pDeskripsi").value = "";
-      document.getElementById("pStokHabis").checked = false;
+      document.getElementById("pStok").value = "10";
       document.getElementById("pFlashSale").checked = false;
       document.getElementById("pFlashHarga").value = "";
       document.getElementById("pFlashEnd").value = "";
@@ -484,11 +482,11 @@
         if (!p) return;
         document.getElementById("produkId").value = p.id;
         document.getElementById("pNama").value = p.nama || "";
-        document.getElementById("pKategori").value = p.kategori || "Akun Premium";
+        document.getElementById("pKategori").value = p.kategori || "Produk Digital";
         document.getElementById("pHarga").value = p.harga || 0;
         document.getElementById("pTipeKirim").value = p.tipeKirim || "email_password";
         document.getElementById("pDeskripsi").value = p.deskripsi || "";
-        document.getElementById("pStokHabis").checked = !!p.stokHabis;
+        document.getElementById("pStok").value = (p.stok != null ? p.stok : (p.stokHabis ? 0 : 10));
         document.getElementById("pFlashSale").checked = !!p.flashSale;
         document.getElementById("pFlashHarga").value = p.flashHarga || "";
         if (p.flashEnd) {
@@ -531,7 +529,8 @@
           gambar: imgUrl || "produk1.png",
           deskripsi: document.getElementById("pDeskripsi").value.trim(),
           tipeKirim: document.getElementById("pTipeKirim").value,
-          stokHabis: document.getElementById("pStokHabis").checked,
+          stok: Math.max(0, Number(document.getElementById("pStok").value) || 0),
+          stokHabis: (Math.max(0, Number(document.getElementById("pStok").value) || 0) <= 0),
           flashSale: !!flashOn,
           flashHarga: flashOn ? (Number(document.getElementById("pFlashHarga").value) || 0) : null,
           flashEnd: flashEnd,

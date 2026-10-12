@@ -84,8 +84,9 @@
             '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">' + (p.kategori || "") + ' · ' + tipeLabel(tipe) + '</div>' +
             '<h1>' + (p.nama || "-") + '</h1>' +
             '<div class="price">' + hargaHtml + '</div>' +
+            ((p.stok != null) ? ('<p style="font-size:12px;color:var(--muted);margin:4px 0 10px">Stok: ' + (Number(p.stok) <= 0 ? 'Habis' : ('Sisa ' + p.stok)) + '</p>') : '') +
             '<p class="desc">' + (p.deskripsi || "Produk digital VOXY MARKET") + '</p>' +
-            (p.stokHabis ? '<button class="btn" style="width:100%;opacity:.5" disabled>Stok Habis</button>' :
+            ((p.stokHabis || (p.stok != null && Number(p.stok) <= 0)) ? '<button class="btn" style="width:100%;opacity:.5" disabled>Stok Habis</button>' :
               '<button class="btn" style="width:100%" onclick="beli()">Beli Produk</button>') +
           '</div>';
       });

@@ -189,7 +189,13 @@
     }
     function iconCard(p) {
       var img = p.gambar || "produk1.png";
-      var stok = (p.stokHabis) ? '<span class="stok-badge habis">Habis</span>' : '<span class="stok-badge">Tersedia</span>';
+      var stokNum = (p.stok != null) ? Number(p.stok) : null;
+      var habis = p.stokHabis || (stokNum !== null && stokNum <= 0);
+      var stok = habis
+        ? '<span class="stok-badge habis">Habis</span>'
+        : (stokNum != null
+          ? '<span class="stok-badge">Sisa ' + stokNum + '</span>'
+          : '<span class="stok-badge">Tersedia</span>');
       var normal = Number(p.harga) || 0;
       var now = hargaTampil(p);
       /* Harga hanya untuk flash sale */

@@ -105,11 +105,27 @@ function requireAdmin(redirect) {
 function simpanOrder(orderData) {
   if (!db) return Promise.reject(new Error("Database belum siap"));
   var kode = orderData.kode || generateKode();
+  var produkId = orderData.produkId || orderData.idProduk || null;
   return db.ref("orders/" + kode).set(Object.assign({}, orderData, {
     kode: kode,
     createdAt: Date.now(),
     updatedAt: Date.now()
-  })).then(function () { return kode; });
+  })).then(function () {
+    if (!produkId) return kode;
+    /* kurangi stok produk */
+    return db.ref("produk/" + produkId).once("value").then(function (snap) {
+      var p = snap.val();
+      if (!p) return kode;
+      var stok = (p.stok != null) ? Number(p.stok) : null;
+      if (stok == null || isNaN(stok)) return kode;
+      var next = Math.max(0, stok - 1);
+      return db.ref("produk/" + produkId).update({
+        stok: next,
+        stokHabis: next <= 0,
+        updatedAt: Date.now()
+      }).then(function () { return kode; });
+    });
+  });
 }
 
 function updateOrder(kode, data) {
