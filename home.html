@@ -23,7 +23,6 @@
   </header>
 
   <main class="page">
-    <!-- Banner 3 slide -->
     <div class="banner-wrap">
       <div class="banner-track" id="bannerTrack">
         <img src="banner.png" alt="Banner 1">
@@ -35,47 +34,31 @@
       </div>
     </div>
 
-    <!-- Feature chips -->
     <div class="feature-row">
       <div class="feature-chip">
         <div class="ic"><i data-lucide="zap"></i></div>
-        <div>
-          <h4>Proses Cepat</h4>
-          <p>Pesanan diproses cepat</p>
-        </div>
+        <div><h4>Proses Cepat</h4><p>Pesanan diproses cepat</p></div>
       </div>
       <div class="feature-chip">
         <div class="ic"><i data-lucide="crown"></i></div>
-        <div>
-          <h4>Produk Premium</h4>
-          <p>Produk digital pilihan</p>
-        </div>
+        <div><h4>Produk Premium</h4><p>Produk digital pilihan</p></div>
       </div>
     </div>
 
-    <!-- Search -->
     <a href="search.html" class="home-search">
       <i data-lucide="search" style="width:18px;height:18px"></i>
       Cari produk, game, atau layanan...
     </a>
 
-    <!-- Tabs -->
     <div class="cat-tabs" id="catTabs">
-      <button class="active" data-f="populer" onclick="setFilter(this,\'populer\')">
-        <i data-lucide="flame" style="width:14px;height:14px"></i> Populer
-      </button>
-      <button data-f="terbaru" onclick="setFilter(this,\'terbaru\')">
-        <i data-lucide="box" style="width:14px;height:14px"></i> Terbaru
-      </button>
-      <button data-f="premium" onclick="setFilter(this,\'premium\')">
-        <i data-lucide="crown" style="width:14px;height:14px"></i> Premium
-      </button>
+      <button type="button" class="active" data-f="populer">Populer</button>
+      <button type="button" data-f="terbaru">Terbaru</button>
+      <button type="button" data-f="premium">Premium</button>
     </div>
 
-    <!-- Produk Populer -->
     <div class="section-title" id="secPopuler">
       <div>
-        <h2><i data-lucide="flame" style="width:16px;height:16px;color:var(--primary)"></i> Produk Populer</h2>
+        <h2>Produk Populer</h2>
         <p>Produk pilihan VOXY MARKET</p>
       </div>
     </div>
@@ -83,10 +66,9 @@
       <div class="empty-state" style="grid-column:1/-1">Memuat...</div>
     </div>
 
-    <!-- Produk Terbaru -->
     <div class="section-title" id="secTerbaru" style="margin-top:22px">
       <div>
-        <h2><i data-lucide="box" style="width:16px;height:16px;color:var(--primary)"></i> Produk Terbaru</h2>
+        <h2>Produk Terbaru</h2>
         <p>Produk yang ditambahkan admin</p>
       </div>
     </div>
@@ -95,25 +77,24 @@
     </div>
   </main>
 
-  <!-- FAB Chat Admin (geser + tekan = pilih WA / Website) -->
-  <div class="fab-chat" id="fabChat" title="Chat Admin">
+  <!-- FAB kanan bawah: foto saja, tekan = pilih WA/Website -->
+  <div class="fab-chat" id="fabChat" title="Chat Admin" style="right:14px;bottom:90px;left:auto;top:auto">
     <img src="chat-admin.png" alt="Chat Admin">
     <span class="badge-dot" id="fabBadge"></span>
   </div>
 
-  <div class="laporan-sheet" id="laporanSheet" onclick="if(event.target===this)tutupLaporan()">
+  <div class="laporan-sheet" id="laporanSheet">
     <div class="laporan-panel">
       <h3>Chat Admin</h3>
       <p>Pilih cara menghubungi admin</p>
       <div class="laporan-options">
-        <button class="btn" onclick="location.href=\'chat.html\'">💬 Chat via Website</button>
-        <button class="btn btn-wa" onclick="laporWA()">📱 Chat via WhatsApp</button>
-        <button class="btn btn-outline" onclick="tutupLaporan()">Batal</button>
+        <button type="button" class="btn" id="btnChatWeb">Chat via Website</button>
+        <button type="button" class="btn btn-wa" id="btnChatWA">Chat via WhatsApp</button>
+        <button type="button" class="btn btn-outline" id="btnChatBatal">Batal</button>
       </div>
     </div>
   </div>
 
-  <!-- Bottom nav: hanya 3 -->
   <nav class="bottom-nav">
     <a href="home.html" class="active"><i data-lucide="home"></i>Home</a>
     <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
@@ -123,23 +104,49 @@
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
-    var waAdmin = "", allProduk = [], bi = 0, filterMode = "populer";
+
+    var waAdmin = "";
+    var allProduk = [];
+    var bi = 0;
+    var filterMode = "populer";
 
     function startBanner() {
       setInterval(function () {
         bi = (bi + 1) % 3;
-        document.getElementById("bannerTrack").style.transform = "translateX(-" + (bi * 100) + "%)";
+        var track = document.getElementById("bannerTrack");
+        if (track) track.style.transform = "translateX(-" + (bi * 100) + "%)";
         document.querySelectorAll("#bannerDots span").forEach(function (d, i) {
           d.classList.toggle("active", i === bi);
         });
       }, 3500);
     }
 
-    /* FAB geser */
+    function bukaLaporan() {
+      document.getElementById("laporanSheet").classList.add("show");
+    }
+    function tutupLaporan() {
+      document.getElementById("laporanSheet").classList.remove("show");
+    }
+
+    document.getElementById("laporanSheet").addEventListener("click", function (e) {
+      if (e.target === this) tutupLaporan();
+    });
+    document.getElementById("btnChatWeb").onclick = function () {
+      location.href = "chat.html";
+    };
+    document.getElementById("btnChatWA").onclick = function () {
+      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET, saya mau tanya/lapor:");
+      tutupLaporan();
+    };
+    document.getElementById("btnChatBatal").onclick = tutupLaporan;
+
+    /* FAB geser + posisi kanan */
     (function () {
       var fab = document.getElementById("fabChat");
-      var x = window.innerWidth - 78, y = window.innerHeight - 150;
+      var x = window.innerWidth - 86;
+      var y = window.innerHeight - 160;
       var dragging = false, moved = false, sx, sy, ox, oy;
+
       function place() {
         fab.style.left = x + "px";
         fab.style.top = y + "px";
@@ -147,54 +154,62 @@
         fab.style.bottom = "auto";
       }
       place();
-      function start(e) {
-        dragging = true; moved = false;
+
+      function onStart(e) {
+        dragging = true;
+        moved = false;
         var t = e.touches ? e.touches[0] : e;
-        sx = t.clientX; sy = t.clientY; ox = x; oy = y;
+        sx = t.clientX;
+        sy = t.clientY;
+        ox = x;
+        oy = y;
         e.preventDefault();
       }
-      function move(e) {
+      function onMove(e) {
         if (!dragging) return;
         var t = e.touches ? e.touches[0] : e;
-        var dx = t.clientX - sx, dy = t.clientY - sy;
+        var dx = t.clientX - sx;
+        var dy = t.clientY - sy;
         if (Math.abs(dx) > 6 || Math.abs(dy) > 6) moved = true;
-        x = Math.max(4, Math.min(window.innerWidth - 66, ox + dx));
-        y = Math.max(4, Math.min(window.innerHeight - 66, oy + dy));
+        x = Math.max(4, Math.min(window.innerWidth - 72, ox + dx));
+        y = Math.max(4, Math.min(window.innerHeight - 72, oy + dy));
         place();
       }
-      function end() {
+      function onEnd() {
         if (!dragging) return;
         dragging = false;
         if (!moved) bukaLaporan();
       }
-      fab.addEventListener("mousedown", start);
-      fab.addEventListener("touchstart", start, { passive: false });
-      window.addEventListener("mousemove", move);
-      window.addEventListener("touchmove", move, { passive: false });
-      window.addEventListener("mouseup", end);
-      window.addEventListener("touchend", end);
+      fab.addEventListener("mousedown", onStart);
+      fab.addEventListener("touchstart", onStart, { passive: false });
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("touchmove", onMove, { passive: false });
+      window.addEventListener("mouseup", onEnd);
+      window.addEventListener("touchend", onEnd);
     })();
-
-    function bukaLaporan() { document.getElementById("laporanSheet").classList.add("show"); }
-    function tutupLaporan() { document.getElementById("laporanSheet").classList.remove("show"); }
-    function laporWA() {
-      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET, saya mau tanya/lapor:");
-      tutupLaporan();
-    }
 
     function cardHtml(p) {
       var img = p.gambar || "produk1.png";
-      return \'<a class="product-card" href="detail-produk.html?id=\' + encodeURIComponent(p.id) + \'">\' +
-        \'<div class="thumb"><img src="\' + img + \'" alt="" onerror="this.src=\\\'produk1.png\\\'"></div>\' +
-        \'<div class="body"><h3>\' + (p.nama || "-") + \'</h3>\' +
-        \'<div class="desc">\' + (p.deskripsi || p.kategori || "") + \'</div>\' +
-        \'<div class="bottom"><span class="price">\' + VOXY.formatRp(p.harga) + \'</span>\' +
-        \'<span class="cart-btn"><i data-lucide="shopping-cart" style="width:14px;height:14px"></i></span></div></div></a>\';
+      var nama = p.nama || "-";
+      var desc = p.deskripsi || p.kategori || "";
+      var id = encodeURIComponent(p.id);
+      return (
+        '<a class="product-card" href="detail-produk.html?id=' + id + '">' +
+          '<div class="thumb"><img src="' + img + '" alt="" onerror="this.src=\'produk1.png\'"></div>' +
+          '<div class="body">' +
+            '<h3>' + nama + '</h3>' +
+            '<div class="desc">' + desc + '</div>' +
+            '<div class="bottom">' +
+              '<span class="price">' + VOXY.formatRp(p.harga) + '</span>' +
+              '<span class="cart-btn"><i data-lucide="shopping-cart" style="width:14px;height:14px"></i></span>' +
+            '</div>' +
+          '</div>' +
+        '</a>'
+      );
     }
 
     function renderAll() {
       var list = allProduk.slice();
-      /* Populer: semua / filter premium jika tab premium */
       var pop = list;
       if (filterMode === "premium") {
         pop = list.filter(function (p) {
@@ -202,66 +217,89 @@
           return k.indexOf("premium") !== -1 || k.indexOf("akun") !== -1;
         });
       }
+
       var gridP = document.getElementById("gridPopuler");
+      var gridT = document.getElementById("gridTerbaru");
+      var secP = document.getElementById("secPopuler");
+      var secT = document.getElementById("secTerbaru");
+
+      if (filterMode === "terbaru") {
+        secP.style.display = "none";
+        gridP.style.display = "none";
+        secT.style.display = "block";
+        gridT.style.display = "grid";
+      } else if (filterMode === "premium") {
+        secP.style.display = "block";
+        gridP.style.display = "grid";
+        secT.style.display = "none";
+        gridT.style.display = "none";
+        secP.querySelector("h2").textContent = "Produk Premium";
+        secP.querySelector("p").textContent = "Produk digital pilihan";
+      } else {
+        secP.style.display = "block";
+        gridP.style.display = "grid";
+        secT.style.display = "block";
+        gridT.style.display = "grid";
+        secP.querySelector("h2").textContent = "Produk Populer";
+        secP.querySelector("p").textContent = "Produk pilihan VOXY MARKET";
+      }
+
       gridP.innerHTML = pop.length
         ? pop.map(cardHtml).join("")
-        : \'<div class="empty-state" style="grid-column:1/-1">Belum ada produk</div>\';
+        : '<div class="empty-state" style="grid-column:1/-1">Belum ada produk</div>';
 
-      /* Terbaru: reverse (yang baru di atas) */
       var terbaru = list.slice().sort(function (a, b) {
         return (b.updatedAt || 0) - (a.updatedAt || 0);
       });
-      var gridT = document.getElementById("gridTerbaru");
       gridT.innerHTML = terbaru.length
         ? terbaru.map(cardHtml).join("")
-        : \'<div class="empty-state" style="grid-column:1/-1">Belum ada produk</div>\';
+        : '<div class="empty-state" style="grid-column:1/-1">Belum ada produk</div>';
 
-      /* hide sections by tab */
-      if (filterMode === "terbaru") {
-        document.getElementById("secPopuler").style.display = "none";
-        gridP.style.display = "none";
-        document.getElementById("secTerbaru").style.display = "block";
-        gridT.style.display = "grid";
-      } else if (filterMode === "premium") {
-        document.getElementById("secPopuler").style.display = "block";
-        gridP.style.display = "grid";
-        document.getElementById("secTerbaru").style.display = "none";
-        gridT.style.display = "none";
-        document.querySelector("#secPopuler h2").innerHTML = \'<i data-lucide="crown" style="width:16px;height:16px;color:var(--primary)"></i> Produk Premium\';
-        document.querySelector("#secPopuler p").textContent = "Produk digital pilihan";
-      } else {
-        document.getElementById("secPopuler").style.display = "block";
-        gridP.style.display = "grid";
-        document.getElementById("secTerbaru").style.display = "block";
-        gridT.style.display = "grid";
-        document.querySelector("#secPopuler h2").innerHTML = \'<i data-lucide="flame" style="width:16px;height:16px;color:var(--primary)"></i> Produk Populer\';
-        document.querySelector("#secPopuler p").textContent = "Produk pilihan VOXY MARKET";
-      }
       lucide.createIcons();
     }
 
-    function setFilter(btn, mode) {
-      document.querySelectorAll("#catTabs button").forEach(function (b) { b.classList.remove("active"); });
-      btn.classList.add("active");
-      filterMode = mode;
-      renderAll();
-    }
+    document.querySelectorAll("#catTabs button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll("#catTabs button").forEach(function (b) {
+          b.classList.remove("active");
+        });
+        btn.classList.add("active");
+        filterMode = btn.getAttribute("data-f") || "populer";
+        renderAll();
+      });
+    });
 
-    VOXY.requireAuth().then(function (user) {
-      VOXY.applyBrandingToPage();
-      startBanner();
-      VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
+    function loadProdukTanpaAuth() {
       VOXY.listenProduk(function (list) {
         allProduk = list || [];
         renderAll();
       });
-      VOXY.listenUserUnread(user.uid, function (unread) {
-        ["logoBadge", "fabBadge"].forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el) el.classList.toggle("show", !!unread);
+    }
+
+    /* Jangan blokir home kalau auth lambat: tampilkan produk dulu */
+    if (VOXY.auth) {
+      VOXY.auth.onAuthStateChanged(function (user) {
+        if (!user) {
+          window.location.href = "login.html";
+          return;
+        }
+        VOXY.applyBrandingToPage();
+        startBanner();
+        VOXY.getSettings().then(function (s) {
+          waAdmin = (s && s.waAdmin) || "";
+        });
+        loadProdukTanpaAuth();
+        VOXY.listenUserUnread(user.uid, function (unread) {
+          ["logoBadge", "fabBadge"].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.toggle("show", !!unread);
+          });
         });
       });
-    });
+    } else {
+      startBanner();
+      loadProdukTanpaAuth();
+    }
   </script>
 </body>
 </html>
