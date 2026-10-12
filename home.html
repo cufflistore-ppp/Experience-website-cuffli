@@ -18,9 +18,26 @@
       <span>VOXY MARKET</span>
     </div>
     <div class="header-actions">
-      <a href="akun.html" class="icon-btn"><i data-lucide="user"></i></a>
+      <button type="button" class="icon-btn" id="btnMenu" aria-label="Menu"><i data-lucide="menu"></i></button>
     </div>
   </header>
+
+  <div class="side-drawer-bg" id="drawerBg"></div>
+  <div class="side-drawer" id="sideDrawer">
+    <div class="side-drawer-head">
+      <div class="logo-area">
+        <img src="logo.png" alt="">
+        <span>VOXY MARKET</span>
+      </div>
+      <button type="button" class="icon-btn" id="btnCloseDrawer"><i data-lucide="x"></i></button>
+    </div>
+    <nav class="side-drawer-nav">
+      <a href="akun.html"><i data-lucide="user"></i> Akun</a>
+      <a href="riwayat.html"><i data-lucide="receipt"></i> Transaksi</a>
+      <a href="home.html"><i data-lucide="package"></i> Semua Produk</a>
+      <a href="chat.html"><i data-lucide="message-circle"></i> Bantuan Admin</a>
+    </nav>
+  </div>
 
   <main class="page">
     <div class="banner-wrap">
@@ -223,6 +240,19 @@
       );
     }
 
+    function catIcon(name) {
+      var n = (name || "").toLowerCase();
+      if (n.indexOf("digital") !== -1) return "hard-drive";
+      if (n.indexOf("suntik") !== -1) return "zap";
+      if (n.indexOf("aplikasi") !== -1 || n.indexOf("premium") !== -1) return "smartphone";
+      if (n.indexOf("jasa") !== -1) return "briefcase";
+      if (n.indexOf("flash") !== -1) return "flame";
+      if (n === "semua") return "layout-grid";
+      return "package";
+    }
+    function catLabelHtml(name) {
+      return '<i data-lucide="' + catIcon(name) + '" style="width:15px;height:15px"></i> ' + name;
+    }
     function buildCategories(list) {
       var cats = {};
       list.forEach(function (p) {
@@ -230,12 +260,13 @@
         cats[c] = (cats[c] || 0) + 1;
       });
       var hasFlash = list.some(isFlash);
-      var html = '<button type="button" class="cat-chip' + (activeCat === "semua" ? " active" : "") + '" data-cat="semua">Semua</button>';
+      var html = '<button type="button" class="cat-chip' + (activeCat === "semua" ? " active" : "") + '" data-cat="semua"><i data-lucide="layout-grid" style="width:13px;height:13px"></i> Semua</button>';
       Object.keys(cats).sort().forEach(function (c) {
-        html += '<button type="button" class="cat-chip' + (activeCat === c ? " active" : "") + '" data-cat="' + c.replace(/"/g, "") + '">' + c + '</button>';
+        var safe = c.replace(/"/g, "");
+        html += '<button type="button" class="cat-chip' + (activeCat === c ? " active" : "") + '" data-cat="' + safe + '"><i data-lucide="' + catIcon(c) + '" style="width:13px;height:13px"></i> ' + c + '</button>';
       });
       if (hasFlash) {
-        html += '<button type="button" class="cat-chip' + (activeCat === "flash" ? " active" : "") + '" data-cat="flash" style="background:#ffedd5;color:#c2410c;border-color:#fdba74">Flash Sale</button>';
+        html += '<button type="button" class="cat-chip' + (activeCat === "flash" ? " active" : "") + '" data-cat="flash" style="background:#ffedd5;color:#c2410c;border-color:#fdba74"><i data-lucide="flame" style="width:13px;height:13px"></i> Flash Sale</button>';
       }
       var el = document.getElementById("catScroll");
       el.innerHTML = html;
@@ -297,11 +328,12 @@
         html = '<div class="empty-state">Belum ada produk</div>';
       } else {
         keys.forEach(function (c) {
-          html += '<div class="section-head"><h2>' + c + '</h2><span class="count">' + groups[c].length + '</span></div>';
+          html += '<div class="section-head"><h2>' + catLabelHtml(c) + '</h2><span class="count">' + groups[c].length + '</span></div>';
           html += '<div class="product-grid-icons">' + groups[c].map(iconCard).join("") + '</div>';
         });
       }
       document.getElementById("catSections").innerHTML = html;
+      lucide.createIcons();
     }
 
     function renderAll() {

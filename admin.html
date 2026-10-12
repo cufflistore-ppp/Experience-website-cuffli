@@ -16,7 +16,7 @@
     <div class="profile">
       <img src="logo.png" alt="VOXY">
       <h2>VOXY ADMIN</h2>
-      <p>Panel Management</p>
+      <p>Panel bersama (2 admin sinkron)</p>
     </div>
     <nav>
       <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><i data-lucide="layout-dashboard"></i> Dashboard</a>
@@ -76,36 +76,40 @@
       <div class="admin-card hidden" id="detailPesananBox">
         <h2>Detail Pesanan <span id="detailKode"></span></h2>
         <div id="detailContent"></div>
-        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-sm" onclick="ubahStatus('Diproses')">Proses</button>
-          <button class="btn btn-sm btn-success" onclick="ubahStatus('Selesai')">Sukses</button>
-          <button class="btn btn-sm btn-danger" onclick="ubahStatus('Ditolak')">Tolak</button>
-          <button class="btn btn-sm btn-outline" onclick="tutupDetail()">Tutup</button>
-        </div>
-        <div class="form-group" style="margin-top:16px"><label>Catatan Admin</label><input id="catatanAdmin" type="text" placeholder="Catatan status / info singkat"></div>
+        <div id="buktiAdmin" style="margin-top:8px"></div>
 
         <div class="admin-card" style="margin-top:12px;background:#f8fafc">
-          <h2 style="margin-bottom:8px">📦 Kirim Hasil ke Pembeli</h2>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Bisa isi <b>link/URL</b>, <b>file</b>, atau keduanya. Pembeli akan melihat tombol <b>Lihat</b> &amp; <b>Download</b>.</p>
-          <div class="form-group">
-            <label>Teks hasil (Email + Password / akun) — bisa disalin pembeli</label>
+          <h2 style="margin-bottom:6px">Kelola + Kirim Hasil</h2>
+          <p id="hasilTipeHint" style="font-size:12px;color:var(--muted);margin-bottom:10px">Isi sesuai tipe pesanan, lalu pilih aksi di bawah.</p>
+
+          <div class="form-group"><label>Catatan admin (opsional)</label>
+            <input id="catatanAdmin" type="text" placeholder="Catatan singkat untuk pembeli">
+          </div>
+
+          <div id="boxHasilTeks" class="form-group" style="display:none">
+            <label>Teks akun (Email + Password) — pembeli bisa salin</label>
             <textarea id="hasilTeks" rows="3" placeholder="Email: xxx@gmail.com&#10;Password: rahasia123"></textarea>
           </div>
-          <div class="form-group">
+          <div id="boxHasilUrl" class="form-group" style="display:none">
             <label>Link / URL hasil</label>
             <input id="hasilUrl" type="url" placeholder="https://...">
           </div>
-          <div class="form-group">
-            <label>Petunjuk untuk pembeli (muncul sebelum Lihat/Download)</label>
-            <textarea id="hasilCatatan" rows="3" placeholder="Contoh: 1) Download APK dulu lewat tombol Download 2) Install APK 3) Baru tekan Lihat untuk buka konten"></textarea>
-          </div>
-          <div class="form-group">
-            <label>Upload file (opsional — APK, zip, gambar, dll)</label>
+          <div id="boxHasilFile" class="form-group" style="display:none">
+            <label>Upload file (APK / ZIP / dll)</label>
             <input type="file" id="fileHasil">
           </div>
-          <button class="btn btn-sm btn-success" onclick="kirimHasil()">Kirim Hasil ke Pembeli</button>
+          <div id="boxHasilCatatan" class="form-group" style="display:none">
+            <label>Petunjuk untuk pembeli</label>
+            <textarea id="hasilCatatan" rows="2" placeholder="Contoh: Download APK dulu, install, lalu buka link"></textarea>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button type="button" class="btn btn-sm btn-outline" onclick="ubahStatus('Diproses')">Proses</button>
+            <button type="button" class="btn btn-sm btn-success" onclick="kirimHasil()">Kirim hasil + Sukses</button>
+            <button type="button" class="btn btn-sm btn-danger" onclick="ubahStatus('Ditolak')">Tolak</button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="tutupDetail()">Tutup</button>
+          </div>
         </div>
-        <div id="buktiAdmin" style="margin-top:12px"></div>
       </div>
     </div>
 
@@ -418,12 +422,44 @@
         (o.linkTarget ? "<div class=\"pay-row\"><span>Link target</span><span style=\"word-break:break-all\">" + o.linkTarget +
           " <button type=\"button\" class=\"btn btn-sm\" onclick=\"navigator.clipboard.writeText('" + String(o.linkTarget).replace(/'/g,"") + "')\">Salin</button></span></div>" : "") +
         "<div class=\"pay-row\"><span>Status</span><span>" + (o.status || "-") + "</span></div>";
+      setupHasilFields(o);
       VOXY.getBukti(kode).then(function (data) {
         var box = document.getElementById("buktiAdmin");
         box.innerHTML = data
           ? "<p style=\"font-size:13px;margin-bottom:6px\"><b>Foto bukti TF</b></p><img src=\"" + data + "\" style=\"max-width:100%;border-radius:12px;border:1px solid var(--border)\">"
           : "<p style=\"font-size:13px;color:var(--muted)\">Belum ada foto bukti TF</p>";
       });
+    }
+
+    function setupHasilFields(o) {
+      var tipe = (o && o.tipeKirim) || "link";
+      var showTeks = tipe === "email_password";
+      var showUrl = tipe === "link" || tipe === "link_target" || tipe === "apk_zip";
+      var showFile = tipe === "apk_zip";
+      var showCat = tipe === "link" || tipe === "apk_zip" || tipe === "link_target";
+      /* fallback: tampilkan semua jika tipe tidak dikenal */
+      if (["email_password","apk_zip","link","link_target","wa_admin"].indexOf(tipe) === -1) {
+        showTeks = showUrl = showFile = showCat = true;
+      }
+      if (tipe === "wa_admin") {
+        showTeks = showUrl = showFile = false;
+      }
+      document.getElementById("boxHasilTeks").style.display = showTeks ? "block" : "none";
+      document.getElementById("boxHasilUrl").style.display = showUrl ? "block" : "none";
+      document.getElementById("boxHasilFile").style.display = showFile ? "block" : "none";
+      document.getElementById("boxHasilCatatan").style.display = showCat ? "block" : "none";
+      var labels = {
+        email_password: "Pesanan akun → isi teks Email+Password, lalu Kirim hasil + Sukses",
+        apk_zip: "Pesanan file → upload APK/ZIP (boleh + link), lalu Kirim hasil + Sukses",
+        link: "Pesanan link → isi URL hasil, lalu Kirim hasil + Sukses",
+        link_target: "Jasa suntik → cek link target di atas, proses lalu Kirim hasil + Sukses (boleh isi link/petunjuk)",
+        wa_admin: "Order via WA → proses/tolak saja, atau tandai Sukses setelah dilayani di WA"
+      };
+      document.getElementById("hasilTipeHint").textContent = labels[tipe] || "Isi hasil sesuai kebutuhan, lalu Kirim hasil + Sukses";
+      /* clear previous */
+      var ht = document.getElementById("hasilTeks"); if (ht) ht.value = o.hasilTeks || "";
+      var hu = document.getElementById("hasilUrl"); if (hu) hu.value = o.hasilUrl || "";
+      var hc = document.getElementById("hasilCatatan"); if (hc) hc.value = o.hasilCatatan || "";
     }
     function tutupDetail() { selectedKode = null; document.getElementById("detailPesananBox").classList.add("hidden"); }
     function ubahStatus(status) {
@@ -441,8 +477,31 @@
       var teks = (document.getElementById("hasilTeks").value || "").trim();
       var catatan = (document.getElementById("hasilCatatan").value || "").trim();
       var file = document.getElementById("fileHasil").files[0];
-      if (!url && !file && !teks) {
-        alert("Isi teks akun, link/URL, atau file");
+      var o = allOrders.find(function (x) { return x.kode === selectedKode; }) || {};
+      var tipe = o.tipeKirim || "";
+      if (tipe === "wa_admin") {
+        /* cukup status selesai */
+        VOXY.updateOrder(selectedKode, { status: "Selesai", catatanAdmin: catatan || document.getElementById("catatanAdmin").value.trim() })
+          .then(function () {
+            if (VOXY.showToast) VOXY.showToast("Status: Selesai");
+            tutupDetail();
+          }).catch(function (e) { alert(e.message); });
+        return;
+      }
+      if (tipe === "email_password" && !teks) {
+        alert("Isi teks Email + Password untuk pembeli");
+        return;
+      }
+      if (tipe === "apk_zip" && !file && !url) {
+        alert("Upload file APK/ZIP atau isi link download");
+        return;
+      }
+      if (tipe === "link" && !url) {
+        alert("Isi link/URL hasil");
+        return;
+      }
+      if (!url && !file && !teks && tipe !== "link_target") {
+        alert("Isi teks akun, link/URL, atau file sesuai tipe pesanan");
         return;
       }
       if (!catatan) {
