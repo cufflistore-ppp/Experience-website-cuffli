@@ -269,7 +269,7 @@ th{color:var(--muted);font-size:10px;text-transform:uppercase}
 .voxy-lf-name{font-weight:800;font-size:15px;color:var(--text)}
 .voxy-lf-tag{font-size:11px;color:var(--muted)}
 .voxy-lf-desc{font-size:12px;color:var(--muted);line-height:1.55;margin:0 0 14px}
-.voxy-lf-cta{display:inline-flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:99px;font-weight:700;font-size:14px;margin-bottom:18px;text-decoration:none}
+.voxy-lf-cta{display:inline-flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:99px;font-weight:700;font-size:14px;margin-bottom:18px;text-decoration:none;background:var(--primary)!important;color:#fff!important;border:none;min-width:140px}
 .voxy-lf-sec{font-size:13px;font-weight:800;margin:0 0 6px;color:var(--text)}
 .voxy-lf-links{font-size:12px;line-height:1.9;margin-bottom:14px}
 .voxy-lf-links a{display:block;color:var(--muted);text-decoration:none}
