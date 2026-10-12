@@ -33,14 +33,10 @@
       <div class="banner-dots" id="bannerDots"><span class="active"></span><span></span><span></span></div>
     </div>
 
-    <div class="landing-intro" style="text-align:center;padding:4px 8px 12px">
-      <p style="font-size:13px;color:var(--muted);line-height:1.5;margin:0 0 8px">Pusat layanan produk digital, akun premium, jasa suntik, dan order cepat untuk kebutuhanmu.</p>
-      <div class="trust-row" style="margin:0">
-        <span>Transaksi Aman</span>
-        <span>Proses Cepat</span>
-        <span>Produk Premium</span>
-      </div>
-    </div>
+    <a href="search.html" class="home-search" style="margin-top:12px">
+      <i data-lucide="search" style="width:18px;height:18px"></i>
+      Cari produk, game, atau layanan...
+    </a>
 
     <!-- Kategori geser horizontal -->
     <div class="cat-scroll" id="catScroll"></div>
@@ -58,9 +54,34 @@
     <div id="catSections"></div>
   </main>
 
-  <div class="site-footer">
-    Copyright &copy; 2026 VOXY MARKET<br>
-    Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+    <div class="site-footer" style="text-align:left;padding:24px 16px 110px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <img src="logo.png" alt="" style="width:40px;height:40px;border-radius:10px">
+      <div>
+        <div style="font-weight:800;color:var(--text)">VOXY MARKET</div>
+        <div style="font-size:11px;color:var(--muted)">Produk Digital, Akun Premium &amp; Jasa</div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px">
+      Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.
+    </p>
+    <div style="font-size:12px;font-weight:700;margin-bottom:6px">Bantuan</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:12px">
+      <a href="riwayat.html" style="color:var(--muted)">Cek Pesanan</a><br>
+      <a href="home.html" style="color:var(--muted)">Buat Pesanan</a><br>
+      <a href="chat.html" style="color:var(--muted)">Chat Admin</a>
+    </div>
+    <div style="font-size:12px;font-weight:700;margin-bottom:6px">Layanan</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px">
+      Akun Premium<br>
+      Produk Digital / APK<br>
+      Jasa Suntik<br>
+      Jasa Lainnya
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center">
+      Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
+      Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+    </div>
   </div>
 
   <div class="fab-chat" id="fabChat" title="Chat Admin">
@@ -145,6 +166,7 @@
       function onEnd() {
         if (!dragging) return;
         dragging = false;
+        fab.classList.remove("dragging");
         if (!moved) bukaLaporan();
       }
       fab.addEventListener("mousedown", onStart);
@@ -185,10 +207,14 @@
         var c = (p.kategori || "Lainnya").trim() || "Lainnya";
         cats[c] = (cats[c] || 0) + 1;
       });
+      var hasFlash = list.some(isFlash);
       var html = '<button type="button" class="cat-chip' + (activeCat === "semua" ? " active" : "") + '" data-cat="semua">Semua</button>';
       Object.keys(cats).sort().forEach(function (c) {
         html += '<button type="button" class="cat-chip' + (activeCat === c ? " active" : "") + '" data-cat="' + c.replace(/"/g, "") + '">' + c + '</button>';
       });
+      if (hasFlash) {
+        html += '<button type="button" class="cat-chip' + (activeCat === "flash" ? " active" : "") + '" data-cat="flash" style="background:#ffedd5;color:#c2410c;border-color:#fdba74">Flash Sale</button>';
+      }
       var el = document.getElementById("catScroll");
       el.innerHTML = html;
       el.querySelectorAll(".cat-chip").forEach(function (btn) {
@@ -230,7 +256,9 @@
 
     function renderSections(list) {
       var filtered = list;
-      if (activeCat !== "semua") {
+      if (activeCat === "flash") {
+        filtered = list.filter(isFlash);
+      } else if (activeCat !== "semua") {
         filtered = list.filter(function (p) {
           return ((p.kategori || "Lainnya").trim() || "Lainnya") === activeCat;
         });
