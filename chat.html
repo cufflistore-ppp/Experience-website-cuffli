@@ -26,6 +26,10 @@
     </div>
 
     <div class="chat-input-bar">
+      <label class="chat-attach" title="Kirim foto">
+        <i data-lucide="image"></i>
+        <input type="file" id="inputFoto" accept="image/*" hidden>
+      </label>
       <input id="inputMsg" type="text" placeholder="Tulis pesan..." autocomplete="off">
       <button type="button" id="btnKirim"><i data-lucide="send"></i></button>
     </div>
@@ -59,12 +63,16 @@
           : '<div class="msg-avatar" style="display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;background:#64748b">' +
               ((currentUser && currentUser.email) ? currentUser.email[0].toUpperCase() : "U") + "</div>";
         var bubbleClass = isAdmin ? "msg msg-admin" : "msg msg-user";
+        var imgHtml = m.image
+          ? '<div class="msg-img"><img src="' + m.image + '" alt="foto" onclick="window.open(this.src,\'_blank\')"></div>'
+          : "";
+        var textHtml = (m.text && m.text !== "📷 Foto") ? esc(m.text) : (m.image ? "" : esc(m.text || ""));
         return (
           '<div class="' + rowClass + '">' +
             avatar +
             '<div class="msg-bubble-wrap">' +
               '<div class="msg-label">' + label + "</div>" +
-              '<div class="' + bubbleClass + '">' + esc(m.text) +
+              '<div class="' + bubbleClass + '">' + imgHtml + textHtml +
                 "<small>" + VOXY.formatTanggal(m.at) + "</small></div>" +
             "</div>" +
           "</div>"
@@ -73,17 +81,20 @@
       box.scrollTop = box.scrollHeight;
     }
 
-    function kirim() {
-      var input = document.getElementById("inputMsg");
-      var text = (input.value || "").trim();
-      if (!text || !currentUser) return;
+    var pendingImage = null;
+
+    function kirim(text, imageData) {
+      if (!currentUser) return;
+      text = (text || "").trim();
+      if (!text && !imageData) return;
       var btn = document.getElementById("btnKirim");
       btn.disabled = true;
-      VOXY.kirimPesanUser(currentUser.uid, currentUser.email, text)
+      VOXY.kirimPesanUser(currentUser.uid, currentUser.email, text, imageData)
         .then(function () {
-          input.value = "";
+          document.getElementById("inputMsg").value = "";
+          pendingImage = null;
           btn.disabled = false;
-          input.focus();
+          document.getElementById("inputMsg").focus();
         })
         .catch(function (e) {
           var msg = e.message || "Gagal kirim";
@@ -95,9 +106,19 @@
         });
     }
 
-    document.getElementById("btnKirim").onclick = kirim;
+    document.getElementById("btnKirim").onclick = function () {
+      kirim(document.getElementById("inputMsg").value, pendingImage);
+    };
     document.getElementById("inputMsg").addEventListener("keydown", function (e) {
-      if (e.key === "Enter") kirim();
+      if (e.key === "Enter") kirim(document.getElementById("inputMsg").value, pendingImage);
+    });
+    document.getElementById("inputFoto").addEventListener("change", function () {
+      var file = this.files && this.files[0];
+      this.value = "";
+      if (!file) return;
+      VOXY.compressChatImage(file).then(function (dataUrl) {
+        kirim("", dataUrl);
+      }).catch(function (e) { alert(e.message || "Gagal foto"); });
     });
     document.getElementById("btnWA").onclick = function () {
       VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET:");

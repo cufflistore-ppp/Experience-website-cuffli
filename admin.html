@@ -183,6 +183,10 @@
               <div class="admin-chat-view">
                 <div class="chat-messages" id="adminMessages"></div>
                 <div class="chat-input-bar" style="padding:0;border:none;background:transparent">
+                  <label class="chat-attach" title="Kirim foto">
+                    <i data-lucide="image"></i>
+                    <input type="file" id="adminChatFoto" accept="image/*" hidden onchange="kirimAdminFoto(this)">
+                  </label>
                   <input id="adminReply" type="text" placeholder="Tulis balasan...">
                   <button onclick="kirimBalasanAdmin()" class="btn btn-sm" style="width:auto;border-radius:12px;padding:12px 16px">➤</button>
                 </div>
@@ -528,7 +532,7 @@
           deskripsi: document.getElementById("pDeskripsi").value.trim(),
           tipeKirim: document.getElementById("pTipeKirim").value,
           stokHabis: document.getElementById("pStokHabis").checked,
-          flashSale: flashOn,
+          flashSale: !!flashOn,
           flashHarga: flashOn ? (Number(document.getElementById("pFlashHarga").value) || 0) : null,
           flashEnd: flashEnd,
           butuhTarget: document.getElementById("pTipeKirim").value === "link_target"
@@ -574,11 +578,13 @@
           var row = isAdmin ? "msg-row mine" : "msg-row";
           var label = isAdmin ? "Admin (kamu)" : "Pelanggan";
           var cls = isAdmin ? "msg msg-admin" : "msg msg-user";
-          var t = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          var txt = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          if (txt === "📷 Foto" && m.image) txt = "";
+          var imgHtml = m.image ? '<div class="msg-img"><img src="' + m.image + '" alt="foto"></div>' : "";
           var av = isAdmin
             ? '<img class="msg-avatar admin" src="logo.png" alt="">'
             : '<div class="msg-avatar" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#94a3b8;font-size:12px">U</div>';
-          return '<div class="' + row + '">' + av + '<div class="msg-bubble-wrap"><div class="msg-label">' + label + '</div><div class="' + cls + '">' + t + '<small>' + VOXY.formatTanggal(m.at) + '</small></div></div></div>';
+          return '<div class="' + row + '">' + av + '<div class="msg-bubble-wrap"><div class="msg-label">' + label + '</div><div class="' + cls + '">' + imgHtml + txt + '<small>' + VOXY.formatTanggal(m.at) + '</small></div></div></div>';
         }).join("");
         box.scrollTop = box.scrollHeight;
       });
@@ -592,6 +598,15 @@
       VOXY.kirimPesanAdmin(selectedChatUid, text).then(function () {
         input.value = "";
       }).catch(function (e) { alert(e.message); });
+    }
+    function kirimAdminFoto(el) {
+      if (!selectedChatUid) { alert("Pilih chat dulu"); return; }
+      var file = el.files && el.files[0];
+      el.value = "";
+      if (!file) return;
+      VOXY.compressChatImage(file).then(function (dataUrl) {
+        return VOXY.kirimPesanAdmin(selectedChatUid, "", dataUrl);
+      }).catch(function (e) { alert(e.message || "Gagal kirim foto"); });
     }
     document.addEventListener("keydown", function (e) {
       if (e.key === "Enter" && document.activeElement && document.activeElement.id === "adminReply") {

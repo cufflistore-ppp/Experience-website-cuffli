@@ -235,8 +235,17 @@ function listenProduk(callback) {
 
 function simpanProduk(id, data) {
   if (!db) return Promise.reject(new Error("Database belum siap"));
-  var key = id || db.ref("produk").push().key;
-  return db.ref("produk/" + key).set(Object.assign({}, data, { updatedAt: Date.now() })).then(function () { return key; });
+  var payload = Object.assign({}, data, { updatedAt: Date.now() });
+  /* pastikan boolean flash */
+  if (payload.flashSale !== undefined) payload.flashSale = !!payload.flashSale;
+  if (payload.flashHarga != null) payload.flashHarga = Number(payload.flashHarga) || 0;
+  if (payload.flashEnd != null) payload.flashEnd = Number(payload.flashEnd) || null;
+  if (id) {
+    return db.ref("produk/" + id).update(payload).then(function () { return id; });
+  }
+  var key = db.ref("produk").push().key;
+  payload.id = key;
+  return db.ref("produk/" + key).set(payload).then(function () { return key; });
 }
 
 function hapusProduk(id) {
@@ -261,20 +270,24 @@ function chatPath(uid) {
   return "chat/" + uid;
 }
 
-function kirimPesanUser(uid, email, text) {
+function kirimPesanUser(uid, email, text, imageData) {
   if (!db || !uid) return Promise.reject(new Error("Database belum siap"));
+  text = (text || "").trim();
+  if (!text && !imageData) return Promise.reject(new Error("Pesan kosong"));
   var msgRef = db.ref(chatPath(uid) + "/messages").push();
   var msg = {
     from: "user",
     email: email || "",
-    text: text,
+    text: text || (imageData ? "📷 Foto" : ""),
     at: Date.now(),
     readByAdmin: false
   };
+  if (imageData) msg.image = imageData;
+  var preview = text || "📷 Foto";
   return msgRef.set(msg).then(function () {
     return db.ref(chatPath(uid) + "/meta").update({
       email: email || "",
-      lastMessage: text,
+      lastMessage: preview,
       lastAt: Date.now(),
       lastFrom: "user",
       unreadAdmin: true,
@@ -283,23 +296,57 @@ function kirimPesanUser(uid, email, text) {
   });
 }
 
-function kirimPesanAdmin(uid, text) {
+function kirimPesanAdmin(uid, text, imageData) {
   if (!db || !uid) return Promise.reject(new Error("Database belum siap"));
+  text = (text || "").trim();
+  if (!text && !imageData) return Promise.reject(new Error("Pesan kosong"));
   var msgRef = db.ref(chatPath(uid) + "/messages").push();
   var msg = {
     from: "admin",
-    text: text,
+    text: text || (imageData ? "📷 Foto" : ""),
     at: Date.now(),
     readByUser: false
   };
+  if (imageData) msg.image = imageData;
+  var preview = text || "📷 Foto";
   return msgRef.set(msg).then(function () {
     return db.ref(chatPath(uid) + "/meta").update({
-      lastMessage: text,
+      lastMessage: preview,
       lastAt: Date.now(),
       lastFrom: "admin",
       unreadAdmin: false,
       unreadUser: true
     });
+  });
+}
+
+/** kompres gambar chat max ~800px */
+function compressChatImage(file) {
+  return new Promise(function (resolve, reject) {
+    if (!file || !file.type || file.type.indexOf("image") !== 0) {
+      reject(new Error("Pilih file gambar"));
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 800;
+        var w = img.width, h = img.height;
+        if (w > max || h > max) {
+          if (w > h) { h = Math.round(h * max / w); w = max; }
+          else { w = Math.round(w * max / h); h = max; }
+        }
+        var canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.72));
+      };
+      img.onerror = function () { reject(new Error("Gagal baca gambar")); };
+      img.src = reader.result;
+    };
+    reader.onerror = function () { reject(new Error("Gagal baca file")); };
+    reader.readAsDataURL(file);
   });
 }
 
@@ -480,6 +527,7 @@ window.VOXY = {
   simpanSettings: simpanSettings,
   kirimPesanUser: kirimPesanUser,
   kirimPesanAdmin: kirimPesanAdmin,
+  compressChatImage: compressChatImage,
   listenChatMessages: listenChatMessages,
   listenAllChats: listenAllChats,
   markChatReadByAdmin: markChatReadByAdmin,
