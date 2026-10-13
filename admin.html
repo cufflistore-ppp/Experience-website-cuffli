@@ -386,9 +386,7 @@
             '<div class="meta">Pesanan: <b>' + (o.namaProduk || "-") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
             (o.linkTarget ? '<div class="meta">Target: ' + o.linkTarget + '</div>' : '') +
             '<div class="actions">' +
-              '<button type="button" class="btn btn-sm" data-kode="' + kode + '" onclick="bukaDetail(this.dataset.kode)">Kelola</button>' +
-              '<button type="button" class="btn btn-sm btn-outline" data-kode="' + kode + '" onclick="ubahStatusCepat(this.dataset.kode,\'Diproses\')">Proses</button>' +
-              '<button type="button" class="btn btn-sm btn-success" data-kode="' + kode + '" onclick="ubahStatusCepat(this.dataset.kode,\'Selesai\')">Sukses</button>' +
+              '<button type="button" class="btn btn-sm" data-kode="' + kode + '" onclick="bukaDetail(this.dataset.kode)">Kelola (status + kirim)</button>' +
               '<button type="button" class="btn btn-sm btn-danger" data-kode="' + kode + '" onclick="ubahStatusCepat(this.dataset.kode,\'Ditolak\')">Tolak</button>' +
             '</div>' +
           '</div>'
@@ -409,6 +407,9 @@
       var o = allOrders.find(function (x) { return x.kode === kode; });
       if (!o) return;
       document.getElementById("detailPesananBox").classList.remove("hidden");
+      setTimeout(function () {
+        document.getElementById("detailPesananBox").scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
       document.getElementById("detailKode").textContent = kode;
       document.getElementById("catatanAdmin").value = o.catatanAdmin || "";
       var hu = document.getElementById("hasilUrl");
@@ -432,34 +433,27 @@
     }
 
     function setupHasilFields(o) {
-      var tipe = (o && o.tipeKirim) || "link";
-      var showTeks = tipe === "email_password";
-      var showUrl = tipe === "link" || tipe === "link_target" || tipe === "apk_zip";
-      var showFile = tipe === "apk_zip";
-      var showCat = tipe === "link" || tipe === "apk_zip" || tipe === "link_target";
-      /* fallback: tampilkan semua jika tipe tidak dikenal */
-      if (["email_password","apk_zip","link","link_target","wa_admin"].indexOf(tipe) === -1) {
-        showTeks = showUrl = showFile = showCat = true;
-      }
-      if (tipe === "wa_admin") {
-        showTeks = showUrl = showFile = false;
-      }
-      document.getElementById("boxHasilTeks").style.display = showTeks ? "block" : "none";
-      document.getElementById("boxHasilUrl").style.display = showUrl ? "block" : "none";
-      document.getElementById("boxHasilFile").style.display = showFile ? "block" : "none";
-      document.getElementById("boxHasilCatatan").style.display = showCat ? "block" : "none";
+      /* SELALU tampilkan semua opsi kirim: teks + link + file */
+      document.getElementById("boxHasilTeks").style.display = "block";
+      document.getElementById("boxHasilUrl").style.display = "block";
+      document.getElementById("boxHasilFile").style.display = "block";
+      document.getElementById("boxHasilCatatan").style.display = "block";
+      var tipe = (o && o.tipeKirim) || "-";
       var labels = {
-        email_password: "Pesanan akun → isi teks Email+Password, lalu Kirim hasil + Sukses",
-        apk_zip: "Pesanan file → upload APK/ZIP (boleh + link), lalu Kirim hasil + Sukses",
-        link: "Pesanan link → isi URL hasil, lalu Kirim hasil + Sukses",
-        link_target: "Jasa suntik → cek link target di atas, proses lalu Kirim hasil + Sukses (boleh isi link/petunjuk)",
-        wa_admin: "Order via WA → proses/tolak saja, atau tandai Sukses setelah dilayani di WA"
+        email_password: "Tipe order: Email+Password — isi teks akun, tekan Kirim hasil + Sukses",
+        apk_zip: "Tipe order: APK/ZIP — upload file (boleh + link), tekan Kirim hasil + Sukses",
+        link: "Tipe order: Link — isi URL, tekan Kirim hasil + Sukses",
+        link_target: "Tipe order: Jasa suntik — proses target, boleh isi hasil, tekan Kirim hasil + Sukses",
+        wa_admin: "Tipe order: WA Admin — boleh kirim hasil atau langsung Proses/Tolak"
       };
-      document.getElementById("hasilTipeHint").textContent = labels[tipe] || "Isi hasil sesuai kebutuhan, lalu Kirim hasil + Sukses";
-      /* clear previous */
-      var ht = document.getElementById("hasilTeks"); if (ht) ht.value = o.hasilTeks || "";
-      var hu = document.getElementById("hasilUrl"); if (hu) hu.value = o.hasilUrl || "";
-      var hc = document.getElementById("hasilCatatan"); if (hc) hc.value = o.hasilCatatan || "";
+      document.getElementById("hasilTipeHint").textContent =
+        (labels[tipe] || "Isi teks / link / file (boleh kombinasi), lalu tekan Kirim hasil + Sukses. Atau Proses / Tolak.") +
+        " · Tipe: " + tipe;
+      document.getElementById("hasilTeks").value = (o && o.hasilTeks) || "";
+      document.getElementById("hasilUrl").value = (o && o.hasilUrl) || "";
+      document.getElementById("hasilCatatan").value = (o && o.hasilCatatan) || "";
+      var ff = document.getElementById("fileHasil");
+      if (ff) ff.value = "";
     }
     function tutupDetail() { selectedKode = null; document.getElementById("detailPesananBox").classList.add("hidden"); }
     function ubahStatus(status) {
@@ -477,32 +471,8 @@
       var teks = (document.getElementById("hasilTeks").value || "").trim();
       var catatan = (document.getElementById("hasilCatatan").value || "").trim();
       var file = document.getElementById("fileHasil").files[0];
-      var o = allOrders.find(function (x) { return x.kode === selectedKode; }) || {};
-      var tipe = o.tipeKirim || "";
-      if (tipe === "wa_admin") {
-        /* cukup status selesai */
-        VOXY.updateOrder(selectedKode, { status: "Selesai", catatanAdmin: catatan || document.getElementById("catatanAdmin").value.trim() })
-          .then(function () {
-            if (VOXY.showToast) VOXY.showToast("Status: Selesai");
-            tutupDetail();
-          }).catch(function (e) { alert(e.message); });
-        return;
-      }
-      if (tipe === "email_password" && !teks) {
-        alert("Isi teks Email + Password untuk pembeli");
-        return;
-      }
-      if (tipe === "apk_zip" && !file && !url) {
-        alert("Upload file APK/ZIP atau isi link download");
-        return;
-      }
-      if (tipe === "link" && !url) {
-        alert("Isi link/URL hasil");
-        return;
-      }
-      if (!url && !file && !teks && tipe !== "link_target") {
-        alert("Isi teks akun, link/URL, atau file sesuai tipe pesanan");
-        return;
+      if (!url && !file && !teks) {
+        if (!confirm("Belum isi teks/link/file. Tetap tandai Sukses tanpa kirim hasil?")) return;
       }
       if (!catatan) {
         catatan = "Sebelum membuka konten: unduh dulu file/APK lewat tombol Download (jika ada), install jika perlu, lalu tekan Lihat untuk membuka link hasil.";
