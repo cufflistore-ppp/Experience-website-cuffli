@@ -284,7 +284,25 @@
     var selectedChatUid = null, allChats = [];
 
     VOXY.requireAdmin().then(function () {
+      var loadDone = false;
+      var loadTimer = setTimeout(function () {
+        if (!loadDone) {
+          var box = document.getElementById("tabelPesanan");
+          if (box && box.textContent.indexOf("Memuat") !== -1) {
+            box.innerHTML = '<div class="empty-state">Memuat lambat… <button class="btn btn-sm" onclick="location.reload()">Muat ulang</button></div>';
+          }
+          /* coba once */
+          VOXY.getAllOrders().then(function (list) {
+            if (loadDone) return;
+            allOrders = list || [];
+            updateDashboard();
+            renderPesanan();
+          }).catch(function () {});
+        }
+      }, 3000);
       VOXY.listenOrders(function (list) {
+        loadDone = true;
+        clearTimeout(loadTimer);
         allOrders = list || [];
         updateDashboard();
         renderPesanan();

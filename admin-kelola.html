@@ -51,7 +51,7 @@
       fields += '<div class="form-group"><label>Catatan admin (opsional)</label>' +
         '<input id="catatanAdmin" type="text" value="' + (o.catatanAdmin || "").replace(/"/g, "&quot;") + '" placeholder="Catatan singkat"></div>';
 
-      if (tipe === "email_password" || !tipe) {
+      if (tipe === "email_password") {
         fields += '<div class="form-group"><label>Teks akun (Email + Password)</label>' +
           '<textarea id="hasilTeks" rows="4" placeholder="Email: xxx@gmail.com&#10;Password: rahasia123">' + (o.hasilTeks || "") + '</textarea></div>';
         fields += '<div class="form-group"><label>Petunjuk untuk pembeli</label>' +
@@ -92,8 +92,8 @@
       if (tipe === "wa_admin") {
         fields += '<p style="font-size:13px;color:var(--muted)">Order via WA — cukup ubah status Proses / Sukses / Tolak.</p>';
       }
-      /* fallback unknown tipe: show teks + link + file */
-      if (tipe && ["email_password","apk_zip","link","link_target","wa_admin"].indexOf(tipe) === -1) {
+      /* order lama / tipe kosong / tidak dikenal: tampilkan semua opsi kirim */
+      if (!tipe || ["email_password","apk_zip","link","link_target","wa_admin"].indexOf(tipe) === -1) {
         fields += '<div class="form-group"><label>Teks hasil</label><textarea id="hasilTeks" rows="3">' + (o.hasilTeks || "") + '</textarea></div>';
         fields += '<div class="form-group"><label>Link / URL</label><input id="hasilUrl" type="url" value="' + (o.hasilUrl || "") + '"></div>';
         fields += '<div class="form-group"><label>File</label><input type="file" id="fileHasil"></div>';
@@ -202,15 +202,45 @@
       }
     }
 
-    VOXY.requireAdmin(function () {
-      var t0 = Date.now();
+    function loadOrder() {
+      if (!kode) {
+        document.getElementById("box").innerHTML = '<div class="empty-state">Kode pesanan kosong. <a href="admin.html">Kembali</a></div>';
+        return;
+      }
+      var done = false;
+      var timer = setTimeout(function () {
+        if (!done) {
+          document.getElementById("box").innerHTML =
+            '<div class="empty-state">Memuat lebih dari 3 detik… cek koneksi / Rules Firebase.<br><br>' +
+            '<button class="btn btn-sm" onclick="loadOrder()">Coba lagi</button> ' +
+            '<a href="admin.html" class="btn btn-sm btn-outline">Kembali</a></div>';
+        }
+      }, 3000);
+
       VOXY.getOrder(kode).then(function (o) {
+        if (o) return o;
+        /* fallback: cari di list (order lama) */
+        return VOXY.getAllOrders().then(function (list) {
+          return (list || []).find(function (x) { return x.kode === kode; }) || null;
+        });
+      }).then(function (o) {
+        done = true;
+        clearTimeout(timer);
         order = o ? Object.assign({ kode: kode }, o) : null;
+        /* tetap bisa kelola meski status lama selama belum Selesai/Ditolak */
         render();
       }).catch(function (e) {
-        document.getElementById("box").innerHTML = '<div class="empty-state">' + (e.message || "Gagal memuat") + '</div>';
+        done = true;
+        clearTimeout(timer);
+        document.getElementById("box").innerHTML =
+          '<div class="empty-state">' + (e.message || "Gagal memuat") +
+          '<br><br><button class="btn btn-sm" onclick="loadOrder()">Coba lagi</button></div>';
       });
-    });
+    }
+
+    VOXY.requireAdmin().then(function () {
+      loadOrder();
+    }).catch(function () {});
   </script>
 </body>
 </html>
