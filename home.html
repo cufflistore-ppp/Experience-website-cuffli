@@ -18,18 +18,18 @@
       <span>VOXY MARKET</span>
     </div>
     <div class="header-actions">
-      <button type="button" class="icon-btn" id="btnMenu" aria-label="Menu"><i data-lucide="menu"></i></button>
+      <button type="button" class="icon-btn" id="btnMenu" aria-label="Menu" onclick="document.getElementById('drawerBg').classList.add('show');document.getElementById('sideDrawer').classList.add('show');if(window.lucide)lucide.createIcons();"><i data-lucide="menu"></i></button>
     </div>
   </header>
 
-  <div class="side-drawer-bg" id="drawerBg"></div>
+  <div class="side-drawer-bg" id="drawerBg" onclick="this.classList.remove('show');document.getElementById('sideDrawer').classList.remove('show');"></div>
   <div class="side-drawer" id="sideDrawer">
     <div class="side-drawer-head">
       <div class="logo-area">
         <img src="logo.png" alt="">
         <span>VOXY MARKET</span>
       </div>
-      <button type="button" class="icon-btn" id="btnCloseDrawer"><i data-lucide="x"></i></button>
+      <button type="button" class="icon-btn" id="btnCloseDrawer" onclick="document.getElementById('drawerBg').classList.remove('show');document.getElementById('sideDrawer').classList.remove('show');"><i data-lucide="x"></i></button>
     </div>
     <nav class="side-drawer-nav">
       <a href="akun.html"><i data-lucide="user"></i> Akun</a>
@@ -125,6 +125,31 @@
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
+
+    /* Menu garis tiga */
+    (function () {
+      var bg = document.getElementById("drawerBg");
+      var dr = document.getElementById("sideDrawer");
+      var btn = document.getElementById("btnMenu");
+      var closeBtn = document.getElementById("btnCloseDrawer");
+      if (!bg || !dr || !btn) return;
+      function openD(e) {
+        if (e) e.preventDefault();
+        bg.classList.add("show");
+        dr.classList.add("show");
+        if (window.lucide) lucide.createIcons();
+      }
+      function closeD(e) {
+        if (e) e.preventDefault();
+        bg.classList.remove("show");
+        dr.classList.remove("show");
+      }
+      btn.addEventListener("click", openD);
+      if (closeBtn) closeBtn.addEventListener("click", closeD);
+      bg.addEventListener("click", closeD);
+    })();
+
+
     var waAdmin = "";
     var allProduk = [];
     var activeCat = "semua";
