@@ -384,7 +384,11 @@
             '<div class="top"><b>' + (o.kode || "-") + '</b><span class="badge ' + cls + '">' + st + '</span></div>' +
             '<div class="meta">Email: <b>' + (o.email || "-") + '</b></div>' +
             '<div class="meta">Pesanan: <b>' + (o.namaProduk || "-") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
-            (o.linkTarget ? '<div class="meta">Target: ' + o.linkTarget + '</div>' : '') +
+            (o.linkTarget ? '<div class="meta" style="background:#eff6ff;padding:8px;border-radius:8px;margin-top:6px">' +
+              '<div style="font-size:11px;color:#1d4ed8;font-weight:700">Link target pembeli</div>' +
+              '<div style="word-break:break-all;font-size:12px;margin:4px 0">' + String(o.linkTarget).replace(/</g,'&lt;') + '</div>' +
+              '<button type="button" class="btn btn-sm" data-target="' + String(o.linkTarget).replace(/"/g,'&quot;').replace(/'/g,'') + '" onclick="navigator.clipboard.writeText(this.dataset.target).then(function(){if(VOXY.showToast)VOXY.showToast(\'Tersalin\')})">📋 Salin</button>' +
+            '</div>' : '') +
             '<div class="actions">' +
               '<button type="button" class="btn btn-sm" data-kode="' + kode + '" onclick="bukaDetail(this.dataset.kode)">Kelola (status + kirim)</button>' +
               '<button type="button" class="btn btn-sm btn-danger" data-kode="' + kode + '" onclick="ubahStatusCepat(this.dataset.kode,\'Ditolak\')">Tolak</button>' +
@@ -403,13 +407,13 @@
     }
 
     function bukaDetail(kode) {
+      /* pindah halaman khusus — tidak scroll ke bawah */
+      location.href = "admin-kelola.html?kode=" + encodeURIComponent(kode);
+      return;
       selectedKode = kode;
       var o = allOrders.find(function (x) { return x.kode === kode; });
       if (!o) return;
       document.getElementById("detailPesananBox").classList.remove("hidden");
-      setTimeout(function () {
-        document.getElementById("detailPesananBox").scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50);
       document.getElementById("detailKode").textContent = kode;
       document.getElementById("catatanAdmin").value = o.catatanAdmin || "";
       var hu = document.getElementById("hasilUrl");

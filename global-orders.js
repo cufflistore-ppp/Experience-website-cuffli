@@ -194,6 +194,7 @@ function simpanHasilPesanan(kode, opts) {
   if (opts.teks !== undefined) updates.hasilTeks = opts.teks || "";
   if (opts.catatan !== undefined) updates.hasilCatatan = opts.catatan || "";
   if (opts.status) updates.status = opts.status;
+  if (opts.catatanAdmin !== undefined) updates.catatanAdmin = opts.catatanAdmin || "";
   var p = db.ref("orders/" + kode).update(updates);
   if (opts.fileData) {
     p = p.then(function () {

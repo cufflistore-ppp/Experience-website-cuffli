@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kelola Pesanan - VOXY ADMIN</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="logo-area">
+      <a href="admin.html" class="icon-btn" style="margin-right:4px"><i data-lucide="arrow-left"></i></a>
+      <span>Kelola Pesanan</span>
+    </div>
+  </header>
+  <main class="page" style="padding-bottom:40px">
+    <div class="admin-card" id="box">
+      <div class="empty-state">Memuat...</div>
+    </div>
+  </main>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var kode = new URLSearchParams(location.search).get("kode") || "";
+    var order = null;
+
+    function tipeLabel(t) {
+      var m = {
+        email_password: "Email + Password (teks)",
+        apk_zip: "APK / ZIP (file)",
+        link: "Link (URL)",
+        link_target: "Link Target (jasa suntik)",
+        wa_admin: "WhatsApp Admin"
+      };
+      return m[t] || t || "Tidak diketahui";
+    }
+
+    function render() {
+      if (!order) {
+        document.getElementById("box").innerHTML = '<div class="empty-state">Pesanan tidak ditemukan</div>';
+        return;
+      }
+      var o = order;
+      var tipe = o.tipeKirim || "";
+      var fields = "";
+
+      fields += '<div class="form-group"><label>Catatan admin (opsional)</label>' +
+        '<input id="catatanAdmin" type="text" value="' + (o.catatanAdmin || "").replace(/"/g, "&quot;") + '" placeholder="Catatan singkat"></div>';
+
+      if (tipe === "email_password" || !tipe) {
+        fields += '<div class="form-group"><label>Teks akun (Email + Password)</label>' +
+          '<textarea id="hasilTeks" rows="4" placeholder="Email: xxx@gmail.com&#10;Password: rahasia123">' + (o.hasilTeks || "") + '</textarea></div>';
+        fields += '<div class="form-group"><label>Petunjuk untuk pembeli</label>' +
+          '<textarea id="hasilCatatan" rows="2" placeholder="Contoh: Login pakai email & password di atas">' + (o.hasilCatatan || "") + '</textarea></div>';
+      }
+      if (tipe === "apk_zip") {
+        fields += '<div class="form-group"><label>Upload file (APK / ZIP)</label><input type="file" id="fileHasil"></div>';
+        fields += '<div class="form-group"><label>Link download (opsional)</label>' +
+          '<input id="hasilUrl" type="url" placeholder="https://..." value="' + (o.hasilUrl || "") + '"></div>';
+        fields += '<div class="form-group"><label>Petunjuk untuk pembeli</label>' +
+          '<textarea id="hasilCatatan" rows="2" placeholder="Download APK, install, lalu buka">' + (o.hasilCatatan || "") + '</textarea></div>';
+      }
+      if (tipe === "link") {
+        fields += '<div class="form-group"><label>Link / URL hasil</label>' +
+          '<input id="hasilUrl" type="url" placeholder="https://..." value="' + (o.hasilUrl || "") + '"></div>';
+        fields += '<div class="form-group"><label>Petunjuk untuk pembeli</label>' +
+          '<textarea id="hasilCatatan" rows="2" placeholder="Buka link di atas">' + (o.hasilCatatan || "") + '</textarea></div>';
+      }
+      if (tipe === "link_target") {
+        var target = o.linkTarget || "";
+        fields +=
+          '<div class="admin-card" style="background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:12px;padding:14px">' +
+            '<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px">🔗 Link dari pembeli (untuk di-suntik)</div>' +
+            (target
+              ? ('<div id="targetText" style="word-break:break-all;font-size:14px;font-weight:600;background:#fff;padding:12px;border-radius:10px;border:1px solid #bfdbfe;margin-bottom:10px">' +
+                  target.replace(/</g,"&lt;") + '</div>' +
+                  '<button type="button" class="btn btn-sm" style="width:100%;margin-bottom:8px" onclick="salinTarget()">📋 Salin link target</button>')
+              : '<p style="font-size:13px;color:#b45309;margin:0">Pembeli belum mengisi link target.</p>') +
+            '<p style="font-size:12px;color:#1e40af;margin:8px 0 0;line-height:1.45">' +
+              '<b>Petunjuk admin:</b> 1) Salin link di atas 2) Proses suntik di tools kamu 3) Setelah selesai, isi pesan sukses di bawah lalu tekan <b>Kirim hasil + Sukses</b>' +
+            '</p>' +
+          '</div>';
+        fields += '<div class="form-group"><label>Pesan ke pembeli (setelah suntik sukses)</label>' +
+          '<textarea id="hasilTeks" rows="3" placeholder="Suntik selesai ya, coba cek saluran kamu ✨">' + (o.hasilTeks || "") + '</textarea></div>';
+        fields += '<div class="form-group"><label>Petunjuk tambahan untuk pembeli (opsional)</label>' +
+          '<textarea id="hasilCatatan" rows="2" placeholder="Misal: Tunggu 5–10 menit lalu refresh">' + (o.hasilCatatan || "") + '</textarea></div>';
+      }
+      if (tipe === "wa_admin") {
+        fields += '<p style="font-size:13px;color:var(--muted)">Order via WA — cukup ubah status Proses / Sukses / Tolak.</p>';
+      }
+      /* fallback unknown tipe: show teks + link + file */
+      if (tipe && ["email_password","apk_zip","link","link_target","wa_admin"].indexOf(tipe) === -1) {
+        fields += '<div class="form-group"><label>Teks hasil</label><textarea id="hasilTeks" rows="3">' + (o.hasilTeks || "") + '</textarea></div>';
+        fields += '<div class="form-group"><label>Link / URL</label><input id="hasilUrl" type="url" value="' + (o.hasilUrl || "") + '"></div>';
+        fields += '<div class="form-group"><label>File</label><input type="file" id="fileHasil"></div>';
+        fields += '<div class="form-group"><label>Petunjuk</label><textarea id="hasilCatatan" rows="2">' + (o.hasilCatatan || "") + '</textarea></div>';
+      }
+
+      var html =
+        '<h2 style="margin-bottom:4px">' + (o.kode || kode) + '</h2>' +
+        '<p style="font-size:12px;color:var(--muted);margin-bottom:12px">Tipe kirim: <b>' + tipeLabel(tipe) + '</b></p>' +
+        '<div class="pay-row"><span>Email</span><span>' + (o.email || "-") + '</span></div>' +
+        '<div class="pay-row"><span>Pesanan</span><span>' + (o.namaProduk || "-") + '</span></div>' +
+        '<div class="pay-row"><span>Harga</span><span>' + VOXY.formatRp(o.harga) + '</span></div>' +
+        '<div class="pay-row"><span>Status</span><span><b>' + (o.status || "-") + '</b></span></div>' +
+        (o.linkTarget && tipe !== "link_target" ? '<div class="pay-row"><span>Link target</span><span style="word-break:break-all">' + o.linkTarget + '</span></div>' : "") +
+        '<div id="buktiBox" style="margin:12px 0;font-size:13px;color:var(--muted)">Memuat bukti TF...</div>' +
+        '<hr style="border:none;border-top:1px solid var(--border);margin:14px 0">' +
+        '<h3 style="font-size:15px;margin-bottom:10px">Kelola + Kirim Hasil</h3>' +
+        fields +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">' +
+          '<button type="button" class="btn btn-sm btn-outline" onclick="setStatus(\'Diproses\')">Proses</button>' +
+          '<button type="button" class="btn btn-sm btn-success" onclick="kirimDanSukses()">Kirim hasil + Sukses</button>' +
+          '<button type="button" class="btn btn-sm btn-danger" onclick="setStatus(\'Ditolak\')">Tolak</button>' +
+          '<a href="admin.html" class="btn btn-sm btn-outline">Kembali</a>' +
+        '</div>';
+      document.getElementById("box").innerHTML = html;
+      lucide.createIcons();
+      VOXY.getBukti(kode).then(function (data) {
+        var el = document.getElementById("buktiBox");
+        if (!el) return;
+        el.innerHTML = data
+          ? '<p style="margin-bottom:6px"><b>Foto bukti TF</b></p><img src="' + data + '" style="max-width:100%;border-radius:12px;border:1px solid var(--border)">'
+          : "Belum ada foto bukti TF";
+      });
+    }
+
+    function salinTarget() {
+      var text = (order && order.linkTarget) || "";
+      if (!text) { alert("Tidak ada link"); return; }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Link tersalin ✓");
+          else alert("Link tersalin ✓");
+        }).catch(function () { prompt("Salin manual:", text); });
+      } else {
+        prompt("Salin manual:", text);
+      }
+    }
+    function setStatus(st) {
+      var catatan = (document.getElementById("catatanAdmin") || {}).value || "";
+      VOXY.updateOrder(kode, { status: st, catatanAdmin: catatan.trim() }).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Status: " + st);
+        if (st === "Ditolak" || st === "Selesai") location.href = "admin.html";
+        else {
+          order.status = st;
+          render();
+        }
+      }).catch(function (e) { alert(e.message); });
+    }
+
+    function val(id) {
+      var el = document.getElementById(id);
+      return el ? (el.value || "").trim() : "";
+    }
+
+    function kirimDanSukses() {
+      var tipe = (order && order.tipeKirim) || "";
+      var teks = val("hasilTeks");
+      var url = val("hasilUrl");
+      var catatan = val("hasilCatatan");
+      var catatanAdmin = val("catatanAdmin");
+      var fileEl = document.getElementById("fileHasil");
+      var file = fileEl && fileEl.files && fileEl.files[0] ? fileEl.files[0] : null;
+
+      if (tipe === "email_password" && !teks) { alert("Isi teks Email + Password"); return; }
+      if (tipe === "apk_zip" && !file && !url) { alert("Upload file atau isi link download"); return; }
+      if (tipe === "link" && !url) { alert("Isi link/URL hasil"); return; }
+      if (tipe === "wa_admin") {
+        setStatus("Selesai");
+        return;
+      }
+      if (!teks && !url && !file && tipe !== "link_target") {
+        if (!confirm("Belum isi hasil. Tetap Sukses?")) return;
+      }
+
+      var opts = {
+        status: "Selesai",
+        teks: teks,
+        url: url,
+        catatan: catatan,
+        catatanAdmin: catatanAdmin
+      };
+      var go = function () {
+        return VOXY.simpanHasilPesanan(kode, opts).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Hasil terkirim · Selesai");
+          location.href = "admin.html";
+        });
+      };
+      if (file) {
+        VOXY.fileToDataURL(file).then(function (dataUrl) {
+          opts.fileData = dataUrl;
+          opts.fileNama = file.name;
+          return go();
+        }).catch(function (e) { alert(e.message || "Gagal file"); });
+      } else {
+        go().catch(function (e) { alert(e.message || "Gagal kirim"); });
+      }
+    }
+
+    VOXY.requireAdmin(function () {
+      var t0 = Date.now();
+      VOXY.getOrder(kode).then(function (o) {
+        order = o ? Object.assign({ kode: kode }, o) : null;
+        render();
+      }).catch(function (e) {
+        document.getElementById("box").innerHTML = '<div class="empty-state">' + (e.message || "Gagal memuat") + '</div>';
+      });
+    });
+  </script>
+</body>
+</html>
