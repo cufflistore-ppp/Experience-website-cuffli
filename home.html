@@ -376,8 +376,17 @@
         VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
         var loadTimeout = setTimeout(function () {
           var el = document.getElementById("catSections");
-          if (el && !allProduk.length) el.innerHTML = '<div class="empty-state">Memuat produk... jika lama, cek koneksi / Rules Firebase</div>';
+          if (el && !allProduk.length) {
+            el.innerHTML = '<div class="empty-state">Memuat lambat... <button type="button" class="btn btn-sm" onclick="location.reload()">Muat ulang</button></div>';
+          }
         }, 3000);
+        VOXY.getProdukList().then(function (list) {
+          if (list && list.length) {
+            clearTimeout(loadTimeout);
+            allProduk = list;
+            renderAll();
+          }
+        }).catch(function () {});
         VOXY.listenProduk(function (list) {
           clearTimeout(loadTimeout);
           allProduk = list || [];

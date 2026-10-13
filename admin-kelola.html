@@ -58,7 +58,9 @@
           '<textarea id="hasilCatatan" rows="2" placeholder="Contoh: Login pakai email & password di atas">' + (o.hasilCatatan || "") + '</textarea></div>';
       }
       if (tipe === "apk_zip") {
-        fields += '<div class="form-group"><label>Upload file (APK / ZIP)</label><input type="file" id="fileHasil"></div>';
+        fields += '<div class="form-group"><label>Upload file (APK / ZIP)</label>' +
+          '<input type="file" id="fileHasil" accept=".apk,.zip,.rar,.7z,application/zip,application/vnd.android.package-archive,application/octet-stream">' +
+          '<p style="font-size:11px;color:var(--muted);margin-top:4px">Pilih dari File / penyimpanan. Di PC: klik Pilih File.</p></div>';
         fields += '<div class="form-group"><label>Link download (opsional)</label>' +
           '<input id="hasilUrl" type="url" placeholder="https://..." value="' + (o.hasilUrl || "") + '"></div>';
         fields += '<div class="form-group"><label>Petunjuk untuk pembeli</label>' +
@@ -96,7 +98,7 @@
       if (!tipe || ["email_password","apk_zip","link","link_target","wa_admin"].indexOf(tipe) === -1) {
         fields += '<div class="form-group"><label>Teks hasil</label><textarea id="hasilTeks" rows="3">' + (o.hasilTeks || "") + '</textarea></div>';
         fields += '<div class="form-group"><label>Link / URL</label><input id="hasilUrl" type="url" value="' + (o.hasilUrl || "") + '"></div>';
-        fields += '<div class="form-group"><label>File</label><input type="file" id="fileHasil"></div>';
+        fields += '<div class="form-group"><label>File (APK/ZIP)</label><input type="file" id="fileHasil" accept=".apk,.zip,.rar,.7z,application/zip,application/vnd.android.package-archive,application/octet-stream"></div>';
         fields += '<div class="form-group"><label>Petunjuk</label><textarea id="hasilCatatan" rows="2">' + (o.hasilCatatan || "") + '</textarea></div>';
       }
 
@@ -192,6 +194,11 @@
         });
       };
       if (file) {
+        if (file.size > 8 * 1024 * 1024) {
+          alert("File terlalu besar (max ~8MB). Gunakan link download saja.");
+          return;
+        }
+        if (VOXY.showToast) VOXY.showToast("Mengirim file...");
         VOXY.fileToDataURL(file).then(function (dataUrl) {
           opts.fileData = dataUrl;
           opts.fileNama = file.name;
