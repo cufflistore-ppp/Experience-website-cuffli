@@ -265,6 +265,11 @@
       );
     }
 
+    function matchCat(p, cat) {
+      var k = ((p.kategori || "Lainnya") + "").trim().toLowerCase();
+      var c = (cat || "").trim().toLowerCase();
+      return k === c;
+    }
     function catIcon(name) {
       var n = (name || "").toLowerCase();
       if (n.indexOf("digital") !== -1) return "hard-drive";
@@ -305,6 +310,9 @@
 
     function renderFlash(list) {
       var flash = list.filter(isFlash);
+      if (activeCat !== "semua" && activeCat !== "flash") {
+        flash = flash.filter(function (p) { return matchCat(p, activeCat); });
+      }
       var box = document.getElementById("flashBox");
       var row = document.getElementById("flashRow");
       if (!flash.length) {
@@ -337,9 +345,7 @@
       if (activeCat === "flash") {
         filtered = list.filter(isFlash);
       } else if (activeCat !== "semua") {
-        filtered = list.filter(function (p) {
-          return ((p.kategori || "Lainnya").trim() || "Lainnya") === activeCat;
-        });
+        filtered = list.filter(function (p) { return matchCat(p, activeCat); });
       }
       var groups = {};
       filtered.forEach(function (p) {
@@ -350,7 +356,7 @@
       var keys = Object.keys(groups).sort();
       var html = "";
       if (!keys.length) {
-        html = '<div class="empty-state">Belum ada produk</div>';
+        html = '<div class="empty-state">Tidak ada produk di kategori ini</div>';
       } else {
         keys.forEach(function (c) {
           html += '<div class="section-head"><h2>' + catLabelHtml(c) + '</h2><span class="count">' + groups[c].length + '</span></div>';
