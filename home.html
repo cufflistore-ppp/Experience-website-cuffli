@@ -15,7 +15,7 @@
     <div class="logo-area">
       <img src="logo.png" alt="VOXY">
       <span class="badge-dot" id="logoBadge"></span>
-      <span>VOXY MARKET</span>
+      <span class="brand-name"><span class="brand-voxy">VOXY</span> <span class="brand-market">MARKET</span></span>
     </div>
     <div class="header-actions">
       <button type="button" class="icon-btn" id="btnMenu" aria-label="Menu" onclick="document.getElementById('drawerBg').classList.add('show');document.getElementById('sideDrawer').classList.add('show');if(window.lucide)lucide.createIcons();"><i data-lucide="menu"></i></button>
@@ -27,7 +27,7 @@
     <div class="side-drawer-head">
       <div class="logo-area">
         <img src="logo.png" alt="">
-        <span>VOXY MARKET</span>
+        <span class="brand-name"><span class="brand-voxy">VOXY</span> <span class="brand-market">MARKET</span></span>
       </div>
       <button type="button" class="icon-btn" id="btnCloseDrawer" onclick="document.getElementById('drawerBg').classList.remove('show');document.getElementById('sideDrawer').classList.remove('show');"><i data-lucide="x"></i></button>
     </div>
@@ -281,7 +281,7 @@
       return "package";
     }
     function catLabelHtml(name) {
-      return '<i data-lucide="' + catIcon(name) + '" style="width:15px;height:15px"></i> ' + name;
+      return '<i data-lucide="' + catIcon(name) + '" style="width:22px;height:22px"></i> ' + name;
     }
     function buildCategories(list) {
       var cats = {};
