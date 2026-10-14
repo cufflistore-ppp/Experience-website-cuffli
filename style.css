@@ -698,3 +698,49 @@ label{color:#94a3b8!important;font-weight:600;font-size:12px}
   border-radius:99px;
   font-weight:700;
 }
+
+/* cat filter blue + dark bg */
+.cat-scroll{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:10px 10px;
+  margin:0 0 12px;
+  scrollbar-width:none;
+  background:linear-gradient(180deg,#0c1630 0%,#0a1228 100%);
+  border:1px solid rgba(59,130,246,.2);
+  border-radius:16px;
+}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-chip{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:6px!important;
+  padding:9px 14px!important;
+  border-radius:99px!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  white-space:nowrap!important;
+  background:rgba(30,58,138,.35)!important;
+  border:1px solid rgba(59,130,246,.35)!important;
+  color:#93c5fd!important;
+  -webkit-text-fill-color:#93c5fd!important;
+}
+.cat-chip svg,.cat-chip i{
+  color:#60a5fa!important;
+  stroke:#60a5fa!important;
+  width:14px!important;
+  height:14px!important;
+}
+.cat-chip.active{
+  background:linear-gradient(135deg,#2563eb,#1d4ed8)!important;
+  border-color:transparent!important;
+  color:#ffffff!important;
+  -webkit-text-fill-color:#ffffff!important;
+  box-shadow:0 4px 16px rgba(37,99,235,.45)!important;
+}
+.cat-chip.active svg,.cat-chip.active i{
+  color:#fff!important;
+  stroke:#fff!important;
+}
