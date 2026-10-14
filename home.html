@@ -60,7 +60,7 @@
     <!-- Flash Sale -->
     <div class="flash-box" id="flashBox" style="display:none">
       <div class="flash-top">
-        <h2>FLASH SALE</h2>
+        <h2><i data-lucide="flame" style="width:18px;height:18px;color:#fb923c;display:inline;vertical-align:-3px"></i> FLASH SALE</h2>
         <div class="flash-timer" id="flashTimer">--:--:--</div>
       </div>
       <div class="flash-row" id="flashRow"></div>
@@ -296,7 +296,7 @@
         html += '<button type="button" class="cat-chip' + (activeCat === c ? " active" : "") + '" data-cat="' + safe + '"><i data-lucide="' + catIcon(c) + '" style="width:13px;height:13px"></i> ' + c + '</button>';
       });
       if (hasFlash) {
-        html += '<button type="button" class="cat-chip' + (activeCat === "flash" ? " active" : "") + '" data-cat="flash" style="background:#ffedd5;color:#c2410c;border-color:#fdba74"><i data-lucide="flame" style="width:13px;height:13px"></i> Flash Sale</button>';
+        html += '<button type="button" class="cat-chip' + (activeCat === "flash" ? " active" : "") + '" data-cat="flash" style="background:rgba(249,115,22,.2);color:#fb923c;border-color:rgba(249,115,22,.45)"><i data-lucide="flame" style="width:13px;height:13px"></i> Flash Sale</button>';
       }
       var el = document.getElementById("catScroll");
       el.innerHTML = html;
