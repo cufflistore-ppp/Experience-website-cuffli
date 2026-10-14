@@ -75,10 +75,10 @@
       if (tipe === "link_target") {
         var target = o.linkTarget || "";
         fields +=
-          '<div class="admin-card" style="background:#eff6ff;border:1px solid #bfdbfe;margin-bottom:12px;padding:14px">' +
+          '<div class="admin-card" style="background:rgba(59,130,246,.15);border:1px solid #bfdbfe;margin-bottom:12px;padding:14px">' +
             '<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px">🔗 Link dari pembeli (untuk di-suntik)</div>' +
             (target
-              ? ('<div id="targetText" style="word-break:break-all;font-size:14px;font-weight:600;background:#fff;padding:12px;border-radius:10px;border:1px solid #bfdbfe;margin-bottom:10px">' +
+              ? ('<div id="targetText" style="word-break:break-all;font-size:14px;font-weight:600;background:#0c1228;padding:12px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px">' +
                   target.replace(/</g,"&lt;") + '</div>' +
                   '<button type="button" class="btn btn-sm" style="width:100%;margin-bottom:8px" onclick="salinTarget()">📋 Salin link target</button>')
               : '<p style="font-size:13px;color:#b45309;margin:0">Pembeli belum mengisi link target.</p>') +

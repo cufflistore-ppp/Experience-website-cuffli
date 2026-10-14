@@ -78,7 +78,7 @@
         <div id="detailContent"></div>
         <div id="buktiAdmin" style="margin-top:8px"></div>
 
-        <div class="admin-card" style="margin-top:12px;background:#f8fafc">
+        <div class="admin-card" style="margin-top:12px;background:#0c1228">
           <h2 style="margin-bottom:6px">Kelola + Kirim Hasil</h2>
           <p id="hasilTipeHint" style="font-size:12px;color:var(--muted);margin-bottom:10px">Isi sesuai tipe pesanan, lalu pilih aksi di bawah.</p>
 
@@ -402,7 +402,7 @@
             '<div class="top"><b>' + (o.kode || "-") + '</b><span class="badge ' + cls + '">' + st + '</span></div>' +
             '<div class="meta">Email: <b>' + (o.email || "-") + '</b></div>' +
             '<div class="meta">Pesanan: <b>' + (o.namaProduk || "-") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
-            (o.linkTarget ? '<div class="meta" style="background:#eff6ff;padding:8px;border-radius:8px;margin-top:6px">' +
+            (o.linkTarget ? '<div class="meta" style="background:rgba(59,130,246,.15);padding:8px;border-radius:8px;margin-top:6px">' +
               '<div style="font-size:11px;color:#1d4ed8;font-weight:700">Link target pembeli</div>' +
               '<div style="word-break:break-all;font-size:12px;margin:4px 0">' + String(o.linkTarget).replace(/</g,'&lt;') + '</div>' +
               '<button type="button" class="btn btn-sm" data-target="' + String(o.linkTarget).replace(/"/g,'&quot;').replace(/'/g,'') + '" onclick="navigator.clipboard.writeText(this.dataset.target).then(function(){if(VOXY.showToast)VOXY.showToast(\'Tersalin\')})">📋 Salin</button>' +
