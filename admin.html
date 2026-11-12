@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-<body class="admin-body">
+<body class="admin-body" style="visibility:hidden">
   <div class="admin-overlay" id="overlay" onclick="closeSidebar()"></div>
   <aside class="admin-sidebar" id="sidebar">
     <div class="profile">
@@ -243,7 +243,7 @@
 
       <div class="admin-card">
         <h2><i class="fa-solid fa-image"></i> Ganti Logo, Banner & QRIS</h2>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Upload dari file foto di HP/PC. Kosongkan = tetap pakai gambar default.</p>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Pilih dari <b>galeri</b> atau file di HP/PC. Kosongkan = tetap pakai gambar default. Perubahan tersinkron ke semua device.</p>
 
         <div class="form-group">
           <label>Logo toko</label>
@@ -285,6 +285,7 @@
     var selectedChatUid = null, allChats = [];
 
     VOXY.requireAdmin().then(function () {
+      document.body.style.visibility = "visible";
       var loadDone = false;
       var loadTimer = setTimeout(function () {
         if (!loadDone) {

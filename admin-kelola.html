@@ -11,7 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
-<body>
+<body style="visibility:hidden">
   <header class="app-header">
     <div class="logo-area">
       <a href="admin.html" class="icon-btn" style="margin-right:4px"><i data-lucide="arrow-left"></i></a>
@@ -247,6 +247,7 @@
     }
 
     VOXY.requireAdmin().then(function () {
+      document.body.style.visibility = "visible";
       loadOrder();
     }).catch(function () {});
   </script>

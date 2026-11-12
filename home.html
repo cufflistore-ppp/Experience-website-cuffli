@@ -39,7 +39,7 @@
     </nav>
   </div>
 
-  <main class="page">
+  <main class="page home-page">
     <div class="banner-wrap">
       <div class="banner-track" id="bannerTrack">
         <img src="banner.png" alt="1">
@@ -49,55 +49,35 @@
       <div class="banner-dots" id="bannerDots"><span class="active"></span><span></span><span></span></div>
     </div>
 
-    <a href="search.html" class="home-search" style="margin-top:12px">
+    <a href="search.html" class="home-search">
       <i data-lucide="search" style="width:18px;height:18px"></i>
-      Cari produk, game, atau layanan...
+      <span>Cari produk atau layanan...</span>
     </a>
 
-    <!-- Kategori geser horizontal -->
     <div class="cat-scroll" id="catScroll"></div>
 
-    <!-- Flash Sale -->
     <div class="flash-box" id="flashBox" style="display:none">
       <div class="flash-top">
-        <h2><i data-lucide="flame" style="width:18px;height:18px;color:#fb923c;display:inline;vertical-align:-3px"></i> FLASH SALE</h2>
+        <h2><i data-lucide="flame" style="width:16px;height:16px;color:#fb923c"></i> Flash Sale</h2>
         <div class="flash-timer" id="flashTimer">--:--:--</div>
       </div>
       <div class="flash-row" id="flashRow"></div>
     </div>
 
-    <!-- Sections by category -->
-    <div id="catSections"></div>
-  </main>
+    <div id="catSections">
+      <div class="empty-state home-loading">Memuat produk...</div>
+    </div>
 
-      <div class="site-footer voxy-landing-footer">
-    <div class="voxy-lf-brand">
-      <img src="logo.png" alt="">
-      <div>
-        <div class="voxy-lf-name">VOXY MARKET</div>
-        <div class="voxy-lf-tag">Produk Digital, Akun Premium &amp; Jasa</div>
+    <footer class="home-mini-footer">
+      <p>VOXY MARKET · Produk digital &amp; jasa</p>
+      <div class="home-mini-links">
+        <a href="riwayat.html">Pesanan</a>
+        <a href="chat.html">Bantuan</a>
+        <a href="akun.html">Akun</a>
       </div>
-    </div>
-    <p class="voxy-lf-desc">Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.</p>
-    <a href="home.html" class="btn voxy-lf-cta">Lihat Produk</a>
-    <div class="voxy-lf-sec">Bantuan</div>
-    <div class="voxy-lf-links">
-      <a href="riwayat.html">Cek Pesanan</a>
-      <a href="home.html">Buat Pesanan</a>
-      <a href="chat.html">Chat Admin</a>
-    </div>
-    <div class="voxy-lf-sec">Layanan</div>
-    <div class="voxy-lf-list">
-      Akun Premium<br>
-      Produk Digital / APK<br>
-      Jasa Suntik<br>
-      Jasa Lainnya
-    </div>
-    <div class="voxy-lf-copy">
-      Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
-      Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
-    </div>
-  </div>
+      <p class="home-mini-copy">&copy; 2026 VOXY MARKET</p>
+    </footer>
+  </main>
 
   <div class="fab-chat" id="fabChat" title="Chat Admin">
     <img src="chat-admin.png" alt="Chat">
@@ -244,22 +224,21 @@
           : '<span class="stok-badge">Tersedia</span>');
       var normal = Number(p.harga) || 0;
       var now = hargaTampil(p);
-      /* Harga hanya untuk flash sale */
       var flash = isFlash(p);
-      var price = '';
-      if (flash) {
-        var disc = Number(p.flashDiskon) || ((normal > 0 && now < normal) ? Math.round((1 - now / normal) * 100) : 0);
-        price =
-          '<div class="card-price-wrap">' +
-            (disc > 0 ? '<span class="disc-badge">-' + disc + '%</span>' : '') +
-            (now < normal ? '<div class="flash-old">' + VOXY.formatRp(normal) + '</div>' : '') +
-            '<div class="flash-price">' + VOXY.formatRp(now) + '</div>' +
-          '</div>';
+      var disc = 0;
+      if (flash && normal > 0 && now < normal) {
+        disc = Number(p.flashDiskon) || Math.round((1 - now / normal) * 100);
       }
+      var price =
+        '<div class="card-price-wrap">' +
+          (disc > 0 ? '<span class="disc-badge">-' + disc + '%</span>' : '') +
+          (flash && now < normal ? '<div class="flash-old">' + VOXY.formatRp(normal) + '</div>' : '') +
+          '<div class="flash-price">' + VOXY.formatRp(now) + '</div>' +
+        '</div>';
       return (
-        '<a class="product-icon-card" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
+        '<a class="product-icon-card' + (habis ? ' is-habis' : '') + '" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
           stok +
-          '<div class="thumb"><img src="' + img + '" alt=""></div>' +
+          '<div class="thumb"><img src="' + img + '" alt="" loading="lazy"></div>' +
           '<h3>' + (p.nama || "-") + '</h3>' + price +
         '</a>'
       );
@@ -315,9 +294,13 @@
       }
       var box = document.getElementById("flashBox");
       var row = document.getElementById("flashRow");
-      if (!flash.length) {
+      /* Strip horizontal hanya di tab Semua — di tab Flash pakai grid biar tidak dobel */
+      if (!flash.length || activeCat === "flash") {
         box.style.display = "none";
         return;
+      }
+      if (activeCat !== "semua" && activeCat !== "flash") {
+        /* kategori spesifik: strip kecil opsional jika ada flash di kategori itu */
       }
       box.style.display = "block";
       var nearest = Math.min.apply(null, flash.map(function (p) { return Number(p.flashEnd); }));
@@ -346,6 +329,12 @@
         filtered = list.filter(isFlash);
       } else if (activeCat !== "semua") {
         filtered = list.filter(function (p) { return matchCat(p, activeCat); });
+      } else {
+        /* Saat "Semua": produk flash sudah di strip atas, jangan dobel di grid */
+        var hasFlashStrip = list.some(isFlash);
+        if (hasFlashStrip) {
+          filtered = list.filter(function (p) { return !isFlash(p); });
+        }
       }
       var groups = {};
       filtered.forEach(function (p) {
@@ -356,11 +345,24 @@
       var keys = Object.keys(groups).sort();
       var html = "";
       if (!keys.length) {
-        html = '<div class="empty-state">Tidak ada produk di kategori ini</div>';
+        if (activeCat === "semua" && list.some(isFlash)) {
+          html = ""; /* semua item ada di flash strip */
+        } else {
+          html = '<div class="empty-state">Tidak ada produk di kategori ini</div>';
+        }
+      } else if (activeCat !== "semua" && activeCat !== "flash") {
+        /* Satu kategori: tanpa header berulang */
+        html += '<div class="section-head"><h2>' + catLabelHtml(activeCat) + '</h2><span class="count">' + filtered.length + ' produk</span></div>';
+        html += '<div class="product-grid-icons">' + filtered.map(iconCard).join("") + '</div>';
+      } else if (activeCat === "flash") {
+        html += '<div class="section-head"><h2><i data-lucide="flame" style="width:18px;height:18px"></i> Flash Sale</h2><span class="count">' + filtered.length + ' produk</span></div>';
+        html += '<div class="product-grid-icons">' + filtered.map(iconCard).join("") + '</div>';
       } else {
         keys.forEach(function (c) {
+          html += '<div class="home-section">';
           html += '<div class="section-head"><h2>' + catLabelHtml(c) + '</h2><span class="count">' + groups[c].length + '</span></div>';
           html += '<div class="product-grid-icons">' + groups[c].map(iconCard).join("") + '</div>';
+          html += '</div>';
         });
       }
       document.getElementById("catSections").innerHTML = html;

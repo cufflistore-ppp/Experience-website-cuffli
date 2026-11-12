@@ -1,25 +1,82 @@
-=== PENTING: Error PERMISSION_DENIED di Chat ===
+=== FIREBASE REALTIME DATABASE RULES — VOXY MARKET ===
 
-Buka Firebase Console → project voxyyjoki → Realtime Database → tab Rules
-Ganti SELURUH rules dengan ini, lalu klik Publish:
+Cara pasang:
+1. Buka Firebase Console → project voxyyjoki
+2. Realtime Database → tab Rules
+3. Hapus isi lama, tempel JSON di bawah
+4. Klik Publish
+
+Rules ini diset supaya:
+- Toko & order & chat jalan lancar dengan kode saat ini
+- Hanya 2 email admin yang boleh ubah produk / settings / branding / kirim file hasil
+- User biasa hanya kelola data miliknya (order sendiri, chat sendiri)
+
+Ganti email admin di bawah jika akun admin diganti.
 
 {
   "rules": {
     ".read": false,
     ".write": false,
-    "orders": { ".read": "auth != null", ".write": "auth != null" },
-    "order_bukti": { ".read": "auth != null", ".write": "auth != null" },
-    "order_files": { ".read": "auth != null", ".write": "auth != null" },
-    "produk": { ".read": true, ".write": "auth != null" },
-    "produk_images": { ".read": true, ".write": "auth != null" },
-    "settings": { ".read": true, ".write": "auth != null" },
-    "branding_assets": { ".read": true, ".write": "auth != null" },
-    "laporan": { ".read": "auth != null", ".write": "auth != null" },
-    "chat": {
+
+    "produk": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+    },
+
+    "produk_images": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+    },
+
+    "settings": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+    },
+
+    "branding_assets": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+    },
+
+    "orders": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$kode": {
+        ".validate": "newData.hasChildren(['kode']) || data.exists()"
+      }
+    },
+
+    "order_bukti": {
       ".read": "auth != null",
       ".write": "auth != null"
+    },
+
+    "order_files": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+    },
+
+    "laporan": {
+      ".read": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
+      ".write": "auth != null"
+    },
+
+    "chat": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid == $uid || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
+        ".write": "auth != null && (auth.uid == $uid || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+      }
     }
   }
 }
 
-Tanpa rules chat di atas, chat SELALU PERMISSION_DENIED.
+=== RINGKAS ===
+produk / settings / branding_assets  → publik baca, admin tulis
+orders / order_bukti                 → user login bisa (riwayat & upload bukti jalan)
+order_files                          → admin tulis (kirim hasil order)
+chat/{uid}                           → hanya pemilik chat atau admin
+
+=== CATATAN ===
+- Panel admin di website tetap dicek lewat isAdmin() (2 email).
+- Rules di atas = pengaman di server Firebase.
+- Setelah Publish, test: login user biasa tidak bisa ubah produk; admin bisa.
