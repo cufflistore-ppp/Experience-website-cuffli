@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kelola Pesanan - VOXY ADMIN</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -76,18 +77,18 @@
         var target = o.linkTarget || "";
         fields +=
           '<div class="admin-card" style="background:rgba(59,130,246,.15);border:1px solid #bfdbfe;margin-bottom:12px;padding:14px">' +
-            '<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px">🔗 Link dari pembeli (untuk di-suntik)</div>' +
+            '<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:6px"><i class="fa-solid fa-link"></i> Link dari pembeli (untuk di-suntik)</div>' +
             (target
               ? ('<div id="targetText" style="word-break:break-all;font-size:14px;font-weight:600;background:#0c1228;padding:12px;border-radius:10px;border:1px solid var(--border);margin-bottom:10px">' +
                   target.replace(/</g,"&lt;") + '</div>' +
-                  '<button type="button" class="btn btn-sm" style="width:100%;margin-bottom:8px" onclick="salinTarget()">📋 Salin link target</button>')
+                  '<button type="button" class="btn btn-sm" style="width:100%;margin-bottom:8px" onclick="salinTarget()"><i class="fa-solid fa-clipboard"></i> Salin link target</button>')
               : '<p style="font-size:13px;color:#b45309;margin:0">Pembeli belum mengisi link target.</p>') +
             '<p style="font-size:12px;color:#1e40af;margin:8px 0 0;line-height:1.45">' +
               '<b>Petunjuk admin:</b> 1) Salin link di atas 2) Proses suntik di tools kamu 3) Setelah selesai, isi pesan sukses di bawah lalu tekan <b>Kirim hasil + Sukses</b>' +
             '</p>' +
           '</div>';
         fields += '<div class="form-group"><label>Pesan ke pembeli (setelah suntik sukses)</label>' +
-          '<textarea id="hasilTeks" rows="3" placeholder="Suntik selesai ya, coba cek saluran kamu ✨">' + (o.hasilTeks || "") + '</textarea></div>';
+          '<textarea id="hasilTeks" rows="3" placeholder="Suntik selesai ya, coba cek saluran kamu">' + (o.hasilTeks || "") + '</textarea></div>';
         fields += '<div class="form-group"><label>Petunjuk tambahan untuk pembeli (opsional)</label>' +
           '<textarea id="hasilCatatan" rows="2" placeholder="Misal: Tunggu 5–10 menit lalu refresh">' + (o.hasilCatatan || "") + '</textarea></div>';
       }
@@ -136,8 +137,8 @@
       if (!text) { alert("Tidak ada link"); return; }
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(function () {
-          if (VOXY.showToast) VOXY.showToast("Link tersalin ✓");
-          else alert("Link tersalin ✓");
+          if (VOXY.showToast) VOXY.showToast("Link tersalin");
+          else alert("Link tersalin");
         }).catch(function () { prompt("Salin manual:", text); });
       } else {
         prompt("Salin manual:", text);

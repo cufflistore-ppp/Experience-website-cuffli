@@ -33,12 +33,15 @@
     </div>
     <div class="pay-card">
       <h2>Upload Bukti Transfer</h2>
-      <label class="upload-area">
-        <i data-lucide="upload" style="width:28px;height:28px;margin-bottom:8px"></i>
-        <div>Klik untuk upload foto bukti</div>
-        <input type="file" id="buktiFile" accept="image/*">
+      <label class="upload-area" for="buktiFile">
+        <i data-lucide="upload" class="upload-icon"></i>
+        <div class="upload-text">Klik untuk upload foto bukti TF</div>
+        <div class="upload-hint">JPG, PNG • maks. jelas & lurus</div>
+        <input type="file" id="buktiFile" accept="image/*" capture="environment">
       </label>
-      <img id="previewBukti" class="preview-bukti hidden" alt="Preview">
+      <div class="preview-bukti-wrap">
+        <img id="previewBukti" class="preview-bukti hidden" alt="Preview bukti transfer">
+      </div>
     </div>
     <button class="btn" style="width:100%;margin-top:8px" id="btnKonfirmasi" onclick="konfirmasi()">Konfirmasi Pembayaran</button>
   </main>

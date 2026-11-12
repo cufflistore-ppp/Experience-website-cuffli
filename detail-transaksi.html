@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Detail Transaksi - VOXY MARKET</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -65,12 +66,12 @@
         var isSuntik = (o.tipeKirim === "link_target") || ((o.kategori || "").toLowerCase().indexOf("suntik") !== -1);
         if (st.indexOf("selesai") !== -1 && isSuntik) {
           VOXY.getSettings().then(function (s) {
-            var pesan = (s && s.pesanSuntik) || "Coba cek saluran kamu ya ✨ Order sudah diproses admin.";
+            var pesan = (s && s.pesanSuntik) || "Coba cek saluran kamu ya. Order sudah diproses admin.";
             var box = document.getElementById("boxHasil");
             if (!box) return;
             var note = document.createElement("div");
             note.style.cssText = "background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;color:#166534";
-            note.innerHTML = "<b>✅ Berhasil diproses</b><br>" + pesan.replace(/</g, "&lt;");
+            note.innerHTML = "<b><i class=\"fa-solid fa-circle-check\"></i> Berhasil diproses</b><br>" + pesan.replace(/</g, "&lt;");
             box.parentNode.insertBefore(note, box);
           });
         }
@@ -85,7 +86,7 @@
 
           var catatan = h.catatan || "Sebelum membuka konten: unduh dulu lewat tombol Download (jika tersedia), install APK/file jika perlu, lalu tekan Lihat untuk membuka hasil.";
           var parts = [];
-          parts.push('<h2 style="margin-bottom:8px">📦 Hasil Pesanan</h2>');
+          parts.push('<h2 style="margin-bottom:8px"><i class="fa-solid fa-box"></i> Hasil Pesanan</h2>');
           parts.push('<div style="background:rgba(59,130,246,.15);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;font-size:13px;color:#93c5fd;line-height:1.5">');
           parts.push('<b>Petunjuk:</b><br>' + catatan.replace(/</g,"&lt;").replace(/\n/g,"<br>"));
           parts.push('</div>');
@@ -94,7 +95,7 @@
           }
           parts.push('<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">');
           if (hasUrl) {
-            parts.push('<a class="btn" href="' + h.url.replace(/"/g,"") + '" target="_blank" rel="noopener">👁️ Lihat</a>');
+            parts.push('<a class="btn" href="' + h.url.replace(/"/g,"") + '" target="_blank" rel="noopener"><i class="fa-solid fa-eye"></i> Lihat</a>');
           }
           if (hasFile) {
             var nama = (h.file.nama || "hasil").replace(/"/g,"");

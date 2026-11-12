@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - VOXY MARKET</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -44,7 +45,7 @@
 
     <!-- DASHBOARD -->
     <div class="panel active" id="panel-dashboard">
-      <div class="revenue-note">💰 Pendapatan dihitung dari pesanan <b>Selesai</b> dalam 30 hari terakhir (rolling otomatis).</div>
+      <div class="revenue-note"><i class="fa-solid fa-coins"></i> Pendapatan dihitung dari pesanan <b>Selesai</b> dalam 30 hari terakhir (rolling otomatis).</div>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-icon blue"><i data-lucide="shopping-cart"></i></div><div><div class="num" id="statTotal">0</div><div class="label">Total Pesanan</div></div></div>
         <div class="stat-card"><div class="stat-icon orange"><i data-lucide="clock"></i></div><div><div class="num" id="statMenunggu">0</div><div class="label">Menunggu</div></div></div>
@@ -175,7 +176,7 @@
     
     <div class="panel" id="panel-flash">
       <div class="admin-card">
-        <h2>⚡ Flash Sale Massal</h2>
+        <h2><i class="fa-solid fa-bolt"></i> Flash Sale Massal</h2>
         <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
           Pilih produk, isi <b>satu diskon %</b> dan <b>satu waktu berakhir</b>, lalu terapkan ke semua yang dicentang.
           Tidak perlu edit produk satu-satu.
@@ -202,7 +203,7 @@
 
     <div class="panel" id="panel-chat">
       <div class="admin-card">
-        <h2>💬 Chat User — Kelola pesan customer</h2>
+        <h2><i class="fa-solid fa-comments"></i> Chat User — Kelola pesan customer</h2>
         <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px" id="chatLayout">
           <div>
             <div class="chat-list-admin" id="chatList"><div class="empty-state">Belum ada chat</div></div>
@@ -219,7 +220,7 @@
                     <input type="file" id="adminChatFoto" accept="image/*" hidden onchange="kirimAdminFoto(this)">
                   </label>
                   <input id="adminReply" type="text" placeholder="Tulis balasan...">
-                  <button onclick="kirimBalasanAdmin()" class="btn btn-sm" style="width:auto;border-radius:12px;padding:12px 16px">➤</button>
+                  <button onclick="kirimBalasanAdmin()" class="btn btn-sm" style="width:auto;border-radius:12px;padding:12px 16px"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
               </div>
             </div>
@@ -236,12 +237,12 @@
         <div class="form-group"><label>WA Admin (628xxx)</label><input id="sWa" type="text" placeholder="628xxxxxxxxxx"></div>
         <div class="form-group"><label>Rekening / Info Transfer</label><textarea id="sRekening" rows="3" placeholder="Bank BCA 123456789 a/n Nama"></textarea></div>
         <div class="form-group"><label>Pesan sukses jasa suntik (ke pembeli)</label>
-        <textarea id="sPesanSuntik" rows="2" placeholder="Coba cek saluran kamu ya ✨ Order sudah diproses."></textarea></div>
+        <textarea id="sPesanSuntik" rows="2" placeholder="Coba cek saluran kamu ya. Order sudah diproses."></textarea></div>
         <button class="btn btn-sm" onclick="simpanPengaturan()">Simpan Info Toko</button>
       </div>
 
       <div class="admin-card">
-        <h2>🖼️ Ganti Logo, Banner & QRIS</h2>
+        <h2><i class="fa-solid fa-image"></i> Ganti Logo, Banner & QRIS</h2>
         <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Upload dari file foto di HP/PC. Kosongkan = tetap pakai gambar default.</p>
 
         <div class="form-group">
@@ -405,7 +406,7 @@
             (o.linkTarget ? '<div class="meta" style="background:rgba(59,130,246,.15);padding:8px;border-radius:8px;margin-top:6px">' +
               '<div style="font-size:11px;color:#1d4ed8;font-weight:700">Link target pembeli</div>' +
               '<div style="word-break:break-all;font-size:12px;margin:4px 0">' + String(o.linkTarget).replace(/</g,'&lt;') + '</div>' +
-              '<button type="button" class="btn btn-sm" data-target="' + String(o.linkTarget).replace(/"/g,'&quot;').replace(/'/g,'') + '" onclick="navigator.clipboard.writeText(this.dataset.target).then(function(){if(VOXY.showToast)VOXY.showToast(\'Tersalin\')})">📋 Salin</button>' +
+              '<button type="button" class="btn btn-sm" data-target="' + String(o.linkTarget).replace(/"/g,'&quot;').replace(/'/g,'') + '" onclick="navigator.clipboard.writeText(this.dataset.target).then(function(){if(VOXY.showToast)VOXY.showToast(\'Tersalin\')})"><i class="fa-solid fa-clipboard"></i> Salin</button>' +
             '</div>' : '') +
             '<div class="actions">' +
               '<button type="button" class="btn btn-sm" data-kode="' + kode + '" onclick="bukaDetail(this.dataset.kode)">Kelola (status + kirim)</button>' +
@@ -678,7 +679,7 @@
           var label = isAdmin ? "Admin (kamu)" : "Pelanggan";
           var cls = isAdmin ? "msg msg-admin" : "msg msg-user";
           var txt = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-          if (txt === "📷 Foto" && m.image) txt = "";
+          if ((txt === "📷 Foto" || txt === "Foto") && m.image) txt = "";
           var imgHtml = m.image ? '<div class="msg-img"><img src="' + m.image + '" alt="foto"></div>' : "";
           var av = isAdmin
             ? '<img class="msg-avatar admin" src="logo.png" alt="">'
@@ -805,7 +806,7 @@
         document.getElementById("sWa").value = s.waAdmin || "";
         document.getElementById("sRekening").value = s.rekening || "";
         var ps = document.getElementById("sPesanSuntik");
-        if (ps) ps.value = s.pesanSuntik || "Coba cek saluran kamu ya ✨ Order sudah diproses admin.";
+        if (ps) ps.value = s.pesanSuntik || "Coba cek saluran kamu ya. Order sudah diproses admin.";
       });
       VOXY.getBranding().then(function (b) {
         b = b || {};
@@ -838,7 +839,7 @@
         namaToko: document.getElementById("sNamaToko").value.trim(),
         waAdmin: document.getElementById("sWa").value.trim(),
         rekening: document.getElementById("sRekening").value.trim(),
-        pesanSuntik: (document.getElementById("sPesanSuntik") && document.getElementById("sPesanSuntik").value.trim()) || "Coba cek saluran kamu ya ✨ Order sudah diproses admin."
+        pesanSuntik: (document.getElementById("sPesanSuntik") && document.getElementById("sPesanSuntik").value.trim()) || "Coba cek saluran kamu ya. Order sudah diproses admin."
       }).then(function () {
         if (VOXY.showToast) VOXY.showToast("Info toko tersimpan");
         else alert("Info toko tersimpan");

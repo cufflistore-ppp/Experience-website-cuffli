@@ -306,12 +306,12 @@ function kirimPesanUser(uid, email, text, imageData) {
   var msg = {
     from: "user",
     email: email || "",
-    text: text || (imageData ? "📷 Foto" : ""),
+    text: text || (imageData ? "Foto" : ""),
     at: Date.now(),
     readByAdmin: false
   };
   if (imageData) msg.image = imageData;
-  var preview = text || "📷 Foto";
+  var preview = text || "Foto";
   return msgRef.set(msg).then(function () {
     return db.ref(chatPath(uid) + "/meta").update({
       email: email || "",
@@ -331,12 +331,12 @@ function kirimPesanAdmin(uid, text, imageData) {
   var msgRef = db.ref(chatPath(uid) + "/messages").push();
   var msg = {
     from: "admin",
-    text: text || (imageData ? "📷 Foto" : ""),
+    text: text || (imageData ? "Foto" : ""),
     at: Date.now(),
     readByUser: false
   };
   if (imageData) msg.image = imageData;
-  var preview = text || "📷 Foto";
+  var preview = text || "Foto";
   return msgRef.set(msg).then(function () {
     return db.ref(chatPath(uid) + "/meta").update({
       lastMessage: preview,
