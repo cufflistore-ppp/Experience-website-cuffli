@@ -59,7 +59,11 @@ function daftarUser(email, password) {
 
 function loginUser(email, password) {
   if (!auth) return Promise.reject(new Error("Firebase belum siap"));
-  return auth.signInWithEmailAndPassword(email, password);
+  // Pastikan sesi disimpan sebelum pindah halaman agar dashboard membaca akun yang sama.
+  return auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+    .then(function () {
+      return auth.signInWithEmailAndPassword(email, password);
+    });
 }
 
 function logoutUser() {

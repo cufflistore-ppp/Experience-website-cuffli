@@ -41,19 +41,28 @@
       var btn = document.getElementById("btnLogin");
       btn.disabled = true; btn.textContent = "Loading...";
       VOXY.loginUser(email, password).then(function (cred) {
-        window.location.href = VOXY.isAdmin(cred.user.email) ? "admin.html" : "home.html";
+        window.location.replace(VOXY.isAdmin(cred.user.email) ? "admin.html" : "home.html");
       }).catch(function (err) {
-        alert(err.message || "Login gagal");
+        alert("Login gagal: " + (err.code || "") + " " + (err.message || "Periksa koneksi dan konfigurasi Firebase."));
         btn.disabled = false; btn.textContent = "LOGIN";
       });
     }
     function doGoogleLogin() {
       var provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider).then(function (result) {
-        window.location.href = VOXY.isAdmin(result.user.email) ? "admin.html" : "home.html";
-      }).catch(function (err) {
-        if (err.code !== "auth/popup-closed-by-user") alert(err.message || "Google login gagal");
-      });
+      var googleBtn = document.querySelector(".btn-google");
+      googleBtn.disabled = true;
+      googleBtn.textContent = "Menghubungkan Google...";
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(function () { return firebase.auth().signInWithPopup(provider); })
+        .then(function (result) {
+          window.location.replace(VOXY.isAdmin(result.user.email) ? "admin.html" : "home.html");
+        }).catch(function (err) {
+          if (err.code !== "auth/popup-closed-by-user") {
+            alert("Google login gagal: " + (err.code || "") + " " + (err.message || ""));
+          }
+          googleBtn.disabled = false;
+          googleBtn.innerHTML = 'Login Google';
+        });
     }
     document.getElementById("password").addEventListener("keydown", function (e) {
       if (e.key === "Enter") doLogin();
