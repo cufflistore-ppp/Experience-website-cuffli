@@ -17,7 +17,7 @@
     <div class="profile">
       <img src="logo.png" alt="VOXY">
       <h2>VOXY ADMIN</h2>
-      <p>Panel bersama (2 admin sinkron)</p>
+      <p>2 email admin · data sinkron semua device</p>
     </div>
     <nav>
       <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><i data-lucide="layout-dashboard"></i> Dashboard</a>
@@ -118,12 +118,16 @@
     <!-- PRODUK -->
     <div class="panel" id="panel-produk">
       <div class="admin-card">
-        <h2>Tambah / Edit Produk</h2>
+        <h2><i data-lucide="package"></i> Tambah / Edit Produk</h2>
+        <div class="admin-hint">
+          Data produk tersimpan di Firebase — <b>kedua email admin</b> melihat & mengedit data yang sama di semua device.
+          Kategori harus cocok dengan <b>filter Menu Layanan</b> agar muncul di tombol home.
+        </div>
         <input type="hidden" id="produkId">
         <div class="form-grid">
           <div class="form-group"><label>Nama Produk</label><input id="pNama" type="text" placeholder="Contoh: Canva Pro"></div>
           <div class="form-group">
-            <label>Kategori (harus sama dengan filter Menu Layanan)</label>
+            <label>Kategori (sama filter Menu Layanan)</label>
             <input id="pKategori" type="text" list="listKategoriMenu" placeholder="Contoh: APK BUG / PANEL">
             <datalist id="listKategoriMenu"></datalist>
           </div>
@@ -158,13 +162,8 @@
         </div>
       </div>
       <div class="admin-card">
-        <h2>Daftar Produk</h2>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Gambar</th><th>Nama</th><th>Kategori</th><th>Harga</th><th>Aksi</th></tr></thead>
-            <tbody id="tabelProduk"><tr><td colspan="5" class="empty-state">Memuat...</td></tr></tbody>
-          </table>
-        </div>
+        <h2><i data-lucide="list"></i> Daftar Produk</h2>
+        <div id="tabelProduk"><div class="empty-state">Memuat...</div></div>
       </div>
     </div>
 
@@ -200,10 +199,10 @@
     <div class="panel" id="panel-menu">
       <div class="admin-card">
         <h2><i class="fa-solid fa-table-cells-large"></i> Menu Layanan (Beranda)</h2>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
-          Tombol menu di beranda. Isi <b>Kategori filter</b> harus cocok dengan kategori produk biar klik menu langsung filter produk.
-          Icon = nama Lucide (contoh: server, smartphone, book-open, file, shopping-cart, palette).
-        </p>
+        <div class="admin-hint">
+          Tombol di home. <b>Kategori filter</b> = kunci produk (harus sama). Icon Lucide: server, smartphone, book-open, file, shopping-cart, palette.
+          Kedua admin share data yang sama (realtime).
+        </div>
         <div class="form-grid">
           <div class="form-group"><label>Judul</label><input id="mJudul" type="text" placeholder="PANEL PTERODACTYL"></div>
           <div class="form-group"><label>Subjudul (opsional)</label><input id="mSub" type="text" placeholder="Hosting panel"></div>
@@ -351,21 +350,23 @@
     VOXY.requireAdmin().then(function () {
       document.body.style.visibility = "visible";
       var loadDone = false;
+      /* Fallback sekali jika listener lama (jaringan jelek), bukan delay sengaja */
       var loadTimer = setTimeout(function () {
         if (!loadDone) {
-          var box = document.getElementById("tabelPesanan");
-          if (box && box.textContent.indexOf("Memuat") !== -1) {
-            box.innerHTML = '<div class="empty-state">Memuat lambat… <button class="btn btn-sm" onclick="location.reload()">Muat ulang</button></div>';
-          }
-          /* coba once */
           VOXY.getAllOrders().then(function (list) {
             if (loadDone) return;
             allOrders = list || [];
             updateDashboard();
             renderPesanan();
-          }).catch(function () {});
+            loadDone = true;
+          }).catch(function () {
+            var box = document.getElementById("tabelPesanan");
+            if (box && box.textContent.indexOf("Memuat") !== -1) {
+              box.innerHTML = '<div class="empty-state">Koneksi lambat… <button class="btn btn-sm" onclick="location.reload()">Muat ulang</button></div>';
+            }
+          });
         }
-      }, 3000);
+      }, 12000);
       VOXY.listenOrders(function (list) {
         loadDone = true;
         clearTimeout(loadTimer);
@@ -594,16 +595,35 @@
     /* Produk */
     function loadProdukAdmin() {
       VOXY.getProdukList().then(function (list) {
-        document.getElementById("statProduk").textContent = (list || []).length;
-        var tbody = document.getElementById("tabelProduk");
-        if (!list || !list.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Belum ada produk</td></tr>'; return; }
-        tbody.innerHTML = list.map(function (p) {
+        var elStat = document.getElementById("statProduk");
+        if (elStat) elStat.textContent = (list || []).length;
+        var box = document.getElementById("tabelProduk");
+        if (!box) return;
+        if (!list || !list.length) {
+          box.innerHTML = '<div class="empty-state">Belum ada produk</div>';
+          return;
+        }
+        box.innerHTML = list.map(function (p) {
           var img = p.gambar || "produk1.png";
-          return "<tr><td><img src=\"" + img + "\" style=\"width:48px;height:48px;object-fit:cover;border-radius:8px\" onerror=\"this.src='produk1.png'\"></td>" +
-            "<td>" + (p.nama || "-") + "</td><td>" + (p.kategori || "-") + "</td><td>" + VOXY.formatRp(p.harga) + "</td>" +
-            "<td class=\"action-btns\"><button class=\"btn btn-sm\" onclick=\"editProduk('" + p.id + "')\">Edit</button> " +
-            "<button class=\"btn btn-sm btn-danger\" onclick=\"hapusProdukId('" + p.id + "')\">Hapus</button></td></tr>";
+          var flash = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1;
+          return (
+            '<div class="admin-produk-list-card">' +
+              '<img src="' + img + '" alt="" onerror="this.src=\'produk1.png\'">' +
+              '<div class="info">' +
+                '<b>' + (p.nama || "-") + '</b>' +
+                '<span>' + (p.kategori || "-") + " · " + VOXY.formatRp(p.harga) +
+                  (flash ? " · Flash" : "") +
+                  (p.stok != null ? " · Stok " + p.stok : "") +
+                '</span>' +
+              '</div>' +
+              '<div class="actions" style="flex-shrink:0;display:flex;gap:6px">' +
+                '<button type="button" class="btn btn-sm" onclick="editProduk(\'' + p.id + '\')">Edit</button>' +
+                '<button type="button" class="btn btn-sm btn-danger" onclick="hapusProdukId(\'' + p.id + '\')">Hapus</button>' +
+              '</div>' +
+            '</div>'
+          );
         }).join("");
+        if (window.lucide) lucide.createIcons();
       });
     }
     function toggleFlash() {

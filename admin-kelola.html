@@ -219,11 +219,11 @@
       var timer = setTimeout(function () {
         if (!done) {
           document.getElementById("box").innerHTML =
-            '<div class="empty-state">Memuat lebih dari 3 detik… cek koneksi / Rules Firebase.<br><br>' +
+            '<div class="empty-state">Koneksi lambat / cek Rules Firebase.<br><br>' +
             '<button class="btn btn-sm" onclick="loadOrder()">Coba lagi</button> ' +
             '<a href="admin.html" class="btn btn-sm btn-outline">Kembali</a></div>';
         }
-      }, 3000);
+      }, 12000);
 
       VOXY.getOrder(kode).then(function (o) {
         if (o) return o;

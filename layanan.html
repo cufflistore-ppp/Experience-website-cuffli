@@ -30,7 +30,7 @@
       <h2 id="listTitle">Produk</h2>
       <span class="count" id="listCount"></span>
     </div>
-    <div id="produkGrid" class="product-grid-icons">
+    <div id="produkGrid" class="paket-grid">
       <div class="empty-state home-loading" style="grid-column:1/-1">Memuat...</div>
     </div>
   </main>
@@ -77,11 +77,6 @@
       var img = p.gambar || "produk1.png";
       var stokNum = (p.stok != null) ? Number(p.stok) : null;
       var habis = p.stokHabis || (stokNum !== null && stokNum <= 0);
-      var stok = habis
-        ? '<span class="stok-badge habis">Habis</span>'
-        : (stokNum != null
-          ? '<span class="stok-badge">Sisa ' + stokNum + '</span>'
-          : '<span class="stok-badge">Tersedia</span>');
       var normal = Number(p.harga) || 0;
       var now = hargaTampil(p);
       var flash = isFlash(p);
@@ -89,18 +84,38 @@
       if (flash && normal > 0 && now < normal) {
         disc = Number(p.flashDiskon) || Math.round((1 - now / normal) * 100);
       }
-      var flashBadge = flash ? '<span class="flash-tag"><i data-lucide="flame" style="width:10px;height:10px"></i> Flash</span>' : "";
-      var price =
-        '<div class="card-price-wrap">' +
-          (disc > 0 ? '<span class="disc-badge">-' + disc + '%</span>' : '') +
-          (flash && now < normal ? '<div class="flash-old">' + VOXY.formatRp(normal) + '</div>' : '') +
-          '<div class="flash-price">' + VOXY.formatRp(now) + '</div>' +
+      var desc = (p.deskripsi || p.kategori || "Layanan digital VOXY MARKET").replace(/</g, "&lt;");
+      if (desc.length > 90) desc = desc.slice(0, 87) + "...";
+      var badgeLeft = habis
+        ? '<span class="paket-badge habis">Habis</span>'
+        : (flash
+          ? '<span class="paket-badge flash">Flash' + (disc > 0 ? " -" + disc + "%" : "") + '</span>'
+          : '<span class="paket-badge">' + (p.kategori || "Produk") + '</span>');
+      var badgePop = flash && !habis ? '<span class="paket-populer">FLASH</span>' : "";
+      var fitur =
+        '<ul class="paket-fitur">' +
+          '<li><i data-lucide="check-circle-2"></i> Pembayaran QRIS / Transfer</li>' +
+          '<li><i data-lucide="check-circle-2"></i> Proses setelah konfirmasi</li>' +
+        '</ul>';
+      var priceHtml =
+        '<div class="paket-price-wrap">' +
+          (flash && now < normal ? '<span class="paket-old">' + VOXY.formatRp(normal) + '</span>' : '') +
+          '<div class="paket-price">' + VOXY.formatRp(now) + '</div>' +
         '</div>';
       return (
-        '<a class="product-icon-card' + (habis ? ' is-habis' : '') + (flash ? ' is-flash' : '') + '" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
-          stok + flashBadge +
-          '<div class="thumb"><img src="' + img + '" alt="" loading="lazy"></div>' +
-          '<h3>' + (p.nama || "-") + '</h3>' + price +
+        '<a class="paket-card' + (habis ? ' is-habis' : '') + (flash ? ' is-flash' : '') + '" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
+          badgePop +
+          '<div class="paket-thumb">' +
+            '<img src="' + img + '" alt="" loading="lazy" onerror="this.src=\'produk1.png\'">' +
+            badgeLeft +
+          '</div>' +
+          '<div class="paket-body">' +
+            '<h3 class="paket-title">' + (p.nama || "-") + '</h3>' +
+            '<p class="paket-desc">' + desc + '</p>' +
+            fitur +
+            priceHtml +
+            '<span class="paket-cta">' + (habis ? "Stok Habis" : "Pilih Paket") + '</span>' +
+          '</div>' +
         '</a>'
       );
     }

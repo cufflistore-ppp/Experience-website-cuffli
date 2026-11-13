@@ -61,14 +61,32 @@
       </div>
     </section>
 
-    <footer class="home-mini-footer">
-      <p>VOXY MARKET · Produk digital &amp; jasa</p>
-      <div class="home-mini-links">
-        <a href="riwayat.html">Pesanan</a>
-        <a href="chat.html">Bantuan</a>
-        <a href="akun.html">Akun</a>
+    <footer class="voxy-landing-footer home-footer-full">
+      <div class="voxy-lf-brand">
+        <img src="logo.png" alt="VOXY" data-brand="logo">
+        <div>
+          <div class="voxy-lf-name">VOXY MARKET <span class="voxy-lf-verified" title="Official">✓</span></div>
+          <div class="voxy-lf-tag">Produk Digital, Akun Premium &amp; Jasa</div>
+        </div>
       </div>
-      <p class="home-mini-copy">&copy; 2026 VOXY MARKET</p>
+      <p class="voxy-lf-desc">Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.</p>
+      <a href="#menuLayananSection" class="btn voxy-lf-cta voxy-lf-cta-lime">
+        <i data-lucide="package" style="width:16px;height:16px"></i> Lihat Paket
+      </a>
+      <div class="voxy-lf-sec">Bantuan</div>
+      <div class="voxy-lf-links">
+        <a href="riwayat.html">Cek Pesanan</a>
+        <a href="#menuLayananSection">Buat Pesanan</a>
+        <a href="chat.html">Chat Admin</a>
+      </div>
+      <div class="voxy-lf-sec">Layanan</div>
+      <div class="voxy-lf-links" id="footerLayananList">
+        <a href="home.html">Semua Layanan</a>
+      </div>
+      <div class="voxy-lf-copy">
+        Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
+        Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+      </div>
     </footer>
   </main>
 
@@ -208,6 +226,19 @@
           '</a>'
         );
       }).join("");
+      var foot = document.getElementById("footerLayananList");
+      if (foot) {
+        if (!list.length) {
+          foot.innerHTML = '<a href="home.html">Semua Layanan</a>';
+        } else {
+          foot.innerHTML = list.map(function (m) {
+            var judul = (m.judul || "Layanan").replace(/</g, "&lt;");
+            var katQ = encodeURIComponent(m.kategori || "");
+            var judulQ = encodeURIComponent(m.judul || m.kategori || "Layanan");
+            return '<a href="layanan.html?kat=' + katQ + '&judul=' + judulQ + '">' + judul + '</a>';
+          }).join("");
+        }
+      }
       lucide.createIcons();
     }
 

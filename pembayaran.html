@@ -144,7 +144,7 @@
           return;
         }
         if (VOXY.showToast) VOXY.showToast("Pesanan terkirim. Menunggu verifikasi admin.");
-        setTimeout(function(){ window.location.href = "riwayat.html"; }, 900);
+        setTimeout(function(){ window.location.href = "riwayat.html"; }, 400);
       }).catch(function (err) {
         alert(err.message || "Gagal menyimpan pesanan");
         btn.disabled = false; btn.textContent = "Konfirmasi Pembayaran";
