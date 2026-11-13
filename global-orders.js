@@ -674,6 +674,54 @@ function bukaWhatsApp(nomor, pesan) {
 }
 
 
+/* ---------- Menu Layanan (home grid) ---------- */
+function getMenuLayanan() {
+  if (!db) return Promise.resolve([]);
+  return db.ref("menu_layanan").once("value").then(function (snap) {
+    var val = snap.val() || {};
+    return Object.keys(val).map(function (id) {
+      return Object.assign({ id: id }, val[id]);
+    }).filter(function (m) {
+      return m.aktif !== false && m.aktif !== "false";
+    }).sort(function (a, b) {
+      return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
+    });
+  });
+}
+function listenMenuLayanan(callback) {
+  if (!db) return function () {};
+  var ref = db.ref("menu_layanan");
+  var handler = function (snap) {
+    var val = snap.val() || {};
+    var list = Object.keys(val).map(function (id) {
+      return Object.assign({ id: id }, val[id]);
+    }).sort(function (a, b) {
+      return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
+    });
+    callback(list);
+  };
+  ref.on("value", handler);
+  return function () { ref.off("value", handler); };
+}
+function simpanMenuLayanan(data) {
+  if (!db) return Promise.reject(new Error("Database belum siap"));
+  var id = data.id || db.ref("menu_layanan").push().key;
+  var payload = {
+    judul: (data.judul || "").trim(),
+    subjudul: (data.subjudul || "").trim(),
+    icon: (data.icon || "package").trim(),
+    kategori: (data.kategori || "").trim(),
+    urutan: Number(data.urutan) || 0,
+    aktif: data.aktif !== false && data.aktif !== "false",
+    updatedAt: Date.now()
+  };
+  return db.ref("menu_layanan/" + id).update(payload).then(function () { return id; });
+}
+function hapusMenuLayanan(id) {
+  if (!db || !id) return Promise.reject(new Error("ID kosong"));
+  return db.ref("menu_layanan/" + id).remove();
+}
+
 /* ---------- Branding (logo, banner x3, qris) ---------- */
 function getBranding() {
   if (!db) return Promise.resolve({});
@@ -748,6 +796,10 @@ window.VOXY = {
   getBranding: getBranding,
   simpanBranding: simpanBranding,
   applyBrandingToPage: applyBrandingToPage,
+  getMenuLayanan: getMenuLayanan,
+  listenMenuLayanan: listenMenuLayanan,
+  simpanMenuLayanan: simpanMenuLayanan,
+  hapusMenuLayanan: hapusMenuLayanan,
   showToast: showToast,
   getProdukList: getProdukList,
   listenProduk: listenProduk,

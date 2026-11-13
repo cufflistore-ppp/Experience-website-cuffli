@@ -24,6 +24,7 @@
       <a href="#" data-tab="pesanan" onclick="switchTab('pesanan',this)"><i data-lucide="shopping-bag"></i> Pesanan</a>
       <a href="#" data-tab="produk" onclick="switchTab('produk',this)"><i data-lucide="package"></i> Produk</a>
       <a href="#" data-tab="flash" onclick="switchTab('flash',this)"><i data-lucide="zap"></i> Flash Sale</a>
+      <a href="#" data-tab="menu" onclick="switchTab('menu',this)"><i data-lucide="layout-grid"></i> Menu Layanan</a>
       <a href="#" data-tab="chat" onclick="switchTab('chat',this)">
         <i data-lucide="message-circle"></i> Chat User
         <span class="nav-badge hidden" id="chatNavBadge">0</span>
@@ -201,6 +202,32 @@
       </div>
     </div>
 
+    <div class="panel" id="panel-menu">
+      <div class="admin-card">
+        <h2><i class="fa-solid fa-table-cells-large"></i> Menu Layanan (Beranda)</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
+          Tombol menu di beranda. Isi <b>Kategori filter</b> harus cocok dengan kategori produk biar klik menu langsung filter produk.
+          Icon = nama Lucide (contoh: server, smartphone, book-open, file, shopping-cart, palette).
+        </p>
+        <div class="form-grid">
+          <div class="form-group"><label>Judul</label><input id="mJudul" type="text" placeholder="PANEL PTERODACTYL"></div>
+          <div class="form-group"><label>Subjudul (opsional)</label><input id="mSub" type="text" placeholder="Hosting panel"></div>
+          <div class="form-group"><label>Icon (Lucide)</label><input id="mIcon" type="text" placeholder="server"></div>
+          <div class="form-group"><label>Kategori filter</label><input id="mKat" type="text" placeholder="sama seperti kategori produk"></div>
+          <div class="form-group"><label>Urutan</label><input id="mUrut" type="number" value="1" min="0"></div>
+          <div class="form-group"><label>Aktif</label>
+            <select id="mAktif"><option value="1">Ya</option><option value="0">Tidak</option></select>
+          </div>
+        </div>
+        <input type="hidden" id="mId" value="">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button type="button" class="btn btn-sm btn-success" onclick="simpanMenuItem()">Simpan Menu</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="resetMenuForm()">Reset Form</button>
+        </div>
+        <div id="menuListAdmin" style="margin-top:16px"><div class="empty-state">Memuat...</div></div>
+      </div>
+    </div>
+
     <div class="panel" id="panel-chat">
       <div class="admin-card">
         <h2><i class="fa-solid fa-comments"></i> Chat User — Kelola pesan customer</h2>
@@ -311,6 +338,7 @@
       });
       loadProdukAdmin();
       loadPengaturan();
+      loadMenuAdmin();
       VOXY.listenAllChats(function (list) {
         allChats = list || [];
         renderChatList();
@@ -338,8 +366,9 @@
       document.getElementById("panel-" + name).classList.add("active");
       document.querySelectorAll(".admin-sidebar nav a[data-tab]").forEach(function (a) { a.classList.remove("active"); });
       if (el) el.classList.add("active");
-      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", produk: "Kelola Produk", flash: "Flash Sale", chat: "Chat User", pengaturan: "Pengaturan" };
+      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", produk: "Kelola Produk", flash: "Flash Sale", menu: "Menu Layanan", chat: "Chat User", pengaturan: "Pengaturan" };
       document.getElementById("pageTitle").textContent = titles[name] || "Admin";
+      if (name === "menu") loadMenuAdmin();
       closeSidebar();
       if (name === "produk") loadProdukAdmin();
       if (name === "pengaturan") loadPengaturan();
@@ -882,6 +911,91 @@
           });
         });
       }).catch(function (e) { alert(e.message || "Gagal simpan branding"); });
+    }
+    function resetMenuForm() {
+      document.getElementById("mId").value = "";
+      document.getElementById("mJudul").value = "";
+      document.getElementById("mSub").value = "";
+      document.getElementById("mIcon").value = "package";
+      document.getElementById("mKat").value = "";
+      document.getElementById("mUrut").value = "1";
+      document.getElementById("mAktif").value = "1";
+    }
+    function loadMenuAdmin() {
+      var box = document.getElementById("menuListAdmin");
+      if (!box) return;
+      if (!VOXY.db) {
+        box.innerHTML = '<div class="empty-state">Database belum siap</div>';
+        return;
+      }
+      VOXY.db.ref("menu_layanan").once("value").then(function (snap) {
+        var val = snap.val() || {};
+        return Object.keys(val).map(function (id) {
+          return Object.assign({ id: id }, val[id]);
+        }).sort(function (a, b) {
+          return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
+        });
+      }).then(function (list) {
+        if (!list.length) {
+          box.innerHTML = '<div class="empty-state">Belum ada menu. Tambah di form atas.</div>';
+          return;
+        }
+        box.innerHTML = list.map(function (m) {
+          var on = m.aktif !== false && m.aktif !== "false";
+          return (
+            '<div class="admin-order-card" style="margin-bottom:8px">' +
+              '<div class="top"><b>' + (m.judul || "-") + '</b><span class="badge ' + (on ? "selesai" : "ditolak") + '">' + (on ? "Aktif" : "Off") + '</span></div>' +
+              '<div class="meta">Icon: <b>' + (m.icon || "-") + '</b> · Filter kategori: <b>' + (m.kategori || "-") + '</b> · Urutan: ' + (m.urutan || 0) + '</div>' +
+              (m.subjudul ? '<div class="meta">' + String(m.subjudul).replace(/</g, "&lt;") + '</div>' : '') +
+              '<div class="actions">' +
+                '<button type="button" class="btn btn-sm" data-id="' + m.id + '" onclick="editMenuItem(this.dataset.id)">Edit</button>' +
+                '<button type="button" class="btn btn-sm btn-danger" data-id="' + m.id + '" onclick="hapusMenuItem(this.dataset.id)">Hapus</button>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join("");
+      }).catch(function (e) {
+        box.innerHTML = '<div class="empty-state">' + (e.message || "Gagal muat menu") + '</div>';
+      });
+    }
+    function editMenuItem(id) {
+      VOXY.db.ref("menu_layanan/" + id).once("value").then(function (snap) {
+        var m = snap.val();
+        if (!m) return alert("Menu tidak ditemukan");
+        document.getElementById("mId").value = id;
+        document.getElementById("mJudul").value = m.judul || "";
+        document.getElementById("mSub").value = m.subjudul || "";
+        document.getElementById("mIcon").value = m.icon || "package";
+        document.getElementById("mKat").value = m.kategori || "";
+        document.getElementById("mUrut").value = m.urutan || 0;
+        document.getElementById("mAktif").value = (m.aktif === false || m.aktif === "false") ? "0" : "1";
+        switchTab("menu", document.querySelector('[data-tab="menu"]'));
+      });
+    }
+    function simpanMenuItem() {
+      var judul = document.getElementById("mJudul").value.trim();
+      if (!judul) return alert("Judul wajib diisi");
+      var data = {
+        id: document.getElementById("mId").value || undefined,
+        judul: judul,
+        subjudul: document.getElementById("mSub").value.trim(),
+        icon: document.getElementById("mIcon").value.trim() || "package",
+        kategori: document.getElementById("mKat").value.trim(),
+        urutan: Number(document.getElementById("mUrut").value) || 0,
+        aktif: document.getElementById("mAktif").value === "1"
+      };
+      VOXY.simpanMenuLayanan(data).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Menu tersimpan");
+        else alert("Menu tersimpan");
+        resetMenuForm();
+        loadMenuAdmin();
+      }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+    }
+    function hapusMenuItem(id) {
+      if (!confirm("Hapus menu ini?")) return;
+      VOXY.hapusMenuLayanan(id).then(function () {
+        loadMenuAdmin();
+      }).catch(function (e) { alert(e.message); });
     }
     function doLogout() {
       if (!confirm("Logout admin?")) return;

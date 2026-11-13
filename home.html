@@ -54,7 +54,12 @@
       <span>Cari produk atau layanan...</span>
     </a>
 
-    <div class="cat-scroll" id="catScroll"></div>
+    <section class="menu-layanan-section" id="menuLayananSection">
+      <h2 class="menu-layanan-title">MENU LAYANAN</h2>
+      <div class="menu-layanan-grid" id="menuLayananGrid">
+        <div class="empty-state" style="grid-column:1/-1;padding:16px;font-size:12px">Memuat menu...</div>
+      </div>
+    </section>
 
     <div class="flash-box" id="flashBox" style="display:none">
       <div class="flash-top">
@@ -64,6 +69,10 @@
       <div class="flash-row" id="flashRow"></div>
     </div>
 
+    <div class="home-produk-head" id="produkHead">
+      <h2 id="produkHeadTitle">Semua Produk</h2>
+      <button type="button" class="btn-text" id="btnResetFilter" style="display:none">Lihat semua</button>
+    </div>
     <div id="catSections">
       <div class="empty-state home-loading">Memuat produk...</div>
     </div>
@@ -132,7 +141,9 @@
 
     var waAdmin = "";
     var allProduk = [];
+    var allMenus = [];
     var activeCat = "semua";
+    var activeMenuTitle = "";
     var bi = 0;
 
     function startBanner() {
@@ -229,6 +240,7 @@
       if (flash && normal > 0 && now < normal) {
         disc = Number(p.flashDiskon) || Math.round((1 - now / normal) * 100);
       }
+      var flashBadge = flash ? '<span class="flash-tag"><i data-lucide="flame" style="width:10px;height:10px"></i> Flash</span>' : "";
       var price =
         '<div class="card-price-wrap">' +
           (disc > 0 ? '<span class="disc-badge">-' + disc + '%</span>' : '') +
@@ -236,8 +248,8 @@
           '<div class="flash-price">' + VOXY.formatRp(now) + '</div>' +
         '</div>';
       return (
-        '<a class="product-icon-card' + (habis ? ' is-habis' : '') + '" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
-          stok +
+        '<a class="product-icon-card' + (habis ? ' is-habis' : '') + (flash ? ' is-flash' : '') + '" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
+          stok + flashBadge +
           '<div class="thumb"><img src="' + img + '" alt="" loading="lazy"></div>' +
           '<h3>' + (p.nama || "-") + '</h3>' + price +
         '</a>'
@@ -247,64 +259,69 @@
     function matchCat(p, cat) {
       var k = ((p.kategori || "Lainnya") + "").trim().toLowerCase();
       var c = (cat || "").trim().toLowerCase();
-      return k === c;
+      if (!c) return true;
+      return k === c || k.indexOf(c) !== -1 || c.indexOf(k) !== -1;
     }
-    function catIcon(name) {
-      var n = (name || "").toLowerCase();
-      if (n.indexOf("digital") !== -1) return "hard-drive";
-      if (n.indexOf("suntik") !== -1) return "zap";
-      if (n.indexOf("aplikasi") !== -1 || n.indexOf("premium") !== -1) return "smartphone";
-      if (n.indexOf("jasa") !== -1) return "briefcase";
-      if (n.indexOf("flash") !== -1) return "flame";
-      if (n === "semua") return "layout-grid";
-      return "package";
-    }
-    function catLabelHtml(name) {
-      return '<i data-lucide="' + catIcon(name) + '" style="width:22px;height:22px"></i> ' + name;
-    }
-    function buildCategories(list) {
-      var cats = {};
-      list.forEach(function (p) {
-        var c = (p.kategori || "Lainnya").trim() || "Lainnya";
-        cats[c] = (cats[c] || 0) + 1;
-      });
-      var hasFlash = list.some(isFlash);
-      var html = '<button type="button" class="cat-chip' + (activeCat === "semua" ? " active" : "") + '" data-cat="semua"><i data-lucide="layout-grid" style="width:13px;height:13px"></i> Semua</button>';
-      Object.keys(cats).sort().forEach(function (c) {
-        var safe = c.replace(/"/g, "");
-        html += '<button type="button" class="cat-chip' + (activeCat === c ? " active" : "") + '" data-cat="' + safe + '"><i data-lucide="' + catIcon(c) + '" style="width:13px;height:13px"></i> ' + c + '</button>';
-      });
-      if (hasFlash) {
-        html += '<button type="button" class="cat-chip' + (activeCat === "flash" ? " active" : "") + '" data-cat="flash" style="background:rgba(249,115,22,.2);color:#fb923c;border-color:rgba(249,115,22,.45)"><i data-lucide="flame" style="width:13px;height:13px"></i> Flash Sale</button>';
+
+    function renderMenuLayanan(menus) {
+      var grid = document.getElementById("menuLayananGrid");
+      if (!grid) return;
+      var list = (menus || []).filter(function (m) { return m.aktif !== false && m.aktif !== "false"; });
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:12px;font-size:12px;color:var(--muted)">Belum ada menu. Admin bisa menambah di Panel Admin → Menu Layanan.</div>';
+        return;
       }
-      var el = document.getElementById("catScroll");
-      el.innerHTML = html;
-      el.querySelectorAll(".cat-chip").forEach(function (btn) {
+      grid.innerHTML = list.map(function (m) {
+        var icon = (m.icon || "package").replace(/[^a-z0-9-]/gi, "") || "package";
+        var judul = (m.judul || "Layanan").replace(/</g, "&lt;");
+        var sub = (m.subjudul || "").replace(/</g, "&lt;");
+        var kat = (m.kategori || "").replace(/"/g, "");
+        var active = activeCat === kat ? " active" : "";
+        return (
+          '<button type="button" class="menu-layanan-btn' + active + '" data-kat="' + kat + '" data-judul="' + judul.replace(/"/g, "") + '">' +
+            '<span class="mlb-icon"><i data-lucide="' + icon + '"></i></span>' +
+            '<span class="mlb-text">' +
+              '<span class="mlb-title">' + judul + '</span>' +
+              (sub ? '<span class="mlb-sub">' + sub + '</span>' : '') +
+            '</span>' +
+            '<span class="mlb-arrow"><i data-lucide="chevron-right"></i></span>' +
+          '</button>'
+        );
+      }).join("");
+      grid.querySelectorAll(".menu-layanan-btn").forEach(function (btn) {
         btn.onclick = function () {
-          activeCat = btn.getAttribute("data-cat");
+          var kat = btn.getAttribute("data-kat") || "";
+          var judul = btn.getAttribute("data-judul") || kat || "Produk";
+          activeCat = kat || "semua";
+          activeMenuTitle = judul;
           renderAll();
+          var target = document.getElementById("produkHead");
+          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
         };
       });
+      lucide.createIcons();
     }
 
     function renderFlash(list) {
       var flash = list.filter(isFlash);
-      if (activeCat !== "semua" && activeCat !== "flash") {
+      if (activeCat && activeCat !== "semua") {
         flash = flash.filter(function (p) { return matchCat(p, activeCat); });
       }
       var box = document.getElementById("flashBox");
       var row = document.getElementById("flashRow");
-      /* Strip horizontal hanya di tab Semua — di tab Flash pakai grid biar tidak dobel */
-      if (!flash.length || activeCat === "flash") {
+      if (!flash.length) {
         box.style.display = "none";
+        if (window._flashInterval) clearInterval(window._flashInterval);
         return;
       }
-      if (activeCat !== "semua" && activeCat !== "flash") {
-        /* kategori spesifik: strip kecil opsional jika ada flash di kategori itu */
-      }
       box.style.display = "block";
-      var nearest = Math.min.apply(null, flash.map(function (p) { return Number(p.flashEnd); }));
+      var ends = flash.map(function (p) { return Number(p.flashEnd) || 0; }).filter(function (n) { return n > 0; });
+      var nearest = ends.length ? Math.min.apply(null, ends) : 0;
       function tick() {
+        if (!nearest) {
+          document.getElementById("flashTimer").textContent = "Aktif";
+          return;
+        }
         var left = nearest - Date.now();
         if (left <= 0) {
           document.getElementById("flashTimer").textContent = "00:00:00";
@@ -325,55 +342,43 @@
 
     function renderSections(list) {
       var filtered = list;
-      if (activeCat === "flash") {
-        filtered = list.filter(isFlash);
-      } else if (activeCat !== "semua") {
+      if (activeCat && activeCat !== "semua") {
         filtered = list.filter(function (p) { return matchCat(p, activeCat); });
-      } else {
-        /* Saat "Semua": produk flash sudah di strip atas, jangan dobel di grid */
-        var hasFlashStrip = list.some(isFlash);
-        if (hasFlashStrip) {
-          filtered = list.filter(function (p) { return !isFlash(p); });
-        }
       }
-      var groups = {};
-      filtered.forEach(function (p) {
-        var c = (p.kategori || "Lainnya").trim() || "Lainnya";
-        if (!groups[c]) groups[c] = [];
-        groups[c].push(p);
-      });
-      var keys = Object.keys(groups).sort();
+      var headTitle = document.getElementById("produkHeadTitle");
+      var btnReset = document.getElementById("btnResetFilter");
+      if (headTitle) {
+        headTitle.textContent = (activeCat && activeCat !== "semua")
+          ? (activeMenuTitle || activeCat)
+          : "Semua Produk";
+      }
+      if (btnReset) {
+        btnReset.style.display = (activeCat && activeCat !== "semua") ? "inline-flex" : "none";
+      }
       var html = "";
-      if (!keys.length) {
-        if (activeCat === "semua" && list.some(isFlash)) {
-          html = ""; /* semua item ada di flash strip */
-        } else {
-          html = '<div class="empty-state">Tidak ada produk di kategori ini</div>';
-        }
-      } else if (activeCat !== "semua" && activeCat !== "flash") {
-        /* Satu kategori: tanpa header berulang */
-        html += '<div class="section-head"><h2>' + catLabelHtml(activeCat) + '</h2><span class="count">' + filtered.length + ' produk</span></div>';
-        html += '<div class="product-grid-icons">' + filtered.map(iconCard).join("") + '</div>';
-      } else if (activeCat === "flash") {
-        html += '<div class="section-head"><h2><i data-lucide="flame" style="width:18px;height:18px"></i> Flash Sale</h2><span class="count">' + filtered.length + ' produk</span></div>';
-        html += '<div class="product-grid-icons">' + filtered.map(iconCard).join("") + '</div>';
+      if (!filtered.length) {
+        html = '<div class="empty-state">Tidak ada produk di menu ini</div>';
       } else {
-        keys.forEach(function (c) {
-          html += '<div class="home-section">';
-          html += '<div class="section-head"><h2>' + catLabelHtml(c) + '</h2><span class="count">' + groups[c].length + '</span></div>';
-          html += '<div class="product-grid-icons">' + groups[c].map(iconCard).join("") + '</div>';
-          html += '</div>';
-        });
+        html = '<div class="product-grid-icons">' + filtered.map(iconCard).join("") + '</div>';
       }
       document.getElementById("catSections").innerHTML = html;
       lucide.createIcons();
     }
 
     function renderAll() {
-      buildCategories(allProduk);
+      renderMenuLayanan(allMenus);
       renderFlash(allProduk);
       renderSections(allProduk);
       lucide.createIcons();
+    }
+
+    var btnReset = document.getElementById("btnResetFilter");
+    if (btnReset) {
+      btnReset.onclick = function () {
+        activeCat = "semua";
+        activeMenuTitle = "";
+        renderAll();
+      };
     }
 
     if (VOXY.auth) {
@@ -388,6 +393,14 @@
             el.innerHTML = '<div class="empty-state">Memuat lambat... <button type="button" class="btn btn-sm" onclick="location.reload()">Muat ulang</button></div>';
           }
         }, 3000);
+        VOXY.getMenuLayanan().then(function (menus) {
+          allMenus = menus || [];
+          renderMenuLayanan(allMenus);
+        }).catch(function () { renderMenuLayanan([]); });
+        VOXY.listenMenuLayanan(function (menus) {
+          allMenus = menus || [];
+          renderMenuLayanan(allMenus);
+        });
         VOXY.getProdukList().then(function (list) {
           if (list && list.length) {
             clearTimeout(loadTimeout);

@@ -1,17 +1,19 @@
-=== FIREBASE REALTIME DATABASE RULES — VOXY MARKET ===
+=== FIREBASE REALTIME DATABASE RULES — VERSI LENGKAP (AMAN ADMIN) ===
 
 Cara pasang:
-1. Buka Firebase Console → project voxyyjoki
-2. Realtime Database → tab Rules
-3. Hapus isi lama, tempel JSON di bawah
-4. Klik Publish
+1. Firebase Console → project voxyyjoki
+2. Realtime Database → Rules
+3. Hapus semua rules lama
+4. Tempel HANYA blok JSON di bawah (dari { sampai })
+5. Publish
 
-Rules ini diset supaya:
-- Toko & order & chat jalan lancar dengan kode saat ini
-- Hanya 2 email admin yang boleh ubah produk / settings / branding / kirim file hasil
-- User biasa hanya kelola data miliknya (order sendiri, chat sendiri)
+Email admin (harus sama dengan yang login panel):
+- emailwebvixy@gmail.com
+- voxymarket98@gmail.com
 
-Ganti email admin di bawah jika akun admin diganti.
+Kalau ganti email admin, ganti SEMUA kemunculan email di rules ini.
+
+========== SALIN MULAI DARI SINI ==========
 
 {
   "rules": {
@@ -20,7 +22,9 @@ Ganti email admin di bawah jika akun admin diganti.
 
     "produk": {
       ".read": true,
-      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+      "$id": {
+        ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com' || (data.exists() && newData.child('nama').val() == data.child('nama').val() && newData.child('harga').val() == data.child('harga').val() && newData.child('kategori').val() == data.child('kategori').val()))"
+      }
     },
 
     "produk_images": {
@@ -38,22 +42,30 @@ Ganti email admin di bawah jika akun admin diganti.
       ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     },
 
+    "menu_layanan": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+    },
+
     "orders": {
       ".read": "auth != null",
-      ".write": "auth != null",
       "$kode": {
-        ".validate": "newData.hasChildren(['kode']) || data.exists()"
+        ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com' || (!data.exists() && newData.child('uid').val() == auth.uid && newData.child('status').val() == 'Menunggu') || (data.exists() && data.child('uid').val() == auth.uid && newData.child('uid').val() == data.child('uid').val() && newData.child('status').val() == data.child('status').val() && newData.child('harga').val() == data.child('harga').val() && newData.child('kode').val() == data.child('kode').val()))"
       }
     },
 
     "order_bukti": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      "$kode": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
     },
 
     "order_files": {
-      ".read": "auth != null",
-      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+      "$kode": {
+        ".read": "auth != null",
+        ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+      }
     },
 
     "laporan": {
@@ -70,13 +82,45 @@ Ganti email admin di bawah jika akun admin diganti.
   }
 }
 
-=== RINGKAS ===
-produk / settings / branding_assets  → publik baca, admin tulis
-orders / order_bukti                 → user login bisa (riwayat & upload bukti jalan)
-order_files                          → admin tulis (kirim hasil order)
-chat/{uid}                           → hanya pemilik chat atau admin
+========== SALIN SAMPAI SINI ==========
 
-=== CATATAN ===
-- Panel admin di website tetap dicek lewat isAdmin() (2 email).
-- Rules di atas = pengaman di server Firebase.
-- Setelah Publish, test: login user biasa tidak bisa ubah produk; admin bisa.
+
+=== APA YANG DIAMANKAN ===
+
+1) PANEL ADMIN (server-side)
+   - settings, branding (logo/banner/QRIS), produk_images
+     → HANYA 2 email admin yang boleh tulis
+   - User biasa yang coba ubah lewat console/API → PERMISSION_DENIED
+
+2) PRODUK
+   - Baca: semua orang (katalog toko)
+   - Tulis penuh (nama, harga, hapus, tambah): admin saja
+   - User boleh update terbatas saat order (stok berkurang),
+     asalkan nama/harga/kategori tidak berubah
+
+3) ORDERS
+   - Baca: user login (riwayat app tetap jalan)
+   - Buat order baru: user, wajib uid sendiri + status "Menunggu"
+   - User TIDAK bisa ubah status / harga / kode order orang lain
+   - User boleh update order sendiri (linkTarget, catatan) tanpa ganti status/harga
+   - Admin: full kontrol (ubah status, tolak, selesai, dll)
+
+4) ORDER_FILES (hasil kirim admin: APK/link file)
+   - Baca: user login (pembeli lihat hasil)
+   - Tulis: admin saja
+
+5) CHAT
+   - Hanya pemilik chat (uid) atau admin
+   - Orang lain tidak bisa buka chat user lain
+
+6) FRONTEND
+   - admin.html / admin-kelola.html tetap pakai requireAdmin()
+   - Email selain 2 admin → ditolak di UI + di rules
+
+
+=== TES CEPAT SETELAH PUBLISH ===
+1. Login email biasa → buka admin.html → ditolak
+2. Login email biasa → tidak bisa ubah produk/settings di Firebase
+3. Login email biasa → order + upload bukti TF tetap bisa
+4. Login admin → panel, ganti logo/QRIS, ubah status order → OK
+5. User coba ubah status order jadi "Selesai" lewat API → DENIED

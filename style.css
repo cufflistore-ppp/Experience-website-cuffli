@@ -859,3 +859,114 @@ label{color:#94a3b8!important;font-weight:600;font-size:12px}
   text-decoration:none;
 }
 .home-mini-copy{font-size:11px!important;opacity:.8}
+
+/* ===== Menu Layanan (home) ===== */
+.menu-layanan-section{margin:6px 0 16px}
+.menu-layanan-title{
+  text-align:center;
+  font-size:15px;
+  font-weight:800;
+  letter-spacing:.06em;
+  color:#38bdf8;
+  margin:4px 0 14px;
+}
+.menu-layanan-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.menu-layanan-btn{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  text-align:left;
+  padding:14px 12px;
+  border:none;
+  border-radius:16px;
+  cursor:pointer;
+  color:#fff;
+  background:linear-gradient(135deg,#0ea5e9 0%,#2563eb 55%,#1d4ed8 100%);
+  box-shadow:0 6px 20px rgba(37,99,235,.35), inset 0 1px 0 rgba(255,255,255,.15);
+  transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+  position:relative;
+  overflow:hidden;
+}
+.menu-layanan-btn::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:16px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+  pointer-events:none;
+}
+.menu-layanan-btn:active{transform:scale(.97)}
+.menu-layanan-btn.active{
+  filter:brightness(1.08);
+  box-shadow:0 0 0 2px rgba(56,189,248,.7), 0 8px 24px rgba(37,99,235,.45);
+}
+.mlb-icon{
+  width:36px;height:36px;flex-shrink:0;
+  border-radius:12px;
+  background:rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;
+}
+.mlb-icon svg{width:20px;height:20px;color:#fff;stroke:#fff}
+.mlb-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.mlb-title{
+  font-size:12px;font-weight:800;line-height:1.25;
+  color:#fff;text-transform:uppercase;letter-spacing:.02em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.mlb-sub{font-size:10px;opacity:.9;font-weight:600;color:rgba(255,255,255,.9)}
+.mlb-arrow{flex-shrink:0;opacity:.85}
+.mlb-arrow svg{width:18px;height:18px;color:#fff}
+
+.home-produk-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:8px 0 12px;gap:10px;
+}
+.home-produk-head h2{font-size:15px;font-weight:800;margin:0;color:var(--text)}
+.btn-text{
+  background:none;border:none;color:#38bdf8;font-size:12px;font-weight:700;
+  cursor:pointer;padding:4px 0;
+}
+
+.product-icon-card.is-flash{
+  border-color:rgba(249,115,22,.45)!important;
+  box-shadow:0 0 0 1px rgba(249,115,22,.2), var(--shadow);
+}
+.flash-tag{
+  position:absolute;top:14px;right:12px;z-index:2;
+  font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;
+  background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;
+  display:inline-flex;align-items:center;gap:2px;
+}
+
+/* Floating capsule bottom nav */
+.bottom-nav{
+  position:fixed!important;
+  left:50%!important;
+  right:auto!important;
+  transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom))!important;
+  width:min(400px, calc(100% - 28px))!important;
+  max-width:400px;
+  border-radius:999px!important;
+  padding:8px 10px!important;
+  background:rgba(10,16,36,.92)!important;
+  backdrop-filter:blur(16px)!important;
+  border:1px solid rgba(59,130,246,.35)!important;
+  box-shadow:0 10px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.04)!important;
+  z-index:50;
+}
+.bottom-nav a{
+  border-radius:999px!important;
+  padding:8px 14px!important;
+}
+.bottom-nav a.active{
+  border-radius:999px!important;
+  padding:8px 18px!important;
+}
+.page, .home-page{padding-bottom:110px!important}
+.fab-chat{bottom:100px!important}
