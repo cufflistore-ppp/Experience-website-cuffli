@@ -3,88 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Layanan — CUFFLI SOCIAL</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="css/style.css">
+  <title>Layanan - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 </head>
 <body>
-  <div id="loading-screen">
-    <div class="loading-logo">CUFFLI SOCIAL</div>
-    <div class="loading-text">Loading...</div>
-  </div>
+  <header class="app-header">
+    <button class="icon-btn" onclick="location.href='home.html'"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span id="pageTitle">Layanan</span></div>
+    <div style="width:40px"></div>
+  </header>
 
-  <nav class="navbar">
-    <div class="nav-container">
-      <a href="index.html" class="logo"><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Beranda</a></li>
-        <li><a href="layanan.html" class="active">Layanan</a></li>
-        <li><a href="order.html">Pesanan</a></li>
-        <li><a href="riwayat.html">Riwayat</a></li>
-        <li><a href="profil.html">Profil</a></li>
-      </ul>
-      <div class="nav-actions">
-        <a href="login.html" class="btn btn-outline btn-sm" id="nav-login">Login</a>
-        <a href="profil.html" class="btn btn-primary btn-sm hidden" id="nav-profile">Profil</a>
+  <main class="page layanan-page">
+    <div class="flash-box" id="flashBox" style="display:none">
+      <div class="flash-top">
+        <h2><i data-lucide="flame" style="width:16px;height:16px;color:#fb923c"></i> Flash Sale</h2>
+        <div class="flash-timer" id="flashTimer">--:--:--</div>
       </div>
+      <div class="flash-row" id="flashRow"></div>
     </div>
-  </nav>
 
-  <div class="page-header">
-    <h1>Daftar <span style="color:var(--neon)">Layanan</span></h1>
-    <p>Pilih platform dan layanan yang kamu butuhkan. Harga transparan, proses cepat.</p>
-  </div>
-
-  <section class="section" style="padding-top:10px">
-    <div class="container">
-      <div class="warning-box">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <div>
-          <strong>Peringatan Keamanan:</strong> Jangan pernah memberikan password, OTP, atau kode verifikasi akun sosial media kepada siapa pun. Kami hanya membutuhkan link publik.
-        </div>
-      </div>
-      <div id="services-container">
-        <!-- Rendered by JS -->
-      </div>
+    <div class="home-produk-head">
+      <h2 id="listTitle">Produk</h2>
+      <span class="count" id="listCount"></span>
     </div>
-  </section>
-
-  <footer class="footer">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <h3><i class="fa-solid fa-bolt"></i> CUFFLI SOCIAL</h3>
-        <p>Layanan sosial media digital modern.</p>
-      </div>
-      <div>
-        <h4>Menu</h4>
-        <ul>
-          <li><a href="index.html">Beranda</a></li>
-          <li><a href="layanan.html">Layanan</a></li>
-          <li><a href="order.html">Pesanan</a></li>
-          <li><a href="riwayat.html">Riwayat</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4>Bantuan</h4>
-        <ul>
-          <li><a href="faq.html">FAQ</a></li>
-          <li><a href="kontak.html">Kontak Admin</a></li>
-        </ul>
-      </div>
+    <div id="produkGrid" class="product-grid-icons">
+      <div class="empty-state home-loading" style="grid-column:1/-1">Memuat...</div>
     </div>
-    <div class="footer-bottom">© 2026 CUFFLI SOCIAL. All Rights Reserved.</div>
-  </footer>
+  </main>
 
   <nav class="bottom-nav">
-    <a href="index.html"><i class="fa-solid fa-house"></i> Beranda</a>
-    <a href="layanan.html" class="active"><i class="fa-solid fa-store"></i> Layanan</a>
-    <a href="order.html"><i class="fa-solid fa-cart-shopping"></i> Pesanan</a>
-    <a href="profil.html"><i class="fa-solid fa-user"></i> Profil</a>
+    <a href="home.html"><i data-lucide="home"></i>Home</a>
+    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
+    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
   </nav>
 
-  <script src="js/app.js"></script>
-  <script src="js/layanan.js"></script>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var params = new URLSearchParams(location.search);
+    var kat = (params.get("kat") || "").trim();
+    var judul = (params.get("judul") || kat || "Layanan").trim();
+    document.getElementById("pageTitle").textContent = judul;
+    document.getElementById("listTitle").textContent = judul;
+    document.title = judul + " - VOXY MARKET";
+
+    function isFlash(p) {
+      if (!p) return false;
+      var on = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1 || p.flashSale === "1";
+      if (!on) return false;
+      var end = Number(p.flashEnd || 0);
+      if (!end) return true;
+      return Date.now() < end;
+    }
+    function hargaTampil(p) {
+      var normal = Number(p.harga) || 0;
+      if (!isFlash(p)) return normal;
+      var disc = Number(p.flashDiskon) || 0;
+      if (disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
+      if (p.flashHarga != null && Number(p.flashHarga) > 0) return Number(p.flashHarga);
+      return normal;
+    }
+    function matchCat(p, cat) {
+      var k = ((p.kategori || "") + "").trim().toLowerCase();
+      var c = (cat || "").trim().toLowerCase();
+      if (!c) return true;
+      return k === c || k.indexOf(c) !== -1 || c.indexOf(k) !== -1;
+    }
+    function iconCard(p) {
+      var img = p.gambar || "produk1.png";
+      var stokNum = (p.stok != null) ? Number(p.stok) : null;
+      var habis = p.stokHabis || (stokNum !== null && stokNum <= 0);
+      var stok = habis
+        ? '<span class="stok-badge habis">Habis</span>'
+        : (stokNum != null
+          ? '<span class="stok-badge">Sisa ' + stokNum + '</span>'
+          : '<span class="stok-badge">Tersedia</span>');
+      var normal = Number(p.harga) || 0;
+      var now = hargaTampil(p);
+      var flash = isFlash(p);
+      var disc = 0;
+      if (flash && normal > 0 && now < normal) {
+        disc = Number(p.flashDiskon) || Math.round((1 - now / normal) * 100);
+      }
+      var flashBadge = flash ? '<span class="flash-tag"><i data-lucide="flame" style="width:10px;height:10px"></i> Flash</span>' : "";
+      var price =
+        '<div class="card-price-wrap">' +
+          (disc > 0 ? '<span class="disc-badge">-' + disc + '%</span>' : '') +
+          (flash && now < normal ? '<div class="flash-old">' + VOXY.formatRp(normal) + '</div>' : '') +
+          '<div class="flash-price">' + VOXY.formatRp(now) + '</div>' +
+        '</div>';
+      return (
+        '<a class="product-icon-card' + (habis ? ' is-habis' : '') + (flash ? ' is-flash' : '') + '" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
+          stok + flashBadge +
+          '<div class="thumb"><img src="' + img + '" alt="" loading="lazy"></div>' +
+          '<h3>' + (p.nama || "-") + '</h3>' + price +
+        '</a>'
+      );
+    }
+    function renderFlash(list) {
+      var flash = list.filter(isFlash);
+      var box = document.getElementById("flashBox");
+      var row = document.getElementById("flashRow");
+      if (!flash.length) {
+        box.style.display = "none";
+        return;
+      }
+      box.style.display = "block";
+      var ends = flash.map(function (p) { return Number(p.flashEnd) || 0; }).filter(function (n) { return n > 0; });
+      var nearest = ends.length ? Math.min.apply(null, ends) : 0;
+      function tick() {
+        if (!nearest) {
+          document.getElementById("flashTimer").textContent = "Aktif";
+          return;
+        }
+        var left = nearest - Date.now();
+        if (left <= 0) {
+          document.getElementById("flashTimer").textContent = "00:00:00";
+          return;
+        }
+        var h = Math.floor(left / 3600000);
+        var m = Math.floor((left % 3600000) / 60000);
+        var s = Math.floor((left % 60000) / 1000);
+        document.getElementById("flashTimer").textContent =
+          (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+      }
+      tick();
+      if (window._flashInterval) clearInterval(window._flashInterval);
+      window._flashInterval = setInterval(tick, 1000);
+      row.innerHTML = flash.map(iconCard).join("");
+      lucide.createIcons();
+    }
+    function renderList(list) {
+      var filtered = kat ? list.filter(function (p) { return matchCat(p, kat); }) : list.slice();
+      document.getElementById("listCount").textContent = filtered.length + " produk";
+      var grid = document.getElementById("produkGrid");
+      if (!filtered.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Belum ada produk di layanan ini</div>';
+        renderFlash([]);
+        return;
+      }
+      renderFlash(filtered);
+      /* grid: semua produk kategori (flash juga tetap tampil dengan badge) */
+      grid.innerHTML = filtered.map(iconCard).join("");
+      lucide.createIcons();
+    }
+
+    VOXY.requireAuth().then(function () {
+      VOXY.applyBrandingToPage();
+      VOXY.getProdukList().then(function (list) {
+        renderList(list || []);
+      });
+      VOXY.listenProduk(function (list) {
+        renderList(list || []);
+      });
+    });
+  </script>
 </body>
 </html>

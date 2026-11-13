@@ -970,3 +970,6 @@ label{color:#94a3b8!important;font-weight:600;font-size:12px}
 }
 .page, .home-page{padding-bottom:110px!important}
 .fab-chat{bottom:100px!important}
+
+a.menu-layanan-btn{text-decoration:none;color:#fff;-webkit-tap-highlight-color:transparent}
+.layanan-page .home-produk-head{margin-top:4px}

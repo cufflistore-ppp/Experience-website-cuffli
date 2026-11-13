@@ -123,14 +123,9 @@
         <div class="form-grid">
           <div class="form-group"><label>Nama Produk</label><input id="pNama" type="text" placeholder="Contoh: Canva Pro"></div>
           <div class="form-group">
-            <label>Kategori</label>
-            <select id="pKategori">
-              <option value="Produk Digital">Produk Digital</option>
-              <option value="Jasa Suntik">Jasa Suntik</option>
-              <option value="Jasa">Jasa</option>
-              <option value="Aplikasi Premium">Aplikasi Premium</option>
-              <option value="Lainnya">Lainnya</option>
-            </select>
+            <label>Kategori (harus sama dengan filter Menu Layanan)</label>
+            <input id="pKategori" type="text" list="listKategoriMenu" placeholder="Contoh: APK BUG / PANEL">
+            <datalist id="listKategoriMenu"></datalist>
           </div>
           <div class="form-group"><label>Harga normal</label><input id="pHarga" type="number" min="0"></div>
           <div class="form-group">
@@ -225,6 +220,48 @@
           <button type="button" class="btn btn-sm btn-outline" onclick="resetMenuForm()">Reset Form</button>
         </div>
         <div id="menuListAdmin" style="margin-top:16px"><div class="empty-state">Memuat...</div></div>
+      </div>
+
+      <div class="admin-card">
+        <h2><i class="fa-solid fa-box"></i> Isi Produk ke Menu</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
+          Pilih menu, lalu tambah produk. Kategori produk otomatis mengikuti <b>kategori filter</b> menu itu.
+        </p>
+        <div class="form-group">
+          <label>Pilih Menu Layanan</label>
+          <select id="mpMenuSelect" onchange="onPilihMenuUntukProduk()">
+            <option value="">— Pilih menu dulu —</option>
+          </select>
+        </div>
+        <div id="mpFormWrap" style="display:none">
+          <input type="hidden" id="mpProdukId" value="">
+          <div class="form-grid">
+            <div class="form-group"><label>Nama Produk</label><input id="mpNama" type="text" placeholder="Nama produk"></div>
+            <div class="form-group"><label>Kategori (otomatis)</label><input id="mpKategori" type="text" readonly style="opacity:.85"></div>
+            <div class="form-group"><label>Harga</label><input id="mpHarga" type="number" min="0" placeholder="0"></div>
+            <div class="form-group"><label>Stok</label><input id="mpStok" type="number" min="0" value="10"></div>
+            <div class="form-group">
+              <label>Tipe kirim</label>
+              <select id="mpTipeKirim">
+                <option value="email_password">Email + Password</option>
+                <option value="apk_zip">APK / ZIP</option>
+                <option value="link">Link URL</option>
+                <option value="link_target">Link Target (suntik)</option>
+                <option value="wa_admin">WhatsApp Admin</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Upload foto</label><input type="file" id="mpGambar" accept="image/*"></div>
+            <div class="form-group full"><label>Deskripsi</label><textarea id="mpDeskripsi" rows="2"></textarea></div>
+            <div class="form-group full"><label><input type="checkbox" id="mpFlash"> Flash Sale</label></div>
+            <div class="form-group"><label>Diskon %</label><input id="mpFlashDiskon" type="number" min="1" max="99" placeholder="20"></div>
+            <div class="form-group"><label>Flash berakhir</label><input id="mpFlashEnd" type="datetime-local"></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button type="button" class="btn btn-sm btn-success" onclick="simpanProdukMenu()">Simpan Produk ke Menu</button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="resetProdukMenuForm()">Reset</button>
+          </div>
+        </div>
+        <div id="mpProdukList" style="margin-top:16px"><div class="empty-state">Pilih menu untuk lihat produknya</div></div>
       </div>
     </div>
 
@@ -936,6 +973,21 @@
           return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
         });
       }).then(function (list) {
+        window._menuAdminList = list || [];
+        var sel = document.getElementById("mpMenuSelect");
+        var dl = document.getElementById("listKategoriMenu");
+        if (sel) {
+          var cur = sel.value;
+          sel.innerHTML = '<option value="">— Pilih menu dulu —</option>' + list.map(function (m) {
+            return '<option value="' + m.id + '">' + (m.judul || m.id) + (m.kategori ? " (" + m.kategori + ")" : "") + '</option>';
+          }).join("");
+          if (cur) sel.value = cur;
+        }
+        if (dl) {
+          dl.innerHTML = list.filter(function (m) { return m.kategori; }).map(function (m) {
+            return '<option value="' + String(m.kategori).replace(/"/g, "") + '">';
+          }).join("");
+        }
         if (!list.length) {
           box.innerHTML = '<div class="empty-state">Belum ada menu. Tambah di form atas.</div>';
           return;
@@ -949,11 +1001,13 @@
               (m.subjudul ? '<div class="meta">' + String(m.subjudul).replace(/</g, "&lt;") + '</div>' : '') +
               '<div class="actions">' +
                 '<button type="button" class="btn btn-sm" data-id="' + m.id + '" onclick="editMenuItem(this.dataset.id)">Edit</button>' +
+                '<button type="button" class="btn btn-sm" data-id="' + m.id + '" onclick="pilihMenuIsiProduk(this.dataset.id)">Isi Produk</button>' +
                 '<button type="button" class="btn btn-sm btn-danger" data-id="' + m.id + '" onclick="hapusMenuItem(this.dataset.id)">Hapus</button>' +
               '</div>' +
             '</div>'
           );
         }).join("");
+        if (sel && sel.value) onPilihMenuUntukProduk();
       }).catch(function (e) {
         box.innerHTML = '<div class="empty-state">' + (e.message || "Gagal muat menu") + '</div>';
       });
@@ -974,13 +1028,15 @@
     }
     function simpanMenuItem() {
       var judul = document.getElementById("mJudul").value.trim();
+      var kat = document.getElementById("mKat").value.trim();
       if (!judul) return alert("Judul wajib diisi");
+      if (!kat) return alert("Kategori filter wajib diisi (dipakai untuk menampung produk menu ini)");
       var data = {
         id: document.getElementById("mId").value || undefined,
         judul: judul,
         subjudul: document.getElementById("mSub").value.trim(),
         icon: document.getElementById("mIcon").value.trim() || "package",
-        kategori: document.getElementById("mKat").value.trim(),
+        kategori: kat,
         urutan: Number(document.getElementById("mUrut").value) || 0,
         aktif: document.getElementById("mAktif").value === "1"
       };
@@ -996,6 +1052,159 @@
       VOXY.hapusMenuLayanan(id).then(function () {
         loadMenuAdmin();
       }).catch(function (e) { alert(e.message); });
+    }
+    function pilihMenuIsiProduk(id) {
+      var sel = document.getElementById("mpMenuSelect");
+      if (sel) sel.value = id;
+      onPilihMenuUntukProduk();
+      var wrap = document.getElementById("mpFormWrap");
+      if (wrap) wrap.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    function onPilihMenuUntukProduk() {
+      var id = document.getElementById("mpMenuSelect").value;
+      var wrap = document.getElementById("mpFormWrap");
+      var listBox = document.getElementById("mpProdukList");
+      if (!id) {
+        if (wrap) wrap.style.display = "none";
+        if (listBox) listBox.innerHTML = '<div class="empty-state">Pilih menu untuk lihat produknya</div>';
+        return;
+      }
+      var menus = window._menuAdminList || [];
+      var m = null;
+      for (var i = 0; i < menus.length; i++) if (menus[i].id === id) { m = menus[i]; break; }
+      if (!m) {
+        if (wrap) wrap.style.display = "none";
+        return;
+      }
+      if (wrap) wrap.style.display = "block";
+      document.getElementById("mpKategori").value = m.kategori || "";
+      resetProdukMenuForm(true);
+      loadProdukUntukMenu(m.kategori || "");
+    }
+    function resetProdukMenuForm(keepKat) {
+      document.getElementById("mpProdukId").value = "";
+      document.getElementById("mpNama").value = "";
+      if (!keepKat) document.getElementById("mpKategori").value = "";
+      document.getElementById("mpHarga").value = "";
+      document.getElementById("mpStok").value = "10";
+      document.getElementById("mpTipeKirim").value = "email_password";
+      document.getElementById("mpDeskripsi").value = "";
+      document.getElementById("mpGambar").value = "";
+      document.getElementById("mpFlash").checked = false;
+      document.getElementById("mpFlashDiskon").value = "";
+      document.getElementById("mpFlashEnd").value = "";
+    }
+    function matchKatAdmin(p, cat) {
+      var k = ((p.kategori || "") + "").trim().toLowerCase();
+      var c = (cat || "").trim().toLowerCase();
+      if (!c) return false;
+      return k === c || k.indexOf(c) !== -1 || c.indexOf(k) !== -1;
+    }
+    function loadProdukUntukMenu(kat) {
+      var listBox = document.getElementById("mpProdukList");
+      if (!listBox) return;
+      listBox.innerHTML = '<div class="empty-state">Memuat produk...</div>';
+      VOXY.getProdukList().then(function (list) {
+        var filtered = (list || []).filter(function (p) { return matchKatAdmin(p, kat); });
+        if (!filtered.length) {
+          listBox.innerHTML = '<div class="empty-state">Belum ada produk di kategori <b>' + (kat || "-") + '</b>. Tambah lewat form di atas.</div>';
+          return;
+        }
+        listBox.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:8px">' + filtered.length + ' produk di menu ini</div>' +
+          filtered.map(function (p) {
+            return (
+              '<div class="admin-order-card" style="margin-bottom:8px">' +
+                '<div class="top"><b>' + (p.nama || "-") + '</b><span class="meta">' + VOXY.formatRp(p.harga) + '</span></div>' +
+                '<div class="meta">Stok: ' + (p.stok != null ? p.stok : "-") + (p.flashSale ? ' · Flash Sale' : '') + '</div>' +
+                '<div class="actions">' +
+                  '<button type="button" class="btn btn-sm" data-id="' + p.id + '" onclick="editProdukMenu(this.dataset.id)">Edit</button>' +
+                  '<button type="button" class="btn btn-sm btn-danger" data-id="' + p.id + '" onclick="hapusProdukMenu(this.dataset.id)">Hapus</button>' +
+                '</div>' +
+              '</div>'
+            );
+          }).join("");
+      }).catch(function (e) {
+        listBox.innerHTML = '<div class="empty-state">' + (e.message || "Gagal muat") + '</div>';
+      });
+    }
+    function editProdukMenu(id) {
+      VOXY.getProdukList().then(function (list) {
+        var p = (list || []).filter(function (x) { return x.id === id; })[0];
+        if (!p) return alert("Produk tidak ditemukan");
+        document.getElementById("mpProdukId").value = p.id;
+        document.getElementById("mpNama").value = p.nama || "";
+        document.getElementById("mpKategori").value = p.kategori || document.getElementById("mpKategori").value;
+        document.getElementById("mpHarga").value = p.harga || 0;
+        document.getElementById("mpStok").value = p.stok != null ? p.stok : 10;
+        document.getElementById("mpTipeKirim").value = p.tipeKirim || "email_password";
+        document.getElementById("mpDeskripsi").value = p.deskripsi || "";
+        document.getElementById("mpFlash").checked = !!(p.flashSale === true || p.flashSale === "true" || p.flashSale === 1);
+        document.getElementById("mpFlashDiskon").value = p.flashDiskon || "";
+        if (p.flashEnd) {
+          try {
+            var d = new Date(Number(p.flashEnd));
+            document.getElementById("mpFlashEnd").value = d.toISOString().slice(0, 16);
+          } catch (e) {}
+        }
+        document.getElementById("mpFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+    function hapusProdukMenu(id) {
+      if (!confirm("Hapus produk ini?")) return;
+      VOXY.hapusProduk(id).then(function () {
+        var kat = document.getElementById("mpKategori").value;
+        loadProdukUntukMenu(kat);
+        if (typeof loadProdukAdmin === "function") loadProdukAdmin();
+      }).catch(function (e) { alert(e.message); });
+    }
+    function simpanProdukMenu() {
+      var nama = document.getElementById("mpNama").value.trim();
+      var kat = document.getElementById("mpKategori").value.trim();
+      if (!document.getElementById("mpMenuSelect").value) return alert("Pilih menu dulu");
+      if (!nama) return alert("Nama produk wajib");
+      if (!kat) return alert("Menu ini belum punya kategori filter. Edit menu dan isi kategori filter dulu.");
+      var flashOn = !!document.getElementById("mpFlash").checked;
+      var disc = Number(document.getElementById("mpFlashDiskon").value) || 0;
+      var flashEndVal = document.getElementById("mpFlashEnd").value;
+      var flashEnd = 0;
+      if (flashOn) {
+        if (disc <= 0) return alert("Isi diskon flash 1–99");
+        flashEnd = flashEndVal ? new Date(flashEndVal).getTime() : (Date.now() + 7 * 24 * 3600 * 1000);
+        if (isNaN(flashEnd)) flashEnd = Date.now() + 7 * 24 * 3600 * 1000;
+      }
+      var id = document.getElementById("mpProdukId").value || null;
+      var data = {
+        nama: nama,
+        kategori: kat,
+        harga: Number(document.getElementById("mpHarga").value) || 0,
+        deskripsi: document.getElementById("mpDeskripsi").value.trim(),
+        tipeKirim: document.getElementById("mpTipeKirim").value,
+        stok: Math.max(0, Number(document.getElementById("mpStok").value) || 0),
+        stokHabis: (Math.max(0, Number(document.getElementById("mpStok").value) || 0) <= 0),
+        flashSale: flashOn,
+        flashDiskon: flashOn ? disc : 0,
+        flashHarga: 0,
+        flashEnd: flashOn ? flashEnd : 0,
+        butuhTarget: document.getElementById("mpTipeKirim").value === "link_target"
+      };
+      var file = document.getElementById("mpGambar").files[0];
+      var go = function (imgUrl) {
+        if (imgUrl) data.gambar = imgUrl;
+        else if (!id) data.gambar = "produk1.png";
+        return VOXY.simpanProduk(id, data).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Produk tersimpan di menu");
+          else alert("Produk tersimpan di menu");
+          resetProdukMenuForm(true);
+          loadProdukUntukMenu(kat);
+          if (typeof loadProdukAdmin === "function") loadProdukAdmin();
+        });
+      };
+      if (file) {
+        VOXY.compressChatImage(file).then(function (url) { return go(url); })
+          .catch(function (e) { alert(e.message || "Gagal upload"); });
+      } else {
+        go(null).catch(function (e) { alert(e.message || "Gagal simpan"); });
+      }
     }
     function doLogout() {
       if (!confirm("Logout admin?")) return;
