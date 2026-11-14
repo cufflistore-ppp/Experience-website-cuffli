@@ -1297,7 +1297,12 @@
       } else if (filterJokiStatus !== "semua") {
         list = list.filter(function (o) { return (o.status || "") === filterJokiStatus; });
       }
-      list.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+      list.sort(function (a, b) {
+        var pa = (a.serobot || (a.jokiIncludes || []).some(function (x) { return x.id === "prioritas"; })) ? 1 : 0;
+        var pb = (b.serobot || (b.jokiIncludes || []).some(function (x) { return x.id === "prioritas"; })) ? 1 : 0;
+        if (pb !== pa) return pb - pa;
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      });
       if (!list.length) {
         box.innerHTML = '<div class="empty-state">Belum ada order joki</div>';
         return;

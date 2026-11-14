@@ -64,22 +64,22 @@
   <script>
     lucide.createIcons();
     var PAKET_MAP = {
-      "joki-20jam": { id: "joki-20jam", nama: "Joki 20 Jam", labelTengah: "[20 jam]", desc: "20 jam + SW + share 10GB", harga: 500 },
-      "joki-1hari": { id: "joki-1hari", nama: "Joki 1 Hari", labelTengah: "[1 hari]", desc: "1 hari + SW + share all GB", harga: 1000 },
-      "joki-2hari": { id: "joki-2hari", nama: "Joki 2 Hari", labelTengah: "[2 hari]", desc: "2 hari + SW + share all GB", harga: 2000 },
-      "joki-3hari": { id: "joki-3hari", nama: "Joki 3 Hari", labelTengah: "[3 hari]", desc: "3 hari + SW + share all GB", harga: 3000 },
-      "joki-4hari": { id: "joki-4hari", nama: "Joki 4 Hari", labelTengah: "[4 hari]", desc: "4 hari + SW + share all GB", harga: 4000 },
-      "joki-5hari": { id: "joki-5hari", nama: "Joki 5 Hari", labelTengah: "[5 hari]", desc: "5 hari + SW + share all GB", harga: 5000 },
-      "joki-permanen": { id: "joki-permanen", nama: "Joki Permanen", labelTengah: "[Manen]", desc: "Permanen link tree + SW tebar", harga: 6000 }
+      "joki-20jam": { id: "joki-20jam", nama: "Joki 20 Jam", hari: 0, jam: 20, desc: "20 jam + SW + share 10GB", harga: 500 },
+      "joki-1hari": { id: "joki-1hari", nama: "Joki 1 Hari", hari: 1, jam: 0, desc: "1 hari + SW + share all GB", harga: 1000 },
+      "joki-2hari": { id: "joki-2hari", nama: "Joki 2 Hari", hari: 2, jam: 0, desc: "2 hari + SW + share all GB", harga: 2000 },
+      "joki-3hari": { id: "joki-3hari", nama: "Joki 3 Hari", hari: 3, jam: 0, desc: "3 hari + SW + share all GB", harga: 3000 },
+      "joki-4hari": { id: "joki-4hari", nama: "Joki 4 Hari", hari: 4, jam: 0, desc: "4 hari + SW + share all GB", harga: 4000 },
+      "joki-5hari": { id: "joki-5hari", nama: "Joki 5 Hari", hari: 5, jam: 0, desc: "5 hari + SW + share all GB", harga: 5000 },
+      "joki-permanen": { id: "joki-permanen", nama: "Joki Permanen", hari: 0, jam: 0, permanen: true, desc: "Permanen link tree + SW tebar", harga: 6000 }
     };
     var INCLUDES = [
-      { id: "plus20jam", nama: "+ 20 Jam", harga: 500 },
-      { id: "plus1hari", nama: "+ 1 Hari", harga: 1000 },
-      { id: "plus2hari", nama: "+ 2 Hari", harga: 2000 },
-      { id: "plus3hari", nama: "+ 3 Hari", harga: 3000 },
-      { id: "plus4hari", nama: "+ 4 Hari", harga: 4000 },
-      { id: "plus5hari", nama: "+ 5 Hari", harga: 5000 },
-      { id: "prioritas", nama: "Prioritas Antrian", harga: 8000 }
+      { id: "plus20jam", nama: "+ 20 Jam", harga: 500, hari: 0, jam: 20 },
+      { id: "plus1hari", nama: "+ 1 Hari", harga: 1000, hari: 1, jam: 0 },
+      { id: "plus2hari", nama: "+ 2 Hari", harga: 2000, hari: 2, jam: 0 },
+      { id: "plus3hari", nama: "+ 3 Hari", harga: 3000, hari: 3, jam: 0 },
+      { id: "plus4hari", nama: "+ 4 Hari", harga: 4000, hari: 4, jam: 0 },
+      { id: "plus5hari", nama: "+ 5 Hari", harga: 5000, hari: 5, jam: 0 },
+      { id: "prioritas", nama: "Prioritas Antrian", harga: 8000, hari: 0, jam: 0, prioritas: true }
     ];
     var selectedInclude = {};
     var paket = null;
@@ -90,10 +90,31 @@
       if (n && !n.startsWith("62")) n = "62" + n;
       return n;
     }
+        function formatLabel(hari, jam, permanen) {
+      if (permanen) return "[Manen]";
+      var parts = [];
+      if (hari > 0) parts.push(hari + " hari");
+      if (jam > 0) parts.push(jam + "jam");
+      if (!parts.length) return "[ ]";
+      return "[" + parts.join(",") + "]";
+    }
+    function totalDurasi() {
+      var hari = paket ? (Number(paket.hari) || 0) : 0;
+      var jam = paket ? (Number(paket.jam) || 0) : 0;
+      var permanen = !!(paket && paket.permanen);
+      if (permanen) return { hari: 0, jam: 0, permanen: true };
+      INCLUDES.forEach(function (inc) {
+        if (!selectedInclude[inc.id] || inc.prioritas) return;
+        hari += Number(inc.hari) || 0;
+        jam += Number(inc.jam) || 0;
+      });
+      return { hari: hari, jam: jam, permanen: false };
+    }
     function buildPreview() {
       var store = document.getElementById("jokiStore").value.trim() || "Nama Store";
       var wa = normWa(document.getElementById("jokiWa").value) || "628…";
-      var tengah = paket ? paket.labelTengah : "[ ]";
+      var d = totalDurasi();
+      var tengah = formatLabel(d.hari, d.jam, d.permanen);
       return "*_SV BUYER DUBAI VOXY🧿_*\n        " + tengah + "\n*_SV ; " + store + "_*\nWa.me/" + wa + "\n\n*#NAMBAH VIEW SW + KONTAK + SELLER + BUYYER + DLL 🌤️🌈*";
     }
     function refreshPreview() {
@@ -116,6 +137,7 @@
       selectedInclude[id] = !selectedInclude[id];
       renderIncludes();
       updateTotal();
+      refreshPreview();
     }
     function renderIncludes() {
       document.getElementById("includeList").innerHTML = INCLUDES.map(function (inc) {
@@ -156,7 +178,7 @@
           '<div class="joki-row-right"><span class="joki-row-price">' + VOXY.formatRp(paket.harga) + '</span></div>' +
         '</div>';
       refreshPreview();
-      if (paket.id === "joki-permanen") {
+      if (paket.permanen) {
         var box = document.getElementById("includeBox");
         if (box) box.style.display = "none";
       } else {
@@ -205,7 +227,9 @@
         jokiStore: store,
         jokiNamaJB: store,
         jokiWa: wa,
-        jokiLabel: paket.labelTengah,
+        jokiLabel: (function(){ var d=totalDurasi(); return formatLabel(d.hari,d.jam,d.permanen); })(),
+        jokiHari: totalDurasi().hari,
+        jokiJam: totalDurasi().jam,
         jokiPreview: buildPreview(),
         deskripsi: paket.desc,
         uid: user.uid,
