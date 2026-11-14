@@ -64,13 +64,13 @@
   <script>
     lucide.createIcons();
     var PAKET_MAP = {
-      "joki-20jam": { id: "joki-20jam", nama: "Joki 20 Jam", labelTengah: "20 Jam", desc: "20 jam + SW + share 10GB", harga: 500 },
-      "joki-1hari": { id: "joki-1hari", nama: "Joki 1 Hari", labelTengah: "1 Hari", desc: "1 hari + SW + share all GB", harga: 1000 },
-      "joki-2hari": { id: "joki-2hari", nama: "Joki 2 Hari", labelTengah: "2 Hari", desc: "2 hari + SW + share all GB", harga: 2000 },
-      "joki-3hari": { id: "joki-3hari", nama: "Joki 3 Hari", labelTengah: "3 Hari", desc: "3 hari + SW + share all GB", harga: 3000 },
-      "joki-4hari": { id: "joki-4hari", nama: "Joki 4 Hari", labelTengah: "4 Hari", desc: "4 hari + SW + share all GB", harga: 4000 },
-      "joki-5hari": { id: "joki-5hari", nama: "Joki 5 Hari", labelTengah: "5 Hari", desc: "5 hari + SW + share all GB", harga: 5000 },
-      "joki-permanen": { id: "joki-permanen", nama: "Joki Permanen", labelTengah: "Permanen", desc: "Permanen link tree + SW tebar", harga: 6000 }
+      "joki-20jam": { id: "joki-20jam", nama: "Joki 20 Jam", labelTengah: "[20 jam]", desc: "20 jam + SW + share 10GB", harga: 500 },
+      "joki-1hari": { id: "joki-1hari", nama: "Joki 1 Hari", labelTengah: "[1 hari]", desc: "1 hari + SW + share all GB", harga: 1000 },
+      "joki-2hari": { id: "joki-2hari", nama: "Joki 2 Hari", labelTengah: "[2 hari]", desc: "2 hari + SW + share all GB", harga: 2000 },
+      "joki-3hari": { id: "joki-3hari", nama: "Joki 3 Hari", labelTengah: "[3 hari]", desc: "3 hari + SW + share all GB", harga: 3000 },
+      "joki-4hari": { id: "joki-4hari", nama: "Joki 4 Hari", labelTengah: "[4 hari]", desc: "4 hari + SW + share all GB", harga: 4000 },
+      "joki-5hari": { id: "joki-5hari", nama: "Joki 5 Hari", labelTengah: "[5 hari]", desc: "5 hari + SW + share all GB", harga: 5000 },
+      "joki-permanen": { id: "joki-permanen", nama: "Joki Permanen", labelTengah: "[Manen]", desc: "Permanen link tree + SW tebar", harga: 6000 }
     };
     var INCLUDES = [
       { id: "plus20jam", nama: "+ 20 Jam", harga: 500 },
@@ -93,7 +93,7 @@
     function buildPreview() {
       var store = document.getElementById("jokiStore").value.trim() || "Nama Store";
       var wa = normWa(document.getElementById("jokiWa").value) || "628…";
-      var tengah = paket ? (paket.labelTengah + " · " + store) : store;
+      var tengah = paket ? paket.labelTengah : "[ ]";
       return "*_SV BUYER DUBAI VOXY🧿_*\n        " + tengah + "\n*_SV ; " + store + "_*\nWa.me/" + wa + "\n\n*#NAMBAH VIEW SW + KONTAK + SELLER + BUYYER + DLL 🌤️🌈*";
     }
     function refreshPreview() {
