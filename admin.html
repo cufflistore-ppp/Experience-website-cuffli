@@ -142,10 +142,13 @@
         <input type="hidden" id="produkId">
         <div class="form-grid">
           <div class="form-group"><label>Nama Produk</label><input id="pNama" type="text" placeholder="Contoh: Canva Pro"></div>
-          <div class="form-group">
-            <label>Kategori (sama filter Menu Layanan)</label>
-            <input id="pKategori" type="text" list="listKategoriMenu" placeholder="Contoh: APK BUG / PANEL">
-            <datalist id="listKategoriMenu"></datalist>
+          <div class="form-group full">
+            <label>Masuk ke Menu Layanan mana?</label>
+            <select id="pMenuPilih" onchange="onPilihMenuProdukTab()">
+              <option value="">— Pilih menu dulu —</option>
+            </select>
+            <input type="hidden" id="pKategori" value="">
+            <p style="font-size:11px;color:var(--muted);margin-top:6px">Produk hanya tampil di menu yang dipilih (kategori filter menu).</p>
           </div>
           <div class="form-group"><label>Harga normal</label><input id="pHarga" type="number" min="0"></div>
           <div class="form-group">
@@ -427,7 +430,7 @@
       if (name === "menu") loadMenuAdmin();
       if (name === "joki" && typeof renderJoki === "function") renderJoki();
       closeSidebar();
-      if (name === "produk") loadProdukAdmin();
+      if (name === "produk") { loadProdukAdmin(); loadMenuAdmin(); }
       if (name === "pengaturan") loadPengaturan();
       if (name === "flash") loadFlashList();
     }
@@ -650,10 +653,18 @@
       document.getElementById("flashFields").style.display = on ? "block" : "none";
       document.getElementById("flashFields2").style.display = on ? "block" : "none";
     }
+    function onPilihMenuProdukTab() {
+      var sel = document.getElementById("pMenuPilih");
+      if (!sel) return;
+      var opt = sel.options[sel.selectedIndex];
+      var kat = opt ? (opt.getAttribute("data-kat") || "") : "";
+      document.getElementById("pKategori").value = kat;
+    }
     function resetProdukForm() {
       document.getElementById("produkId").value = "";
       document.getElementById("pNama").value = "";
-      document.getElementById("pKategori").value = "Produk Digital";
+      document.getElementById("pKategori").value = "";
+      var pm = document.getElementById("pMenuPilih"); if (pm) pm.value = "";
       document.getElementById("pHarga").value = "";
       document.getElementById("pTipeKirim").value = "email_password";
       document.getElementById("pDeskripsi").value = "";
@@ -670,7 +681,15 @@
         if (!p) return;
         document.getElementById("produkId").value = p.id;
         document.getElementById("pNama").value = p.nama || "";
-        document.getElementById("pKategori").value = p.kategori || "Produk Digital";
+        document.getElementById("pKategori").value = p.kategori || "";
+        var pm = document.getElementById("pMenuPilih");
+        if (pm) {
+          var found = "";
+          for (var i = 0; i < pm.options.length; i++) {
+            if ((pm.options[i].getAttribute("data-kat") || "") === (p.kategori || "")) { found = pm.options[i].value; break; }
+          }
+          pm.value = found;
+        }
         document.getElementById("pHarga").value = p.harga || 0;
         document.getElementById("pTipeKirim").value = p.tipeKirim || "email_password";
         document.getElementById("pDeskripsi").value = p.deskripsi || "";
@@ -695,6 +714,9 @@
       var id = document.getElementById("produkId").value || null;
       var nama = document.getElementById("pNama").value.trim();
       if (!nama) { alert("Nama produk wajib"); return; }
+      onPilihMenuProdukTab();
+      var katCek = document.getElementById("pKategori").value.trim();
+      if (!katCek) { alert("Pilih Menu Layanan dulu (produk masuk ke menu mana)"); return; }
       var flashOn = !!document.getElementById("pFlashSale").checked;
       var flashHarga = Number(document.getElementById("pFlashDiskon").value) || 0;
       var flashEndVal = document.getElementById("pFlashEnd").value;
@@ -1021,6 +1043,14 @@
             return '<option value="' + m.id + '">' + (m.judul || m.id) + (m.kategori ? " (" + m.kategori + ")" : "") + '</option>';
           }).join("");
           if (cur) sel.value = cur;
+        }
+        var selP = document.getElementById("pMenuPilih");
+        if (selP) {
+          var curP = selP.value;
+          selP.innerHTML = '<option value="">— Pilih menu dulu —</option>' + list.map(function (m) {
+            return '<option value="' + m.id + '" data-kat="' + String(m.kategori || "").replace(/"/g, "") + '">' + (m.judul || m.id) + (m.kategori ? " → " + m.kategori : "") + '</option>';
+          }).join("");
+          if (curP) selP.value = curP;
         }
         if (dl) {
           dl.innerHTML = list.filter(function (m) { return m.kategori; }).map(function (m) {

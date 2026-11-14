@@ -1268,3 +1268,8 @@ a.menu-layanan-btn{text-decoration:none;color:#fff;-webkit-tap-highlight-color:t
   margin:0 0 8px;
 }
 .paket-badge{z-index:2}
+.jaspost-home-btn{
+  background:linear-gradient(135deg,#22c55e,#16a34a 45%,#15803d)!important;
+  box-shadow:0 6px 20px rgba(22,163,74,.35)!important;
+}
+.menu-fixed-grid{margin-bottom:4px}

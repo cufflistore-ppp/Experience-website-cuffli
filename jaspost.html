@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jaspost / PM Admin - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <button class="icon-btn" onclick="location.href='home.html'"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span>Jaspost / PM</span></div>
+    <div style="width:40px"></div>
+  </header>
+  <main class="page">
+    <div class="pay-card">
+      <h2 style="margin-bottom:8px">Jasa Post / PM Admin</h2>
+      <p style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:16px">
+        Layanan jaspost tidak lewat paket otomatis. Hubungi admin langsung untuk order &amp; negosiasi.
+      </p>
+      <button type="button" class="btn" style="width:100%;margin-bottom:10px" id="btnChatWeb">
+        Chat via Website
+      </button>
+      <button type="button" class="btn btn-wa" style="width:100%" id="btnChatWA">
+        Chat via WhatsApp
+      </button>
+    </div>
+  </main>
+  <nav class="bottom-nav">
+    <a href="home.html"><i data-lucide="home"></i>Home</a>
+    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
+    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
+  </nav>
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var waAdmin = "";
+    VOXY.requireAuth().then(function () {
+      VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
+    });
+    document.getElementById("btnChatWeb").onclick = function () { location.href = "chat.html"; };
+    document.getElementById("btnChatWA").onclick = function () {
+      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY, saya mau order Jaspost / PM:");
+    };
+  </script>
+</body>
+</html>
