@@ -120,7 +120,7 @@
     <div class="panel" id="panel-joki">
       <div class="admin-card">
         <h2><i data-lucide="zap"></i> Order Joki Khusus</h2>
-        <div class="admin-hint">Hanya order jenis <b>joki</b>. Lihat data store/JB/WA, preview teks, serobot antrian, dan bukti TF. Kelola status lewat tombol di bawah atau buka halaman kelola.</div>
+        <div class="admin-hint">Khusus order <b>joki</b>: cukup <b>ubah status</b> (Proses/Selesai/Tolak) dan <b>Salin Teks</b>. Tidak perlu kirim file produk. Produk biasa tetap di tab Pesanan (status + kirim hasil).</div>
         <div class="filter-row" id="filterJoki">
           <button class="active" type="button" onclick="setFilterJoki('aktif',this)">Aktif</button>
           <button type="button" onclick="setFilterJoki('Menunggu',this)">Menunggu</button>
@@ -1303,29 +1303,59 @@
         return;
       }
       box.innerHTML = list.map(function (o) {
-        var serobot = o.serobot ? '<span class="badge menunggu">SEROBOT</span>' : "";
         var preview = (o.jokiPreview || "").replace(/</g, "&lt;");
+        var includes = "";
+        if (o.jokiIncludes && o.jokiIncludes.length) {
+          includes = '<div class="meta">Include: ' + o.jokiIncludes.map(function (x) {
+            return (x.nama || "") + " (+" + VOXY.formatRp(x.harga || 0) + ")";
+          }).join(", ") + '</div>';
+        } else if (o.serobot) {
+          includes = '<div class="meta">Include: Prioritas Antrian</div>';
+        }
         return (
           '<div class="admin-order-card" style="margin-bottom:10px">' +
-            '<div class="top"><b>' + (o.kode || "-") + '</b> ' + serobot +
+            '<div class="top"><b>' + (o.kode || "-") + '</b>' +
               '<span class="badge">' + (o.status || "-") + '</span></div>' +
-            '<div class="meta"><b>' + (o.nama || o.namaProduk || "Joki") + '</b> · ' + VOXY.formatRp(o.harga) +
-              (o.serobot ? " (dasar " + VOXY.formatRp(o.hargaDasar || 0) + " + serobot)" : "") +
-            '</div>' +
+            '<div class="meta"><b>' + (o.nama || "Joki") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
+            '<div class="meta">Store: <b>' + (o.jokiStore || "-") + '</b> · WA: <b>' + (o.jokiWa || "-") + '</b></div>' +
             '<div class="meta">Email: ' + (o.email || "-") + '</div>' +
-            '<div class="meta">Store: <b>' + (o.jokiStore || "-") + '</b></div>' +
-            '<div class="meta">JB: <b>' + (o.jokiNamaJB || "-") + '</b> · WA: <b>' + (o.jokiWa || "-") + '</b></div>' +
-            (preview ? '<pre class="joki-admin-preview">' + preview + '</pre>' : '') +
+            includes +
+            (preview ? ('<pre class="joki-admin-preview" id="jokiPrev_' + (o.kode || "") + '">' + preview + '</pre>' +
+              '<button type="button" class="btn btn-sm btn-outline" style="margin:6px 0 8px" onclick="salinTeksJoki(\'' + (o.kode || "") + '\')">Salin Teks</button>') : '') +
             '<div class="actions" style="flex-wrap:wrap;gap:6px;margin-top:8px">' +
-              '<a class="btn btn-sm" href="admin-kelola.html?kode=' + encodeURIComponent(o.kode || "") + '">Kelola + Bukti TF</a>' +
               '<button type="button" class="btn btn-sm" onclick="updateStatusJoki(\'' + o.kode + '\',\'Diproses\')">Proses</button>' +
               '<button type="button" class="btn btn-sm btn-success" onclick="updateStatusJoki(\'' + o.kode + '\',\'Selesai\')">Selesai</button>' +
               '<button type="button" class="btn btn-sm btn-danger" onclick="updateStatusJoki(\'' + o.kode + '\',\'Ditolak\')">Tolak</button>' +
             '</div>' +
+            '<p style="font-size:11px;color:var(--muted);margin-top:8px">Joki: ubah status + salin teks saja. Bukti TF cek di Pesanan / detail order user.</p>' +
           '</div>'
         );
       }).join("");
     }
+    function salinTeksJoki(kode) {
+      var el = document.getElementById("jokiPrev_" + kode);
+      var text = el ? el.textContent : "";
+      if (!text) {
+        var o = (allOrders || []).filter(function (x) { return x.kode === kode; })[0];
+        text = (o && o.jokiPreview) || "";
+      }
+      if (!text) return alert("Teks kosong");
+      function ok() { if (VOXY.showToast) VOXY.showToast("Teks disalin"); else alert("Teks disalin"); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok).catch(function () {
+          var ta = document.createElement("textarea");
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); ok(); } catch (e) { alert("Gagal salin"); }
+          document.body.removeChild(ta);
+        });
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); ok(); } catch (e) { alert("Gagal salin"); }
+        document.body.removeChild(ta);
+      }
+    }
+
     function updateStatusJoki(kode, status) {
       if (!kode) return;
       VOXY.updateOrder(kode, { status: status }).then(function () {

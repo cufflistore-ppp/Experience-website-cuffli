@@ -1273,3 +1273,49 @@ a.menu-layanan-btn{text-decoration:none;color:#fff;-webkit-tap-highlight-color:t
   box-shadow:0 6px 20px rgba(22,163,74,.35)!important;
 }
 .menu-fixed-grid{margin-bottom:4px}
+
+/* Joki list rows (include style) */
+.joki-box{
+  background:linear-gradient(180deg,#121a32,#0d1528);
+  border:1px solid rgba(59,130,246,.25);
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:14px;
+}
+.joki-box-head{
+  display:flex;align-items:center;gap:10px;
+  font-size:14px;font-weight:800;color:#e2e8f0;
+  margin-bottom:12px;
+}
+.joki-step{
+  width:26px;height:26px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#38bdf8,#2563eb);
+  color:#fff;font-size:12px;font-weight:800;flex-shrink:0;
+}
+.joki-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 12px;
+  border-radius:14px;
+  background:rgba(10,16,36,.75);
+  border:1px solid rgba(148,163,184,.12);
+  margin-bottom:8px;
+}
+.joki-row.is-on{
+  border-color:rgba(56,189,248,.45);
+  background:rgba(37,99,235,.12);
+}
+.joki-row-info{min-width:0;flex:1}
+.joki-row-name{font-size:13px;font-weight:700;color:#f1f5f9}
+.joki-row-desc{font-size:11px;color:#94a3b8;margin-top:2px}
+.joki-row-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.joki-row-price{font-size:13px;font-weight:800;color:#38bdf8;white-space:nowrap}
+.joki-row-btn{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:7px 14px;border-radius:10px;border:none;cursor:pointer;
+  font-size:12px;font-weight:800;color:#fff;text-decoration:none;
+  background:linear-gradient(135deg,#3b82f6,#2563eb);
+  white-space:nowrap;
+}
+.joki-row-btn.on{background:linear-gradient(135deg,#0ea5e9,#0284c7)}
+button.joki-row-btn{font-family:inherit}
