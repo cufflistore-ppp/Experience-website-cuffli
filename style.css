@@ -1319,3 +1319,28 @@ a.menu-layanan-btn{text-decoration:none;color:#fff;-webkit-tap-highlight-color:t
 }
 .joki-row-btn.on{background:linear-gradient(135deg,#0ea5e9,#0284c7)}
 button.joki-row-btn{font-family:inherit}
+
+/* Banner merah berjalan - joki */
+.joki-marquee-wrap{
+  overflow:hidden;
+  border-radius:999px;
+  margin-bottom:14px;
+  background:linear-gradient(90deg,#ef4444,#dc2626,#b91c1c);
+  box-shadow:0 6px 18px rgba(220,38,38,.35);
+}
+.joki-marquee{
+  display:flex;
+  width:max-content;
+  animation:jokiMarquee 18s linear infinite;
+  padding:10px 0;
+  color:#fff;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.02em;
+  white-space:nowrap;
+}
+.joki-marquee span{padding-right:0}
+@keyframes jokiMarquee{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}

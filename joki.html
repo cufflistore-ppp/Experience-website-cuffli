@@ -17,14 +17,18 @@
     <div style="width:40px"></div>
   </header>
 
-  <main class="page">
-    <div class="joki-box">
-      <div class="joki-box-head">
-        <span class="joki-step">1</span>
-        <span>Pilih Paket Joki</span>
+  <main class="page layanan-page">
+    <div class="joki-marquee-wrap" aria-label="Peringatan">
+      <div class="joki-marquee">
+        <span>⚠ Kang joki kontak dilarang order joki di sini. Jika ketahuan, tidak dilayani!&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
+        <span>⚠ Kang joki kontak dilarang order joki di sini. Jika ketahuan, tidak dilayani!&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
       </div>
-      <div id="jokiList"></div>
     </div>
+
+    <div class="home-produk-head">
+      <h2>Pilih Paket Joki</h2>
+    </div>
+    <div class="paket-grid" id="jokiGrid"></div>
   </main>
 
   <nav class="bottom-nav">
@@ -37,28 +41,69 @@
   <script>
     lucide.createIcons();
     var PAKET = [
-      { id: "joki-20jam", nama: "Joki 20 Jam", desc: "20 jam + SW + share 10GB", harga: 500 },
-      { id: "joki-1hari", nama: "Joki 1 Hari", desc: "1 hari + SW + share all GB", harga: 1000 },
-      { id: "joki-2hari", nama: "Joki 2 Hari", desc: "2 hari + SW + share all GB", harga: 2000 },
-      { id: "joki-3hari", nama: "Joki 3 Hari", desc: "3 hari + SW + share all GB", harga: 3000 },
-      { id: "joki-4hari", nama: "Joki 4 Hari", desc: "4 hari + SW + share all GB", harga: 4000 },
-      { id: "joki-5hari", nama: "Joki 5 Hari", desc: "5 hari + SW + share all GB", harga: 5000 },
-      { id: "joki-permanen", nama: "Joki Permanen", desc: "Permanen link tree + SW tebar", harga: 6000 }
+      {
+        id: "joki-20jam", nama: "Joki 20 Jam", badge: "20 JAM",
+        desc: "Layanan joki kontak selama 20 jam + SW + share 10GB",
+        fitur: ["20 jam + SW + share 10GB", "Order langsung di web", "Status dapat dipantau"],
+        harga: 500
+      },
+      {
+        id: "joki-1hari", nama: "Joki 1 Hari", badge: "1 HARI",
+        desc: "Layanan joki kontak selama 1 hari + SW + share all GB.",
+        fitur: ["1 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
+        harga: 1000
+      },
+      {
+        id: "joki-2hari", nama: "Joki 2 Hari", badge: "2 HARI",
+        desc: "Layanan joki kontak selama 2 hari + SW + share all GB.",
+        fitur: ["2 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
+        harga: 2000
+      },
+      {
+        id: "joki-3hari", nama: "Joki 3 Hari", badge: "3 HARI",
+        desc: "Layanan joki kontak selama 3 hari + SW + share all GB.",
+        fitur: ["3 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
+        harga: 3000, populer: true
+      },
+      {
+        id: "joki-4hari", nama: "Joki 4 Hari", badge: "4 HARI",
+        desc: "Layanan joki kontak selama 4 hari + SW + share all GB.",
+        fitur: ["4 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
+        harga: 4000
+      },
+      {
+        id: "joki-5hari", nama: "Joki 5 Hari", badge: "5 HARI",
+        desc: "Layanan joki kontak selama 5 hari + SW + share all GB.",
+        fitur: ["5 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
+        harga: 5000
+      },
+      {
+        id: "joki-permanen", nama: "Joki Permanen", badge: "PERMANEN",
+        desc: "Permanen tempel link tree di TikTok + SW tebar. Same lu pensi JB.",
+        fitur: ["Permanen tempel link tree di TikTok", "SW tebar", "Same lu pensi JB", "Order langsung di web", "Status dapat dipantau"],
+        harga: 6000
+      }
     ];
-    document.getElementById("jokiList").innerHTML = PAKET.map(function (p) {
+
+    document.getElementById("jokiGrid").innerHTML = PAKET.map(function (p) {
+      var fitur = p.fitur.map(function (f) {
+        return '<li><i data-lucide="check-circle-2"></i> ' + f + '</li>';
+      }).join("");
       return (
-        '<div class="joki-row">' +
-          '<div class="joki-row-info">' +
-            '<div class="joki-row-name">' + p.nama + '</div>' +
-            '<div class="joki-row-desc">' + p.desc + '</div>' +
+        '<a class="paket-card' + (p.populer ? ' is-flash' : '') + '" href="joki-order.html?id=' + encodeURIComponent(p.id) + '">' +
+          (p.populer ? '<span class="paket-populer">POPULER</span>' : '') +
+          '<div class="paket-body" style="padding-top:14px">' +
+            '<span class="paket-badge" style="position:static;display:inline-flex;margin-bottom:8px">' + p.badge + '</span>' +
+            '<h3 class="paket-title">' + p.nama + '</h3>' +
+            '<p class="paket-desc">' + p.desc + '</p>' +
+            '<ul class="paket-fitur">' + fitur + '</ul>' +
+            '<div class="paket-price-wrap"><div class="paket-price">' + VOXY.formatRp(p.harga) + '</div></div>' +
+            '<span class="paket-cta">Pilih Paket</span>' +
           '</div>' +
-          '<div class="joki-row-right">' +
-            '<span class="joki-row-price">' + VOXY.formatRp(p.harga) + '</span>' +
-            '<a class="joki-row-btn" href="joki-order.html?id=' + encodeURIComponent(p.id) + '">Pilih</a>' +
-          '</div>' +
-        '</div>'
+        '</a>'
       );
     }).join("");
+    lucide.createIcons();
     VOXY.requireAuth().then(function () {});
   </script>
 </body>
