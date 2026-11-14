@@ -22,6 +22,7 @@
     <nav>
       <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><i data-lucide="layout-dashboard"></i> Dashboard</a>
       <a href="#" data-tab="pesanan" onclick="switchTab('pesanan',this)"><i data-lucide="shopping-bag"></i> Pesanan</a>
+      <a href="#" data-tab="joki" onclick="switchTab('joki',this)"><i data-lucide="zap"></i> Order Joki</a>
       <a href="#" data-tab="produk" onclick="switchTab('produk',this)"><i data-lucide="package"></i> Produk</a>
       <a href="#" data-tab="flash" onclick="switchTab('flash',this)"><i data-lucide="zap"></i> Flash Sale</a>
       <a href="#" data-tab="menu" onclick="switchTab('menu',this)"><i data-lucide="layout-grid"></i> Menu Layanan</a>
@@ -116,6 +117,21 @@
     </div>
 
     <!-- PRODUK -->
+    <div class="panel" id="panel-joki">
+      <div class="admin-card">
+        <h2><i data-lucide="zap"></i> Order Joki Khusus</h2>
+        <div class="admin-hint">Hanya order jenis <b>joki</b>. Lihat data store/JB/WA, preview teks, serobot antrian, dan bukti TF. Kelola status lewat tombol di bawah atau buka halaman kelola.</div>
+        <div class="filter-row" id="filterJoki">
+          <button class="active" type="button" onclick="setFilterJoki('aktif',this)">Aktif</button>
+          <button type="button" onclick="setFilterJoki('Menunggu',this)">Menunggu</button>
+          <button type="button" onclick="setFilterJoki('Diproses',this)">Diproses</button>
+          <button type="button" onclick="setFilterJoki('Selesai',this)">Selesai</button>
+          <button type="button" onclick="setFilterJoki('semua',this)">Semua</button>
+        </div>
+        <div id="tabelJoki"><div class="empty-state">Memuat...</div></div>
+      </div>
+    </div>
+
     <div class="panel" id="panel-produk">
       <div class="admin-card">
         <h2><i data-lucide="package"></i> Tambah / Edit Produk</h2>
@@ -200,8 +216,9 @@
       <div class="admin-card">
         <h2><i class="fa-solid fa-table-cells-large"></i> Menu Layanan (Beranda)</h2>
         <div class="admin-hint">
-          Tombol di home. <b>Kategori filter</b> = kunci produk (harus sama). Icon Lucide: server, smartphone, book-open, file, shopping-cart, palette.
-          Kedua admin share data yang sama (realtime).
+          <b>Halaman ini = MENU LAYANAN saja</b> (tombol di home).<br>
+          Isi <b>produk</b> di bagian bawah “Isi Produk ke Menu” atau tab <b>Produk</b> (halaman terpisah).<br>
+          Kategori filter menu harus sama dengan kategori produk. Icon Lucide: server, smartphone, package, dll.
         </div>
         <div class="form-grid">
           <div class="form-group"><label>Judul</label><input id="mJudul" type="text" placeholder="PANEL PTERODACTYL"></div>
@@ -373,6 +390,7 @@
         allOrders = list || [];
         updateDashboard();
         renderPesanan();
+        if (typeof renderJoki === 'function') renderJoki();
       });
       loadProdukAdmin();
       loadPengaturan();
@@ -404,9 +422,10 @@
       document.getElementById("panel-" + name).classList.add("active");
       document.querySelectorAll(".admin-sidebar nav a[data-tab]").forEach(function (a) { a.classList.remove("active"); });
       if (el) el.classList.add("active");
-      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", produk: "Kelola Produk", flash: "Flash Sale", menu: "Menu Layanan", chat: "Chat User", pengaturan: "Pengaturan" };
+      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", joki: "Order Joki", produk: "Kelola Produk", flash: "Flash Sale", menu: "Menu Layanan", chat: "Chat User", pengaturan: "Pengaturan" };
       document.getElementById("pageTitle").textContent = titles[name] || "Admin";
       if (name === "menu") loadMenuAdmin();
+      if (name === "joki" && typeof renderJoki === "function") renderJoki();
       closeSidebar();
       if (name === "produk") loadProdukAdmin();
       if (name === "pengaturan") loadPengaturan();
@@ -1226,7 +1245,65 @@
         go(null).catch(function (e) { alert(e.message || "Gagal simpan"); });
       }
     }
+
+    var filterJokiStatus = "aktif";
+    function setFilterJoki(st, el) {
+      filterJokiStatus = st;
+      document.querySelectorAll("#filterJoki button").forEach(function (b) { b.classList.remove("active"); });
+      if (el) el.classList.add("active");
+      renderJoki();
+    }
+    function renderJoki() {
+      var box = document.getElementById("tabelJoki");
+      if (!box) return;
+      var list = (allOrders || []).filter(function (o) {
+        return (o.jenis === "joki") || ((o.kategori || "").toLowerCase() === "joki");
+      });
+      if (filterJokiStatus === "aktif") {
+        list = list.filter(function (o) {
+          var s = (o.status || "").toLowerCase();
+          return s !== "selesai" && s !== "ditolak" && s !== "completed";
+        });
+      } else if (filterJokiStatus !== "semua") {
+        list = list.filter(function (o) { return (o.status || "") === filterJokiStatus; });
+      }
+      list.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+      if (!list.length) {
+        box.innerHTML = '<div class="empty-state">Belum ada order joki</div>';
+        return;
+      }
+      box.innerHTML = list.map(function (o) {
+        var serobot = o.serobot ? '<span class="badge menunggu">SEROBOT</span>' : "";
+        var preview = (o.jokiPreview || "").replace(/</g, "&lt;");
+        return (
+          '<div class="admin-order-card" style="margin-bottom:10px">' +
+            '<div class="top"><b>' + (o.kode || "-") + '</b> ' + serobot +
+              '<span class="badge">' + (o.status || "-") + '</span></div>' +
+            '<div class="meta"><b>' + (o.nama || o.namaProduk || "Joki") + '</b> · ' + VOXY.formatRp(o.harga) +
+              (o.serobot ? " (dasar " + VOXY.formatRp(o.hargaDasar || 0) + " + serobot)" : "") +
+            '</div>' +
+            '<div class="meta">Email: ' + (o.email || "-") + '</div>' +
+            '<div class="meta">Store: <b>' + (o.jokiStore || "-") + '</b></div>' +
+            '<div class="meta">JB: <b>' + (o.jokiNamaJB || "-") + '</b> · WA: <b>' + (o.jokiWa || "-") + '</b></div>' +
+            (preview ? '<pre class="joki-admin-preview">' + preview + '</pre>' : '') +
+            '<div class="actions" style="flex-wrap:wrap;gap:6px;margin-top:8px">' +
+              '<a class="btn btn-sm" href="admin-kelola.html?kode=' + encodeURIComponent(o.kode || "") + '">Kelola + Bukti TF</a>' +
+              '<button type="button" class="btn btn-sm" onclick="updateStatusJoki(\'' + o.kode + '\',\'Diproses\')">Proses</button>' +
+              '<button type="button" class="btn btn-sm btn-success" onclick="updateStatusJoki(\'' + o.kode + '\',\'Selesai\')">Selesai</button>' +
+              '<button type="button" class="btn btn-sm btn-danger" onclick="updateStatusJoki(\'' + o.kode + '\',\'Ditolak\')">Tolak</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
+    }
+    function updateStatusJoki(kode, status) {
+      if (!kode) return;
+      VOXY.updateOrder(kode, { status: status }).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Status: " + status);
+      }).catch(function (e) { alert(e.message); });
+    }
     function doLogout() {
+
       if (!confirm("Logout admin?")) return;
       VOXY.logoutUser().then(function () { window.location.href = "login.html"; });
     }

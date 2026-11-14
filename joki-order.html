@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Joki - VOXY MARKET</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <button class="icon-btn" onclick="location.href='joki.html'"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span id="pageTitle">Order Joki</span></div>
+    <div style="width:40px"></div>
+  </header>
+
+  <main class="page">
+    <div class="pay-card" id="paketInfo">
+      <div class="empty-state">Memuat paket...</div>
+    </div>
+
+    <div class="pay-card">
+      <h2 style="margin-bottom:10px">Data Order</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Isi 3 data di bawah. Preview teks otomatis — <b>tidak bisa disalin</b> dari layar (anti-salin).</p>
+
+      <div class="form-group">
+        <label>Nama Store / teks di [isi sesuai order]</label>
+        <input type="text" id="jokiStore" placeholder="Nama store / brand kamu" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Nama JB</label>
+        <input type="text" id="jokiNamaJB" placeholder="Nama JB" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Nomor WhatsApp (62…)</label>
+        <input type="tel" id="jokiWa" placeholder="62812xxxxxxx" autocomplete="off">
+      </div>
+
+      <label class="joki-serobot">
+        <input type="checkbox" id="jokiSerobot">
+        <span><b>Serobot antrian</b> (+ Rp 8.000) — diprioritaskan</span>
+      </label>
+
+      <div class="joki-preview-wrap">
+        <div class="joki-preview-label">Preview teks (tidak bisa disalin)</div>
+        <div class="joki-preview" id="jokiPreview" aria-hidden="true"></div>
+      </div>
+
+      <div class="joki-total-box">
+        <span>Total bayar</span>
+        <strong id="jokiTotal">Rp 0</strong>
+      </div>
+
+      <button type="button" class="btn" style="width:100%;margin-top:12px" id="btnOrderJoki">Lanjut Bayar</button>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html"><i data-lucide="home"></i>Home</a>
+    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
+    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
+  </nav>
+
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+
+    var PAKET_MAP = {
+      "joki-20jam": { id: "joki-20jam", nama: "Joki 20 Jam", desc: "20 jam + SW + share 10GB", harga: 500 },
+      "joki-1hari": { id: "joki-1hari", nama: "Joki 1 Hari", desc: "1 hari + SW + share all GB", harga: 1000 },
+      "joki-2hari": { id: "joki-2hari", nama: "Joki 2 Hari", desc: "2 hari + SW + share all GB", harga: 2000 },
+      "joki-3hari": { id: "joki-3hari", nama: "Joki 3 Hari", desc: "3 hari + SW + share all GB", harga: 3000 },
+      "joki-4hari": { id: "joki-4hari", nama: "Joki 4 Hari", desc: "4 hari + SW + share all GB", harga: 4000 },
+      "joki-5hari": { id: "joki-5hari", nama: "Joki 5 Hari", desc: "5 hari + SW + share all GB", harga: 5000 },
+      "joki-permanen": { id: "joki-permanen", nama: "Joki Permanen", desc: "Permanen link tree + SW tebar", harga: 6000 }
+    };
+    var SEROBOT = 8000;
+    var paket = null;
+
+    function normWa(n) {
+      n = String(n || "").replace(/\D/g, "");
+      if (n.startsWith("0")) n = "62" + n.slice(1);
+      if (n && !n.startsWith("62")) n = "62" + n;
+      return n;
+    }
+
+    function buildPreview() {
+      var store = document.getElementById("jokiStore").value.trim() || "[ isi sesuai di order ]";
+      var jb = document.getElementById("jokiNamaJB").value.trim() || "NAMA JB";
+      var wa = normWa(document.getElementById("jokiWa").value) || "628…";
+      return (
+        "*_SV BUYER DUBAI VOXY🧿_*\n" +
+        "        " + store + "\n" +
+        "*_SV ; " + jb + "_*\n" +
+        "Wa.me/" + wa + "\n\n" +
+        "*#NAMBAH VIEW SW + KONTAK + SELLER + BUYYER + DLL 🌤️🌈*"
+      );
+    }
+
+    function refreshPreview() {
+      var el = document.getElementById("jokiPreview");
+      el.textContent = buildPreview();
+      updateTotal();
+    }
+
+    function updateTotal() {
+      if (!paket) return;
+      var serobot = document.getElementById("jokiSerobot").checked;
+      var total = Number(paket.harga) + (serobot ? SEROBOT : 0);
+      document.getElementById("jokiTotal").textContent = VOXY.formatRp(total);
+    }
+
+    function blockCopy(el) {
+      ["copy", "cut", "contextmenu", "selectstart", "dragstart"].forEach(function (ev) {
+        el.addEventListener(ev, function (e) { e.preventDefault(); return false; });
+      });
+      el.addEventListener("keydown", function (e) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C" || e.key === "a" || e.key === "A")) {
+          e.preventDefault();
+        }
+      });
+    }
+
+    var params = new URLSearchParams(location.search);
+    var id = params.get("id") || "";
+    paket = PAKET_MAP[id] || null;
+
+    if (!paket) {
+      document.getElementById("paketInfo").innerHTML = '<div class="empty-state">Paket tidak ditemukan. <a href="joki.html">Kembali</a></div>';
+      document.getElementById("btnOrderJoki").disabled = true;
+    } else {
+      document.getElementById("pageTitle").textContent = paket.nama;
+      document.getElementById("paketInfo").innerHTML =
+        '<div style="font-size:12px;color:var(--muted)">Paket dipilih</div>' +
+        '<div style="font-size:16px;font-weight:800;margin:4px 0">' + paket.nama + '</div>' +
+        '<div style="font-size:12px;color:var(--muted)">' + paket.desc + '</div>' +
+        '<div class="paket-price" style="margin-top:8px">' + VOXY.formatRp(paket.harga) + '</div>';
+      refreshPreview();
+    }
+
+    ["jokiStore", "jokiNamaJB", "jokiWa"].forEach(function (id) {
+      document.getElementById(id).addEventListener("input", refreshPreview);
+    });
+    document.getElementById("jokiSerobot").addEventListener("change", updateTotal);
+    blockCopy(document.getElementById("jokiPreview"));
+
+    document.getElementById("btnOrderJoki").onclick = function () {
+      if (!paket) return;
+      var store = document.getElementById("jokiStore").value.trim();
+      var jb = document.getElementById("jokiNamaJB").value.trim();
+      var wa = normWa(document.getElementById("jokiWa").value);
+      var serobot = document.getElementById("jokiSerobot").checked;
+      if (!store) return alert("Isi nama store / teks order");
+      if (!jb) return alert("Isi nama JB");
+      if (!wa || wa.length < 10) return alert("Isi nomor WhatsApp valid (62…)");
+
+      var user = VOXY.getCurrentUser && VOXY.getCurrentUser();
+      if (!user) return (location.href = "login.html");
+
+      var total = Number(paket.harga) + (serobot ? SEROBOT : 0);
+      var preview = buildPreview();
+      var btn = document.getElementById("btnOrderJoki");
+      btn.disabled = true;
+      btn.textContent = "Menyimpan...";
+
+      var order = {
+        jenis: "joki",
+        produkId: paket.id,
+        nama: paket.nama,
+        kategori: "Joki",
+        harga: total,
+        hargaDasar: paket.harga,
+        serobot: serobot,
+        serobotBiaya: serobot ? SEROBOT : 0,
+        status: "Menunggu",
+        jokiStore: store,
+        jokiNamaJB: jb,
+        jokiWa: wa,
+        jokiPreview: preview,
+        deskripsi: paket.desc,
+        uid: user.uid,
+        email: user.email || "",
+        createdAt: Date.now()
+      };
+
+      VOXY.simpanOrder(order).then(function (kode) {
+        location.href = "pembayaran.html?kode=" + encodeURIComponent(kode || order.kode);
+      }).catch(function (e) {
+        alert(e.message || "Gagal buat order");
+        btn.disabled = false;
+        btn.textContent = "Lanjut Bayar";
+      });
+    };
+
+    VOXY.requireAuth().then(function () {});
+  </script>
+</body>
+</html>

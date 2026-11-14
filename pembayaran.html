@@ -77,22 +77,53 @@
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
-    var produk = null, buktiDataUrl = null;
+    var produk = null, buktiDataUrl = null, existingKode = null, existingOrder = null;
+    var q = new URLSearchParams(location.search);
+    existingKode = q.get("kode") || null;
+
+    function loadSettings() {
+      return VOXY.getSettings().then(function (s) {
+        s = s || {};
+        document.getElementById("rekeningBox").innerHTML = s.rekening
+          ? ("<b>Rekening:</b><br>" + s.rekening)
+          : "Hubungi admin untuk rekening.";
+        if (s.qrisUrl) document.getElementById("qrisImg").src = s.qrisUrl;
+        VOXY.applyBrandingToPage();
+      });
+    }
+
     VOXY.requireAuth().then(function (user) {
-      VOXY.applyBrandingToPage();
+      loadSettings();
+      if (existingKode) {
+        return VOXY.getOrder(existingKode).then(function (o) {
+          if (!o) {
+            alert("Pesanan tidak ditemukan");
+            location.href = "home.html";
+            return;
+          }
+          existingOrder = o;
+          document.getElementById("namaProduk").textContent = o.nama || o.namaProduk || "-";
+          document.getElementById("kategori").textContent = o.kategori || o.jenis || "-";
+          document.getElementById("totalHarga").textContent = VOXY.formatRp(o.harga);
+        });
+      }
       try { produk = JSON.parse(sessionStorage.getItem("produkDipilih") || "null"); } catch (e) { produk = null; }
       if (!produk) { alert("Produk tidak ditemukan"); window.location.href = "home.html"; return; }
       document.getElementById("namaProduk").textContent = produk.nama || "-";
       document.getElementById("kategori").textContent = produk.kategori || "-";
-      document.getElementById("totalHarga").textContent = VOXY.formatRp(produk.harga);
-      VOXY.getSettings().then(function (s) {
-        s = s || {};
-        document.getElementById("rekeningBox").innerHTML = s.rekening
-          ? ("<b>Rekening:</b><br>" + s.rekening)
-          : "";
-        if (s.qrisUrl) document.getElementById("qrisImg").src = s.qrisUrl;
-      });
+      var hargaTampil = (function () {
+        var flash = produk.flashSale === true || produk.flashSale === "true" || produk.flashSale === 1;
+        if (flash && produk.flashEnd && Date.now() >= Number(produk.flashEnd)) flash = false;
+        var normal = Number(produk.harga) || 0;
+        var disc = Number(produk.flashDiskon) || 0;
+        if (flash && disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
+        var fh = Number(produk.flashHarga);
+        if (flash && fh > 0) return fh;
+        return normal;
+      })();
+      document.getElementById("totalHarga").textContent = VOXY.formatRp(hargaTampil);
     });
+
     document.getElementById("buktiFile").addEventListener("change", function (e) {
       var file = e.target.files[0];
       if (!file) return;
@@ -102,27 +133,52 @@
         prev.src = url; prev.classList.remove("hidden");
       }).catch(function () { alert("Gagal membaca file"); });
     });
+
     function konfirmasi() {
-      if (!produk) return;
       if (!buktiDataUrl) { alert("Upload bukti transfer dulu"); return; }
       var btn = document.getElementById("btnKonfirmasi");
       btn.disabled = true; btn.textContent = "Mengirim...";
+
+      /* Order sudah ada (joki / pre-created) */
+      if (existingKode && existingOrder) {
+        VOXY.simpanBukti(existingKode, buktiDataUrl)
+          .then(function () {
+            return VOXY.updateOrder(existingKode, {
+              status: "Menunggu",
+              buktiUploaded: true,
+              updatedAt: Date.now()
+            });
+          })
+          .then(function () {
+            if (VOXY.showToast) VOXY.showToast("Bukti TF terkirim. Menunggu admin.");
+            setTimeout(function () { location.href = "riwayat.html"; }, 400);
+          })
+          .catch(function (err) {
+            alert(err.message || "Gagal kirim bukti");
+            btn.disabled = false; btn.textContent = "Konfirmasi Pembayaran";
+          });
+        return;
+      }
+
+      if (!produk) return;
       var user = VOXY.getCurrentUser();
+      var harga = (function () {
+        var flash = produk.flashSale === true || produk.flashSale === "true" || produk.flashSale === 1;
+        if (flash && produk.flashEnd && Date.now() >= Number(produk.flashEnd)) flash = false;
+        var normal = Number(produk.harga) || 0;
+        var disc = Number(produk.flashDiskon) || 0;
+        if (flash && disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
+        var fh = Number(produk.flashHarga);
+        if (flash && fh > 0) return fh;
+        return normal;
+      })();
       var order = {
         kode: VOXY.generateKode(),
         produkId: produk.id || "",
+        nama: produk.nama || "",
         namaProduk: produk.nama || "",
         kategori: produk.kategori || "",
-        harga: (function(){
-          var flash = produk.flashSale === true || produk.flashSale === "true" || produk.flashSale === 1;
-          if (flash && produk.flashEnd && Date.now() >= Number(produk.flashEnd)) flash = false;
-          var normal = Number(produk.harga) || 0;
-          var disc = Number(produk.flashDiskon) || 0;
-          if (flash && disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
-          var fh = Number(produk.flashHarga);
-          if (flash && fh > 0) return fh;
-          return normal;
-        })(),
+        harga: harga,
         hargaAsli: Number(produk.harga) || 0,
         gambar: produk.gambar || "",
         status: "Menunggu",
@@ -130,7 +186,8 @@
         uid: user ? user.uid : "",
         linkTarget: "",
         catatan: "",
-        tipeKirim: produk.tipeKirim || "link"
+        tipeKirim: produk.tipeKirim || "link",
+        buktiUploaded: true
       };
       VOXY.simpanOrder(order).then(function (kode) {
         return VOXY.simpanBukti(kode, buktiDataUrl).then(function () { return kode; });
@@ -144,7 +201,7 @@
           return;
         }
         if (VOXY.showToast) VOXY.showToast("Pesanan terkirim. Menunggu verifikasi admin.");
-        setTimeout(function(){ window.location.href = "riwayat.html"; }, 400);
+        setTimeout(function () { window.location.href = "riwayat.html"; }, 400);
       }).catch(function (err) {
         alert(err.message || "Gagal menyimpan pesanan");
         btn.disabled = false; btn.textContent = "Konfirmasi Pembayaran";
