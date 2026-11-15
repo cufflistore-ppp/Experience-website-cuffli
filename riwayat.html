@@ -46,7 +46,7 @@
           var st = o.status || "Menunggu";
           return '<a class="order-item" href="detail-transaksi.html?kode=' + encodeURIComponent(o.kode) + '">' +
             '<img class="thumb" src="' + img + '" onerror="this.src=\'produk1.png\'">' +
-            '<div class="info"><h3>' + (o.namaProduk || "-") + '</h3>' +
+            '<div class="info"><h3>' + (o.namaProduk || o.nama || "-") + '</h3>' +
             '<div class="meta">' + (o.kode || "") + ' · ' + VOXY.formatTanggal(o.createdAt) + '</div>' +
             '<div class="meta" style="margin-top:4px">' + VOXY.formatRp(o.harga) +
             ' · <span class="badge ' + statusClass(st) + '">' + st + '</span></div></div></a>';
@@ -54,5 +54,6 @@
       });
     });
   </script>
+  <script src="music-player.js"></script>
 </body>
 </html>

@@ -515,15 +515,19 @@ function kirimPesanUser(uid, email, text, imageData) {
   };
   if (imageData) msg.image = imageData;
   var preview = text || "Foto";
+  var meta = {
+    email: email || "",
+    lastMessage: preview,
+    lastAt: Date.now(),
+    lastFrom: "user",
+    unreadAdmin: true,
+    unreadUser: false
+  };
   return msgRef.set(msg).then(function () {
-    return db.ref(chatPath(uid) + "/meta").update({
-      email: email || "",
-      lastMessage: preview,
-      lastAt: Date.now(),
-      lastFrom: "user",
-      unreadAdmin: true,
-      unreadUser: false
-    });
+    return db.ref(chatPath(uid) + "/meta").update(meta);
+  }).then(function () {
+    /* index agar admin pasti bisa lihat daftar chat */
+    return db.ref("chat_inbox/" + uid).set(meta);
   });
 }
 
@@ -541,12 +545,15 @@ function kirimPesanAdmin(uid, text, imageData) {
   if (imageData) msg.image = imageData;
   var preview = text || "Foto";
   return msgRef.set(msg).then(function () {
-    return db.ref(chatPath(uid) + "/meta").update({
+    var meta = {
       lastMessage: preview,
       lastAt: Date.now(),
       lastFrom: "admin",
       unreadAdmin: false,
       unreadUser: true
+    };
+    return db.ref(chatPath(uid) + "/meta").update(meta).then(function () {
+      return db.ref("chat_inbox/" + uid).update(meta);
     });
   });
 }
@@ -598,11 +605,21 @@ function listenChatMessages(uid, callback) {
 
 function listenAllChats(callback) {
   if (!db) return function () {};
-  var ref = db.ref("chat");
-  var handler = function (snap) {
-    var val = snap.val() || {};
-    var list = Object.keys(val).map(function (uid) {
-      var meta = val[uid].meta || {};
+  /* utamakan chat_inbox (ringan + rules jelas); fallback ke chat/{uid}/meta */
+  var refInbox = db.ref("chat_inbox");
+  var refChat = db.ref("chat");
+  var unsubInbox = null;
+  var unsubChat = null;
+  var lastList = [];
+  function emit(list) {
+    list = (list || []).slice().sort(function (a, b) { return (b.lastAt || 0) - (a.lastAt || 0); });
+    lastList = list;
+    try { callback(list); } catch (e) {}
+  }
+  function mapInbox(val) {
+    val = val || {};
+    return Object.keys(val).map(function (uid) {
+      var meta = val[uid] || {};
       return {
         uid: uid,
         email: meta.email || uid,
@@ -612,16 +629,54 @@ function listenAllChats(callback) {
         unreadAdmin: !!meta.unreadAdmin
       };
     });
-    list.sort(function (a, b) { return (b.lastAt || 0) - (a.lastAt || 0); });
-    callback(list);
+  }
+  function mapChatTree(val) {
+    val = val || {};
+    return Object.keys(val).map(function (uid) {
+      var meta = (val[uid] && val[uid].meta) || {};
+      return {
+        uid: uid,
+        email: meta.email || uid,
+        lastMessage: meta.lastMessage || "",
+        lastAt: meta.lastAt || 0,
+        lastFrom: meta.lastFrom || "",
+        unreadAdmin: !!meta.unreadAdmin
+      };
+    });
+  }
+  var inboxOk = false;
+  unsubInbox = function () {};
+  unsubChat = function () {};
+  var hInbox = function (snap) {
+    inboxOk = true;
+    emit(mapInbox(snap.val()));
   };
-  ref.on("value", handler);
-  return function () { ref.off("value", handler); };
+  var hInboxErr = function (err) {
+    console.warn("chat_inbox listen:", err && err.message);
+    /* fallback chat tree */
+    if (!unsubChat._on) {
+      unsubChat._on = true;
+      refChat.on("value", function (snap) { emit(mapChatTree(snap.val())); }, function (e) {
+        console.warn("chat listen:", e && e.message);
+        emit(lastList);
+      });
+    }
+  };
+  refInbox.on("value", hInbox, hInboxErr);
+  unsubInbox = function () { refInbox.off("value", hInbox); };
+  return function () {
+    try { refInbox.off("value", hInbox); } catch (e) {}
+    try { refChat.off("value"); } catch (e) {}
+  };
 }
 
 function markChatReadByAdmin(uid) {
   if (!db || !uid) return Promise.resolve();
-  return db.ref(chatPath(uid) + "/meta").update({ unreadAdmin: false });
+  return db.ref(chatPath(uid) + "/meta").update({ unreadAdmin: false }).then(function () {
+    return db.ref("chat_inbox/" + uid).update({ unreadAdmin: false });
+  }).catch(function () {
+    return db.ref("chat_inbox/" + uid).update({ unreadAdmin: false });
+  });
 }
 
 function markChatReadByUser(uid) {

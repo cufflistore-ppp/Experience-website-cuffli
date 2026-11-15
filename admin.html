@@ -423,11 +423,13 @@
         renderChatList();
         var unread = allChats.filter(function (c) { return c.unreadAdmin; }).length;
         var badge = document.getElementById("chatNavBadge");
-        if (unread > 0) {
-          badge.textContent = unread;
-          badge.classList.remove("hidden");
-        } else {
-          badge.classList.add("hidden");
+        if (badge) {
+          if (unread > 0) {
+            badge.textContent = unread;
+            badge.classList.remove("hidden");
+          } else {
+            badge.classList.add("hidden");
+          }
         }
       });
     });
@@ -480,7 +482,10 @@
 
     function renderPesanan() {
       var q = (document.getElementById("cariKode").value || "").trim().toLowerCase();
-      var list = allOrders.slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+      /* produk biasa saja — order joki ada di tab Order Joki */
+      var list = allOrders.filter(function (o) {
+        return o.jenis !== "joki" && ((o.kategori || "").toLowerCase() !== "joki");
+      }).slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
       if (filterStatus === "aktif") {
         list = list.filter(function (o) {
           var s = (o.status || "").toLowerCase();
@@ -495,7 +500,7 @@
         list = list.filter(function (o) {
           return (o.kode || "").toLowerCase().indexOf(q) !== -1 ||
                  (o.email || "").toLowerCase().indexOf(q) !== -1 ||
-                 (o.namaProduk || "").toLowerCase().indexOf(q) !== -1;
+                 (o.namaProduk || o.nama || "").toLowerCase().indexOf(q) !== -1;
         });
       }
       var box = document.getElementById("tabelPesanan");
@@ -512,7 +517,7 @@
           '<div class="admin-order-card">' +
             '<div class="top"><b>' + (o.kode || "-") + '</b><span class="badge ' + cls + '">' + st + '</span></div>' +
             '<div class="meta">Email: <b>' + (o.email || "-") + '</b></div>' +
-            '<div class="meta">Pesanan: <b>' + (o.namaProduk || "-") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
+            '<div class="meta">Pesanan: <b>' + (o.namaProduk || o.nama || "-") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
             (o.linkTarget ? '<div class="meta" style="background:rgba(59,130,246,.15);padding:8px;border-radius:8px;margin-top:6px">' +
               '<div style="font-size:11px;color:#1d4ed8;font-weight:700">Link target pembeli</div>' +
               '<div style="word-break:break-all;font-size:12px;margin:4px 0">' + String(o.linkTarget).replace(/</g,'&lt;') + '</div>' +
@@ -552,7 +557,7 @@
       document.getElementById("detailContent").innerHTML =
         "<div class=\"pay-row\"><span>Email</span><span>" + (o.email || "-") + "</span></div>" +
         "<div class=\"pay-row\"><span>Kode</span><span><b>" + (o.kode || "-") + "</b></span></div>" +
-        "<div class=\"pay-row\"><span>Pesanan</span><span>" + (o.namaProduk || "-") + " · " + VOXY.formatRp(o.harga) + "</span></div>" +
+        "<div class=\"pay-row\"><span>Pesanan</span><span>" + (o.namaProduk || o.nama || "-") + " · " + VOXY.formatRp(o.harga) + "</span></div>" +
         (o.linkTarget ? "<div class=\"pay-row\"><span>Link target</span><span style=\"word-break:break-all\">" + o.linkTarget +
           " <button type=\"button\" class=\"btn btn-sm\" onclick=\"navigator.clipboard.writeText('" + String(o.linkTarget).replace(/'/g,"") + "')\">Salin</button></span></div>" : "") +
         "<div class=\"pay-row\"><span>Status</span><span>" + (o.status || "-") + "</span></div>";
@@ -834,7 +839,10 @@
     var unsubMsg = null;
     function renderChatList() {
       var box = document.getElementById("chatList");
-      if (!allChats.length) { box.innerHTML = '<div class="empty-state">Belum ada chat</div>'; return; }
+      if (!allChats.length) {
+        box.innerHTML = '<div class="empty-state">Belum ada chat.<br><span style="font-size:11px;color:var(--muted)">User harus kirim pesan dulu dari Chat Admin. Pastikan Firebase Rules sudah di-Publish (chat + chat_inbox).</span></div>';
+        return;
+      }
       box.innerHTML = allChats.map(function (c) {
         var initial = (c.email || "?")[0].toUpperCase();
         var active = selectedChatUid === c.uid ? " active" : "";
@@ -1381,28 +1389,55 @@
         } else if (o.serobot) {
           includes = '<div class="meta">Include: Prioritas Antrian</div>';
         }
+        var nama = o.namaProduk || o.nama || "Joki";
         return (
           '<div class="admin-order-card" style="margin-bottom:10px">' +
             '<div class="top"><b>' + (o.kode || "-") + '</b>' +
               '<span class="badge">' + (o.status || "-") + '</span></div>' +
             (badges ? '<div style="margin:4px 0 2px">' + badges + '</div>' : '') +
-            '<div class="meta"><b>' + (o.nama || "Joki") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
+            '<div class="meta"><b>' + nama + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
             '<div class="meta">Store: <b>' + (o.jokiStore || "-") + '</b> · WA: <b>' + (o.jokiWa || "-") + '</b></div>' +
             '<div class="meta">Email: ' + (o.email || "-") + '</div>' +
             includes +
-            (preview ? ('<pre class="joki-admin-preview" id="jokiPrev_' + (o.kode || "") + '">' + preview + '</pre>' +
-              '<button type="button" class="btn btn-sm btn-outline" style="margin:6px 0 8px" onclick="salinTeksJoki(\'' + (o.kode || "") + '\')">Salin Teks</button>') : '') +
-            '<div class="actions" style="flex-wrap:wrap;gap:6px;margin-top:8px">' +
+            '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">' +
+              '<div style="font-size:12px;font-weight:700;margin-bottom:6px">Bukti TF</div>' +
+              '<div id="jokiBukti_' + (o.kode || "") + '" class="meta" style="color:var(--muted)">Memuat bukti...</div>' +
+            '</div>' +
+            (preview ? (
+              '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">' +
+                '<div style="font-size:12px;font-weight:700;margin-bottom:6px">Teks format joki</div>' +
+                '<pre class="joki-admin-preview" id="jokiPrev_' + (o.kode || "") + '">' + preview + '</pre>' +
+                '<button type="button" class="btn btn-sm btn-outline" style="margin:6px 0 0" onclick="salinTeksJoki(\'' + (o.kode || "") + '\')">Salin Teks</button>' +
+              '</div>'
+            ) : '') +
+            '<div class="actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">' +
               '<button type="button" class="btn btn-sm" onclick="updateStatusJoki(\'' + o.kode + '\',\'Diproses\')">Proses</button>' +
               '<button type="button" class="btn btn-sm btn-success" onclick="updateStatusJoki(\'' + o.kode + '\',\'Selesai\')">Selesai</button>' +
               '<button type="button" class="btn btn-sm btn-danger" onclick="updateStatusJoki(\'' + o.kode + '\',\'Ditolak\')">Tolak</button>' +
             '</div>' +
-            '<p style="font-size:11px;color:var(--muted);margin-top:8px">Joki: ubah status + salin teks saja. Tidak perlu kirim produk.</p>' +
+            '<p style="font-size:11px;color:var(--muted);margin-top:8px">Cek bukti TF + teks di atas. Joki: cukup ubah status, tidak perlu kirim produk.</p>' +
           '</div>'
         );
       }).join("");
+      /* muat bukti TF per order (satu halaman dengan teks) */
+      list.forEach(function (o) {
+        var kode = o.kode;
+        if (!kode) return;
+        var el = document.getElementById("jokiBukti_" + kode);
+        if (!el) return;
+        VOXY.getBukti(kode).then(function (data) {
+          if (data) {
+            el.innerHTML = '<img src="' + data + '" alt="Bukti TF" style="max-width:100%;max-height:220px;border-radius:10px;border:1px solid var(--border);margin-top:4px">' +
+              '<div style="font-size:11px;color:#22c55e;margin-top:4px;font-weight:700">✓ Sudah kirim bukti TF</div>';
+          } else {
+            el.innerHTML = '<span style="color:#f59e0b;font-weight:600">Belum ada bukti TF</span>';
+          }
+        }).catch(function () {
+          el.innerHTML = '<span style="color:var(--muted)">Gagal muat bukti</span>';
+        });
+      });
     }
-    function salinTeksJoki(kode) {
+function salinTeksJoki(kode) {
       var el = document.getElementById("jokiPrev_" + kode);
       var text = el ? el.textContent : "";
       if (!text) {

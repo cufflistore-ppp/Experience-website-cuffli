@@ -18,9 +18,13 @@
       <span class="brand-name"><span class="brand-voxy">VOXY</span> <span class="brand-market">MARKET</span></span>
     </div>
     <div class="header-actions">
+      <button type="button" class="icon-btn music-toggle" id="btnMusic" aria-label="Putar musik" aria-pressed="false" title="Putar musik">
+        <i data-lucide="play"></i>
+      </button>
       <button type="button" class="icon-btn" id="btnMenu" aria-label="Menu" onclick="document.getElementById('drawerBg').classList.add('show');document.getElementById('sideDrawer').classList.add('show');if(window.lucide)lucide.createIcons();"><i data-lucide="menu"></i></button>
     </div>
   </header>
+
 
   <div class="side-drawer-bg" id="drawerBg" onclick="this.classList.remove('show');document.getElementById('sideDrawer').classList.remove('show');"></div>
   <div class="side-drawer" id="sideDrawer">
@@ -280,6 +284,9 @@
         });
       });
     }
+
+
   </script>
+  <script src="music-player.js"></script>
 </body>
 </html>

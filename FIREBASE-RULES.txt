@@ -79,8 +79,16 @@ Kalau ganti email admin, ganti SEMUA kemunculan email di rules ini.
     },
 
     "chat": {
+      ".read": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
       "$uid": {
         ".read": "auth != null && (auth.uid == $uid || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
+        ".write": "auth != null && (auth.uid == $uid || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+      }
+    },
+
+    "chat_inbox": {
+      ".read": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
+      "$uid": {
         ".write": "auth != null && (auth.uid == $uid || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
       }
     }
