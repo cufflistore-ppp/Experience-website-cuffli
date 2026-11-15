@@ -97,6 +97,20 @@
             <label>Link / URL hasil</label>
             <input id="hasilUrl" type="url" placeholder="https://...">
           </div>
+          <div id="boxHasilPtero" style="display:none">
+            <div class="form-group">
+              <label>Username Pterodactyl</label>
+              <input id="pteroUser" type="text" placeholder="username" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label>Password Pterodactyl</label>
+              <input id="pteroPass" type="text" placeholder="password" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label>Link Panel Pterodactyl</label>
+              <input id="pteroLink" type="url" placeholder="https://panel.contoh.com">
+            </div>
+          </div>
           <div id="boxHasilFile" class="form-group" style="display:none">
             <label>Upload file (APK / ZIP / dll)</label>
             <input type="file" id="fileHasil">
@@ -120,7 +134,7 @@
     <div class="panel" id="panel-joki">
       <div class="admin-card">
         <h2><i data-lucide="zap"></i> Order Joki Khusus</h2>
-        <div class="admin-hint">Khusus order <b>joki</b>: cukup <b>ubah status</b> (Proses/Selesai/Tolak) dan <b>Salin Teks</b>. Tidak perlu kirim file produk. Produk biasa tetap di tab Pesanan (status + kirim hasil).</div>
+        <div class="admin-hint">Khusus order <b>joki</b>: cukup <b>ubah status</b> (Proses/Selesai/Tolak) dan <b>Salin Teks</b>. Tidak perlu kirim file produk. <b>Prioritas</b> tampil paling atas, lalu <b>FaceCam/Video</b>.</div>
         <div class="filter-row" id="filterJoki">
           <button class="active" type="button" onclick="setFilterJoki('aktif',this)">Aktif</button>
           <button type="button" onclick="setFilterJoki('Menunggu',this)">Menunggu</button>
@@ -129,6 +143,15 @@
           <button type="button" onclick="setFilterJoki('semua',this)">Semua</button>
         </div>
         <div id="tabelJoki"><div class="empty-state">Memuat...</div></div>
+      </div>
+      <div class="admin-card" style="margin-top:16px">
+        <h2><i data-lucide="settings-2"></i> Atur Harga Paket &amp; Tambahan Joki</h2>
+        <div class="admin-hint">Ubah harga paket joki dan harga tambahan (Prioritas, FaceCam, +hari). Perubahan langsung dipakai di halaman order user.</div>
+        <div id="jokiConfigBox"><div class="empty-state">Buka tab ini untuk memuat...</div></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn btn-sm btn-success" onclick="simpanJokiHarga()">Simpan Harga Joki</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="resetJokiHarga()">Reset Default</button>
+        </div>
       </div>
     </div>
 
@@ -158,6 +181,7 @@
               <option value="apk_zip">APK / ZIP (file)</option>
               <option value="link">Link (URL)</option>
               <option value="link_target">Link Target (jasa suntik)</option>
+              <option value="pterodactyl">Pterodactyl (Username + PW + Link Panel)</option>
               <option value="wa_admin">WhatsApp Admin</option>
             </select>
           </div>
@@ -266,6 +290,7 @@
                 <option value="apk_zip">APK / ZIP</option>
                 <option value="link">Link URL</option>
                 <option value="link_target">Link Target (suntik)</option>
+                <option value="pterodactyl">Pterodactyl (User+PW+Panel)</option>
                 <option value="wa_admin">WhatsApp Admin</option>
               </select>
             </div>
@@ -428,7 +453,10 @@
       var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", joki: "Order Joki", produk: "Kelola Produk", flash: "Flash Sale", menu: "Menu Layanan", chat: "Chat User", pengaturan: "Pengaturan" };
       document.getElementById("pageTitle").textContent = titles[name] || "Admin";
       if (name === "menu") loadMenuAdmin();
-      if (name === "joki" && typeof renderJoki === "function") renderJoki();
+      if (name === "joki") {
+        if (typeof renderJoki === "function") renderJoki();
+        if (typeof loadJokiConfigAdmin === "function") loadJokiConfigAdmin();
+      }
       closeSidebar();
       if (name === "produk") { loadProdukAdmin(); loadMenuAdmin(); }
       if (name === "pengaturan") loadPengaturan();
@@ -546,17 +574,20 @@
     }
 
     function setupHasilFields(o) {
-      /* SELALU tampilkan semua opsi kirim: teks + link + file */
-      document.getElementById("boxHasilTeks").style.display = "block";
-      document.getElementById("boxHasilUrl").style.display = "block";
-      document.getElementById("boxHasilFile").style.display = "block";
-      document.getElementById("boxHasilCatatan").style.display = "block";
       var tipe = (o && o.tipeKirim) || "-";
+      var isPtero = tipe === "pterodactyl";
+      document.getElementById("boxHasilTeks").style.display = isPtero ? "none" : "block";
+      document.getElementById("boxHasilUrl").style.display = isPtero ? "none" : "block";
+      document.getElementById("boxHasilFile").style.display = isPtero ? "none" : "block";
+      document.getElementById("boxHasilCatatan").style.display = "block";
+      var pteroBox = document.getElementById("boxHasilPtero");
+      if (pteroBox) pteroBox.style.display = isPtero ? "block" : "none";
       var labels = {
         email_password: "Tipe order: Email+Password — isi teks akun, tekan Kirim hasil + Sukses",
         apk_zip: "Tipe order: APK/ZIP — upload file (boleh + link), tekan Kirim hasil + Sukses",
         link: "Tipe order: Link — isi URL, tekan Kirim hasil + Sukses",
         link_target: "Tipe order: Jasa suntik — proses target, boleh isi hasil, tekan Kirim hasil + Sukses",
+        pterodactyl: "Tipe order: Pterodactyl — isi Username, Password, dan Link Panel, lalu Kirim hasil + Sukses",
         wa_admin: "Tipe order: WA Admin — boleh kirim hasil atau langsung Proses/Tolak"
       };
       document.getElementById("hasilTipeHint").textContent =
@@ -565,6 +596,20 @@
       document.getElementById("hasilTeks").value = (o && o.hasilTeks) || "";
       document.getElementById("hasilUrl").value = (o && o.hasilUrl) || "";
       document.getElementById("hasilCatatan").value = (o && o.hasilCatatan) || "";
+      if (isPtero) {
+        var teks = (o && o.hasilTeks) || "";
+        var u = "", p = "", l = (o && o.hasilUrl) || "";
+        var mU = teks.match(/Username\s*:\s*(.+)/i);
+        var mP = teks.match(/Password\s*:\s*(.+)/i);
+        if (mU) u = mU[1].trim();
+        if (mP) p = mP[1].trim();
+        var elU = document.getElementById("pteroUser");
+        var elP = document.getElementById("pteroPass");
+        var elL = document.getElementById("pteroLink");
+        if (elU) elU.value = u;
+        if (elP) elP.value = p;
+        if (elL) elL.value = l;
+      }
       var ff = document.getElementById("fileHasil");
       if (ff) ff.value = "";
     }
@@ -580,15 +625,28 @@
     }
     function kirimHasil() {
       if (!selectedKode) return;
+      var o = (allOrders || []).filter(function (x) { return x.kode === selectedKode; })[0];
+      var isPtero = o && o.tipeKirim === "pterodactyl";
       var url = (document.getElementById("hasilUrl").value || "").trim();
       var teks = (document.getElementById("hasilTeks").value || "").trim();
       var catatan = (document.getElementById("hasilCatatan").value || "").trim();
       var file = document.getElementById("fileHasil").files[0];
-      if (!url && !file && !teks) {
-        if (!confirm("Belum isi teks/link/file. Tetap tandai Sukses tanpa kirim hasil?")) return;
-      }
-      if (!catatan) {
-        catatan = "Sebelum membuka konten: unduh dulu file/APK lewat tombol Download (jika ada), install jika perlu, lalu tekan Lihat untuk membuka link hasil.";
+
+      if (isPtero) {
+        var pu = (document.getElementById("pteroUser").value || "").trim();
+        var pp = (document.getElementById("pteroPass").value || "").trim();
+        var pl = (document.getElementById("pteroLink").value || "").trim();
+        if (!pu || !pp || !pl) return alert("Isi Username, Password, dan Link Panel Pterodactyl");
+        teks = "Username: " + pu + "\nPassword: " + pp + "\nPanel: " + pl;
+        url = pl;
+        if (!catatan) catatan = "Login ke panel Pterodactyl dengan username & password di atas. Simpan data dengan aman.";
+      } else {
+        if (!url && !file && !teks) {
+          if (!confirm("Belum isi teks/link/file. Tetap tandai Sukses tanpa kirim hasil?")) return;
+        }
+        if (!catatan) {
+          catatan = "Sebelum membuka konten: unduh dulu file/APK lewat tombol Download (jika ada), install jika perlu, lalu tekan Lihat untuk membuka link hasil.";
+        }
       }
       var opts = { url: url, catatan: catatan, status: "Selesai", teks: teks };
       var go = function () {
@@ -599,9 +657,12 @@
           document.getElementById("hasilTeks").value = "";
           document.getElementById("hasilCatatan").value = "";
           document.getElementById("fileHasil").value = "";
+          var elU = document.getElementById("pteroUser"); if (elU) elU.value = "";
+          var elP = document.getElementById("pteroPass"); if (elP) elP.value = "";
+          var elL = document.getElementById("pteroLink"); if (elL) elL.value = "";
         });
       };
-      if (file) {
+      if (file && !isPtero) {
         VOXY.fileToDataURL(file).then(function (dataUrl) {
           opts.fileData = dataUrl;
           opts.fileNama = file.name;
@@ -1298,9 +1359,15 @@
         list = list.filter(function (o) { return (o.status || "") === filterJokiStatus; });
       }
       list.sort(function (a, b) {
-        var pa = (a.serobot || (a.jokiIncludes || []).some(function (x) { return x.id === "prioritas"; })) ? 1 : 0;
-        var pb = (b.serobot || (b.jokiIncludes || []).some(function (x) { return x.id === "prioritas"; })) ? 1 : 0;
-        if (pb !== pa) return pb - pa;
+        function rank(o) {
+          var hasPrio = o.serobot || (o.jokiIncludes || []).some(function (x) { return x.id === "prioritas" || x.prioritas; });
+          var hasFc = o.facecam || (o.jokiIncludes || []).some(function (x) { return x.id === "facecam" || x.facecam; });
+          if (hasPrio) return 2;
+          if (hasFc) return 1;
+          return 0;
+        }
+        var ra = rank(a), rb = rank(b);
+        if (rb !== ra) return rb - ra;
         return (b.createdAt || 0) - (a.createdAt || 0);
       });
       if (!list.length) {
@@ -1309,6 +1376,11 @@
       }
       box.innerHTML = list.map(function (o) {
         var preview = (o.jokiPreview || "").replace(/</g, "&lt;");
+        var hasPrio = o.serobot || (o.jokiIncludes || []).some(function (x) { return x.id === "prioritas" || x.prioritas; });
+        var hasFc = o.facecam || (o.jokiIncludes || []).some(function (x) { return x.id === "facecam" || x.facecam; });
+        var badges = "";
+        if (hasPrio) badges += '<span class="admin-joki-badge prio">PRIORITAS</span>';
+        if (hasFc) badges += '<span class="admin-joki-badge facecam">FACECAM / VIDEO</span>';
         var includes = "";
         if (o.jokiIncludes && o.jokiIncludes.length) {
           includes = '<div class="meta">Include: ' + o.jokiIncludes.map(function (x) {
@@ -1321,6 +1393,7 @@
           '<div class="admin-order-card" style="margin-bottom:10px">' +
             '<div class="top"><b>' + (o.kode || "-") + '</b>' +
               '<span class="badge">' + (o.status || "-") + '</span></div>' +
+            (badges ? '<div style="margin:4px 0 2px">' + badges + '</div>' : '') +
             '<div class="meta"><b>' + (o.nama || "Joki") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
             '<div class="meta">Store: <b>' + (o.jokiStore || "-") + '</b> · WA: <b>' + (o.jokiWa || "-") + '</b></div>' +
             '<div class="meta">Email: ' + (o.email || "-") + '</div>' +
@@ -1332,7 +1405,7 @@
               '<button type="button" class="btn btn-sm btn-success" onclick="updateStatusJoki(\'' + o.kode + '\',\'Selesai\')">Selesai</button>' +
               '<button type="button" class="btn btn-sm btn-danger" onclick="updateStatusJoki(\'' + o.kode + '\',\'Ditolak\')">Tolak</button>' +
             '</div>' +
-            '<p style="font-size:11px;color:var(--muted);margin-top:8px">Joki: ubah status + salin teks saja. Bukti TF cek di Pesanan / detail order user.</p>' +
+            '<p style="font-size:11px;color:var(--muted);margin-top:8px">Joki: ubah status + salin teks saja. Tidak perlu kirim produk.</p>' +
           '</div>'
         );
       }).join("");
@@ -1366,6 +1439,71 @@
       VOXY.updateOrder(kode, { status: status }).then(function () {
         if (VOXY.showToast) VOXY.showToast("Status: " + status);
       }).catch(function (e) { alert(e.message); });
+    }
+
+    var _jokiCfgCache = null;
+    function loadJokiConfigAdmin() {
+      var box = document.getElementById("jokiConfigBox");
+      if (!box) return;
+      box.innerHTML = '<div class="empty-state">Memuat harga...</div>';
+      VOXY.getJokiConfig().then(function (cfg) {
+        _jokiCfgCache = cfg;
+        renderJokiConfigForm(cfg);
+      }).catch(function () {
+        _jokiCfgCache = { paket: VOXY.DEFAULT_JOKI_PAKET, includes: VOXY.DEFAULT_JOKI_INCLUDES };
+        renderJokiConfigForm(_jokiCfgCache);
+      });
+    }
+    function renderJokiConfigForm(cfg) {
+      var box = document.getElementById("jokiConfigBox");
+      if (!box) return;
+      var html = '<h3 style="font-size:14px;margin:0 0 8px">Paket Joki</h3>';
+      html += '<div style="display:grid;gap:8px;margin-bottom:16px">';
+      (cfg.paket || []).forEach(function (p, i) {
+        html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid var(--border);border-radius:8px">' +
+          '<span style="min-width:110px;font-weight:700;font-size:13px">' + (p.nama || p.id) + '</span>' +
+          '<label style="font-size:12px;color:var(--muted)">Harga <input type="number" min="0" data-joki-paket="' + i + '" value="' + (Number(p.harga) || 0) + '" style="width:100px;margin-left:4px"></label>' +
+          '</div>';
+      });
+      html += '</div><h3 style="font-size:14px;margin:0 0 8px">Tambahan (Prioritas, FaceCam, +hari)</h3>';
+      html += '<div style="display:grid;gap:8px">';
+      (cfg.includes || []).forEach(function (inc, i) {
+        var tag = "";
+        if (inc.prioritas) tag = ' <span class="admin-joki-badge prio">PRIORITAS</span>';
+        if (inc.facecam) tag = ' <span class="admin-joki-badge facecam">FACECAM</span>';
+        html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid var(--border);border-radius:8px">' +
+          '<span style="min-width:160px;font-weight:700;font-size:13px">' + (inc.nama || inc.id) + tag + '</span>' +
+          '<label style="font-size:12px;color:var(--muted)">Harga <input type="number" min="0" data-joki-inc="' + i + '" value="' + (Number(inc.harga) || 0) + '" style="width:100px;margin-left:4px"></label>' +
+          '</div>';
+      });
+      html += '</div>';
+      box.innerHTML = html;
+    }
+    function simpanJokiHarga() {
+      if (!_jokiCfgCache) return alert("Belum dimuat");
+      var paket = (_jokiCfgCache.paket || []).map(function (p, i) {
+        var el = document.querySelector('[data-joki-paket="' + i + '"]');
+        var harga = el ? Number(el.value) || 0 : Number(p.harga) || 0;
+        return Object.assign({}, p, { harga: harga });
+      });
+      var includes = (_jokiCfgCache.includes || []).map(function (inc, i) {
+        var el = document.querySelector('[data-joki-inc="' + i + '"]');
+        var harga = el ? Number(el.value) || 0 : Number(inc.harga) || 0;
+        return Object.assign({}, inc, { harga: harga });
+      });
+      VOXY.simpanJokiConfig({ paket: paket, includes: includes }).then(function () {
+        _jokiCfgCache = { paket: paket, includes: includes };
+        if (VOXY.showToast) VOXY.showToast("Harga joki tersimpan"); else alert("Harga joki tersimpan");
+      }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+    }
+    function resetJokiHarga() {
+      if (!confirm("Reset semua harga joki ke default?")) return;
+      var def = { paket: JSON.parse(JSON.stringify(VOXY.DEFAULT_JOKI_PAKET)), includes: JSON.parse(JSON.stringify(VOXY.DEFAULT_JOKI_INCLUDES)) };
+      VOXY.simpanJokiConfig(def).then(function () {
+        _jokiCfgCache = def;
+        renderJokiConfigForm(def);
+        if (VOXY.showToast) VOXY.showToast("Reset ke default"); else alert("Reset ke default");
+      }).catch(function (e) { alert(e.message || "Gagal"); });
     }
     function doLogout() {
 

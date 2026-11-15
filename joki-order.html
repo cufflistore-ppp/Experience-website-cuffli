@@ -63,24 +63,8 @@
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
-    var PAKET_MAP = {
-      "joki-20jam": { id: "joki-20jam", nama: "Joki 20 Jam", hari: 0, jam: 20, desc: "20 jam + SW + share 10GB", harga: 500 },
-      "joki-1hari": { id: "joki-1hari", nama: "Joki 1 Hari", hari: 1, jam: 0, desc: "1 hari + SW + share all GB", harga: 1000 },
-      "joki-2hari": { id: "joki-2hari", nama: "Joki 2 Hari", hari: 2, jam: 0, desc: "2 hari + SW + share all GB", harga: 2000 },
-      "joki-3hari": { id: "joki-3hari", nama: "Joki 3 Hari", hari: 3, jam: 0, desc: "3 hari + SW + share all GB", harga: 3000 },
-      "joki-4hari": { id: "joki-4hari", nama: "Joki 4 Hari", hari: 4, jam: 0, desc: "4 hari + SW + share all GB", harga: 4000 },
-      "joki-5hari": { id: "joki-5hari", nama: "Joki 5 Hari", hari: 5, jam: 0, desc: "5 hari + SW + share all GB", harga: 5000 },
-      "joki-permanen": { id: "joki-permanen", nama: "Joki Permanen", hari: 0, jam: 0, permanen: true, desc: "Permanen link tree + SW tebar", harga: 6000 }
-    };
-    var INCLUDES = [
-      { id: "plus20jam", nama: "+ 20 Jam", harga: 500, hari: 0, jam: 20 },
-      { id: "plus1hari", nama: "+ 1 Hari", harga: 1000, hari: 1, jam: 0 },
-      { id: "plus2hari", nama: "+ 2 Hari", harga: 2000, hari: 2, jam: 0 },
-      { id: "plus3hari", nama: "+ 3 Hari", harga: 3000, hari: 3, jam: 0 },
-      { id: "plus4hari", nama: "+ 4 Hari", harga: 4000, hari: 4, jam: 0 },
-      { id: "plus5hari", nama: "+ 5 Hari", harga: 5000, hari: 5, jam: 0 },
-      { id: "prioritas", nama: "Prioritas Antrian", harga: 8000, hari: 0, jam: 0, prioritas: true }
-    ];
+    var PAKET_MAP = {};
+    var INCLUDES = [];
     var selectedInclude = {};
     var paket = null;
 
@@ -90,7 +74,7 @@
       if (n && !n.startsWith("62")) n = "62" + n;
       return n;
     }
-        function formatLabel(hari, jam, permanen) {
+    function formatLabel(hari, jam, permanen) {
       if (permanen) return "[Manen]";
       var parts = [];
       if (hari > 0) parts.push(hari + " hari");
@@ -104,7 +88,7 @@
       var permanen = !!(paket && paket.permanen);
       if (permanen) return { hari: 0, jam: 0, permanen: true };
       INCLUDES.forEach(function (inc) {
-        if (!selectedInclude[inc.id] || inc.prioritas) return;
+        if (!selectedInclude[inc.id] || inc.prioritas || inc.facecam) return;
         hari += Number(inc.hari) || 0;
         jam += Number(inc.jam) || 0;
       });
@@ -124,12 +108,8 @@
     function updateTotal() {
       if (!paket) return;
       var extra = 0;
-      var names = [];
       INCLUDES.forEach(function (inc) {
-        if (selectedInclude[inc.id]) {
-          extra += inc.harga;
-          names.push(inc.nama);
-        }
+        if (selectedInclude[inc.id]) extra += Number(inc.harga) || 0;
       });
       document.getElementById("jokiTotal").textContent = VOXY.formatRp(Number(paket.harga) + extra);
     }
@@ -142,9 +122,12 @@
     function renderIncludes() {
       document.getElementById("includeList").innerHTML = INCLUDES.map(function (inc) {
         var on = !!selectedInclude[inc.id];
+        var badge = "";
+        if (inc.prioritas) badge = '<span class="joki-badge joki-badge-prio">PRIORITAS</span> ';
+        else if (inc.facecam) badge = '<span class="joki-badge joki-badge-facecam">FACECAM / VIDEO</span> ';
         return (
-          '<div class="joki-row' + (on ? ' is-on' : '') + '">' +
-            '<div class="joki-row-info"><div class="joki-row-name">' + inc.nama + '</div></div>' +
+          '<div class="joki-row' + (on ? ' is-on' : '') + (inc.prioritas ? ' is-prio' : '') + (inc.facecam ? ' is-facecam' : '') + '">' +
+            '<div class="joki-row-info"><div class="joki-row-name">' + badge + (inc.nama || "") + '</div></div>' +
             '<div class="joki-row-right">' +
               '<span class="joki-row-price">+' + VOXY.formatRp(inc.harga) + '</span>' +
               '<button type="button" class="joki-row-btn' + (on ? ' on' : '') + '" onclick="toggleInclude(\'' + inc.id + '\')">' +
@@ -161,19 +144,25 @@
       });
     }
 
-    var id = new URLSearchParams(location.search).get("id") || "";
-    paket = PAKET_MAP[id] || null;
-    if (!paket) {
-      document.getElementById("paketInfo").innerHTML = '<div class="empty-state">Paket tidak ditemukan. <a href="joki.html">Kembali</a></div>';
-      document.getElementById("btnOrderJoki").disabled = true;
-    } else {
+    function initPage(cfg) {
+      var list = (cfg && cfg.paket) || VOXY.DEFAULT_JOKI_PAKET || [];
+      list.forEach(function (p) { PAKET_MAP[p.id] = p; });
+      INCLUDES = (cfg && cfg.includes) || VOXY.DEFAULT_JOKI_INCLUDES || [];
+
+      var id = new URLSearchParams(location.search).get("id") || "";
+      paket = PAKET_MAP[id] || null;
+      if (!paket) {
+        document.getElementById("paketInfo").innerHTML = '<div class="empty-state">Paket tidak ditemukan. <a href="joki.html">Kembali</a></div>';
+        document.getElementById("btnOrderJoki").disabled = true;
+        return;
+      }
       document.getElementById("pageTitle").textContent = paket.nama;
       document.getElementById("paketInfo").innerHTML =
         '<div class="joki-box-head"><span class="joki-step">1</span><span>Paket dipilih</span></div>' +
         '<div class="joki-row" style="border:none;padding:0">' +
           '<div class="joki-row-info">' +
             '<div class="joki-row-name">' + paket.nama + '</div>' +
-            '<div class="joki-row-desc">' + paket.desc + '</div>' +
+            '<div class="joki-row-desc">' + (paket.desc || "") + '</div>' +
           '</div>' +
           '<div class="joki-row-right"><span class="joki-row-price">' + VOXY.formatRp(paket.harga) + '</span></div>' +
         '</div>';
@@ -203,12 +192,13 @@
       var extra = 0;
       INCLUDES.forEach(function (inc) {
         if (selectedInclude[inc.id]) {
-          includes.push({ id: inc.id, nama: inc.nama, harga: inc.harga });
-          extra += inc.harga;
+          includes.push({ id: inc.id, nama: inc.nama, harga: Number(inc.harga) || 0, prioritas: !!inc.prioritas, facecam: !!inc.facecam });
+          extra += Number(inc.harga) || 0;
         }
       });
       var total = Number(paket.harga) + extra;
       var serobot = !!selectedInclude.prioritas;
+      var hasFacecam = !!selectedInclude.facecam;
       var btn = document.getElementById("btnOrderJoki");
       btn.disabled = true;
       btn.textContent = "Menyimpan...";
@@ -222,7 +212,8 @@
         hargaDasar: paket.harga,
         jokiIncludes: includes,
         serobot: serobot,
-        serobotBiaya: serobot ? 8000 : 0,
+        serobotBiaya: serobot ? (includes.filter(function(x){return x.id==="prioritas";})[0] || {}).harga || 8000 : 0,
+        facecam: hasFacecam,
         status: "Menunggu",
         jokiStore: store,
         jokiNamaJB: store,
@@ -231,7 +222,7 @@
         jokiHari: totalDurasi().hari,
         jokiJam: totalDurasi().jam,
         jokiPreview: buildPreview(),
-        deskripsi: paket.desc,
+        deskripsi: paket.desc || "",
         uid: user.uid,
         email: user.email || ""
       }).then(function (kode) {
@@ -243,7 +234,11 @@
       });
     };
 
-    VOXY.requireAuth().then(function () {});
+    VOXY.requireAuth().then(function () {
+      VOXY.getJokiConfig().then(initPage).catch(function () {
+        initPage({ paket: VOXY.DEFAULT_JOKI_PAKET, includes: VOXY.DEFAULT_JOKI_INCLUDES });
+      });
+    });
   </script>
 </body>
 </html>

@@ -722,6 +722,47 @@ function hapusMenuLayanan(id) {
   return db.ref("menu_layanan/" + id).remove();
 }
 
+/* ---------- Joki Config (paket + includes, editable admin) ---------- */
+var DEFAULT_JOKI_PAKET = [
+  { id: "joki-20jam", nama: "Joki 20 Jam", badge: "20 JAM", desc: "Layanan joki kontak selama 20 jam + SW + share 10GB", fitur: ["20 jam + SW + share 10GB", "Order langsung di web", "Status dapat dipantau"], harga: 500, hari: 0, jam: 20 },
+  { id: "joki-1hari", nama: "Joki 1 Hari", badge: "1 HARI", desc: "Layanan joki kontak selama 1 hari + SW + share all GB.", fitur: ["1 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"], harga: 1000, hari: 1, jam: 0 },
+  { id: "joki-2hari", nama: "Joki 2 Hari", badge: "2 HARI", desc: "Layanan joki kontak selama 2 hari + SW + share all GB.", fitur: ["2 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"], harga: 2000, hari: 2, jam: 0 },
+  { id: "joki-3hari", nama: "Joki 3 Hari", badge: "3 HARI", desc: "Layanan joki kontak selama 3 hari + SW + share all GB.", fitur: ["3 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"], harga: 3000, populer: true, hari: 3, jam: 0 },
+  { id: "joki-4hari", nama: "Joki 4 Hari", badge: "4 HARI", desc: "Layanan joki kontak selama 4 hari + SW + share all GB.", fitur: ["4 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"], harga: 4000, hari: 4, jam: 0 },
+  { id: "joki-5hari", nama: "Joki 5 Hari", badge: "5 HARI", desc: "Layanan joki kontak selama 5 hari + SW + share all GB.", fitur: ["5 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"], harga: 5000, hari: 5, jam: 0 },
+  { id: "joki-permanen", nama: "Joki Permanen", badge: "PERMANEN", desc: "Permanen tempel link tree di TikTok + SW tebar. Same lu pensi JB.", fitur: ["Permanen tempel link tree di TikTok", "SW tebar", "Same lu pensi JB", "Order langsung di web", "Status dapat dipantau"], harga: 6000, permanen: true, hari: 0, jam: 0 }
+];
+var DEFAULT_JOKI_INCLUDES = [
+  { id: "prioritas", nama: "Prioritas Antrian", harga: 8000, hari: 0, jam: 0, prioritas: true },
+  { id: "facecam", nama: "FaceCam / Video Rekomendasi", harga: 5000, hari: 0, jam: 0, facecam: true },
+  { id: "plus20jam", nama: "+ 20 Jam", harga: 500, hari: 0, jam: 20 },
+  { id: "plus1hari", nama: "+ 1 Hari", harga: 1000, hari: 1, jam: 0 },
+  { id: "plus2hari", nama: "+ 2 Hari", harga: 2000, hari: 2, jam: 0 },
+  { id: "plus3hari", nama: "+ 3 Hari", harga: 3000, hari: 3, jam: 0 },
+  { id: "plus4hari", nama: "+ 4 Hari", harga: 4000, hari: 4, jam: 0 },
+  { id: "plus5hari", nama: "+ 5 Hari", harga: 5000, hari: 5, jam: 0 }
+];
+
+function getJokiConfig() {
+  if (!db) return Promise.resolve({ paket: DEFAULT_JOKI_PAKET.slice(), includes: DEFAULT_JOKI_INCLUDES.slice() });
+  return db.ref("joki_config").once("value").then(function (snap) {
+    var val = snap.val() || {};
+    var paket = Array.isArray(val.paket) && val.paket.length ? val.paket : DEFAULT_JOKI_PAKET.slice();
+    var includes = Array.isArray(val.includes) && val.includes.length ? val.includes : DEFAULT_JOKI_INCLUDES.slice();
+    return { paket: paket, includes: includes };
+  });
+}
+
+function simpanJokiConfig(data) {
+  if (!db) return Promise.reject(new Error("Database belum siap"));
+  var payload = {
+    paket: Array.isArray(data.paket) ? data.paket : DEFAULT_JOKI_PAKET,
+    includes: Array.isArray(data.includes) ? data.includes : DEFAULT_JOKI_INCLUDES,
+    updatedAt: Date.now()
+  };
+  return db.ref("joki_config").set(payload);
+}
+
 /* ---------- Branding (logo, banner x3, qris) ---------- */
 function getBranding() {
   if (!db) return Promise.resolve({});
@@ -800,6 +841,10 @@ window.VOXY = {
   listenMenuLayanan: listenMenuLayanan,
   simpanMenuLayanan: simpanMenuLayanan,
   hapusMenuLayanan: hapusMenuLayanan,
+  getJokiConfig: getJokiConfig,
+  simpanJokiConfig: simpanJokiConfig,
+  DEFAULT_JOKI_PAKET: DEFAULT_JOKI_PAKET,
+  DEFAULT_JOKI_INCLUDES: DEFAULT_JOKI_INCLUDES,
   showToast: showToast,
   getProdukList: getProdukList,
   listenProduk: listenProduk,

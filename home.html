@@ -34,7 +34,6 @@
     <nav class="side-drawer-nav">
       <a href="akun.html"><i data-lucide="user"></i> Akun</a>
       <a href="riwayat.html"><i data-lucide="receipt"></i> Transaksi</a>
-      <a href="joki.html"><i data-lucide="zap"></i> Joki Kontak</a>
       <a href="jaspost.html"><i data-lucide="send"></i> Jaspost / PM</a>
       <a href="home.html"><i data-lucide="layout-grid"></i> Menu Layanan</a>
       <a href="chat.html"><i data-lucide="message-circle"></i> Bantuan Admin</a>
@@ -216,7 +215,14 @@
         var kat = (m.kategori || "").replace(/"/g, "");
         var judulQ = encodeURIComponent(m.judul || kat || "Layanan");
         var katQ = encodeURIComponent(kat);
-        var href = "layanan.html?kat=" + katQ + "&judul=" + judulQ;
+        var katLow = (kat || "").toLowerCase();
+        var judulLow = (m.judul || "").toLowerCase();
+        var href;
+        if (katLow === "joki" || katLow.indexOf("joki") !== -1 || judulLow.indexOf("joki") !== -1) {
+          href = "joki.html";
+        } else {
+          href = "layanan.html?kat=" + katQ + "&judul=" + judulQ;
+        }
         return (
           '<a class="menu-layanan-btn" href="' + href + '">' +
             '<span class="mlb-icon"><i data-lucide="' + icon + '"></i></span>' +

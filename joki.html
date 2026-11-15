@@ -28,7 +28,9 @@
     <div class="home-produk-head">
       <h2>Pilih Paket Joki</h2>
     </div>
-    <div class="paket-grid" id="jokiGrid"></div>
+    <div class="paket-grid" id="jokiGrid">
+      <div class="empty-state" style="grid-column:1/-1">Memuat paket...</div>
+    </div>
   </main>
 
   <nav class="bottom-nav">
@@ -40,71 +42,36 @@
   <script src="global-orders.js"></script>
   <script>
     lucide.createIcons();
-    var PAKET = [
-      {
-        id: "joki-20jam", nama: "Joki 20 Jam", badge: "20 JAM",
-        desc: "Layanan joki kontak selama 20 jam + SW + share 10GB",
-        fitur: ["20 jam + SW + share 10GB", "Order langsung di web", "Status dapat dipantau"],
-        harga: 500
-      },
-      {
-        id: "joki-1hari", nama: "Joki 1 Hari", badge: "1 HARI",
-        desc: "Layanan joki kontak selama 1 hari + SW + share all GB.",
-        fitur: ["1 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
-        harga: 1000
-      },
-      {
-        id: "joki-2hari", nama: "Joki 2 Hari", badge: "2 HARI",
-        desc: "Layanan joki kontak selama 2 hari + SW + share all GB.",
-        fitur: ["2 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
-        harga: 2000
-      },
-      {
-        id: "joki-3hari", nama: "Joki 3 Hari", badge: "3 HARI",
-        desc: "Layanan joki kontak selama 3 hari + SW + share all GB.",
-        fitur: ["3 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
-        harga: 3000, populer: true
-      },
-      {
-        id: "joki-4hari", nama: "Joki 4 Hari", badge: "4 HARI",
-        desc: "Layanan joki kontak selama 4 hari + SW + share all GB.",
-        fitur: ["4 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
-        harga: 4000
-      },
-      {
-        id: "joki-5hari", nama: "Joki 5 Hari", badge: "5 HARI",
-        desc: "Layanan joki kontak selama 5 hari + SW + share all GB.",
-        fitur: ["5 hari + SW + share all GB", "Order langsung di web", "Status dapat dipantau"],
-        harga: 5000
-      },
-      {
-        id: "joki-permanen", nama: "Joki Permanen", badge: "PERMANEN",
-        desc: "Permanen tempel link tree di TikTok + SW tebar. Same lu pensi JB.",
-        fitur: ["Permanen tempel link tree di TikTok", "SW tebar", "Same lu pensi JB", "Order langsung di web", "Status dapat dipantau"],
-        harga: 6000
-      }
-    ];
 
-    document.getElementById("jokiGrid").innerHTML = PAKET.map(function (p) {
-      var fitur = p.fitur.map(function (f) {
-        return '<li><i data-lucide="check-circle-2"></i> ' + f + '</li>';
+    function renderPaket(PAKET) {
+      document.getElementById("jokiGrid").innerHTML = PAKET.map(function (p) {
+        var fitur = (p.fitur || []).map(function (f) {
+          return '<li><i data-lucide="check-circle-2"></i> ' + f + '</li>';
+        }).join("");
+        return (
+          '<a class="paket-card' + (p.populer ? ' is-flash' : '') + '" href="joki-order.html?id=' + encodeURIComponent(p.id) + '">' +
+            (p.populer ? '<span class="paket-populer">POPULER</span>' : '') +
+            '<div class="paket-body" style="padding-top:14px">' +
+              '<span class="paket-badge" style="position:static;display:inline-flex;margin-bottom:8px">' + (p.badge || "") + '</span>' +
+              '<h3 class="paket-title">' + (p.nama || "") + '</h3>' +
+              '<p class="paket-desc">' + (p.desc || "") + '</p>' +
+              '<ul class="paket-fitur">' + fitur + '</ul>' +
+              '<div class="paket-price-wrap"><div class="paket-price">' + VOXY.formatRp(p.harga) + '</div></div>' +
+              '<span class="paket-cta">Pilih Paket</span>' +
+            '</div>' +
+          '</a>'
+        );
       }).join("");
-      return (
-        '<a class="paket-card' + (p.populer ? ' is-flash' : '') + '" href="joki-order.html?id=' + encodeURIComponent(p.id) + '">' +
-          (p.populer ? '<span class="paket-populer">POPULER</span>' : '') +
-          '<div class="paket-body" style="padding-top:14px">' +
-            '<span class="paket-badge" style="position:static;display:inline-flex;margin-bottom:8px">' + p.badge + '</span>' +
-            '<h3 class="paket-title">' + p.nama + '</h3>' +
-            '<p class="paket-desc">' + p.desc + '</p>' +
-            '<ul class="paket-fitur">' + fitur + '</ul>' +
-            '<div class="paket-price-wrap"><div class="paket-price">' + VOXY.formatRp(p.harga) + '</div></div>' +
-            '<span class="paket-cta">Pilih Paket</span>' +
-          '</div>' +
-        '</a>'
-      );
-    }).join("");
-    lucide.createIcons();
-    VOXY.requireAuth().then(function () {});
+      lucide.createIcons();
+    }
+
+    VOXY.requireAuth().then(function () {
+      VOXY.getJokiConfig().then(function (cfg) {
+        renderPaket(cfg.paket || VOXY.DEFAULT_JOKI_PAKET);
+      }).catch(function () {
+        renderPaket(VOXY.DEFAULT_JOKI_PAKET);
+      });
+    });
   </script>
 </body>
 </html>

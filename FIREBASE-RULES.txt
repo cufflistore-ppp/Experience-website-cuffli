@@ -47,6 +47,11 @@ Kalau ganti email admin, ganti SEMUA kemunculan email di rules ini.
       ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     },
 
+    "joki_config": {
+      ".read": true,
+      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
+    },
+
     "orders": {
       ".read": "auth != null",
       "$kode": {
