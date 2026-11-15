@@ -23,6 +23,7 @@
       <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><i data-lucide="layout-dashboard"></i> Dashboard</a>
       <a href="#" data-tab="pesanan" onclick="switchTab('pesanan',this)"><i data-lucide="shopping-bag"></i> Pesanan</a>
       <a href="#" data-tab="joki" onclick="switchTab('joki',this)"><i data-lucide="zap"></i> Order Joki</a>
+      <a href="admin-joki-harga.html"><i data-lucide="tags"></i> Harga Joki</a>
       <a href="#" data-tab="produk" onclick="switchTab('produk',this)"><i data-lucide="package"></i> Produk</a>
       <a href="#" data-tab="flash" onclick="switchTab('flash',this)"><i data-lucide="zap"></i> Flash Sale</a>
       <a href="#" data-tab="menu" onclick="switchTab('menu',this)"><i data-lucide="layout-grid"></i> Menu Layanan</a>
@@ -135,6 +136,9 @@
       <div class="admin-card">
         <h2><i data-lucide="zap"></i> Order Joki Khusus</h2>
         <div class="admin-hint">Khusus order <b>joki</b>: cukup <b>ubah status</b> (Proses/Selesai/Tolak) dan <b>Salin Teks</b>. Tidak perlu kirim file produk. <b>Prioritas</b> tampil paling atas, lalu <b>FaceCam/Video</b>.</div>
+        <div style="margin-bottom:12px">
+          <a href="admin-joki-harga.html" class="btn btn-sm btn-outline"><i data-lucide="settings-2" style="width:14px;height:14px"></i> Atur Harga Paket Joki</a>
+        </div>
         <div class="filter-row" id="filterJoki">
           <button class="active" type="button" onclick="setFilterJoki('aktif',this)">Aktif</button>
           <button type="button" onclick="setFilterJoki('Menunggu',this)">Menunggu</button>
@@ -143,15 +147,6 @@
           <button type="button" onclick="setFilterJoki('semua',this)">Semua</button>
         </div>
         <div id="tabelJoki"><div class="empty-state">Memuat...</div></div>
-      </div>
-      <div class="admin-card" style="margin-top:16px">
-        <h2><i data-lucide="settings-2"></i> Atur Harga Paket &amp; Tambahan Joki</h2>
-        <div class="admin-hint">Ubah harga paket joki dan harga tambahan (Prioritas, FaceCam, +hari). Perubahan langsung dipakai di halaman order user.</div>
-        <div id="jokiConfigBox"><div class="empty-state">Buka tab ini untuk memuat...</div></div>
-        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-          <button type="button" class="btn btn-sm btn-success" onclick="simpanJokiHarga()">Simpan Harga Joki</button>
-          <button type="button" class="btn btn-sm btn-outline" onclick="resetJokiHarga()">Reset Default</button>
-        </div>
       </div>
     </div>
 
@@ -453,10 +448,7 @@
       var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", joki: "Order Joki", produk: "Kelola Produk", flash: "Flash Sale", menu: "Menu Layanan", chat: "Chat User", pengaturan: "Pengaturan" };
       document.getElementById("pageTitle").textContent = titles[name] || "Admin";
       if (name === "menu") loadMenuAdmin();
-      if (name === "joki") {
-        if (typeof renderJoki === "function") renderJoki();
-        if (typeof loadJokiConfigAdmin === "function") loadJokiConfigAdmin();
-      }
+      if (name === "joki" && typeof renderJoki === "function") renderJoki();
       closeSidebar();
       if (name === "produk") { loadProdukAdmin(); loadMenuAdmin(); }
       if (name === "pengaturan") loadPengaturan();

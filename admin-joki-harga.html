@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atur Harga Joki - VOXY ADMIN</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body class="admin-body" style="visibility:hidden">
+  <header class="app-header">
+    <div class="logo-area">
+      <a href="admin.html" class="icon-btn" style="margin-right:4px" title="Kembali ke Admin"><i data-lucide="arrow-left"></i></a>
+      <span>Atur Harga Joki</span>
+    </div>
+  </header>
+
+  <main class="page" style="padding-bottom:48px;max-width:720px;margin:0 auto">
+    <div class="admin-card">
+      <h2><i data-lucide="settings-2"></i> Harga Paket &amp; Tambahan Joki</h2>
+      <div class="admin-hint">
+        Ubah harga paket joki dan tambahan (Prioritas, FaceCam, +hari).
+        Perubahan langsung dipakai di halaman order user. Halaman ini terpisah agar tidak bercampur dengan daftar order.
+      </div>
+      <div id="jokiConfigBox"><div class="empty-state">Memuat...</div></div>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" class="btn btn-sm btn-success" id="btnSimpan">Simpan Harga Joki</button>
+        <button type="button" class="btn btn-sm btn-outline" id="btnReset">Reset Default</button>
+        <a href="admin.html" class="btn btn-sm btn-outline">Kembali ke Admin</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var _cfg = null;
+
+    function renderForm(cfg) {
+      var box = document.getElementById("jokiConfigBox");
+      var html = '<h3 style="font-size:14px;margin:0 0 8px">Paket Joki</h3>';
+      html += '<div style="display:grid;gap:8px;margin-bottom:18px">';
+      (cfg.paket || []).forEach(function (p, i) {
+        html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;border:1px solid var(--border);border-radius:10px;background:rgba(15,23,42,.5)">' +
+          '<span style="min-width:120px;font-weight:700;font-size:13px">' + (p.nama || p.id) + '</span>' +
+          '<label style="font-size:12px;color:var(--muted)">Harga Rp <input type="number" min="0" data-joki-paket="' + i + '" value="' + (Number(p.harga) || 0) + '" style="width:110px;margin-left:6px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:#e2e8f0"></label>' +
+          '</div>';
+      });
+      html += '</div><h3 style="font-size:14px;margin:0 0 8px">Tambahan (Prioritas, FaceCam, +hari)</h3>';
+      html += '<div style="display:grid;gap:8px">';
+      (cfg.includes || []).forEach(function (inc, i) {
+        var tag = "";
+        if (inc.prioritas) tag = ' <span class="admin-joki-badge prio">PRIORITAS</span>';
+        if (inc.facecam) tag = ' <span class="admin-joki-badge facecam">FACECAM</span>';
+        html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;border:1px solid var(--border);border-radius:10px;background:rgba(15,23,42,.5)">' +
+          '<span style="min-width:180px;font-weight:700;font-size:13px">' + (inc.nama || inc.id) + tag + '</span>' +
+          '<label style="font-size:12px;color:var(--muted)">Harga Rp <input type="number" min="0" data-joki-inc="' + i + '" value="' + (Number(inc.harga) || 0) + '" style="width:110px;margin-left:6px;padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:#e2e8f0"></label>' +
+          '</div>';
+      });
+      html += '</div>';
+      box.innerHTML = html;
+    }
+
+    function load() {
+      VOXY.getJokiConfig().then(function (cfg) {
+        _cfg = cfg;
+        renderForm(cfg);
+      }).catch(function () {
+        _cfg = { paket: VOXY.DEFAULT_JOKI_PAKET, includes: VOXY.DEFAULT_JOKI_INCLUDES };
+        renderForm(_cfg);
+      });
+    }
+
+    document.getElementById("btnSimpan").onclick = function () {
+      if (!_cfg) return alert("Belum dimuat");
+      var paket = (_cfg.paket || []).map(function (p, i) {
+        var el = document.querySelector('[data-joki-paket="' + i + '"]');
+        return Object.assign({}, p, { harga: el ? Number(el.value) || 0 : Number(p.harga) || 0 });
+      });
+      var includes = (_cfg.includes || []).map(function (inc, i) {
+        var el = document.querySelector('[data-joki-inc="' + i + '"]');
+        return Object.assign({}, inc, { harga: el ? Number(el.value) || 0 : Number(inc.harga) || 0 });
+      });
+      var btn = document.getElementById("btnSimpan");
+      btn.disabled = true;
+      VOXY.simpanJokiConfig({ paket: paket, includes: includes }).then(function () {
+        _cfg = { paket: paket, includes: includes };
+        if (VOXY.showToast) VOXY.showToast("Harga joki tersimpan"); else alert("Harga joki tersimpan");
+        btn.disabled = false;
+      }).catch(function (e) {
+        alert(e.message || "Gagal simpan");
+        btn.disabled = false;
+      });
+    };
+
+    document.getElementById("btnReset").onclick = function () {
+      if (!confirm("Reset semua harga joki ke default?")) return;
+      var def = {
+        paket: JSON.parse(JSON.stringify(VOXY.DEFAULT_JOKI_PAKET)),
+        includes: JSON.parse(JSON.stringify(VOXY.DEFAULT_JOKI_INCLUDES))
+      };
+      VOXY.simpanJokiConfig(def).then(function () {
+        _cfg = def;
+        renderForm(def);
+        if (VOXY.showToast) VOXY.showToast("Reset ke default"); else alert("Reset ke default");
+      }).catch(function (e) { alert(e.message || "Gagal"); });
+    };
+
+    VOXY.requireAdmin().then(function () {
+      document.body.style.visibility = "visible";
+      load();
+    }).catch(function () {
+      location.href = "login.html";
+    });
+  </script>
+</body>
+</html>

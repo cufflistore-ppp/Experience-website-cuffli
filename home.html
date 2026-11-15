@@ -204,27 +204,43 @@
       }).sort(function (a, b) {
         return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
       });
+      /* Pastikan Joki Kontak selalu ada sebagai menu (tampilan sama seperti menu lain) */
+      var hasJoki = list.some(function (m) {
+        var k = ((m.kategori || "") + " " + (m.judul || "")).toLowerCase();
+        return k.indexOf("joki") !== -1;
+      });
+      if (!hasJoki) {
+        list = list.concat([{
+          id: "_joki_default",
+          judul: "Joki Kontak",
+          subjudul: "Paket joki + Prioritas + FaceCam",
+          icon: "zap",
+          kategori: "joki",
+          urutan: 999,
+          aktif: true
+        }]);
+      }
       if (!list.length) {
         grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:16px;font-size:12px;color:var(--muted)">Belum ada menu layanan.<br>Admin: Panel Admin → Menu Layanan</div>';
         return;
+      }
+      function menuHref(m) {
+        var kat = (m.kategori || "").replace(/"/g, "");
+        var katLow = kat.toLowerCase();
+        var judulLow = (m.judul || "").toLowerCase();
+        if (katLow === "joki" || katLow.indexOf("joki") !== -1 || judulLow.indexOf("joki") !== -1) {
+          return "joki.html";
+        }
+        var judulQ = encodeURIComponent(m.judul || kat || "Layanan");
+        var katQ = encodeURIComponent(kat);
+        return "layanan.html?kat=" + katQ + "&judul=" + judulQ;
       }
       grid.innerHTML = list.map(function (m) {
         var icon = (m.icon || "package").replace(/[^a-z0-9-]/gi, "") || "package";
         var judul = (m.judul || "Layanan").replace(/</g, "&lt;");
         var sub = (m.subjudul || "").replace(/</g, "&lt;");
-        var kat = (m.kategori || "").replace(/"/g, "");
-        var judulQ = encodeURIComponent(m.judul || kat || "Layanan");
-        var katQ = encodeURIComponent(kat);
-        var katLow = (kat || "").toLowerCase();
-        var judulLow = (m.judul || "").toLowerCase();
-        var href;
-        if (katLow === "joki" || katLow.indexOf("joki") !== -1 || judulLow.indexOf("joki") !== -1) {
-          href = "joki.html";
-        } else {
-          href = "layanan.html?kat=" + katQ + "&judul=" + judulQ;
-        }
         return (
-          '<a class="menu-layanan-btn" href="' + href + '">' +
+          '<a class="menu-layanan-btn" href="' + menuHref(m) + '">' +
             '<span class="mlb-icon"><i data-lucide="' + icon + '"></i></span>' +
             '<span class="mlb-text">' +
               '<span class="mlb-title">' + judul + '</span>' +
@@ -236,16 +252,10 @@
       }).join("");
       var foot = document.getElementById("footerLayananList");
       if (foot) {
-        if (!list.length) {
-          foot.innerHTML = '<a href="home.html">Semua Layanan</a>';
-        } else {
-          foot.innerHTML = list.map(function (m) {
-            var judul = (m.judul || "Layanan").replace(/</g, "&lt;");
-            var katQ = encodeURIComponent(m.kategori || "");
-            var judulQ = encodeURIComponent(m.judul || m.kategori || "Layanan");
-            return '<a href="layanan.html?kat=' + katQ + '&judul=' + judulQ + '">' + judul + '</a>';
-          }).join("");
-        }
+        foot.innerHTML = list.map(function (m) {
+          var judul = (m.judul || "Layanan").replace(/</g, "&lt;");
+          return '<a href="' + menuHref(m) + '">' + judul + '</a>';
+        }).join("");
       }
       lucide.createIcons();
     }

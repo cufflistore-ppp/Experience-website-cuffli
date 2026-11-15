@@ -1,11 +1,11 @@
-=== FIREBASE REALTIME DATABASE RULES — VERSI LENGKAP (AMAN ADMIN) ===
+=== FIREBASE REALTIME DATABASE RULES — VERSI LENGKAP ===
 
 Cara pasang:
-1. Firebase Console → project voxyyjoki
+1. Buka Firebase Console → project voxyyjoki
 2. Realtime Database → Rules
 3. Hapus semua rules lama
 4. Tempel HANYA blok JSON di bawah (dari { sampai })
-5. Publish
+5. Klik Publish
 
 Email admin (harus sama dengan yang login panel):
 - emailwebvixy@gmail.com
@@ -90,42 +90,17 @@ Kalau ganti email admin, ganti SEMUA kemunculan email di rules ini.
 ========== SALIN SAMPAI SINI ==========
 
 
-=== APA YANG DIAMANKAN ===
-
-1) PANEL ADMIN (server-side)
-   - settings, branding (logo/banner/QRIS), produk_images
-     → HANYA 2 email admin yang boleh tulis
-   - User biasa yang coba ubah lewat console/API → PERMISSION_DENIED
-
-2) PRODUK
-   - Baca: semua orang (katalog toko)
-   - Tulis penuh (nama, harga, hapus, tambah): admin saja
-   - User boleh update terbatas saat order (stok berkurang),
-     asalkan nama/harga/kategori tidak berubah
-
-3) ORDERS
-   - Baca: user login (riwayat app tetap jalan)
-   - Buat order baru: user, wajib uid sendiri + status "Menunggu"
-   - User TIDAK bisa ubah status / harga / kode order orang lain
-   - User boleh update order sendiri (linkTarget, catatan) tanpa ganti status/harga
-   - Admin: full kontrol (ubah status, tolak, selesai, dll)
-
-4) ORDER_FILES (hasil kirim admin: APK/link file)
-   - Baca: user login (pembeli lihat hasil)
-   - Tulis: admin saja
-
-5) CHAT
-   - Hanya pemilik chat (uid) atau admin
-   - Orang lain tidak bisa buka chat user lain
-
-6) FRONTEND
-   - admin.html / admin-kelola.html tetap pakai requireAdmin()
-   - Email selain 2 admin → ditolak di UI + di rules
+=== PATH YANG DILINDUNGI ===
+- produk, produk_images
+- settings, branding_assets
+- menu_layanan
+- joki_config          ← harga paket & tambahan joki
+- orders, order_bukti, order_files
+- laporan, chat
 
 
-=== TES CEPAT SETELAH PUBLISH ===
-1. Login email biasa → buka admin.html → ditolak
-2. Login email biasa → tidak bisa ubah produk/settings di Firebase
-3. Login email biasa → order + upload bukti TF tetap bisa
-4. Login admin → panel, ganti logo/QRIS, ubah status order → OK
-5. User coba ubah status order jadi "Selesai" lewat API → DENIED
+=== TES SETELAH PUBLISH ===
+1. Login email biasa → admin.html ditolak
+2. Login admin → Order Joki, Harga Joki, Menu Layanan OK
+3. User order joki + upload bukti TF tetap bisa
+4. User tidak bisa ubah status order jadi Selesai lewat API
