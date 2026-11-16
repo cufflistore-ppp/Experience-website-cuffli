@@ -1,78 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Joki Kontak - VOXY MARKET</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-</head>
-<body>
-  <header class="app-header">
-    <button class="icon-btn" onclick="location.href='home.html'"><i data-lucide="arrow-left"></i></button>
-    <div class="logo-area"><span>Joki Kontak</span></div>
-    <div style="width:40px"></div>
-  </header>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Layanan Joki — ELZKII JOKI</title><link rel="stylesheet" href="css/style.css"></head><body>
+<header class="topbar"><a class="logo" href="home.html"><span class="logo-box">EJ</span> ELZKII <b>JOKI</b></a><button id="logoutBtn" class="btn tiny">Keluar</button></header>
+<div class="layout"><aside class="sidebar"><p class="eyebrow">MENU UTAMA</p><a class="" href="home.html">Home</a><a class="active" href="joki.html">Joki</a><a class="" href="produk.html">Produk</a><a class="" href="order.html">Pesan</a><a class="" href="riwayat.html">Riwayat</a><a class="" href="about.html">Tentang</a><a href="admin.html" class="admin-link">Admin Panel</a></aside><main class="main-content"><p class="eyebrow">LAYANAN</p><h1 class="page-title">Paket <span>Joki</span></h1><p class="muted">Pilih paket yang tersedia. Detail akhir dan kesepakatan pesanan dikonfirmasi melalui WhatsApp admin.</p><div class="package-grid"><article class="package"><p class="eyebrow">PAKET 01</p><h2>500P</h2><p>1 hari pengerjaan</p><button class="btn primary order-joki" data-pack="500P">Pesan paket</button></article><article class="package"><p class="eyebrow">PAKET 02</p><h2>1K</h2><p>2 hari pengerjaan</p><button class="btn primary order-joki" data-pack="1K">Pesan paket</button></article><article class="package"><p class="eyebrow">PAKET 03</p><h2>2K</h2><p>3 hari pengerjaan</p><button class="btn primary order-joki" data-pack="2K">Pesan paket</button></article><article class="package"><p class="eyebrow">PAKET 04</p><h2>3K</h2><p>4 hari pengerjaan</p><button class="btn primary order-joki" data-pack="3K">Pesan paket</button></article><article class="package"><p class="eyebrow">PAKET 05</p><h2>4K</h2><p>5 hari pengerjaan</p><button class="btn primary order-joki" data-pack="4K">Pesan paket</button></article><article class="package"><p class="eyebrow">PAKET 06</p><h2>5K</h2><p>6 hari pengerjaan</p><button class="btn primary order-joki" data-pack="5K">Pesan paket</button></article><article class="package"><p class="eyebrow">PAKET 07</p><h2>6K</h2><p>7 hari pengerjaan</p><button class="btn primary order-joki" data-pack="6K">Pesan paket</button></article><article class="package"><p class="eyebrow">PAKET 08</p><h2>7K</h2><p>8 hari pengerjaan</p><button class="btn primary order-joki" data-pack="7K">Pesan paket</button></article></div><section class="format-box"><div><p class="eyebrow">TEMPLATE PESANAN</p><h2>Format teks joki</h2></div><pre id="jokiFormat">SV BUYER FRESH ELZKII😘
 
-  <main class="page layanan-page">
-    <div class="joki-marquee-wrap" aria-label="Peringatan">
-      <div class="joki-marquee">
-        <span>⚠ Kang joki kontak dilarang order joki di sini. Jika ketahuan, tidak dilayani!&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
-        <span>⚠ Kang joki kontak dilarang order joki di sini. Jika ketahuan, tidak dilayani!&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
-      </div>
-    </div>
+SV ; NAMA STORE
+Wa.me/628...
 
-    <div class="home-produk-head">
-      <h2>Pilih Paket Joki</h2>
-    </div>
-    <div class="paket-grid" id="jokiGrid">
-      <div class="empty-state" style="grid-column:1/-1">Memuat paket...</div>
-    </div>
-  </main>
-
-  <nav class="bottom-nav">
-    <a href="home.html"><i data-lucide="home"></i>Home</a>
-    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
-    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
-  </nav>
-
-  <script src="global-orders.js"></script>
-  <script>
-    lucide.createIcons();
-
-    function renderPaket(PAKET) {
-      document.getElementById("jokiGrid").innerHTML = PAKET.map(function (p) {
-        var fitur = (p.fitur || []).map(function (f) {
-          return '<li><i data-lucide="check-circle-2"></i> ' + f + '</li>';
-        }).join("");
-        return (
-          '<a class="paket-card' + (p.populer ? ' is-flash' : '') + '" href="joki-order.html?id=' + encodeURIComponent(p.id) + '">' +
-            (p.populer ? '<span class="paket-populer">POPULER</span>' : '') +
-            '<div class="paket-body" style="padding-top:14px">' +
-              '<span class="paket-badge" style="position:static;display:inline-flex;margin-bottom:8px">' + (p.badge || "") + '</span>' +
-              '<h3 class="paket-title">' + (p.nama || "") + '</h3>' +
-              '<p class="paket-desc">' + (p.desc || "") + '</p>' +
-              '<ul class="paket-fitur">' + fitur + '</ul>' +
-              '<div class="paket-price-wrap"><div class="paket-price">' + VOXY.formatRp(p.harga) + '</div></div>' +
-              '<span class="paket-cta">Pilih Paket</span>' +
-            '</div>' +
-          '</a>'
-        );
-      }).join("");
-      lucide.createIcons();
-    }
-
-    VOXY.requireAuth().then(function () {
-      VOXY.getJokiConfig().then(function (cfg) {
-        renderPaket(cfg.paket || VOXY.DEFAULT_JOKI_PAKET);
-      }).catch(function () {
-        renderPaket(VOXY.DEFAULT_JOKI_PAKET);
-      });
-    });
-  </script>
-  <script src="music-player.js"></script>
-</body>
-</html>
+#NAMBAH VIEW SW + KONTAK + BUYER + SELER</pre><button class="btn dark" id="copyFormat">Salin format</button></section><footer>© 2026 ELZKII JOKI · Layanan digital</footer></main></div><script type="module" src="js/app.js"></script></body></html>

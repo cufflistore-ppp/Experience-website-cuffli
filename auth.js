@@ -1,57 +1,6 @@
-// VOXY AUTH SYSTEM
-
-
-const auth = firebase.auth();
-
-
-
-function daftarUser(email,password){
-
-
-return auth
-.createUserWithEmailAndPassword(
-email,
-password
-);
-
-
-}
-
-
-
-function loginUser(email,password){
-
-
-return auth
-.signInWithEmailAndPassword(
-email,
-password
-);
-
-
-}
-
-
-
-function logoutUser(){
-
-return auth.signOut();
-
-}
-
-
-
-auth.onAuthStateChanged(
-(user)=>{
-
-if(user){
-
-console.log(
-"Login:",
-user.email
-);
-
-}
-
-}
-);
+import { firebaseConfig, firebaseReady } from './firebase.js';
+const msg = document.getElementById('authMsg');
+const login = document.getElementById('loginForm');
+const register = document.getElementById('registerForm');
+if (login) login.addEventListener('submit', async e => { e.preventDefault(); msg.textContent = firebaseReady ? 'Hubungkan Firebase Authentication di js/auth.js untuk mengaktifkan login.' : 'Firebase belum dikonfigurasi. Isi js/firebase.js terlebih dahulu.'; });
+if (register) register.addEventListener('submit', async e => { e.preventDefault(); msg.textContent = 'Firebase belum dikonfigurasi. Isi js/firebase.js dan aktifkan Authentication terlebih dahulu.'; });
