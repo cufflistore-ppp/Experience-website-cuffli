@@ -1,8 +1,8 @@
 /**
- * Dipakai di halaman konten yang dibuka di dalam iframe shell.
- * - Sembunyikan nav & music ganda
- * - Intercept link internal → parent shell
- * - Jangan redirect ke intro saat di iframe
+ * Dipakai di halaman konten yang dibuka di dalam iframe shell[span_1](start_span)[span_1](end_span).
+ * - Sembunyikan nav & music ganda[span_2](start_span)[span_2](end_span)
+ * - Intercept link internal → parent shell[span_3](start_span)[span_3](end_span)
+ * - Jangan redirect ke intro saat di iframe[span_4](start_span)[span_4](end_span)
  */
 (function () {
   var inFrame = false;
@@ -13,8 +13,6 @@
   }
 
   if (!inFrame) {
-    // Buka langsung halaman konten (bukan lewat shell) → arahkan ke index
-    // kecuali sudah di index
     if (!/index\.html$/i.test(location.pathname) && location.pathname !== "/") {
       // biarkan; user bisa buka home.html langsung
     }
@@ -23,7 +21,7 @@
 
   document.documentElement.classList.add("in-iframe");
 
-  // Sembunyikan chrome ganda secepat mungkin
+  // Sembunyikan chrome ganda secepat mungkin[span_5](start_span)[span_5](end_span)
   var style = document.createElement("style");
   style.textContent = [
     "html.in-iframe .bottom-nav,",
@@ -33,14 +31,13 @@
     "html.in-iframe audio#bgMusic {",
     "  display: none !important;",
     "  visibility: hidden !important;",
-    "  pointer-events: none !important;",
     "}",
     "html.in-iframe body { padding-bottom: 12px !important; }",
     "html.in-iframe .page-content { padding-bottom: 20px !important; }"
   ].join("\n");
   document.documentElement.appendChild(style);
 
-  // Pause audio lokal di halaman konten (kalau ada) biar tidak dobel
+  // Pause audio lokal di halaman konten (kalau ada) biar tidak dobel[span_6](start_span)[span_6](end_span)
   function muteLocalAudio() {
     var a = document.getElementById("bgMusic");
     if (a) {
@@ -50,31 +47,44 @@
   muteLocalAudio();
   document.addEventListener("DOMContentLoaded", muteLocalAudio);
 
-  // Intercept klik link internal
+  // Intercept klik link internal tanpa mematikan event listener tombol persegi[span_7](start_span)[span_7](end_span)
   document.addEventListener("click", function (e) {
     var a = e.target.closest("a");
     if (!a) return;
+    
     var href = a.getAttribute("href");
-    if (!href || href.charAt(0) === "#" || href.indexOf("javascript:") === 0) return;
-    // external / wa.me / tel → biarkan
-    if (/^(https?:|mailto:|tel:|wa\.me)/i.test(href) || href.indexOf("//") === 0) {
-      // open external in top
+    if (!href || href === "#" || href.indexOf("javascript:") === 0) return;
+
+    // WhatsApp: keluar dari iframe agar redirect ke aplikasi/browser WhatsApp tidak terjebak di frame.
+    if (/wa\.me|api\.whatsapp/i.test(href)) {
+      e.preventDefault();
+      try {
+        window.top.location.href = href;
+      } catch (err) {
+        window.open(href, "_blank", "noopener");
+      }
+      return;
+    }
+
+    // External / Tel / email
+    if (/^(https?:|mailto:|tel:)/i.test(href) || href.indexOf("//") === 0) {
       if (/^https?:/i.test(href) && href.indexOf(location.host) === -1) {
         e.preventDefault();
-        window.open(href, "_blank");
+        window.open(href, "_blank", "noopener");
         return;
       }
-      if (/wa\.me|api\.whatsapp/i.test(href)) return; // let default
     }
-    // internal page
+
+    // Internal page[span_9](start_span)[span_9](end_span)
     if (/\.html(\?|$)/i.test(href) || href.indexOf("?") === 0) {
-      e.preventDefault();
-      e.stopPropagation();
       try {
-        window.parent.postMessage({ type: "voxyy-nav", href: href }, "*");
+        if (window.parent && window.parent !== window) {
+          e.preventDefault();
+          window.parent.postMessage({ type: "voxyy-nav", href: href }, "*");
+        }
       } catch (err) {
         location.href = href;
       }
     }
-  }, true);
+  }, false); // Diubah dari true ke false agar tidak mencegat bubbling event lain
 })();

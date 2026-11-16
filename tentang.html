@@ -1,675 +1,287 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <!-- Script untuk mendeteksi iframe dan mencegah navigasi dobel -->
+  <script>
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('in-iframe');
+    }
+  </script>
+  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tentang - ELZKII JOKI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tentang - Doxy Joki Elite</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
   <style>
-:root {
-  --pink-primary: #ff2d87;
-  --pink-dark: #e91e63;
-  --pink-light: #ff69b4;
-  --pink-soft: #ffe4f0;
-  --pink-bg: #fff5f9;
-  --white: #ffffff;
-  --gray: #f8f9fa;
-  --text: #2d2d2d;
-  --text-light: #666;
-  --shadow: 0 8px 30px rgba(255, 45, 135, 0.15);
-  --radius: 16px;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--pink-bg);
-  color: var(--text);
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Header */
-.header {
-  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
-  color: white;
-  padding: 12px 0;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.logo-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-area img {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 2px solid white;
-  object-fit: cover;
-}
-
-.logo-text {
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.logo-text span {
-  color: #ffe0f0;
-}
-
-.nav-links {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.nav-links a {
-  padding: 8px 16px;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.25s ease;
-  background: rgba(255,255,255,0.15);
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-  background: white;
-  color: var(--pink-primary);
-}
-
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.8rem;
-  cursor: pointer;
-}
-
-/* Banner */
-.banner {
-  width: 100%;
-  overflow: hidden;
-  background: white;
-}
-
-.banner img {
-  width: 100%;
-  display: block;
-  max-height: 280px;
-  object-fit: cover;
-}
-
-/* Hero */
-.hero {
-  background: linear-gradient(180deg, var(--pink-soft) 0%, var(--pink-bg) 100%);
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.hero h1 {
-  font-size: 2.4rem;
-  color: var(--pink-primary);
-  margin-bottom: 12px;
-  text-shadow: 0 2px 10px rgba(255,45,135,0.2);
-}
-
-.hero p {
-  font-size: 1.15rem;
-  color: var(--text-light);
-  max-width: 600px;
-  margin: 0 auto 24px;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 28px;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
-  color: white;
-  box-shadow: 0 6px 20px rgba(255,45,135,0.4);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(255,45,135,0.5);
-}
-
-.btn-outline {
-  background: white;
-  color: var(--pink-primary);
-  border: 2px solid var(--pink-primary);
-}
-
-.btn-outline:hover {
-  background: var(--pink-primary);
-  color: white;
-}
-
-.btn-wa {
-  background: #25D366;
-  color: white;
-}
-
-.btn-wa:hover {
-  background: #1da851;
-  transform: translateY(-2px);
-}
-
-/* Container */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.section-title {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.section-title h2 {
-  font-size: 2rem;
-  color: var(--pink-primary);
-  margin-bottom: 8px;
-}
-
-.section-title p {
-  color: var(--text-light);
-}
-
-/* Cards */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-.card {
-  background: white;
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  border: 1px solid #ffe0f0;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(255,45,135,0.2);
-}
-
-.card h3 {
-  color: var(--pink-primary);
-  margin-bottom: 8px;
-  font-size: 1.2rem;
-}
-
-.card .price {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--pink-dark);
-  margin: 12px 0;
-}
-
-.card .duration {
-  display: inline-block;
-  background: var(--pink-soft);
-  color: var(--pink-primary);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.card-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-/* Product list */
-.product-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 18px;
-  background: white;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-  border-left: 4px solid var(--pink-primary);
-  transition: all 0.2s;
-}
-
-.product-item:hover {
-  background: var(--pink-soft);
-  transform: translateX(4px);
-}
-
-.product-name {
-  font-weight: 600;
-  flex: 1;
-}
-
-.product-price {
-  font-weight: 800;
-  color: var(--pink-primary);
-  margin: 0 16px;
-  white-space: nowrap;
-}
-
-/* About */
-.about-box {
-  background: white;
-  border-radius: var(--radius);
-  padding: 32px;
-  box-shadow: var(--shadow);
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.about-box h3 {
-  color: var(--pink-primary);
-  margin-bottom: 16px;
-}
-
-.contact-info {
-  background: var(--pink-soft);
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 20px;
-}
-
-.contact-info a {
-  color: var(--pink-primary);
-  font-weight: 700;
-}
-
-.note {
-  background: #fff3cd;
-  border-left: 4px solid #ffc107;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-top: 16px;
-  font-size: 0.95rem;
-}
-
-/* Queue / Status */
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.status-pending { background: #fff3cd; color: #856404; }
-.status-process { background: #cce5ff; color: #004085; }
-.status-done { background: #d4edda; color: #155724; }
-
-/* Footer */
-.footer {
-  background: linear-gradient(135deg, var(--pink-dark), #c2185b);
-  color: white;
-  padding: 40px 20px 24px;
-  margin-top: 60px;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 32px;
-}
-
-.footer h4 {
-  margin-bottom: 12px;
-  font-size: 1.1rem;
-}
-
-.footer a {
-  color: #ffe0f0;
-  display: block;
-  margin-bottom: 6px;
-  transition: color 0.2s;
-}
-
-.footer a:hover {
-  color: white;
-}
-
-.footer-bottom {
-  text-align: center;
-  margin-top: 32px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.2);
-  font-size: 0.9rem;
-  opacity: 0.85;
-}
-
-/* Admin */
-.admin-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 260px;
-  background: linear-gradient(180deg, var(--pink-primary), var(--pink-dark));
-  color: white;
-  padding: 24px 0;
-  flex-shrink: 0;
-}
-
-.sidebar .logo {
-  padding: 0 20px 24px;
-  font-size: 1.3rem;
-  font-weight: 800;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  margin-bottom: 16px;
-}
-
-.sidebar a {
-  display: block;
-  padding: 12px 24px;
-  color: rgba(255,255,255,0.85);
-  transition: all 0.2s;
-}
-
-.sidebar a:hover,
-.sidebar a.active {
-  background: rgba(255,255,255,0.15);
-  color: white;
-}
-
-.admin-main {
-  flex: 1;
-  padding: 32px;
-  background: var(--pink-bg);
-}
-
-.admin-card {
-  background: white;
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  margin-bottom: 24px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.table th {
-  background: var(--pink-soft);
-  color: var(--pink-primary);
-  font-weight: 700;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #ffe0f0;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--pink-primary);
-}
-
-.login-box {
-  max-width: 420px;
-  margin: 80px auto;
-  background: white;
-  padding: 40px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  text-align: center;
-}
-
-.login-box img {
-  width: 80px;
-  border-radius: 50%;
-  margin-bottom: 16px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-  }
-
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background: var(--pink-dark);
-    flex-direction: column;
-    padding: 16px;
-    gap: 8px;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-
-  .admin-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
-  .product-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .product-price {
-    margin: 0;
-  }
-}
-
-/* Utility */
-.text-center { text-align: center; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-.mb-2 { margin-bottom: 16px; }
-.flex { display: flex; }
-.gap-2 { gap: 12px; }
-.flex-wrap { flex-wrap: wrap; }
-.justify-center { justify-content: center; }
-
-/* SAFETY FALLBACK - pink theme always visible */
-body { background: #fff5f9 !important; color: #2d2d2d; font-family: system-ui, sans-serif; }
-.header { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; }
-.btn-primary { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; border: none; padding: 12px 24px; border-radius: 50px; font-weight: 700; }
-.btn-outline { border: 2px solid #ff2d87; color: #ff2d87; background: white; padding: 10px 22px; border-radius: 50px; font-weight: 700; }
-.btn-wa { background: #25D366 !important; color: white !important; }
-.card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(255,45,135,0.15); border: 1px solid #ffe0f0; }
-.price { color: #e91e63; font-weight: 800; font-size: 1.4rem; }
-
-</style>
-<link rel="icon" href="assets/1000332841.jpg">
+    .about-hero {
+      text-align: center;
+      padding: 8px 0 20px;
+    }
+    .about-hero img {
+      width: 88px;
+      height: 88px;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 2px solid rgba(0,229,160,0.35);
+      box-shadow: 0 6px 20px rgba(33, 150, 243, 0.15);
+      margin-bottom: 12px;
+      background: #1e2a45;
+    }
+    .about-hero h2 {
+      font-size: 20px;
+      color: #0d47a1;
+      margin: 0 0 4px;
+      font-weight: 800;
+    }
+    .about-hero .badge-elite {
+      display: inline-block;
+      background: linear-gradient(135deg, #2196f3, #1565c0);
+      color: #0a0e1a;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .about-card {
+      background: #12182a;
+      border: 1px solid #1e2a45;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+      line-height: 1.65;
+      font-size: 13px;
+      color: #ccc;
+    }
+    .about-card p { margin: 0 0 10px; }
+    .about-card p:last-child { margin-bottom: 0; }
+    .about-card strong { color: #0d47a1; }
+    .section-title {
+      color: #0d47a1;
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-sub {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 12px;
+    }
+    .contact-list { margin-top: 4px; }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #12182a;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 14px 14px;
+      margin-bottom: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .contact-item:active {
+      border-color: #0d47a166;
+      background: #322800;
+    }
+    .contact-item .icon-wrap {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .contact-item .icon-wrap.wa { background: #075e5433; color: #25d366; }
+    .contact-item .icon-wrap.channel { background: #075e5433; color: #25d366; }
+    .contact-item strong {
+      display: block;
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .contact-item small {
+      display: block;
+      color: #999;
+      font-size: 12px;
+    }
+    .contact-item .arrow {
+      margin-left: auto;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
   <header class="header">
-    <div class="nav-container">
-      <a href="index.html" class="logo-area">
-        <img src="assets/1000332841.jpg" alt="ELZKII Logo">
-        <div class="logo-text">ELZKII <span>JOKI</span></div>
-      </a>
-      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-      <nav class="nav-links" id="navLinks">
-        <a href="index.html">Beranda</a>
-        <a href="joki.html">Jasa Joki</a>
-        <a href="produk.html">Produk</a>
-        <a href="antrian.html">Antrian</a>
-        <a href="tentang.html" class="active">Tentang</a>
-        <a href="admin/login.html">Admin</a>
-      </nav>
+    <div class="brand">
+      <img src="logo.jpg" class="logo" alt="Doxy Joki">
+      <div>
+        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Doxy Joki Elite</p>
+      </div>
+    </div>
+  
+    <div class="header-right">
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
     </div>
   </header>
 
-  <div class="banner">
-    <img src="assets/1000332754.jpg" alt="ELZKII Banner">
-  </div>
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
 
-  <div class="container">
+  <div class="page-content">
+    <!-- Hero -->
+    <div class="about-hero">
+      <img src="logo.jpg" alt="Doxy Joki Elite" onerror="this.style.background='#1e2a45'">
+      <div class="badge-elite">ELITE</div>
+      <h2>Doxy Joki Elite</h2>
+      <p style="color:#aaa;font-size:13px;margin:0;">Joki Kontak & Produk Digital Terpercaya</p>
+    </div>
+
+    <!-- Tentang -->
+    <div class="about-card">
+      <p>
+        <strong>Doxy Joki Elite</strong> adalah pusat layanan joki kontak dan produk digital yang dirancang agar proses order, pembayaran, serta pemantauan antrian jadi lebih rapi dan terpusat di satu website.
+      </p>
+      <p>
+        Kami fokus pada layanan <strong>Joki Kontak</strong>, <strong>Paket Views + Kontak</strong>, dengan sistem order yang jelas, konfirmasi pembayaran via bot, serta status antrian yang bisa dipantau kapan saja.
+      </p>
+      <p>
+        Semua transaksi diproses secara profesional. Gunakan jasa admin / MC resmi agar terhindar dari penipuan.
+      </p>
+      <p>
+        Sejak awal beroperasi, Doxy Joki Elite berkomitmen memberikan pelayanan yang transparan, cepat, dan aman. Setiap order yang masuk akan langsung tercatat di sistem, sehingga kamu tidak perlu khawatir kehilangan data atau status pesanan.
+      </p>
+      <p>
+        Kami memahami kebutuhan seller, store, maupun personal yang ingin meningkatkan views status, memperluas jangkauan kontak, atau mempromosikan akun secara lebih luas. Karena itu, kami menyediakan berbagai paket yang bisa disesuaikan dengan kebutuhan dan budget kamu.
+      </p>
+    </div>
+
+    <!-- Kenapa pilih kami -->
+    <div class="section-title" style="margin-top:8px;">
+      <i class="fa-solid fa-star"></i> Kenapa Pilih Doxy Joki Elite?
+    </div>
+    <div class="about-card">
+      <p>
+        <strong>1. Proses Order Terpusat</strong><br>
+        Semua tahap mulai dari pilih paket, isi data, bayar, sampai pantau antrian ada di satu website. Tidak perlu bolak-balik chat yang membingungkan.
+      </p>
+      <p>
+        <strong>2. Pembayaran Aman & Otomatis</strong><br>
+        Sistem pembayaran menggunakan QRIS dinamis. Setelah bayar, kamu bisa langsung konfirmasi dan status akan diperbarui oleh admin.
+      </p>
+      <p>
+        <strong>3. Status Antrian Real-time</strong><br>
+        Kamu bisa cek kode antrian kapan saja di halaman Antrian. Tidak perlu tanya-tanya berulang kali ke admin.
+      </p>
+      <p>
+        <strong>4. Layanan Lengkap</strong><br>
+        Dari joki kontak harian, paket views + kontak, hingga jasa post akun ke channel — semua tersedia dalam satu tempat.
+      </p>
+      <p>
+        <strong>5. Support Resmi</strong><br>
+        Ada CS WhatsApp dan saluran resmi. Semua komunikasi penting hanya melalui channel yang tertera di website ini.
+      </p>
+    </div>
+
+    <!-- Cara Order -->
     <div class="section-title">
-      <h2>ℹ️ Tentang ELZKII JOKI</h2>
-      <p>Info admin & channel resmi</p>
+      <i class="fa-solid fa-list-ol"></i> Cara Order
+    </div>
+    <div class="about-card">
+      <p>
+        <strong>Langkah 1</strong> — Pilih layanan di halaman Home atau Joki (Joki Kontak / Jasa Post Akun).
+      </p>
+      <p>
+        <strong>Langkah 2</strong> — Isi data yang diminta dengan lengkap dan benar (nama, nomor WhatsApp, format push, atau data akun).
+      </p>
+      <p>
+        <strong>Langkah 3</strong> — Lakukan pembayaran melalui QRIS yang muncul di halaman pembayaran.
+      </p>
+      <p>
+        <strong>Langkah 4</strong> — Setelah transfer, klik konfirmasi bayar. Order akan masuk antrian dan diproses admin.
+      </p>
+      <p>
+        <strong>Langkah 5</strong> — Pantau status pesanan di halaman Antrian menggunakan kode order kamu.
+      </p>
+      <p style="margin-top:8px;color:#2196f3;">
+        ⚠️ Pastikan hanya order melalui website resmi. Jangan transfer ke rekening pribadi yang tidak tercantum di sistem.
+      </p>
     </div>
 
-    <div class="about-box">
-      <div style="text-align:center;margin-bottom:24px;">
-        <img src="assets/1000332841.jpg" alt="Logo" style="width:120px;border-radius:50%;border:4px solid var(--pink-primary);">
-        <h3 style="margin-top:12px;">ELZKII STR</h3>
-        <p style="color:var(--text-light);">Admin Utama</p>
-      </div>
-
-      <div class="contact-info">
-        <h4 style="color:var(--pink-primary);margin-bottom:8px;">📱 Kontak Admin</h4>
-        <p><strong>ADMIN UTAMA :</strong> [ELZKII STR]</p>
-        <p>• <a href="https://wa.me/6282364307699" target="_blank">wa.me/6282364307699</a></p>
-      </div>
-
-      <div class="note">
-        <strong>NOTE:</strong> SELAIN NO DI ATAS WASPADA CLONE / PENIPUAN
-      </div>
-
-      <div class="mt-3">
-        <h4 style="color:var(--pink-primary);margin-bottom:12px;">📢 Channel Resmi</h4>
-        <p style="margin-bottom:8px;">
-          <strong>LINK SL :</strong><br>
-          <a href="https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08" target="_blank" style="word-break:break-all;">
-            https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08
-          </a>
-        </p>
-        <p>
-          <strong>LINK SL KEDUA:</strong><br>
-          <a href="https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P" target="_blank" style="word-break:break-all;">
-            https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P
-          </a>
-        </p>
-      </div>
-
-      <div class="mt-3 text-center">
-        <a href="https://wa.me/6282364307699" target="_blank" class="btn btn-wa">Chat Admin Sekarang</a>
-      </div>
+    <!-- Kontak -->
+    <div class="section-title">
+      <i class="fa-solid fa-headset"></i> Hubungi Kami
     </div>
+    <p class="section-sub">CS WhatsApp dan Saluran resmi Doxy Joki Elite.</p>
+
+    <div class="contact-list">
+      <!-- WA CS -->
+      <a href="https://wa.me/6281252384673" class="contact-item" target="_blank" rel="noopener">
+        <div class="icon-wrap wa"><i class="fa-brands fa-whatsapp"></i></div>
+        <div>
+          <strong>WhatsApp CS</strong>
+          <small>0812-5238-4673</small>
+        </div>
+        <i class="fa-solid fa-chevron-right arrow"></i>
+      </a>
+
+      <!-- WA CS Cadangan -->
+      <a href="https://wa.me/6285190843300" class="contact-item" target="_blank" rel="noopener">
+        <div class="icon-wrap wa"><i class="fa-brands fa-whatsapp"></i></div>
+        <div>
+          <strong>WhatsApp CS Cadangan</strong>
+          <small>0851-9084-3300</small>
+        </div>
+        <i class="fa-solid fa-chevron-right arrow"></i>
+      </a>
+
+      <!-- Saluran WA -->
+      <a href="https://whatsapp.com/channel/0029Vb93w5nIt5s3imv6N33R" class="contact-item" target="_blank" rel="noopener">
+        <div class="icon-wrap channel"><i class="fa-solid fa-bullhorn"></i></div>
+        <div>
+          <strong>Saluran Resmi Doxy Joki</strong>
+          <small>Ikuti info, promo & pengumuman</small>
+        </div>
+        <i class="fa-solid fa-chevron-right arrow"></i>
+      </a>
+    </div>
+
+    <p style="text-align:center;color:#666;font-size:11px;margin-top:20px;line-height:1.5;">
+      © Doxy Joki Elite · Order hanya melalui website resmi
+    </p>
   </div>
 
-  <footer class="footer">
-    <div class="footer-content">
-      <div>
-        <h4>ELZKII JOKI</h4>
-        <p>Jasa joki & produk premium terpercaya.</p>
-      </div>
-      <div>
-        <h4>Menu</h4>
-        <a href="joki.html">Jasa Joki</a>
-        <a href="produk.html">Produk</a>
-        <a href="antrian.html">Cek Antrian</a>
-        <a href="tentang.html">Tentang Kami</a>
-      </div>
-      <div>
-        <h4>Kontak</h4>
-        <a href="https://wa.me/6282364307699" target="_blank">Admin Utama WA</a>
-        <a href="https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08" target="_blank">Channel 1</a>
-        <a href="https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P" target="_blank">Channel 2</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      © 2026 ELZKII JOKI / ELZKII STR. All rights reserved.
-    </div>
-  </footer>
-<script>
-function toggleMenu() {
-  var nav = document.getElementById("navLinks");
-  if (nav) nav.classList.toggle("open");
-}
-</script>
+  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
 
+  <nav class="bottom-nav nav-6">
+    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item active"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+  </nav>
+
+  <script src="script.js"></script>
+  <script src="music.js"></script>
 </body>
 </html>

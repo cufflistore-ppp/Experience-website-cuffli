@@ -1,34 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="auth-guard.js"></script>
-  <script>
-  (function () {
-    var params = new URLSearchParams(location.search);
-    var type = (params.get("type") || "").toLowerCase();
-    var isJaspost = type === "jaspost" || type === "jasa-post" || type === "jasapost";
-    // Juga jika judul/paket mengandung jasa post
-    var paket = (params.get("paket") || params.get("judul") || "").toLowerCase();
-    if (!isJaspost && paket.indexOf("jasa post") >= 0) isJaspost = true;
-    if (!isJaspost) return;
-
-    var wa = "6285151982250";
-    try {
-      var s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
-      if (s.waAdmin) wa = String(s.waAdmin).replace(/\D/g, "");
-    } catch (e) {}
-
-    var text = encodeURIComponent(
-      "Halo Admin VOXY MARKET, saya mau *Jasa Post*.\n\n" +
-      "Mohon info format & ketentuan jasa postnya. Terima kasih."
-    );
-    location.replace("https://wa.me/" + wa + "?text=" + text);
-  })();
-  </script>
-
+  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pesan Paket - VOXY MARKET</title>
+  <title>Pesan Paket - Doxy Joki</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -67,12 +43,26 @@
   </style>
 </head>
 <body>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
   <header class="header">
     <div class="brand">
-      <img src="logo.png" alt="VOXY MARKET" class="logo"  >
+      <img src="logo.jpg" alt="Doxy Joki" class="logo"  >
       <div>
-        <h1>VOXY MARKET <i class="fa-solid fa-circle-check verified"></i></h1>
+        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
         <p>Form Pemesanan</p>
+      </div>
+    </div>
+  
+    <div class="header-right">
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
       </div>
     </div>
   </header>
@@ -85,8 +75,8 @@
     <div class="order-header" style="margin-bottom:16px;">
       <img src="logo.png" class="order-logo"  >
       <div>
-        <h3 id="paketJudul">Produk</h3>
-        <p>VOXY MARKET · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
+        <h3 id="paketJudul">Joki Kontak</h3>
+        <p>Doxy Joki · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
       </div>
     </div>
 
@@ -112,7 +102,7 @@
         <p style="font-size:12px; color:#2196f3; margin:4px 0 8px;">
           * Tinggal ganti <b>NAMA STORE</b> dan nomor WhatsApp saja. Jangan hapus formatnya.
         </p>
-        <textarea id="catatan" rows="7">SV BUYER FRESH VOXYY🔥
+        <textarea id="catatan" rows="7">SV BUYER FRESH DOXY🔥
 
 SV ; NAMA STORE
 Wa.me/628…
@@ -132,9 +122,9 @@ Wa.me/628…
           <span class="addon-price">+Rp 10.000</span>
           <button class="btn-pilih" type="button">Pilih</button>
         </div>
-        <div class="addon" onclick="toggleAddon(this, 15000)">
-          <span>+ 3hari</span>
-          <span class="addon-price">+Rp 15.000</span>
+        <div class="addon" onclick="toggleAddon(this, 5000)">
+          <span>+Vidio Rekomendasi</span>
+          <span class="addon-price">+Rp 5.000</span>
           <button class="btn-pilih" type="button">Pilih</button>
         </div>
         <div class="addon" onclick="toggleAddon(this, 35000)">
@@ -184,7 +174,7 @@ Wa.me/628…
 
     <div class="ringkasan">
       <h4>Ringkasan Order</h4>
-      <div class="row"><span id="namaPaketRow">Produk</span><span>Paket</span><span id="hargaPaket">Rp 5.000</span></div>
+      <div class="row"><span id="namaPaketRow">Joki Kontak</span><span>Paket</span><span id="hargaPaket">Rp 5.000</span></div>
       <div class="row total"><span>Total</span><span id="totalHarga">Rp 5.000</span></div>
       <button class="btn-buat" id="btnSubmitOrder" onclick="buatPesanan()">Buat Pesanan</button>
     </div>
@@ -192,24 +182,22 @@ Wa.me/628…
 
   <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
 
-              <nav class="bottom-nav nav-5">
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
-    <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
+        <nav class="bottom-nav nav-6">
+    <a href="joki.html" class="nav-item active"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
     <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-circle-user"></i><span>Akun</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="auth.js"></script>
-  <script src="branding.js"></script>
   <script src="joki-produk.js"></script>
   <script src="telegram.js"></script>
-      <script src="script.js"></script>
+    <script src="script.js"></script>
   <script src="digital-produk.js"></script>
   <script>
     // Preview foto akun
@@ -231,8 +219,8 @@ Wa.me/628…
       const id = parseInt(params.get("id") || "1", 10);
 
       window.isJaspost = false;
-      window.orderType = "Produk";
-      window.orderPaketName = "Produk";
+      window.orderType = "Joki Kontak";
+      window.orderPaketName = "Joki Kontak";
 
       if (type === "jaspost") {
         window.isJaspost = true;
@@ -304,7 +292,7 @@ Wa.me/628…
           document.getElementById("hargaPaket").textContent = "Rp " + Number(paket.harga).toLocaleString("id-ID");
           if (typeof updateTotal === "function") updateTotal();
           window.orderPaketName = paket.judul;
-          window.orderType = "Produk";
+          window.orderType = "Joki Kontak";
         }
       }
     });
@@ -329,7 +317,7 @@ Wa.me/628…
           return;
         }
 
-        const catatan = `jasa post by voxy💥
+        const catatan = `jasa post by doxyy💥
 
 nama produk👜: ${namaProduk}
 spek 📈: ${spek}
@@ -340,7 +328,7 @@ jasa post voxy all produk`;
 
         const rand = Math.floor(1000 + Math.random() * 9000);
         const timePart = String(Date.now()).slice(-3);
-        const kode = `VJ-2026-${rand}${timePart}`;
+        const kode = `DJ-2026-${rand}${timePart}`;
 
         if (btn) {
           btn.disabled = true;
@@ -348,7 +336,7 @@ jasa post voxy all produk`;
         }
 
         const pesan = `
-📣 <b>JASA POST GRATIS - VOXYY</b>
+📣 <b>JASA POST GRATIS - DOXYY</b>
 
 🆔 Kode: <code>${kode}</code>
 👤 Nama: <b>${nama}</b>
@@ -423,7 +411,6 @@ jasa post voxy all produk`;
       }
     }
   </script>
-  <script src="bgm.js"></script>
-  <script src="notif.js"></script>
+<script src="music.js"></script>
 </body>
 </html>

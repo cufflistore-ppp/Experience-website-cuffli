@@ -1,130 +1,170 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detail Produk - VOXY MARKET</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Detail Produk - Doxy Joki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <style>
+    .produk-detail-img {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      height: auto;
+      max-height: none;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 12px;
+      background: #1e2a45;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .produk-detail-card {
+      background: #12182a;
+      border: 1px solid #1e2a45;
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .produk-detail-card h2 {
+      font-size: 20px;
+      margin: 8px 0;
+    }
+    .produk-status {
+      display: inline-block;
+      background: #0d2137;
+      color: #64b5f6;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+    }
+    .produk-harga-big {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0d47a1;
+      margin: 12px 0;
+    }
+    .fitur-list {
+      list-style: none;
+      margin: 12px 0;
+    }
+    .fitur-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid #1e2a45;
+      font-size: 13px;
+      color: #ccc;
+    }
+    .fitur-list li i {
+      color: #0d47a1;
+      margin-right: 8px;
+    }
+    .fitur-list li:last-child { border-bottom: none; }
+  </style>
 </head>
 <body>
-  <header class="app-header">
-    <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
-    <div class="logo-area"><img src="logo.png" alt=""><span class="brand-name"><span class="brand-voxy">VOXY</span> <span class="brand-market">MARKET</span></span></div>
-    <div style="width:40px"></div>
-  </header>
-  <main class="page" id="detailPage"><div class="empty-state">Memuat...</div></main>
-    <div class="site-footer voxy-landing-footer">
-    <div class="voxy-lf-brand">
-      <img src="logo.png" alt="">
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
+  <header class="header">
+    <div class="brand">
+      <img src="logo.jpg" alt="Doxy Joki" class="logo"  >
       <div>
-        <div class="voxy-lf-name">VOXY MARKET</div>
-        <div class="voxy-lf-tag">Produk Digital, Akun Premium &amp; Jasa</div>
+        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Detail Produk Digital</p>
       </div>
     </div>
-    <p class="voxy-lf-desc">Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.</p>
-    <a href="home.html" class="btn voxy-lf-cta">Lihat Produk</a>
-    <div class="voxy-lf-sec">Bantuan</div>
-    <div class="voxy-lf-links">
-      <a href="riwayat.html">Cek Pesanan</a>
-      <a href="home.html">Buat Pesanan</a>
-      <a href="chat.html">Chat Admin</a>
+  
+    <div class="header-right">
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
     </div>
-    <div class="voxy-lf-sec">Layanan</div>
-    <div class="voxy-lf-list">
-      Akun Premium<br>
-      Produk Digital / APK<br>
-      Jasa Suntik<br>
-      Jasa Lainnya
-    </div>
-    <div class="voxy-lf-copy">
-      Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
-      Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+  </header>
+
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
+
+  <div class="page-content">
+    <a href="digital.html" class="back"><i class="fa-solid fa-arrow-left"></i> Kembali ke Produk Digital</a>
+
+    <div id="detailProduk">
+      <p style="color:#aaa;text-align:center;">Memuat produk...</p>
     </div>
   </div>
 
+  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+
+        <nav class="bottom-nav nav-6">
+    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item active"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+  </nav>
+
+  <script src="digital-produk.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="script.js"></script>
   <script>
-    lucide.createIcons();
-    var produkData = null;
-    function isFlash(p) {
-      if (!p) return false; var on = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1; if (!on) return false; var end = Number(p.flashEnd || 0); if (!end) return true; return Date.now() < end;
-    }
-    VOXY.auth.onAuthStateChanged(function (user) {
-      if (!user) { location.href = "login.html"; return; }
-      VOXY.applyBrandingToPage();
-      var id = new URLSearchParams(location.search).get("id");
-      if (!id) {
-        document.getElementById("detailPage").innerHTML = '<div class="empty-state">Produk tidak ditemukan</div>';
+    function loadDetailProduk() {
+      const params = new URLSearchParams(window.location.search);
+      const id = parseInt(params.get("id") || "1", 10);
+
+      // reload dari storage (digital-produk.js sudah load)
+      if (typeof loadProdukDigital === "function") loadProdukDigital();
+
+      const item = (typeof produkDigital !== "undefined" ? produkDigital : []).find(p => p.id === id);
+      const el = document.getElementById("detailProduk");
+
+      if (!item) {
+        el.innerHTML = "<p style='color:#aaa;'>Produk tidak ditemukan. <a href='digital.html' style='color:#0d47a1;'>Kembali</a></p>";
         return;
       }
-      VOXY.getProdukList().then(function (list) {
-        produkData = (list || []).find(function (p) { return p.id === id; });
-        if (!produkData) {
-          document.getElementById("detailPage").innerHTML = '<div class="empty-state">Produk tidak ditemukan</div>';
-          return;
-        }
-        var p = produkData;
-        var img = p.gambar || "produk1.png";
-        var normal = Number(p.harga) || 0;
-        var disc = isFlash(p) ? (Number(p.flashDiskon) || 0) : 0;
-        var harga = (disc > 0 && disc < 100) ? Math.round(normal * (100 - disc) / 100) : normal;
-        if (isFlash(p) && (!disc) && p.flashHarga && Number(p.flashHarga) > 0) {
-          harga = Number(p.flashHarga);
-          disc = normal > 0 ? Math.round((1 - harga / normal) * 100) : 0;
-        }
-        var hargaHtml = VOXY.formatRp(harga);
-        if (isFlash(p) && disc > 0 && harga < normal) {
-          hargaHtml = '<span style="text-decoration:line-through;color:var(--muted);font-size:14px;font-weight:500;margin-right:8px">' +
-            VOXY.formatRp(normal) + '</span>' + VOXY.formatRp(harga) +
-            ' <span style="background:#ffedd5;color:#c2410c;font-size:12px;padding:2px 8px;border-radius:6px;font-weight:700">-' + disc + '%</span>';
-        }
-        var tipe = p.tipeKirim || "link";
-        var desk = String(p.deskripsi || "Belum ada deskripsi produk. Hubungi admin jika butuh info lebih lanjut.")
-          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        var flashNote = isFlash(p) ? '<div class="admin-hint" style="margin-bottom:12px">Sedang <b>Flash Sale</b>' + (disc > 0 ? " (−" + disc + "%)" : "") + "</div>" : "";
-        document.getElementById("detailPage").innerHTML =
-          '<div class="detail-hero"><img src="' + img + '" alt="' + String(p.nama || "").replace(/"/g, "") + '" onerror="this.src=\'produk1.png\'"></div>' +
-          '<div class="detail-info">' +
-            flashNote +
-            '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">' + (p.kategori || "Produk") + " · " + tipeLabel(tipe) + "</div>" +
-            "<h1>" + String(p.nama || "-").replace(/</g, "&lt;") + "</h1>" +
-            '<div class="price">' + hargaHtml + "</div>" +
-            ((p.stok != null) ? ('<p style="font-size:12px;color:var(--muted);margin:4px 0 10px">Stok: ' + (Number(p.stok) <= 0 ? "Habis" : ("Sisa " + p.stok)) + "</p>") : "") +
-            '<div class="detail-sec-title">Deskripsi produk</div>' +
-            '<div class="desc">' + desk + "</div>" +
-            ((p.stokHabis || (p.stok != null && Number(p.stok) <= 0))
-              ? '<button class="btn" style="width:100%;opacity:.5" disabled>Stok Habis</button>'
-              : '<button class="btn" style="width:100%" onclick="beli()">Beli Sekarang</button>') +
-          "</div>";
-      });
-    });
-    function tipeLabel(t) {
-      var m = {
-        "email_password": "Email + Password",
-        "apk_zip": "APK / ZIP",
-        "link": "Link",
-        "link_target": "Link Target (Jasa)",
-        "wa_admin": "WhatsApp Admin"
-      };
-      return m[t] || t;
+
+      const harga = "Rp " + Number(item.harga).toLocaleString("id-ID");
+
+      el.innerHTML = `
+        <div class="badge">PRODUK DIGITAL</div>
+        <div class="produk-detail-card" style="margin-top:12px;">
+          ${item.img ? `<img src="${item.img}" alt="${item.judul}" class="produk-detail-img" onerror="this.style.display=\'none\'">` : ""}
+          <span class="produk-status">${item.status || "TERSEDIA"}</span>
+          <h2>${item.judul}</h2>
+          <p style="font-size:13px;color:#bbb;line-height:1.5;">${item.deskripsi || ""}</p>
+          
+          <div class="produk-harga-big">${harga}</div>
+
+          <h4 style="font-size:14px;margin-top:8px;color:#0d47a1;">Yang kamu dapat:</h4>
+          <ul class="fitur-list">
+            ${(item.fitur || []).map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join("")}
+          </ul>
+
+          <a href="pesan.html?type=produk&id=${item.id}" class="btn-pesan" style="display:block;text-align:center;text-decoration:none;margin-top:16px;">
+            Pesan Produk Ini
+          </a>
+        </div>
+
+        <div class="info-box" style="margin-top:16px;">
+          <h4>Bedanya dengan Joki?</h4>
+          <p style="font-size:12px;color:#bbb;">
+            <b>Produk Digital</b> = file / jasa sekali beli, dikirim setelah bayar.<br>
+            <b>Joki Kontak</b> = layanan push kontak berdurasi (1 hari, 2 hari, dst).
+          </p>
+        </div>
+      `;
     }
-    function beli() {
-      if (!produkData || produkData.stokHabis) return;
-      sessionStorage.setItem("produkDipilih", JSON.stringify(produkData));
-      var tipe = produkData.tipeKirim || "link";
-      if (tipe === "wa_admin") {
-        VOXY.getSettings().then(function (s) {
-          VOXY.bukaWhatsApp((s && s.waAdmin) || "", "Halo admin, saya mau order: " + (produkData.nama || ""));
-        });
-        return;
-      }
-      location.href = "pembayaran.html";
-    }
+
+    document.addEventListener("DOMContentLoaded", loadDetailProduk);
   </script>
-  <script src="music-player.js"></script>
+<script src="music.js"></script>
 </body>
 </html>

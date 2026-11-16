@@ -4,65 +4,65 @@ const produk = [
   {
     id: 1,
     judul: "Nokos WA Indonesia",
-    harga: 6000,
+    harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo-produk.jpg",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 6.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 2,
-    judul: "Nokos Shopee",
-    harga: 2500,
+    judul: "Murid Nokos",
+    harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo-produk.jpg",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 3,
-    judul: "Nokos Lazada",
-    harga: 2500,
+    judul: "Murid Web ",
+    harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo-produk.jpg",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 4,
-    judul: "Jasa Logo Teks",
-    harga: 2000,
+    judul: "Murid Logo",
+    harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo-produk.jpg",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 5,
-    judul: "Jasa Logo Yang Udah Jadi",
+    judul: "Murid Suntik",
     harga: 3000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo-produk.jpg",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
     fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 6,
-    judul: "Jasa Bikin Poster",
-    harga: 7000,
+    judul: "Apk Auto Sv",
+    harga: 1000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo-produk.jpg",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 1.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 7,
-    judul: "Jasa Bikin Logo Pake Muka Lu Sendiri",
-    harga: 8000,
+    judul: "Web Suntik All Sosmed",
+    harga: 3000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo-produk.jpg",
     deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 8.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   }
 ];
 
@@ -90,7 +90,7 @@ function renderProduk() {
   } catch (e) {}
 
   grid.innerHTML = produk.map(p => {
-    const href = "pembayaran.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(Number(String(p.harga||"0").replace(/[^\d]/g,""))||0));
+    const href = "pembayaran-digital.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
     return `
     <div class="produk-card">
       <img src="${p.img || "logo.png"}" alt="${p.judul}" onerror="this.src='logo.png'">

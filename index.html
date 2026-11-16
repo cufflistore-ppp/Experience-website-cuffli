@@ -2,729 +2,695 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ELZKII JOKI - Jasa Joki & Produk Premium</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Doxy Joki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-:root {
-  --pink-primary: #ff2d87;
-  --pink-dark: #e91e63;
-  --pink-light: #ff69b4;
-  --pink-soft: #ffe4f0;
-  --pink-bg: #fff5f9;
-  --white: #ffffff;
-  --gray: #f8f9fa;
-  --text: #2d2d2d;
-  --text-light: #666;
-  --shadow: 0 8px 30px rgba(255, 45, 135, 0.15);
-  --radius: 16px;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: var(--pink-bg);
-  color: var(--text);
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Header */
-.header {
-  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
-  color: white;
-  padding: 12px 0;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.logo-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-area img {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 2px solid white;
-  object-fit: cover;
-}
-
-.logo-text {
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.logo-text span {
-  color: #ffe0f0;
-}
-
-.nav-links {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.nav-links a {
-  padding: 8px 16px;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 0.25s ease;
-  background: rgba(255,255,255,0.15);
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-  background: white;
-  color: var(--pink-primary);
-}
-
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.8rem;
-  cursor: pointer;
-}
-
-/* Banner */
-.banner {
-  width: 100%;
-  overflow: hidden;
-  background: white;
-}
-
-.banner img {
-  width: 100%;
-  display: block;
-  max-height: 280px;
-  object-fit: cover;
-}
-
-/* Hero */
-.hero {
-  background: linear-gradient(180deg, var(--pink-soft) 0%, var(--pink-bg) 100%);
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.hero h1 {
-  font-size: 2.4rem;
-  color: var(--pink-primary);
-  margin-bottom: 12px;
-  text-shadow: 0 2px 10px rgba(255,45,135,0.2);
-}
-
-.hero p {
-  font-size: 1.15rem;
-  color: var(--text-light);
-  max-width: 600px;
-  margin: 0 auto 24px;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 28px;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
-  color: white;
-  box-shadow: 0 6px 20px rgba(255,45,135,0.4);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(255,45,135,0.5);
-}
-
-.btn-outline {
-  background: white;
-  color: var(--pink-primary);
-  border: 2px solid var(--pink-primary);
-}
-
-.btn-outline:hover {
-  background: var(--pink-primary);
-  color: white;
-}
-
-.btn-wa {
-  background: #25D366;
-  color: white;
-}
-
-.btn-wa:hover {
-  background: #1da851;
-  transform: translateY(-2px);
-}
-
-/* Container */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-
-.section-title {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.section-title h2 {
-  font-size: 2rem;
-  color: var(--pink-primary);
-  margin-bottom: 8px;
-}
-
-.section-title p {
-  color: var(--text-light);
-}
-
-/* Cards */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-.card {
-  background: white;
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  border: 1px solid #ffe0f0;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(255,45,135,0.2);
-}
-
-.card h3 {
-  color: var(--pink-primary);
-  margin-bottom: 8px;
-  font-size: 1.2rem;
-}
-
-.card .price {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--pink-dark);
-  margin: 12px 0;
-}
-
-.card .duration {
-  display: inline-block;
-  background: var(--pink-soft);
-  color: var(--pink-primary);
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.card-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-
-/* Product list */
-.product-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 18px;
-  background: white;
-  border-radius: 12px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-  border-left: 4px solid var(--pink-primary);
-  transition: all 0.2s;
-}
-
-.product-item:hover {
-  background: var(--pink-soft);
-  transform: translateX(4px);
-}
-
-.product-name {
-  font-weight: 600;
-  flex: 1;
-}
-
-.product-price {
-  font-weight: 800;
-  color: var(--pink-primary);
-  margin: 0 16px;
-  white-space: nowrap;
-}
-
-/* About */
-.about-box {
-  background: white;
-  border-radius: var(--radius);
-  padding: 32px;
-  box-shadow: var(--shadow);
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.about-box h3 {
-  color: var(--pink-primary);
-  margin-bottom: 16px;
-}
-
-.contact-info {
-  background: var(--pink-soft);
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 20px;
-}
-
-.contact-info a {
-  color: var(--pink-primary);
-  font-weight: 700;
-}
-
-.note {
-  background: #fff3cd;
-  border-left: 4px solid #ffc107;
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-top: 16px;
-  font-size: 0.95rem;
-}
-
-/* Queue / Status */
-.status-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.status-pending { background: #fff3cd; color: #856404; }
-.status-process { background: #cce5ff; color: #004085; }
-.status-done { background: #d4edda; color: #155724; }
-
-/* Footer */
-.footer {
-  background: linear-gradient(135deg, var(--pink-dark), #c2185b);
-  color: white;
-  padding: 40px 20px 24px;
-  margin-top: 60px;
-}
-
-.footer-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 32px;
-}
-
-.footer h4 {
-  margin-bottom: 12px;
-  font-size: 1.1rem;
-}
-
-.footer a {
-  color: #ffe0f0;
-  display: block;
-  margin-bottom: 6px;
-  transition: color 0.2s;
-}
-
-.footer a:hover {
-  color: white;
-}
-
-.footer-bottom {
-  text-align: center;
-  margin-top: 32px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.2);
-  font-size: 0.9rem;
-  opacity: 0.85;
-}
-
-/* Admin */
-.admin-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 260px;
-  background: linear-gradient(180deg, var(--pink-primary), var(--pink-dark));
-  color: white;
-  padding: 24px 0;
-  flex-shrink: 0;
-}
-
-.sidebar .logo {
-  padding: 0 20px 24px;
-  font-size: 1.3rem;
-  font-weight: 800;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  margin-bottom: 16px;
-}
-
-.sidebar a {
-  display: block;
-  padding: 12px 24px;
-  color: rgba(255,255,255,0.85);
-  transition: all 0.2s;
-}
-
-.sidebar a:hover,
-.sidebar a.active {
-  background: rgba(255,255,255,0.15);
-  color: white;
-}
-
-.admin-main {
-  flex: 1;
-  padding: 32px;
-  background: var(--pink-bg);
-}
-
-.admin-card {
-  background: white;
-  border-radius: var(--radius);
-  padding: 24px;
-  box-shadow: var(--shadow);
-  margin-bottom: 24px;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th,
-.table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-}
-
-.table th {
-  background: var(--pink-soft);
-  color: var(--pink-primary);
-  font-weight: 700;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #ffe0f0;
-  border-radius: 10px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--pink-primary);
-}
-
-.login-box {
-  max-width: 420px;
-  margin: 80px auto;
-  background: white;
-  padding: 40px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  text-align: center;
-}
-
-.login-box img {
-  width: 80px;
-  border-radius: 50%;
-  margin-bottom: 16px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-  }
-
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background: var(--pink-dark);
-    flex-direction: column;
-    padding: 16px;
-    gap: 8px;
-  }
-
-  .nav-links.open {
-    display: flex;
-  }
-
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-
-  .admin-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
-  .product-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .product-price {
-    margin: 0;
-  }
-}
-
-/* Utility */
-.text-center { text-align: center; }
-.mt-2 { margin-top: 16px; }
-.mt-3 { margin-top: 24px; }
-.mb-2 { margin-bottom: 16px; }
-.flex { display: flex; }
-.gap-2 { gap: 12px; }
-.flex-wrap { flex-wrap: wrap; }
-.justify-center { justify-content: center; }
-
-/* SAFETY FALLBACK - pink theme always visible */
-body { background: #fff5f9 !important; color: #2d2d2d; font-family: system-ui, sans-serif; }
-.header { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; }
-.btn-primary { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; border: none; padding: 12px 24px; border-radius: 50px; font-weight: 700; }
-.btn-outline { border: 2px solid #ff2d87; color: #ff2d87; background: white; padding: 10px 22px; border-radius: 50px; font-weight: 700; }
-.btn-wa { background: #25D366 !important; color: white !important; }
-.card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(255,45,135,0.15); border: 1px solid #ffe0f0; }
-.price { color: #e91e63; font-weight: 800; font-size: 1.4rem; }
-
-</style>
-<link rel="icon" href="assets/1000332841.jpg">
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      background: #050a14;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #fff;
+    }
+
+    /* ===== INTRO ===== */
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #050a14;
+    }
+    #intro.done { display: none; }
+    .intro-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(33, 150, 243, 0.28), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13, 71, 161, 0.22), transparent 50%),
+        radial-gradient(ellipse 50% 30% at 20% 70%, rgba(30, 136, 229, 0.18), transparent 45%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.85; }
+      50% { opacity: 1; }
+    }
+    .logo-wrap {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin-bottom: 24px;
+      z-index: 2;
+    }
+    .logo-ring {
+      position: absolute;
+      inset: -14px;
+      border-radius: 28px;
+      border: 2px solid rgba(33, 150, 243, 0.45);
+      box-shadow: 0 0 36px rgba(33, 150, 243, 0.4);
+      animation: spin 8s linear infinite;
+    }
+    .logo-ring::before {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 32px;
+      border: 1px solid rgba(100, 181, 246, 0.3);
+      animation: spin 12s linear infinite reverse;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 22px;
+      object-fit: cover;
+      background: #0d1220;
+      box-shadow: 0 0 40px rgba(33, 150, 243, 0.55);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-shadow: 0 0 24px rgba(33, 150, 243, 0.7);
+      margin-bottom: 6px;
+      z-index: 2;
+    }
+    .sub {
+      font-size: 11px;
+      color: #90caf9;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      z-index: 2;
+    }
+    .progress-wrap {
+      width: 210px;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      z-index: 2;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #1565c0, #42a5f5, #90caf9);
+      border-radius: 4px;
+      box-shadow: 0 0 12px rgba(66, 165, 245, 0.7);
+      transition: width 0.12s linear;
+    }
+    .percent {
+      font-size: 13px;
+      color: #64b5f6;
+      font-weight: 600;
+      margin-bottom: 12px;
+      z-index: 2;
+    }
+    .status {
+      font-size: 12px;
+      color: #90caf9;
+      opacity: 0.85;
+      z-index: 2;
+      min-height: 18px;
+    }
+
+    /* ===== APP SHELL ===== */
+    #app {
+      display: none;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      position: relative;
+    }
+    #app.show { display: block; }
+
+    #frame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 58px;
+      width: 100%;
+      height: calc(100% - 58px);
+      height: calc(100dvh - 58px);
+      border: 0;
+      background: #0a0e18;
+      transition: top 0.2s, bottom 0.2s, height 0.2s;
+    }
+
+    .music-fab {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(13, 18, 32, 0.92);
+      border: 1px solid rgba(33, 150, 243, 0.45);
+      border-radius: 24px;
+      padding: 4px 10px 4px 4px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+    }
+    .music-fab button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .music-fab span {
+      font-size: 12px;
+      color: #90caf9;
+      font-weight: 600;
+      padding-right: 4px;
+    }
+
+    /* ===== ADMIN TOP BAR ===== */
+    .admin-top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 52px;
+      background: #0c1218;
+      border-bottom: 1px solid #1a2740;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 9999;
+    }
+    .admin-top-bar.show {
+      display: flex;
+    }
+    .admin-top-bar button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      background: #0d1220;
+      color: #90caf9;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .admin-top-bar button:hover {
+      background: #1976d2;
+      color: #fff;
+    }
+    .admin-top-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    /* ===== CUSTOM MODAL INPUT KODE ADMIN ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
+      background: rgba(5, 10, 20, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      width: 90%;
+      max-width: 320px;
+      background: #0d1220;
+      border: 1px solid rgba(33, 150, 243, 0.45);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(33, 150, 243, 0.2);
+      text-align: center;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .modal-title i { color: #42a5f5; }
+    .modal-sub {
+      font-size: 12px;
+      color: #90caf9;
+      margin-bottom: 20px;
+    }
+    .modal-box input {
+      width: 100%;
+      background: #050a14;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 15px;
+      text-align: center;
+      letter-spacing: 2px;
+      outline: none;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+    .modal-box input:focus {
+      border-color: #42a5f5;
+      box-shadow: 0 0 10px rgba(66, 165, 245, 0.3);
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.06);
+      color: #90caf9;
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,0.12); }
+    .btn-submit {
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+    }
+    .btn-submit:hover { opacity: 0.9; }
+
+    /* ===== SHELL NAV ===== */
+    .shell-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0c1218;
+      border-top: 1px solid #1a2740;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 0;
+      z-index: 9998;
+      padding: 6px 2px calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+    .shell-nav a {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: #7a9bb0;
+      text-decoration: none;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 6px 2px;
+      border-radius: 16px;
+      transition: all 0.2s;
+    }
+    .shell-nav a i {
+      font-size: 15px;
+      margin-bottom: 1px;
+      color: inherit;
+    }
+    .shell-nav a span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      line-height: 1.15;
+    }
+    .shell-nav a.active {
+      color: #fff !important;
+      font-weight: 700;
+      background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 40%, #0d47a1 100%) !important;
+      box-shadow: 0 0 12px rgba(33, 150, 243, 0.5) !important;
+      border-radius: 18px;
+      padding: 8px 6px;
+    }
+    .shell-nav a.active i {
+      color: #fff !important;
+    }
+  </style>
 </head>
 <body>
-  <header class="header">
-    <div class="nav-container">
-      <a href="index.html" class="logo-area">
-        <img src="assets/1000332841.jpg" alt="ELZKII Logo">
-        <div class="logo-text">ELZKII <span>JOKI</span></div>
-      </a>
-      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-      <nav class="nav-links" id="navLinks">
-        <a href="index.html" class="active">Beranda</a>
-        <a href="joki.html">Jasa Joki</a>
-        <a href="produk.html">Produk</a>
-        <a href="antrian.html">Antrian</a>
-        <a href="tentang.html">Tentang</a>
-        <a href="admin/login.html">Admin</a>
-      </nav>
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="intro-bg"></div>
+    <div class="logo-wrap">
+      <div class="logo-ring"></div>
+      <img src="logo.jpg" alt="Doxy Joki" class="logo-img">
     </div>
-  </header>
-
-  <div class="banner">
-    <img src="assets/1000332754.jpg" alt="ELZKII Banner">
+    <div class="title">DOXY JOKI</div>
+    <div class="sub">Initializing Elite Service System</div>
+    <div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
+    <div class="percent" id="percent">0%</div>
+    <div class="status" id="status"></div>
   </div>
 
-  <section class="hero">
-    <h1>Selamat Datang di ELZKII JOKI</h1>
-    <p>Jasa joki profesional & produk premium untuk kebutuhan JB kamu. Cepat, aman, dan terpercaya.</p>
-    <div class="flex gap-2 justify-center flex-wrap">
-      <a href="joki.html" class="btn btn-primary">Lihat Jasa Joki</a>
-      <a href="produk.html" class="btn btn-outline">Lihat Produk</a>
-      <a href="https://wa.me/6282364307699" target="_blank" class="btn btn-wa">Chat Admin WA</a>
-    </div>
-  </section>
+  <!-- PERSISTENT AUDIO -->
+  <audio id="bgMusic" loop preload="auto" autoplay muted playsinline>
+    <source src="music.mp3" type="audio/mpeg">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
 
-  <div class="container">
-    <div class="section-title">
-      <h2>🔥 Jasa Joki Populer</h2>
-      <p>Pilih paket sesuai kebutuhanmu</p>
-    </div>
-
-    <div class="card-grid">
-      <div class="card">
-        <span class="duration">1 Hari</span>
-        <h3>Paket Basic</h3>
-        <div class="price">Rp 500</div>
-        <p>Cocok untuk trial / kebutuhan singkat</p>
-        <div class="card-actions">
-          <a href="joki.html" class="btn btn-primary" style="flex:1;justify-content:center">Order</a>
-        </div>
-      </div>
-      <div class="card">
-        <span class="duration">3 Hari</span>
-        <h3>Paket Standard</h3>
-        <div class="price">Rp 2.000</div>
-        <p>Paling banyak dipesan</p>
-        <div class="card-actions">
-          <a href="joki.html" class="btn btn-primary" style="flex:1;justify-content:center">Order</a>
-        </div>
-      </div>
-      <div class="card">
-        <span class="duration">7 Hari</span>
-        <h3>Paket Elite</h3>
-        <div class="price">Rp 6.000</div>
-        <p>Full power seharian penuh</p>
-        <div class="card-actions">
-          <a href="joki.html" class="btn btn-primary" style="flex:1;justify-content:center">Order</a>
-        </div>
-      </div>
-      <div class="card">
-        <span class="duration">8 Hari</span>
-        <h3>Paket Ultimate</h3>
-        <div class="price">Rp 7.000</div>
-        <p>Maksimal performa</p>
-        <div class="card-actions">
-          <a href="joki.html" class="btn btn-primary" style="flex:1;justify-content:center">Order</a>
-        </div>
-      </div>
+  <!-- APP SHELL -->
+  <div id="app">
+    <div class="music-fab" id="musicFab">
+      <button type="button" id="musicToggle" title="Pause / Play">
+        <i class="fa-solid fa-pause" id="musicIcon"></i>
+      </button>
+      <span>Lagu</span>
     </div>
 
-    <div class="section-title mt-3">
-      <h2>📦 Produk Unggulan</h2>
-      <p>APK & Tools berkualitas</p>
+    <div id="adminTopBar" class="admin-top-bar">
+      <button type="button" id="adminBackBtn" title="Kembali"><i class="fa-solid fa-arrow-left"></i></button>
+      <span class="admin-top-title">ADMIN PANEL</span>
+      <button type="button" id="adminCloseBtn" title="Keluar"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <div class="card-grid">
-      <div class="card">
-        <h3>APK SPAM OTP</h3>
-        <div class="price">Rp 7.000</div>
-        <p>Tools spam OTP terbaik</p>
-        <div class="card-actions">
-          <a href="produk.html" class="btn btn-outline" style="flex:1;justify-content:center">Detail</a>
-        </div>
-      </div>
-      <div class="card">
-        <h3>APK BUG FN CRASHER</h3>
-        <div class="price">Rp 50.000</div>
-        <p>Permanen • Powerfull</p>
-        <div class="card-actions">
-          <a href="produk.html" class="btn btn-outline" style="flex:1;justify-content:center">Detail</a>
-        </div>
-      </div>
-      <div class="card">
-        <h3>APK BUG YAKUZA V2</h3>
-        <div class="price">Rp 45.000</div>
-        <p>Versi terbaru</p>
-        <div class="card-actions">
-          <a href="produk.html" class="btn btn-outline" style="flex:1;justify-content:center">Detail</a>
-        </div>
-      </div>
-      <div class="card">
-        <h3>JASA BUAT LOGO</h3>
-        <div class="price">Rp 10.000</div>
-        <p>Logo custom premium</p>
-        <div class="card-actions">
-          <a href="produk.html" class="btn btn-outline" style="flex:1;justify-content:center">Detail</a>
+    <div id="adminModal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-title"><i class="fa-solid fa-lock"></i> Akses Admin</div>
+        <div class="modal-sub">Masukkan kode akses sistem</div>
+        <input type="password" id="adminCodeInput" placeholder="DOXY-2026" autocomplete="off">
+        <div class="modal-buttons">
+          <button type="button" id="adminCancelBtn" class="btn-cancel">Batal</button>
+          <button type="button" id="adminSubmitBtn" class="btn-submit">Masuk</button>
         </div>
       </div>
     </div>
+    <iframe id="frame" src="about:blank" title="Doxy Joki" allow="autoplay"></iframe>
 
-    <div class="text-center mt-3">
-      <a href="produk.html" class="btn btn-primary">Lihat Semua Produk →</a>
-    </div>
+    <nav class="shell-nav" id="shellNav">
+      <a href="joki.html" data-page="joki.html"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+      <a href="digital.html" data-page="digital.html"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+      <a href="home.html" data-page="home.html" class="active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="antrian.html" data-page="antrian.html"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+      <a href="tentang.html" data-page="tentang.html"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+      <a href="akun.html" data-page="akun.html"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+    </nav>
   </div>
+  <script>
+    (function () {
+      const intro = document.getElementById("intro");
+      const app = document.getElementById("app");
+      const bar = document.getElementById("bar");
+      const percentEl = document.getElementById("percent");
+      const statusEl = document.getElementById("status");
+      const music = document.getElementById("bgMusic");
+      const icon = document.getElementById("musicIcon");
+      const frame = document.getElementById("frame");
+      const nav = document.getElementById("shellNav");
+      const musicFab = document.getElementById("musicFab");
 
-  <footer class="footer">
-    <div class="footer-content">
-      <div>
-        <h4>ELZKII JOKI</h4>
-        <p>Jasa joki & produk premium terpercaya.</p>
-      </div>
-      <div>
-        <h4>Menu</h4>
-        <a href="joki.html">Jasa Joki</a>
-        <a href="produk.html">Produk</a>
-        <a href="antrian.html">Cek Antrian</a>
-        <a href="tentang.html">Tentang Kami</a>
-      </div>
-      <div>
-        <h4>Kontak</h4>
-        <a href="https://wa.me/6282364307699" target="_blank">Admin Utama WA</a>
-        <a href="https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08" target="_blank">Channel 1</a>
-        <a href="https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P" target="_blank">Channel 2</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      © 2026 ELZKII JOKI / ELZKII STR. All rights reserved.
-    </div>
-  </footer>
-<script>
-function toggleMenu() {
-  var nav = document.getElementById("navLinks");
-  if (nav) nav.classList.toggle("open");
-}
-</script>
+      // Elemen Modal & Top Bar Admin
+      const adminModal = document.getElementById("adminModal");
+      const adminCodeInput = document.getElementById("adminCodeInput");
+      const adminCancelBtn = document.getElementById("adminCancelBtn");
+      const adminSubmitBtn = document.getElementById("adminSubmitBtn");
+      const adminTopBar = document.getElementById("adminTopBar");
+      const adminBackBtn = document.getElementById("adminBackBtn");
+      const adminCloseBtn = document.getElementById("adminCloseBtn");
 
+      let wantMusic = sessionStorage.getItem("doxy_music_playing") !== "0";
+      let isAdminMode = false;
+
+      music.loop = true;
+      music.volume = 0.55;
+      music.setAttribute("playsinline", "");
+      music.setAttribute("webkit-playsinline", "");
+
+      function setIcon(playing) {
+        if (icon) icon.className = playing ? "fa-solid fa-pause" : "fa-solid fa-play";
+      }
+
+      function kickPlay() {
+        if (!wantMusic) return;
+        try {
+          music.muted = false;
+          music.volume = 0.55;
+          const p = music.play();
+          if (p && p.then) {
+            p.then(function () {
+              setIcon(true);
+            }).catch(function () {
+              music.muted = true;
+              music.play().then(function () {
+                setTimeout(function () {
+                  music.muted = false;
+                  music.volume = 0.55;
+                  setIcon(true);
+                }, 50);
+              }).catch(function () {
+                setIcon(false);
+              });
+            });
+          }
+        } catch (e) {}
+      }
+
+      function playMusic() {
+        wantMusic = true;
+        sessionStorage.setItem("doxy_music_playing", "1");
+        kickPlay();
+      }
+
+      function pauseMusic() {
+        wantMusic = false;
+        sessionStorage.setItem("doxy_music_playing", "0");
+        try { music.pause(); } catch (e) {}
+        setIcon(false);
+      }
+
+      function navigate(page) {
+        if (!page) return;
+        if (page.indexOf("http") === 0) {
+          window.open(page, "_blank");
+          return;
+        }
+        const cleanPage = page.split("#")[0];
+        frame.src = cleanPage;
+        
+        if (!isAdminMode) {
+          nav.querySelectorAll("a").forEach(function (a) {
+            const p = (a.getAttribute("data-page") || "").split("?")[0];
+            const base = cleanPage.split("?")[0];
+            a.classList.toggle("active", base === p);
+          });
+        }
+        if (wantMusic) kickPlay();
+      }
+
+      function enterApp() {
+        sessionStorage.setItem("doxy_entered", "1");
+        intro.classList.add("done");
+        app.classList.add("show");
+        navigate("home.html");
+
+        if (wantMusic) {
+          sessionStorage.setItem("doxy_music_playing", "1");
+          kickPlay();
+          setTimeout(kickPlay, 200);
+          setTimeout(kickPlay, 600);
+          setTimeout(kickPlay, 1200);
+          setTimeout(kickPlay, 2500);
+        } else {
+          setIcon(false);
+        }
+      }
+
+      try {
+        music.muted = true;
+        music.play().catch(function () {});
+      } catch (e) {}
+
+      if (sessionStorage.getItem("doxy_entered") === "1") {
+        enterApp();
+      } else {
+        let progress = 0;
+        const tick = setInterval(function () {
+          if (progress >= 100) {
+            clearInterval(tick);
+            bar.style.width = "100%";
+            percentEl.textContent = "100%";
+            statusEl.textContent = "Selesai";
+            setTimeout(enterApp, 200);
+            return;
+          }
+          progress += Math.random() * 5 + 2.5;
+          if (progress > 100) progress = 100;
+          bar.style.width = progress + "%";
+          percentEl.textContent = Math.floor(progress) + "%";
+        }, 65);
+      }
+
+      function unlock() {
+        if (wantMusic) kickPlay();
+      }
+      document.addEventListener("touchstart", unlock, { passive: true });
+      document.addEventListener("click", unlock);
+
+      document.getElementById("musicToggle").addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (wantMusic && !music.paused) pauseMusic();
+        else playMusic();
+      });
+
+      function openAdminModal() {
+        adminCodeInput.value = "";
+        adminModal.classList.add("show");
+        setTimeout(function() { adminCodeInput.focus(); }, 100);
+      }
+
+      function closeAdminModal() {
+        adminModal.classList.remove("show");
+      }
+
+      adminCancelBtn.addEventListener("click", closeAdminModal);
+      adminModal.addEventListener("click", function(e) {
+        if (e.target === adminModal) closeAdminModal();
+      });
+
+      function submitAdminCode() {
+        const val = adminCodeInput.value.trim();
+        if (val === "DOXY-2026") {
+          closeAdminModal();
+          enterAdminMode();
+        } else {
+          alert("Kode akses salah!");
+          adminCodeInput.value = "";
+          adminCodeInput.focus();
+        }
+      }
+
+      adminSubmitBtn.addEventListener("click", submitAdminCode);
+      adminCodeInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          submitAdminCode();
+        }
+      });
+
+      // Masuk ke Mode Admin
+      function enterAdminMode() {
+        isAdminMode = true;
+        nav.style.display = "none";
+        musicFab.style.display = "none";
+        
+        adminTopBar.classList.add("show");
+
+        frame.style.top = "52px";
+        frame.style.bottom = "0";
+        frame.style.height = "calc(100% - 52px)";
+        frame.style.height = "calc(100dvh - 52px)";
+
+        navigate("admin.html");
+      }
+
+      // Keluar dari Mode Admin
+      function exitAdminMode() {
+        isAdminMode = false;
+        nav.style.display = "flex";
+        musicFab.style.display = "flex";
+
+        adminTopBar.classList.remove("show");
+
+        frame.style.top = "0";
+        frame.style.bottom = "58px";
+        frame.style.height = "calc(100% - 58px)";
+        frame.style.height = "calc(100dvh - 58px)";
+
+        navigate("home.html");
+      }
+
+      adminBackBtn.addEventListener("click", function() {
+        try {
+          if (frame.contentWindow && frame.contentWindow.history.length > 1) {
+            frame.contentWindow.history.back();
+          } else {
+            exitAdminMode();
+          }
+        } catch (e) {
+          exitAdminMode();
+        }
+      });
+
+      adminCloseBtn.addEventListener("click", function() {
+        exitAdminMode();
+      });
+
+      music.addEventListener("ended", function () {
+        music.currentTime = 0;
+        if (wantMusic) music.play().catch(function () {});
+      });
+      music.addEventListener("play", function () {
+        if (wantMusic && !music.muted) setIcon(true);
+      });
+
+      nav.addEventListener("click", function (e) {
+        const a = e.target.closest("a");
+        if (!a) return;
+        e.preventDefault();
+        navigate(a.getAttribute("data-page"));
+      });
+
+      // Menerima pesan dari dalam iframe (ketukan 5x pada logo di halaman dalam/home.html)
+      window.addEventListener("message", function (e) {
+        if (!e.data) return;
+        if (e.data.type === "doxy-admin-open") {
+          openAdminModal();
+        } else if ((e.data.type === "doxy-nav" || e.data.type === "voxyy-nav") && e.data.href) {
+          navigate(e.data.href);
+        } else if (typeof e.data === "string" && e.data.indexOf(".html") !== -1) {
+          navigate(e.data);
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

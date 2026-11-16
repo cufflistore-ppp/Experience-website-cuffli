@@ -1,41 +1,28 @@
 const SAVED_KODE_KEY = "voxyy_saved_kode";
-const SAVED_KODES_KEY = "voxyy_saved_kodes";
 
-function parseMoney(v) {
-  if (v == null || v === "") return 0;
-  if (typeof v === "number" && !isNaN(v)) return v;
-  var n = parseInt(String(v).replace(/[^\d]/g, ""), 10);
-  return isNaN(n) ? 0 : n;
-}
-function escapeHtml(str) {
-  return String(str ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+function isStatusSukses(status) {
+  const s = String(status || "").toLowerCase();
+  return s.includes("sukses") || s.includes("selesai");
 }
 
-function getTrackedKodes() {
-  const set = new Set();
-  try {
-    const one = localStorage.getItem(SAVED_KODE_KEY);
-    if (one) set.add(String(one).trim().toUpperCase());
-    const arr = JSON.parse(localStorage.getItem(SAVED_KODES_KEY) || "[]");
-    (arr || []).forEach((k) => set.add(String(k).trim().toUpperCase()));
-  } catch (e) {}
-  return set;
+function isStatusBelumSelesai(status) {
+  return !isStatusSukses(status);
 }
 
 function saveTrackedKode(kode) {
   if (!kode) return;
-  const k = String(kode).trim();
-  localStorage.setItem(SAVED_KODE_KEY, k);
-  try {
-    const arr = JSON.parse(localStorage.getItem(SAVED_KODES_KEY) || "[]");
-    const up = k.toUpperCase();
-    const next = [k].concat((arr || []).filter((x) => String(x).toUpperCase() !== up)).slice(0, 30);
-    localStorage.setItem(SAVED_KODES_KEY, JSON.stringify(next));
-  } catch (e) {}
+  localStorage.setItem(SAVED_KODE_KEY, String(kode).trim());
+}
+
+function clearTrackedKode(kode) {
+  const saved = localStorage.getItem(SAVED_KODE_KEY);
+  if (!kode || !saved || saved.toUpperCase() === String(kode).toUpperCase()) {
+    localStorage.removeItem(SAVED_KODE_KEY);
+  }
+}
+
+function getTrackedKode() {
+  return (localStorage.getItem(SAVED_KODE_KEY) || "").trim();
 }
 
 async function fetchOrders() {
@@ -49,192 +36,68 @@ async function fetchOrders() {
   }
 }
 
-function statusMeta(status, hasFile, order) {
-  const s = String(status || "").toLowerCase();
-  var isSuntik = false;
-  try {
-    var pk = String((order && (order.paket || order.judul)) || "").toLowerCase();
-    isSuntik = pk.indexOf("suntik") >= 0 || !!(order && order.isJasa);
-  } catch (e) {}
-  // Sukses: jasa/suntik selesai tanpa file; digital selesai kalau ada file
-  if (s.includes("sukses") || s.includes("selesai")) {
-    if (hasFile || isSuntik) {
-      return { label: "Selesai", cls: "sukses", color: "#66bb6a", bg: "#0d3d1a" };
-    }
-    return { label: "Sukses — menunggu file", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
-  }
-  if (s.includes("tolak")) {
-    return { label: "Ditolak", cls: "tolak", color: "#ef9a9a", bg: "#3d1515" };
-  }
-  if (s.includes("proses")) {
-    return { label: "Diproses Admin", cls: "proses", color: "#ffb74d", bg: "#3d2a0d" };
-  }
-  if (s.includes("menunggu link")) {
-    return { label: "Isi link target", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
-  }
-  // semua status bayar / menunggu / kosong → Menunggu Verifikasi (jangan "Belum Bayar")
-  if (
-    s.includes("verifikasi") ||
-    s.includes("menunggu") ||
-    s.includes("bayar") ||
-    s.includes("belum") ||
-    !s
-  ) {
-    return { label: "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
-  }
-  return { label: status || "Menunggu Verifikasi", cls: "proses", color: "#64b5f6", bg: "#0d2137" };
+function findOrderByKode(orders, kode) {
+  if (!kode) return null;
+  const target = String(kode).trim().toUpperCase();
+  return (orders || []).find(
+    (o) => String(o.kode || "").toUpperCase() === target
+  ) || null;
 }
 
-function filterMyOrders(orders) {
-  const tracked = getTrackedKodes();
-  let email = "";
-  try {
-    const u = window.VoxyyAuth && window.VoxyyAuth.currentUser && window.VoxyyAuth.currentUser();
-    if (u && u.email) email = String(u.email).toLowerCase();
-  } catch (e) {}
-
-  return (orders || []).filter((o) => {
-    // Pesanan ditolak admin → hilang dari list pembeli
-    const st = String(o.status || "").toLowerCase();
-    if (st.includes("tolak")) return false;
-    // draft kosong saja yang disembunyikan
-    if (st === "draft" || st.includes("draft suntik") && !o.bukti && !o.hasBukti) return false;
-    const kode = String(o.kode || "").toUpperCase();
-    if (tracked.has(kode)) return true;
-    if (email && String(o.email || "").toLowerCase() === email) return true;
-    if (email && String(o.userEmail || "").toLowerCase() === email) return true;
-    return false;
-  });
+function loadAntrianFromOrders(orders) {
+  return (orders || []).map((o, i) => ({
+    no: i + 1,
+    nama:
+      (o.nama || "Anonim").length > 8
+        ? (o.nama || "A").substring(0, 2) + "********"
+        : o.nama || "Anonim",
+    jenis: (o.paket || "Joki Kontak") + " · " + (o.status || "Belum Bayar"),
+    status:
+      o.status === "Sukses" || o.status === "SELESAI"
+        ? "SELESAI"
+        : o.status === "Proses" || o.status === "PROSES"
+        ? "PROSES"
+        : o.status === "Menunggu Verifikasi"
+        ? "PROSES"
+        : "MASUK ANTRIAN"
+  }));
 }
 
-function renderOrderCard(o) {
-  const file = o.file || o.download || o.fileUrl || "";
-  const st = statusMeta(o.status, !!file, o);
-  const kode = o.kode || "-";
-  const paket = o.paket || o.judul || "Pesanan";
-  const totalN = parseMoney(o.finalAmount != null ? o.finalAmount : o.total);
-  const total = totalN > 0 ? totalN.toLocaleString("id-ID") : String(o.total || "-").replace(/^Rp\s*/i, "");
-  const waktu = o.waktu || o.dikirimAt || "";
-  const fileName = o.fileName || (file ? (String(file).split("/").pop() || "file").split("?")[0] : "");
-  const catatan = o.catatanAdmin || o.catatan || "";
-  const isData = String(file).indexOf("data:") === 0;
-  const isApk = /\.apk(\?|$)/i.test(fileName) || /\.apk(\?|$)/i.test(String(file));
-  const isZip = /\.(zip|rar|7z)(\?|$)/i.test(fileName) || /\.(zip|rar|7z)(\?|$)/i.test(String(file));
-
-  let actionHtml = "";
-  var stLow = String(o.status || "").toLowerCase();
-  var isHttp = /^https?:\/\//i.test(String(file || ""));
-  var isFbFile = String(file || "").indexOf("firebase:order_files/") === 0;
-  if (!file && stLow.indexOf("menunggu link") >= 0) {
-    actionHtml =
-      '<a href="jasa-link.html?kode=' + encodeURIComponent(kode) + '" style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:10px 14px;background:#1565c0;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
-      '<i class="fa-solid fa-link"></i> Isi link target</a>';
-  } else if (file && !isFbFile) {
-    // URL http → biru Lihat; APK/ZIP/data → hijau Unduh
-    if (isHttp && !isApk && !isZip) {
-      actionHtml =
-        '<div style="font-size:12px;color:#64b5f6;margin-bottom:6px;font-weight:600;">✓ Link produk siap</div>' +
-        '<a href="' + escapeHtml(file) + '" target="_blank" rel="noopener" ' +
-        'style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#1565c0;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
-        '<i class="fa-solid fa-eye"></i> Lihat / Buka Link</a>';
-    } else {
-      const openLabel = isApk ? "Unduh / Install APK" : isZip ? "Unduh ZIP" : "Unduh file";
-      actionHtml =
-        '<div style="font-size:12px;color:#81c784;margin-bottom:6px;font-weight:600;">✓ Produk sudah di pesanan ini</div>' +
-        '<a href="' + escapeHtml(file) + '" ' +
-        (isData ? 'download="' + escapeHtml(fileName || "produk") + '"' : 'download="' + escapeHtml(fileName || "produk") + '" target="_blank" rel="noopener"') +
-        ' style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#2e7d32;color:#fff;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">' +
-        '<i class="fa-solid fa-download"></i> ' + escapeHtml(openLabel) +
-        (fileName ? " · " + escapeHtml(fileName) : "") + "</a>";
-    }
-  } else if (file && isFbFile) {
-    actionHtml =
-      '<div style="font-size:12px;color:#81c784;margin-bottom:6px;font-weight:600;">✓ Produk siap</div>' +
-      '<button type="button" onclick="unduhFilePesanan(\'' + escapeHtml(kode) + '\')" ' +
-      'style="display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:10px 14px;background:#2e7d32;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">' +
-      '<i class="fa-solid fa-download"></i> Unduh file</button>';
-  } else if (st.cls === "sukses") {
-    actionHtml =
-      '<div style="font-size:12px;color:#ffb74d;margin-top:4px;">Admin sedang proses. File akan muncul di kode ini setelah admin kirim.</div>';
-  } else if (st.cls === "tolak") {
-    actionHtml =
-      '<div style="font-size:12px;color:#ef9a9a;margin-top:4px;">Pesanan ditolak admin.</div>';
-  } else {
-    actionHtml =
-      '<div style="font-size:12px;color:#8aa0b8;margin-top:6px;line-height:1.4;">Pesanan diproses di website. File akan muncul di sini (kode ' +
-      escapeHtml(kode) +
-      ") setelah admin kirim.</div>";
-  }
-
-  return (
-    '<div class="order-status-card" style="background:#12182a;border:1px solid #1e2a45;border-radius:14px;padding:14px;margin-bottom:12px;">' +
-    '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;">' +
-    "<div>" +
-    '<div style="font-size:12px;color:#8aa0b8;">Kode</div>' +
-    '<div style="font-weight:800;color:#fff;letter-spacing:0.3px;">' +
-    escapeHtml(kode) +
-    "</div>" +
-    "</div>" +
-    '<span style="font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;background:' +
-    st.bg +
-    ";color:" +
-    st.color +
-    ';white-space:nowrap;">' +
-    escapeHtml(st.label) +
-    "</span>" +
-    "</div>" +
-    '<div style="font-size:14px;font-weight:700;color:#e3eaf2;margin-bottom:4px;">' +
-    escapeHtml(paket) +
-    "</div>" +
-    '<div style="font-size:12px;color:#8aa0b8;margin-bottom:8px;">Total Rp ' +
-    escapeHtml(String(total)) +
-    (waktu ? " · " + escapeHtml(String(waktu)) : "") +
-    "</div>" +
-    (catatan
-      ? '<div style="font-size:12px;color:#cfd8e3;background:#0a0e18;border-radius:8px;padding:8px 10px;margin-bottom:8px;">' +
-        escapeHtml(catatan) +
-        "</div>"
-      : "") +
-    actionHtml +
-    "</div>"
-  );
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-
-var _antrianFirst = true;
-var _antrianSig = "";
-var _antrianBusy = false;
-
-function orderListSignature(list) {
-  try {
-    return (list || [])
-      .map(function (o) {
-        return [
-          o.kode || "",
-          o.status || "",
-          o.file || o.download || o.fileUrl || "",
-          o.hasBukti ? "1" : "0",
-          o.dikirimTs || "",
-          o.updatedAt || "",
-        ].join(":");
-      })
-      .join("|");
-  } catch (e) {
-    return String(Date.now());
-  }
+function statusClass(status) {
+  const s = (status || "").toLowerCase();
+  if (s.includes("sukses") || s.includes("selesai")) return "sukses";
+  if (s.includes("proses") || s.includes("verifikasi")) return "proses";
+  return "belum";
 }
 
-async function renderAntrian(force) {
+function statusIcon(cls) {
+  if (cls === "sukses") return "✅";
+  if (cls === "proses") return "⏳";
+  return "🛒";
+}
+
+async function renderAntrian() {
   const list = document.getElementById("antrianList");
   if (!list) return;
-  if (_antrianBusy && !force) return;
-  _antrianBusy = true;
 
-  // Hanya tampilkan "Memuat" saat pertama kali / list masih kosong
-  if (_antrianFirst && !list.querySelector(".order-status-card")) {
-    list.innerHTML =
-      '<div style="text-align:center;color:#8aa0b8;padding:24px 12px;">Memuat pesanan...</div>';
-  }
+  const globalOn =
+    window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured();
+
+  list.innerHTML = `
+    <div class="antrian-empty">
+      <div class="antrian-empty-icon">⏳</div>
+      <strong>Memuat antrian...</strong>
+      <small>Sinkron data...</small>
+    </div>
+  `;
 
   let orders = [];
   try {
@@ -243,125 +106,340 @@ async function renderAntrian(force) {
     console.warn(e);
   }
 
-  // resolve file APK/ZIP/URL (tanpa flash UI)
-  try {
-    var pre = filterMyOrders(orders);
-    await Promise.all(
-      (pre || []).slice(0, 15).map(async function (o) {
-        if (!o || !o.kode) return;
-        var f = o.file || o.download || o.fileUrl || "";
-        if (f && (String(f).indexOf("data:") === 0 || /^https?:\/\//i.test(f))) return;
-        if (window.VoxyyOrders && window.VoxyyOrders.getDeliveryFileByKode) {
-          try {
-            var real = await window.VoxyyOrders.getDeliveryFileByKode(o.kode);
-            if (real) {
-              o.file = real;
-              o.download = real;
-              o.fileUrl = real;
-            }
-          } catch (e) {}
-        }
-      })
-    );
-  } catch (eH) {}
+  let modeBadge = document.getElementById("antrianModeBadge");
+  if (!modeBadge) {
+    modeBadge = document.createElement("div");
+    modeBadge.id = "antrianModeBadge";
+    modeBadge.style.cssText =
+      "font-size:11px;color:#8aa0b8;margin:-8px 0 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;";
+    const searchBox = document.querySelector(".search-box");
+    if (searchBox && searchBox.parentNode) {
+      searchBox.parentNode.insertBefore(modeBadge, searchBox.nextSibling);
+    }
+  }
+  const data = loadAntrianFromOrders(orders);
+  const configured = window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured && window.VoxyyOrders.isGlobalConfigured();
+  if (configured) {
+    modeBadge.innerHTML =
+      '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global (Realtime)</span> <span>' +
+      (orders.length || 0) + ' pesanan · sinkron antar HP</span>';
+  } else {
+    modeBadge.innerHTML =
+      '<span style="background:#3d2a0d;color:#ffb74d;padding:3px 8px;border-radius:6px;font-weight:600;">⚙️ Setup Firebase</span> <span>Isi FIREBASE_CONFIG di global-orders.js (gratis) agar antar-HP sinkron</span>';
+  }
 
-  const mine = filterMyOrders(orders);
-  mine.sort(function (a, b) {
-    var ta = Date.parse(a.createdAt || a.waktu || 0) || Number(a.dikirimTs || a.createdAt) || 0;
-    var tb = Date.parse(b.createdAt || b.waktu || 0) || Number(b.dikirimTs || b.createdAt) || 0;
-    return tb - ta;
+  if (data.length === 0) {
+    list.innerHTML = `
+      <div class="antrian-empty">
+        <div class="antrian-empty-icon">🕒</div>
+        <strong>Antrian masih kosong</strong>
+        <small>Belum ada pesanan global. Buat order baru, lalu tarik refresh halaman ini.</small>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = data
+    .map(
+      (item) => `
+    <div class="antrian-item">
+      <div style="display:flex;align-items:center;">
+        <div class="num">#${item.no}</div>
+        <div class="info">
+          <strong>${escapeHtml(item.nama)}</strong>
+          <small>${escapeHtml(item.jenis)}</small>
+        </div>
+      </div>
+      <span class="status-badge">${escapeHtml(item.status)}</span>
+    </div>
+  `
+    )
+    .join("");
+}
+
+function ensureStatusModal() {
+  if (document.getElementById("statusCheckModal")) return;
+
+  const wrap = document.createElement("div");
+  wrap.id = "statusCheckModal";
+  wrap.innerHTML = `
+    <div class="status-modal-backdrop" data-close="1"></div>
+    <div class="status-modal-box" role="dialog" aria-modal="true" aria-labelledby="statusModalTitle">
+      <div class="status-modal-icon" id="statusModalIcon">📋</div>
+      <div class="status-modal-title" id="statusModalTitle">Status Pesanan</div>
+      <div class="status-modal-body" id="statusModalBody"></div>
+      <button type="button" class="status-modal-btn" data-close="1">Oke</button>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+
+  wrap.addEventListener("click", function (e) {
+    if (e.target && e.target.getAttribute("data-close") === "1") closeStatusModal();
   });
 
-  var sig = orderListSignature(mine);
-  // Skip re-render kalau data sama (hindari kedip / refresh terus)
-  if (!force && sig === _antrianSig && !_antrianFirst) {
-    _antrianBusy = false;
+  if (!document.getElementById("statusCheckModalStyle")) {
+    const style = document.createElement("style");
+    style.id = "statusCheckModalStyle";
+    style.textContent = `
+      #statusCheckModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      #statusCheckModal.show { display: flex; }
+      .status-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.72);
+        backdrop-filter: blur(5px);
+      }
+      .status-modal-box {
+        position: relative;
+        background: #10182a;
+        border: 1px solid #1a2740;
+        border-radius: 16px;
+        padding: 22px 16px 16px;
+        width: 100%;
+        max-width: 340px;
+        max-height: calc(100vh - 36px);
+        overflow: auto;
+        text-align: center;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+        animation: statusModalIn 0.22s ease;
+      }
+      @keyframes statusModalIn {
+        from { opacity: 0; transform: scale(0.94) translateY(8px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      .status-modal-icon { font-size: 30px; margin-bottom: 6px; line-height: 1; }
+      .status-modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 12px;
+      }
+      .status-modal-body {
+        text-align: left;
+        background: #0a0e18;
+        border: 1px solid #1a2740;
+        border-radius: 12px;
+        padding: 10px 12px;
+        margin-bottom: 14px;
+        overflow: hidden;
+      }
+      .status-row {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        gap: 8px;
+        align-items: start;
+        padding: 7px 0;
+        border-bottom: 1px solid #1a2740;
+      }
+      .status-row:last-child { border-bottom: none; }
+      .status-row .k {
+        color: #8aa0b8;
+        font-size: 11px;
+        padding-top: 2px;
+      }
+      .status-row .v {
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        line-height: 1.4;
+      }
+      .status-row .v code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+        background: #10182a;
+        border: 1px solid #1a2740;
+        padding: 2px 6px;
+        border-radius: 6px;
+        color: #90caf9;
+      }
+      .status-row .v.sukses { color: #66bb6a; }
+      .status-row .v.proses { color: #42a5f5; }
+      .status-row .v.belum { color: #ffb74d; }
+      .status-note {
+        margin-top: 8px;
+        font-size: 11px;
+        color: #9bb0c4;
+        line-height: 1.45;
+      }
+      .status-modal-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #2196f3, #1565c0);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .antrian-empty {
+        background: #10182a;
+        border: 1px dashed #1a2740;
+        border-radius: 14px;
+        padding: 28px 16px;
+        text-align: center;
+      }
+      .antrian-empty-icon { font-size: 28px; margin-bottom: 8px; }
+      .antrian-empty strong { display: block; font-size: 14px; margin-bottom: 6px; }
+      .antrian-empty small { display: block; color: #8aa0b8; font-size: 12px; line-height: 1.45; }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+function showStatusModal(title, bodyHtml, icon) {
+  ensureStatusModal();
+  document.getElementById("statusModalTitle").textContent = title || "Status Pesanan";
+  document.getElementById("statusModalBody").innerHTML = bodyHtml || "";
+  document.getElementById("statusModalIcon").textContent = icon || "📋";
+  document.getElementById("statusCheckModal").classList.add("show");
+}
+
+function closeStatusModal() {
+  const el = document.getElementById("statusCheckModal");
+  if (el) el.classList.remove("show");
+}
+
+function row(label, value, extraClass) {
+  return (
+    '<div class="status-row">' +
+    '<div class="k">' +
+    escapeHtml(label) +
+    "</div>" +
+    '<div class="v' +
+    (extraClass ? " " + extraClass : "") +
+    '">' +
+    value +
+    "</div>" +
+    "</div>"
+  );
+}
+
+function syncSearchInput(kode) {
+  const input = document.getElementById("searchOrder");
+  if (!input) return;
+  input.value = kode || "";
+}
+
+async function restoreSavedKodeToInput() {
+  const input = document.getElementById("searchOrder");
+  if (!input) return;
+
+  let kode = getTrackedKode();
+  const orders = await fetchOrders();
+
+  if (!kode) {
+    const pending = orders.find(
+      (o) => o && o.kode && isStatusBelumSelesai(o.status)
+    );
+    if (pending) {
+      kode = pending.kode;
+      saveTrackedKode(kode);
+    }
+  }
+
+  if (!kode) {
+    input.value = "";
     return;
   }
-  _antrianSig = sig;
-  _antrianFirst = false;
 
-  if (!mine.length) {
-    list.innerHTML =
-      '<div style="text-align:center;padding:28px 16px;background:#12182a;border-radius:14px;border:1px solid #1e2a45;">' +
-      '<div style="font-size:28px;margin-bottom:8px;">📋</div>' +
-      '<strong style="color:#fff;">Belum ada pesanan</strong>' +
-      '<p style="font-size:13px;color:#8aa0b8;margin-top:6px;line-height:1.45;">Order produk dari Home/Produk. Setelah bayar & konfirmasi, pesanan muncul di sini otomatis (tanpa refresh).</p>' +
-      '<a href="digital.html" style="display:inline-block;margin-top:12px;padding:10px 18px;background:#1565c0;color:#fff;border-radius:10px;text-decoration:none;font-weight:700;font-size:13px;">Lihat Produk</a>' +
-      "</div>";
-    _antrianBusy = false;
+  const found = findOrderByKode(orders, kode);
+  if (found && isStatusSukses(found.status)) {
+    clearTrackedKode(kode);
+    input.value = "";
     return;
   }
 
-  list.innerHTML =
-    '<div style="font-size:12px;color:#8aa0b8;margin-bottom:10px;">' +
-    mine.length +
-    " pesanan · update otomatis</div>" +
-    mine.map(renderOrderCard).join("");
-  _antrianBusy = false;
+  input.value = kode;
 }
 
 async function cekStatus() {
-  const input = document.getElementById("kodeInput");
-  const kode = (input && input.value ? input.value : "").trim();
-  const box = document.getElementById("detailPesanan");
-  if (!kode) {
-    if (box) {
-      box.style.display = "block";
-      box.innerHTML = `<div style="color:#ef9a9a;font-size:13px;">Masukkan kode pesanan.</div>`;
-    }
+  const input = document.getElementById("searchOrder");
+  if (!input || !input.value.trim()) {
+    showStatusModal(
+      "Nomor Order Kosong",
+      row("Info", "Masukkan nomor order terlebih dahulu.") +
+        row("Contoh", "<code>VJ-2026-7129517</code>"),
+      "⚠️"
+    );
     return;
   }
-  saveTrackedKode(kode);
+
+  const kode = input.value.trim().toUpperCase();
   const orders = await fetchOrders();
-  const found = (orders || []).find((o) => String(o.kode || "").toUpperCase() === kode.toUpperCase());
-  if (!box) return;
-  box.style.display = "block";
-  if (!found) {
-    box.innerHTML = `<div style="color:#ffb74d;font-size:13px;">Kode <b>${escapeHtml(kode)}</b> belum ditemukan. Pastikan sudah order & bayar.</div>`;
-    return;
-  }
-  box.innerHTML = renderOrderCard(found);
-  renderAntrian();
-}
+  const found = findOrderByKode(orders, kode);
 
-window.cekStatus = cekStatus;
-window.saveTrackedKode = saveTrackedKode;
+  if (found) {
+    const st = found.status || "Belum Bayar";
+    const cls = statusClass(st);
+    const note = isStatusSukses(st)
+      ? '<div class="status-note">Pesanan sudah sukses. Kode antrian di kolom pencarian dihapus otomatis.</div>'
+      : '<div class="status-note">Kode antrian disimpan di kolom pencarian sampai status menjadi Sukses.</div>';
 
-async function unduhFilePesanan(kode) {
-  try {
-    var url = "";
-    if (window.VoxyyOrders && window.VoxyyOrders.getDeliveryFileByKode) {
-      url = await window.VoxyyOrders.getDeliveryFileByKode(kode);
+    showStatusModal(
+      "Status Pesanan",
+      row("Kode Antrian", "<code>" + escapeHtml(found.kode || kode) + "</code>") +
+        row("Nama", escapeHtml(found.nama || "-")) +
+        row("Paket", escapeHtml(found.paket || "-")) +
+        row("Status", escapeHtml(st), cls) +
+        row("Total", escapeHtml(found.total || "-")) +
+        row("Waktu", escapeHtml(found.waktu || "-")) +
+        note,
+      statusIcon(cls)
+    );
+
+    if (isStatusSukses(st)) {
+      clearTrackedKode(found.kode || kode);
+      syncSearchInput("");
+    } else {
+      saveTrackedKode(found.kode || kode);
+      syncSearchInput(found.kode || kode);
     }
-    if (!url) { alert("File belum tersedia. Coba refresh."); return; }
-    if (/^https?:\/\//i.test(url)) { window.open(url, "_blank"); return; }
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = "produk-" + kode;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-  } catch (e) {
-    alert("Gagal unduh: " + (e.message || e));
+  } else {
+    showStatusModal(
+      "Order Tidak Ditemukan",
+      row("Kode yang dicari", "<code>" + escapeHtml(kode) + "</code>") +
+        row("Info", "Nomor order tidak ditemukan di antrian global. Pastikan kode benar."),
+      "❌"
+    );
   }
 }
-window.unduhFilePesanan = unduhFilePesanan;
 
 document.addEventListener("DOMContentLoaded", function () {
-  renderAntrian(true);
-  // Realtime Firebase: order baru + bukti TF + status langsung muncul tanpa refresh
-  if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
-    var _deb;
-    window.VoxyyOrders.onOrdersChange(function () {
-      clearTimeout(_deb);
-      _deb = setTimeout(function () {
-        renderAntrian(false);
-      }, 200);
+  ensureStatusModal();
+  renderAntrian();
+  restoreSavedKodeToInput();
+
+  const inp = document.getElementById("searchOrder");
+  if (inp) {
+    inp.placeholder = "VJ-2026-xxxx";
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        cekStatus();
+      }
     });
   }
-  // Backup sangat jarang (bukan refresh terus)
-  setInterval(function () {
-    renderAntrian(false);
-  }, 60000);
+
+  // Realtime: order baru langsung muncul tanpa refresh
+  if (window.VoxyyOrders && typeof window.VoxyyOrders.onOrdersChange === "function") {
+    window.VoxyyOrders.onOrdersChange(function () {
+      renderAntrian();
+      restoreSavedKodeToInput();
+    });
+  } else {
+    setInterval(function () {
+      renderAntrian();
+    }, 60000);
+  }
 });

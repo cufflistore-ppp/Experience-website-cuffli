@@ -1,23 +1,40 @@
-const DIGITAL_CATALOG_VER = "5";
+const DIGITAL_CATALOG_VER = "6";
 
 const produkDigital = [
+{
+  id: 19,
+  slug: "jasa-edit-video-animasi-anime",
+  label: "JASA",
+  judul: "Jasa Edit Video Animasi Anime",
+  deskripsi: "Jasa edit video animasi anime. Bayar QRIS, lalu konfirmasi pesanan via WhatsApp.",
+  harga: 5000,
+  status: "TERSEDIA",
+  img: "logo.png",
+  directPay: true,
+  fitur: [
+    "Harga Rp 5.000",
+    "Jasa edit video animasi anime",
+    "Bayar langsung QRIS",
+    "Konfirmasi via WhatsApp"
+  ]
+},
   {
     id: 1,
-    slug: "apk-auto-sv",
-    label: "APK",
-    judul: "APK Auto SV Kontak",
+    slug: "jasa-buk-pernomor",
+    label: "JASA",
+    judul: "Jasa Buk Pernomor",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 2000,
+    harga: 1000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 1.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 2,
-    slug: "apk-logo-prem-mod",
-    label: "APK",
-    judul: "APK Logo Prem/Mod",
+    slug: "logo-mascot",
+    label: "LOGO",
+    judul: "Logo Mascot",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
     harga: 3000,
     status: "TERSEDIA",
@@ -27,18 +44,193 @@ const produkDigital = [
   },
   {
     id: 3,
-    slug: "script-bot-jaga-gbxjpm",
-    label: "SCRIPT",
-    judul: "Script Bot Jaga GBXJPM",
+    slug: "logo-muka",
+    label: "LOGO",
+    judul: "Logo Muka",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 7000,
+    harga: 4000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 4.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
     id: 4,
+    slug: "logo-faktor-ff",
+    label: "LOGO",
+    judul: "Logo Faktor FF",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 5,
+    slug: "jasa-web-no-antrian",
+    label: "JASA",
+    judul: "Jasa Buat Web No Antrian",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 5000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 6,
+    slug: "jasa-web-ada-antrian",
+    label: "JASA",
+    judul: "Jasa Buat Web Ada Antrian",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 10000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 10.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 7,
+    slug: "jasa-buat-fs",
+    label: "JASA",
+    judul: "Jasa Buat FS",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Pilih paket sesuai kebutuhan", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"],
+    variants: [
+      { nama: "1 HP + 1 iPad", harga: 2000 },
+      { nama: "1 HP + 1 iPad · Foto Live", harga: 4000 },
+      { nama: "2 HP + 1 iPad", harga: 3000 },
+      { nama: "2 HP + 1 iPad · Foto Live", harga: 5000 }
+    ]
+  },
+  {
+    id: 8,
+    slug: "jasa-logo-testimoni",
+    label: "JASA",
+    judul: "Jasa Bikin Logo Testimoni",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 9,
+    slug: "apk-auto-sv",
+    label: "APK",
+    judul: "APK Auto SV",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 1000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 1.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 10,
+    slug: "apk-pixellab",
+    label: "APK",
+    judul: "APK PixelLab",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 11,
+    slug: "web-suntik-all-sosmed",
+    label: "WEB",
+    judul: "Web Suntik All Sosmed",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 3000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 12,
+    slug: "all-nokos-fresh",
+    label: "NOKOS",
+    judul: "All Nokos Fresh",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 5000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 13,
+    slug: "suntik-saluran",
+    label: "SUNTIK",
+    judul: "Suntik Saluran",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 1000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Pilih jumlah P sesuai kebutuhan", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"],
+    variants: [
+      { nama: "100P", harga: 1000 },
+      { nama: "200P", harga: 2000 },
+      { nama: "300P", harga: 3000 },
+      { nama: "400P", harga: 4000 },
+      { nama: "500P", harga: 5000 },
+      { nama: "600P", harga: 6000 },
+      { nama: "700P", harga: 7000 },
+      { nama: "800P", harga: 8000 },
+      { nama: "900P", harga: 9000 },
+      { nama: "1.000P", harga: 10000 }
+    ]
+  },
+  {
+    id: 14,
+    slug: "jpm-by-doxy-joki",
+    label: "JPM",
+    judul: "JPM by Doxy Joki",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 2000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Pilih paket Grup / Saluran", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"],
+    variants: [
+      { nama: "Grup · 10 Member", harga: 2000 },
+      { nama: "Grup · 20 Member", harga: 5000 },
+      { nama: "Grup · 30 Member", harga: 7000 },
+      { nama: "Grup · 45 Member", harga: 12000 },
+      { nama: "Grup · 55 Member", harga: 16000 },
+      { nama: "Grup · 100 Member", harga: 30000 },
+      { nama: "Saluran · 10P", harga: 3000 },
+      { nama: "Saluran · 15P", harga: 4000 },
+      { nama: "Saluran · 25P", harga: 7000 },
+      { nama: "Saluran · 35P", harga: 11000 },
+      { nama: "Saluran · 45P", harga: 16000 }
+    ]
+  },
+  {
+    id: 15,
+    slug: "murid-web",
+    label: "MURID",
+    judul: "Murid Web",
+    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    harga: 5000,
+    status: "TERSEDIA",
+    img: "logo.png",
+    directPay: true,
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+  },
+  {
+    id: 16,
     slug: "murid-logo",
     label: "MURID",
     judul: "Murid Logo",
@@ -50,100 +242,28 @@ const produkDigital = [
     fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
-    id: 5,
+    id: 17,
     slug: "murid-nokos",
     label: "MURID",
     judul: "Murid Nokos",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 7000,
+    harga: 5000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   },
   {
-    id: 6,
-    slug: "nokos-wa-indonesia",
-    label: "NOKOS",
-    judul: "Nokos WA Indonesia",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 6000,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    fitur: ["Harga Rp 6.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 7,
-    slug: "nokos-shopee",
-    label: "NOKOS",
-    judul: "Nokos Shopee",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 2500,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 8,
-    slug: "nokos-lazada",
-    label: "NOKOS",
-    judul: "Nokos Lazada",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 2500,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    fitur: ["Harga Rp 2.500", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 9,
-    slug: "jasa-logo-teks",
-    label: "JASA",
-    judul: "Jasa Logo Teks",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 2000,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 10,
-    slug: "jasa-logo-udah-jadi",
-    label: "JASA",
-    judul: "Jasa Logo Yang Udah Jadi",
+    id: 18,
+    slug: "mursun-ful-tutor",
+    label: "MURID",
+    judul: "Mursun Ful Tutor",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
     harga: 3000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
     fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 11,
-    slug: "jasa-bikin-poster",
-    label: "JASA",
-    judul: "Jasa Bikin Poster",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 7000,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    fitur: ["Harga Rp 7.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
-  },
-  {
-    id: 12,
-    slug: "jasa-logo-muka",
-    label: "JASA",
-    judul: "Jasa Bikin Logo Pake Muka Lu Sendiri",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
-    harga: 8000,
-    status: "TERSEDIA",
-    img: "logo.png",
-    directPay: true,
-    fitur: ["Harga Rp 8.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   }
 ];
 
@@ -152,55 +272,21 @@ function formatRpDigital(n) {
 }
 
 function payUrl(judul, harga) {
-  return "pembayaran.html?paket=" + encodeURIComponent(judul) + "&total=" + encodeURIComponent(String(Number(String(harga||"0").replace(/[^\d]/g,""))||0));
-}
-
-function mapAdminToDigital(p) {
-  if (!p || p.status === "nonaktif") return null;
-  var kat = String(p.kategori || p.label || "digital").toUpperCase();
-  if (kat.indexOf("JOKI") >= 0) kat = "DIGITAL";
-  return {
-    id: p.id,
-    slug: String(p.id || p.judul || "").toLowerCase().replace(/\s+/g, "-"),
-    label: (p.label || kat || "DIGITAL").toString().toUpperCase(),
-    judul: p.judul || p.nama || "Produk",
-    deskripsi: p.deskripsi || "Produk digital VOXY MARKET.",
-    harga: Number(p.harga) || 0,
-    status: p.status === "aktif" || !p.status ? "TERSEDIA" : "HABIS",
-    img: p.img || p.foto || "logo.png",
-    directPay: true,
-    fitur: ["Harga Rp " + Number(p.harga || 0).toLocaleString("id-ID"), "Bayar QRIS di website", "Proses di panel admin"],
-    file: p.file || "",
-    kategori: (p.kategori || "").toLowerCase(),
-  };
+  return "pembayaran-digital.html?paket=" + encodeURIComponent(judul) + "&total=" + encodeURIComponent(String(harga));
 }
 
 function loadProdukDigital() {
-  // Prioritas: produk admin (Firebase/local) — biar tambah di admin langsung muncul di semua device
-  try {
-    var adminList = [];
-    var raw = localStorage.getItem("voxyy_produk_admin");
-    if (raw) {
-      var arr = JSON.parse(raw);
-      if (Array.isArray(arr)) adminList = arr;
-    }
-    if (adminList.length) {
-      var mapped = adminList.map(mapAdminToDigital).filter(Boolean);
-      if (mapped.length) {
-        produkDigital.length = 0;
-        mapped.forEach(function (p) { produkDigital.push(p); });
-        return;
-      }
-    }
-  } catch (e) {}
   try {
     if (localStorage.getItem("voxyy_digital_ver") !== DIGITAL_CATALOG_VER) {
       localStorage.removeItem("voxyy_digital");
       localStorage.setItem("voxyy_digital_ver", DIGITAL_CATALOG_VER);
     }
+
     const saved = localStorage.getItem("voxyy_digital");
+
     if (saved) {
       const parsed = JSON.parse(saved);
+
       if (Array.isArray(parsed) && parsed.length) {
         produkDigital.length = 0;
         parsed.forEach(p => produkDigital.push(p));
@@ -209,100 +295,38 @@ function loadProdukDigital() {
   } catch (e) {}
 }
 
-async function syncProdukDigitalFromCloud() {
-  try {
-    if (!window.VoxyyOrders) return;
-    if (window.VoxyyOrders.initFirebase) try { window.VoxyyOrders.initFirebase(); } catch (e) {}
-    if (window.VoxyyOrders.getProdukGlobal) {
-      var list = await window.VoxyyOrders.getProdukGlobal();
-      if (list && list.length) {
-        localStorage.setItem("voxyy_produk_admin", JSON.stringify(list));
-        loadProdukDigital();
-        renderDigitalList();
-      }
-    }
-    if (window.VoxyyOrders.onProdukChange) {
-      window.VoxyyOrders.onProdukChange(function (list) {
-        if (list && list.length) {
-          try { localStorage.setItem("voxyy_produk_admin", JSON.stringify(list)); } catch (e) {}
-          loadProdukDigital();
-          renderDigitalList();
-        }
-      });
-    }
-  } catch (e) {}
-}
-
-let digitalFilter = "all";
-let digitalSearch = "";
-
-function filterDigital(cat) {
-  digitalFilter = cat;
-  document.querySelectorAll("#digitalCats .cat-chip").forEach(b => {
-    b.classList.toggle("active", b.getAttribute("data-cat") === cat);
-  });
-  renderDigitalList();
-}
-
-function onSearchDigital() {
-  const inp = document.getElementById("searchDigital");
-  digitalSearch = (inp ? inp.value : "").trim().toLowerCase();
-  renderDigitalList();
-}
-
-function iconForDigital(p) {
-  const k = (p.label || "").toUpperCase();
-  if (k === "APK") return "fa-mobile-screen";
-  if (k === "SCRIPT") return "fa-code";
-  if (k === "NOKOS") return "fa-sim-card";
-  if (k === "MURID") return "fa-graduation-cap";
-  if (k === "JASA") return "fa-pen-ruler";
-  if (k.includes("GAME")) return "fa-gamepad";
-  return "fa-box";
-}
-
 function renderDigitalList() {
   const list = document.getElementById("digitalList");
   if (!list) return;
+
   loadProdukDigital();
 
-  let items = produkDigital.slice();
-  if (digitalFilter !== "all") {
-    items = items.filter(p => (p.label || "").toUpperCase() === digitalFilter.toUpperCase());
-  }
-  if (digitalSearch) {
-    items = items.filter(p => {
-      const t = ((p.judul || "") + " " + (p.deskripsi || "") + " " + (p.label || "")).toLowerCase();
-      return t.includes(digitalSearch);
-    });
-  }
+  list.innerHTML = produkDigital.map(p => {
+    const variants = Array.isArray(p.variants) && p.variants.length ? p.variants : null;
 
-  if (!items.length) {
-    list.innerHTML = '<div class="market-empty"><i class="fa-solid fa-box-open" style="font-size:32px;margin-bottom:8px;display:block;"></i>Tidak ada produk ditemukan.</div>';
-    return;
-  }
+    const actions = variants
+      ? `<div class="variant-grid">` + variants.map(v =>
+          `<a href="${payUrl(p.judul + " · " + v.nama, v.harga)}" class="btn-pesan variant-btn">${v.nama}<small>${formatRpDigital(v.harga)}</small></a>`
+        ).join("") + `</div>`
+      : `<a href="${payUrl(p.judul, p.harga)}" class="btn-pesan">Bayar Sekarang</a>`;
 
-  list.innerHTML = items.map(p => {
-    const href = payUrl(p.judul, p.harga);
-    const stok = p.stok !== undefined && p.stok !== -1 ? p.stok : Math.floor(15 + Math.random() * 20);
-    const icon = iconForDigital(p);
-    const desc = (p.deskripsi || "Produk digital berkualitas.").substring(0, 55);
     return `
-    <div class="m-card">
-      <div class="m-card-icon"><i class="fa-solid ${icon}"></i></div>
-      <div class="m-card-title">${p.judul}</div>
-      <div class="m-card-desc">${desc}</div>
-      <div class="m-card-meta">
-        <span class="stok">Stok ${stok}</span>
-        <span class="harga">${formatRpDigital(p.harga).replace(" ","")}</span>
-      </div>
-      <a href="${href}" class="m-card-btn">Beli Sekarang</a>
+    <div class="paket-card">
+      <span class="paket-label">${p.label || "DIGITAL"}</span>
+      <h3>${p.judul}</h3>
+      <p>${p.deskripsi || ""}</p>
+      <ul>
+        ${(p.fitur || []).map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join("")}
+      </ul>
+      <div class="harga">${variants ? "Mulai " + formatRpDigital(p.harga) : formatRpDigital(p.harga)}</div>
+      ${actions}
     </div>`;
   }).join("");
 }
 
 function tambahProdukDigital(data) {
   const id = produkDigital.length ? Math.max(...produkDigital.map(p => p.id)) + 1 : 1;
+
   produkDigital.push({
     id,
     label: data.label || "DIGITAL",
@@ -314,13 +338,9 @@ function tambahProdukDigital(data) {
     directPay: true,
     fitur: data.fitur || ["Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
   });
+
   localStorage.setItem("voxyy_digital", JSON.stringify(produkDigital));
   renderDigitalList();
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  renderDigitalList();
-  syncProdukDigitalFromCloud();
-  // max loading feel 3s — pastikan list ter-render
-  setTimeout(function () { try { renderDigitalList(); } catch (e) {} }, 3000);
-});
+document.addEventListener("DOMContentLoaded", renderDigitalList);

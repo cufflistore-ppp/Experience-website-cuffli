@@ -2,9 +2,19 @@
 [build]
   publish = "."
 
-# Proxy Firebase Auth handler (login Google)
+# Proxy Firebase Auth (login Google)
 [[redirects]]
   from = "/__/auth/*"
   to = "https://voxyyjoki.firebaseapp.com/__/auth/:splat"
   status = 200
   force = true
+
+# Headers audio
+[[headers]]
+  for = "/*.mp3"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+[[headers]]
+  for = "/*.m4a"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"

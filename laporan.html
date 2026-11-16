@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="auth-guard.js"></script>
+  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laporan - VOXY MARKET</title>
+  <title>Laporan - Doxy Joki</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
 
   <!-- Notif (hanya muncul jika ada order real) -->
   <div class="top-notif" id="topNotif" style="display:none;"></div>
@@ -33,7 +38,7 @@
       <label>Deskripsi</label>
       <textarea id="deskripsiLaporan" rows="4" placeholder="Jelaskan kendala transaksi secara lengkap..."></textarea>
 
-      <label>Foto Laporan (wajib minimal 1, maksimal 5)</label>
+      <label>Foto Pendukung (opsional, maksimal 3)</label>
       <input type="file" id="fotoLaporan" accept="image/*" multiple style="margin-bottom:10px;">
 
       <button class="btn-kirim" onclick="kirimLaporan()">
@@ -42,24 +47,17 @@
     </div>
   </div>
 
-              <nav class="bottom-nav nav-5">
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
-    <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
-    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-circle-user"></i><span>Akun</span></a>
+        <nav class="bottom-nav nav-6">
+    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+    <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
   <script src="telegram.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="auth.js"></script>
-  <script src="branding.js"></script>
   <script src="script.js"></script>
-  <script src="bgm.js"></script>
-  <script src="notif.js"></script>
+<script src="music.js"></script>
 </body>
 </html>

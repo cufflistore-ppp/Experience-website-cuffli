@@ -1,6 +1,6 @@
 /**
  * ================================================
- *  VOXY MARKET - Backend Antrian Global (GRATIS)
+ *  VOXYY JOKI - Backend Antrian Global (GRATIS)
  *  File ini di-paste ke Google Apps Script
  *  BUKAN dijalankan di website
  * ================================================
