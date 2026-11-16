@@ -1,12 +1,914 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0;url=index.html#/home">
-  <title>NAILONG TOOLS</title>
-  <script>location.replace("index.html#/home");</script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin - ELZKII JOKI</title>
+  <style>
+:root {
+  --pink-primary: #ff2d87;
+  --pink-dark: #e91e63;
+  --pink-light: #ff69b4;
+  --pink-soft: #ffe4f0;
+  --pink-bg: #fff5f9;
+  --white: #ffffff;
+  --gray: #f8f9fa;
+  --text: #2d2d2d;
+  --text-light: #666;
+  --shadow: 0 8px 30px rgba(255, 45, 135, 0.15);
+  --radius: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--pink-bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+  color: white;
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-area img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.logo-text span {
+  color: #ffe0f0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  background: rgba(255,255,255,0.15);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background: white;
+  color: var(--pink-primary);
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+/* Banner */
+.banner {
+  width: 100%;
+  overflow: hidden;
+  background: white;
+}
+
+.banner img {
+  width: 100%;
+  display: block;
+  max-height: 280px;
+  object-fit: cover;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(180deg, var(--pink-soft) 0%, var(--pink-bg) 100%);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 2.4rem;
+  color: var(--pink-primary);
+  margin-bottom: 12px;
+  text-shadow: 0 2px 10px rgba(255,45,135,0.2);
+}
+
+.hero p {
+  font-size: 1.15rem;
+  color: var(--text-light);
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+  color: white;
+  box-shadow: 0 6px 20px rgba(255,45,135,0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255,45,135,0.5);
+}
+
+.btn-outline {
+  background: white;
+  color: var(--pink-primary);
+  border: 2px solid var(--pink-primary);
+}
+
+.btn-outline:hover {
+  background: var(--pink-primary);
+  color: white;
+}
+
+.btn-wa {
+  background: #25D366;
+  color: white;
+}
+
+.btn-wa:hover {
+  background: #1da851;
+  transform: translateY(-2px);
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.section-title h2 {
+  font-size: 2rem;
+  color: var(--pink-primary);
+  margin-bottom: 8px;
+}
+
+.section-title p {
+  color: var(--text-light);
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid #ffe0f0;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(255,45,135,0.2);
+}
+
+.card h3 {
+  color: var(--pink-primary);
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.card .price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--pink-dark);
+  margin: 12px 0;
+}
+
+.card .duration {
+  display: inline-block;
+  background: var(--pink-soft);
+  color: var(--pink-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+/* Product list */
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  border-left: 4px solid var(--pink-primary);
+  transition: all 0.2s;
+}
+
+.product-item:hover {
+  background: var(--pink-soft);
+  transform: translateX(4px);
+}
+
+.product-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.product-price {
+  font-weight: 800;
+  color: var(--pink-primary);
+  margin: 0 16px;
+  white-space: nowrap;
+}
+
+/* About */
+.about-box {
+  background: white;
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.about-box h3 {
+  color: var(--pink-primary);
+  margin-bottom: 16px;
+}
+
+.contact-info {
+  background: var(--pink-soft);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.contact-info a {
+  color: var(--pink-primary);
+  font-weight: 700;
+}
+
+.note {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+/* Queue / Status */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-process { background: #cce5ff; color: #004085; }
+.status-done { background: #d4edda; color: #155724; }
+
+/* Footer */
+.footer {
+  background: linear-gradient(135deg, var(--pink-dark), #c2185b);
+  color: white;
+  padding: 40px 20px 24px;
+  margin-top: 60px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+
+.footer h4 {
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.footer a {
+  color: #ffe0f0;
+  display: block;
+  margin-bottom: 6px;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: white;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+/* Admin */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, var(--pink-primary), var(--pink-dark));
+  color: white;
+  padding: 24px 0;
+  flex-shrink: 0;
+}
+
+.sidebar .logo {
+  padding: 0 20px 24px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  margin-bottom: 16px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 24px;
+  color: rgba(255,255,255,0.85);
+  transition: all 0.2s;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 32px;
+  background: var(--pink-bg);
+}
+
+.admin-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table th {
+  background: var(--pink-soft);
+  color: var(--pink-primary);
+  font-weight: 700;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #ffe0f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--pink-primary);
+}
+
+.login-box {
+  max-width: 420px;
+  margin: 80px auto;
+  background: white;
+  padding: 40px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.login-box img {
+  width: 80px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: var(--pink-dark);
+    flex-direction: column;
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .product-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .product-price {
+    margin: 0;
+  }
+}
+
+/* Utility */
+.text-center { text-align: center; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-2 { margin-bottom: 16px; }
+.flex { display: flex; }
+.gap-2 { gap: 12px; }
+.flex-wrap { flex-wrap: wrap; }
+.justify-center { justify-content: center; }
+
+/* SAFETY FALLBACK - pink theme always visible */
+body { background: #fff5f9 !important; color: #2d2d2d; font-family: system-ui, sans-serif; }
+.header { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; }
+.btn-primary { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; border: none; padding: 12px 24px; border-radius: 50px; font-weight: 700; }
+.btn-outline { border: 2px solid #ff2d87; color: #ff2d87; background: white; padding: 10px 22px; border-radius: 50px; font-weight: 700; }
+.btn-wa { background: #25D366 !important; color: white !important; }
+.card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(255,45,135,0.15); border: 1px solid #ffe0f0; }
+.price { color: #e91e63; font-weight: 800; font-size: 1.4rem; }
+
+</style>
+<link rel="icon" href="../assets/1000332841.jpg">
 </head>
 <body>
-  <a href="index.html#/home">Continue to NAILONG TOOLS</a>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="logo">ELZKII Admin</div>
+      <a href="dashboard.html" class="active">📊 Dashboard</a>
+      <a href="#queue" onclick="showSection('queue')">📋 Antrian Joki</a>
+      <a href="#products" onclick="showSection('products')">📦 Kirim Produk</a>
+      <a href="#trx" onclick="showSection('trx')">💳 Ubah TRX</a>
+      <a href="../index.html">🌐 Lihat Website</a>
+      <a href="#" onclick="logout()" style="margin-top:auto;color:#ffcdd2;">🚪 Logout</a>
+    </aside>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <h1 style="color:var(--pink-primary);font-size:1.6rem;">Dashboard Admin</h1>
+        <div id="adminInfo" style="font-size:0.9rem;color:#666;"></div>
+      </div>
+
+      <!-- Dashboard overview -->
+      <div id="section-dashboard">
+        <div class="card-grid">
+          <div class="card">
+            <h3>Total Antrian</h3>
+            <div class="price" id="statQueue">0</div>
+          </div>
+          <div class="card">
+            <h3>Pending</h3>
+            <div class="price" id="statPending">0</div>
+          </div>
+          <div class="card">
+            <h3>Selesai</h3>
+            <div class="price" id="statDone">0</div>
+          </div>
+        </div>
+        <div class="admin-card mt-3">
+          <h3 style="color:var(--pink-primary);margin-bottom:12px;">Quick Actions</h3>
+          <div class="flex gap-2 flex-wrap">
+            <button class="btn btn-primary" onclick="showSection('queue')">Kelola Antrian</button>
+            <button class="btn btn-outline" onclick="showSection('products')">Kirim Produk</button>
+            <button class="btn btn-outline" onclick="showSection('trx')">Ubah Status TRX</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Queue management -->
+      <div id="section-queue" style="display:none;">
+        <div class="admin-card">
+          <h3 style="color:var(--pink-primary);margin-bottom:16px;">Kelola Antrian Joki</h3>
+          
+          <div class="form-group">
+            <label>Nama / Store</label>
+            <input type="text" id="qName" placeholder="Nama store / buyer">
+          </div>
+          <div class="form-group">
+            <label>Paket (contoh: 3 Hari / 2k)</label>
+            <input type="text" id="qPaket" placeholder="3 Hari">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="qStatus">
+              <option value="pending">Pending</option>
+              <option value="process">Proses</option>
+              <option value="done">Selesai</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addQueue()">Tambah ke Antrian</button>
+        </div>
+
+        <div class="admin-card">
+          <h3 style="color:var(--pink-primary);margin-bottom:12px;">Daftar Antrian</h3>
+          <div style="overflow-x:auto;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nama</th>
+                  <th>Paket</th>
+                  <th>Status</th>
+                  <th>Waktu</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="adminQueueBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Send product -->
+      <div id="section-products" style="display:none;">
+        <div class="admin-card">
+          <h3 style="color:var(--pink-primary);margin-bottom:16px;">Kirim Produk via Web</h3>
+          <p style="color:#666;margin-bottom:16px;">Upload file produk lalu generate link download untuk buyer (demo local).</p>
+          
+          <div class="form-group">
+            <label>Nama Produk</label>
+            <input type="text" id="prodName" placeholder="APK SPAM OTP">
+          </div>
+          <div class="form-group">
+            <label>File Produk</label>
+            <input type="file" id="prodFile">
+          </div>
+          <div class="form-group">
+            <label>Catatan / Password (opsional)</label>
+            <input type="text" id="prodNote" placeholder="Password: 1234">
+          </div>
+          <button class="btn btn-primary" onclick="generateProductLink()">Generate Link Download</button>
+          
+          <div id="prodResult" style="display:none;margin-top:20px;padding:16px;background:var(--pink-soft);border-radius:12px;">
+            <p><strong>Link siap dikirim ke buyer:</strong></p>
+            <input type="text" id="prodLink" readonly style="width:100%;margin:8px 0;padding:10px;border-radius:8px;border:1px solid #ffb6c1;">
+            <button class="btn btn-outline" onclick="copyProdLink()" style="margin-top:8px;">Salin Link</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRX status -->
+      <div id="section-trx" style="display:none;">
+        <div class="admin-card">
+          <h3 style="color:var(--pink-primary);margin-bottom:16px;">Ubah Status TRX</h3>
+          <p style="color:#666;margin-bottom:16px;">Update status transaksi / order.</p>
+          
+          <div class="form-group">
+            <label>ID / Nama Order</label>
+            <input type="text" id="trxId" placeholder="Nama store atau ID">
+          </div>
+          <div class="form-group">
+            <label>Status Baru</label>
+            <select id="trxStatus">
+              <option value="pending">Pending</option>
+              <option value="process">Proses</option>
+              <option value="done">Selesai / Paid</option>
+              <option value="cancel">Cancel</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="updateTrx()">Update Status</button>
+          <p id="trxMsg" style="margin-top:12px;color:var(--pink-primary);"></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const ALLOWED_EMAIL = "cufflistore@gmail.com";
+
+    // Auth check
+    function checkAuth() {
+      try {
+        const admin = JSON.parse(localStorage.getItem("elzkii_admin") || "null");
+        if (!admin || admin.email !== ALLOWED_EMAIL) {
+          window.location.href = "login.html";
+          return null;
+        }
+        document.getElementById("adminInfo").textContent = "Login: " + admin.email;
+        return admin;
+      } catch {
+        window.location.href = "login.html";
+        return null;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("elzkii_admin");
+      window.location.href = "login.html";
+    }
+
+    function getQueue() {
+      try {
+        return JSON.parse(localStorage.getItem("elzkii_queue") || "[]");
+      } catch { return []; }
+    }
+
+    function saveQueue(data) {
+      localStorage.setItem("elzkii_queue", JSON.stringify(data));
+    }
+
+    function updateStats() {
+      const q = getQueue();
+      document.getElementById("statQueue").textContent = q.length;
+      document.getElementById("statPending").textContent = q.filter(x => x.status === "pending").length;
+      document.getElementById("statDone").textContent = q.filter(x => x.status === "done").length;
+    }
+
+    function renderAdminQueue() {
+      const data = getQueue();
+      const tbody = document.getElementById("adminQueueBody");
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center">Belum ada data</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = data.map((item, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${item.name}</td>
+          <td>${item.paket}</td>
+          <td><span class="status-badge status-${item.status}">${item.status.toUpperCase()}</span></td>
+          <td>${item.time}</td>
+          <td>
+            <button class="btn btn-outline" style="padding:4px 10px;font-size:0.8rem;" onclick="setStatus(${i}, 'process')">Proses</button>
+            <button class="btn btn-primary" style="padding:4px 10px;font-size:0.8rem;" onclick="setStatus(${i}, 'done')">Selesai</button>
+            <button class="btn" style="padding:4px 10px;font-size:0.8rem;background:#eee;" onclick="deleteQueue(${i})">Hapus</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function addQueue() {
+      const name = document.getElementById("qName").value.trim();
+      const paket = document.getElementById("qPaket").value.trim();
+      const status = document.getElementById("qStatus").value;
+      if (!name || !paket) {
+        alert("Nama dan paket wajib diisi");
+        return;
+      }
+      const data = getQueue();
+      data.unshift({
+        name,
+        paket,
+        status,
+        time: new Date().toLocaleString("id-ID")
+      });
+      saveQueue(data);
+      document.getElementById("qName").value = "";
+      document.getElementById("qPaket").value = "";
+      renderAdminQueue();
+      updateStats();
+      alert("Berhasil ditambahkan ke antrian");
+    }
+
+    function setStatus(idx, status) {
+      const data = getQueue();
+      if (data[idx]) {
+        data[idx].status = status;
+        saveQueue(data);
+        renderAdminQueue();
+        updateStats();
+      }
+    }
+
+    function deleteQueue(idx) {
+      if (!confirm("Hapus item ini?")) return;
+      const data = getQueue();
+      data.splice(idx, 1);
+      saveQueue(data);
+      renderAdminQueue();
+      updateStats();
+    }
+
+    function showSection(name) {
+      document.getElementById("section-dashboard").style.display = name === "dashboard" ? "block" : "none";
+      document.getElementById("section-queue").style.display = name === "queue" ? "block" : "none";
+      document.getElementById("section-products").style.display = name === "products" ? "block" : "none";
+      document.getElementById("section-trx").style.display = name === "trx" ? "block" : "none";
+      if (name === "queue") renderAdminQueue();
+    }
+
+    // Product send (demo)
+    let lastFileData = null;
+    document.getElementById("prodFile")?.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        lastFileData = {
+          name: file.name,
+          data: ev.target.result,
+          type: file.type
+        };
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function generateProductLink() {
+      const name = document.getElementById("prodName").value.trim() || "produk";
+      const note = document.getElementById("prodNote").value.trim();
+      if (!lastFileData) {
+        alert("Pilih file dulu");
+        return;
+      }
+      // Demo: store in localStorage and create a fake link
+      const id = "prod_" + Date.now();
+      localStorage.setItem(id, JSON.stringify({
+        name,
+        note,
+        fileName: lastFileData.name,
+        data: lastFileData.data,
+        type: lastFileData.type
+      }));
+      const link = window.location.origin + window.location.pathname.replace("dashboard.html", "") + "download.html?id=" + id;
+      // Since we don't have download.html yet, just show data URL tip
+      document.getElementById("prodResult").style.display = "block";
+      document.getElementById("prodLink").value = "DATA URL (demo) - gunakan tombol di bawah untuk download langsung, atau salin ID: " + id;
+      window._lastProdId = id;
+      alert("File disimpan di browser (demo). Nanti diganti Firebase Storage.");
+    }
+
+    function copyProdLink() {
+      if (window._lastProdId) {
+        const item = JSON.parse(localStorage.getItem(window._lastProdId));
+        // Create download
+        const a = document.createElement("a");
+        a.href = item.data;
+        a.download = item.fileName;
+        a.click();
+        alert("File didownload. Kirim file ini ke buyer via WA atau link Firebase nanti.");
+      }
+    }
+
+    function updateTrx() {
+      const id = document.getElementById("trxId").value.trim();
+      const status = document.getElementById("trxStatus").value;
+      if (!id) {
+        alert("Isi ID / Nama dulu");
+        return;
+      }
+      // Update matching queue item
+      const data = getQueue();
+      let found = false;
+      data.forEach(item => {
+        if (item.name.toLowerCase().includes(id.toLowerCase())) {
+          item.status = status === "cancel" ? "pending" : status;
+          found = true;
+        }
+      });
+      if (found) {
+        saveQueue(data);
+        document.getElementById("trxMsg").textContent = "Status berhasil diupdate untuk: " + id;
+        updateStats();
+      } else {
+        document.getElementById("trxMsg").textContent = "Tidak ditemukan antrian dengan nama tersebut. Status dicatat lokal saja.";
+      }
+    }
+
+    // Init
+    checkAuth();
+    updateStats();
+    showSection("dashboard");
+  </script>
 </body>
 </html>

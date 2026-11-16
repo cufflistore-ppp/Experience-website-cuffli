@@ -1,168 +1,675 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="auth-guard.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tentang - VOXY MARKET</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tentang - ELZKII JOKI</title>
   <style>
-    .about-hero { text-align:center; padding:20px 12px 8px; }
-    .about-hero img { width:72px; height:72px; border-radius:16px; object-fit:cover; }
-    .about-hero h2 { margin:12px 0 4px; font-size:20px; }
-    .about-hero p { color:#8aa0b8; font-size:13px; }
-    .about-card {
-      background:#12182a; border:1px solid #1e2a45; border-radius:14px;
-      padding:14px 16px; margin:10px 12px; font-size:13px; color:#cfd8e3; line-height:1.55;
-    }
-    .contact-list { padding:0 12px 90px; display:flex; flex-direction:column; gap:10px; }
-    .contact-item {
-      display:flex; align-items:center; gap:12px; padding:12px 14px;
-      background:#12182a; border:1px solid #1e2a45; border-radius:12px;
-      text-decoration:none; color:inherit;
-    }
-    .contact-item .icon-wrap {
-      width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center;
-      background:rgba(33,150,243,0.15); color:#42a5f5; flex-shrink:0;
-    }
-    .contact-item .icon-wrap.wa { background:rgba(37,211,102,0.15); color:#25d366; }
-  </style>
+:root {
+  --pink-primary: #ff2d87;
+  --pink-dark: #e91e63;
+  --pink-light: #ff69b4;
+  --pink-soft: #ffe4f0;
+  --pink-bg: #fff5f9;
+  --white: #ffffff;
+  --gray: #f8f9fa;
+  --text: #2d2d2d;
+  --text-light: #666;
+  --shadow: 0 8px 30px rgba(255, 45, 135, 0.15);
+  --radius: 16px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--pink-bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+  color: white;
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(233, 30, 99, 0.3);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-area img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.logo-text span {
+  color: #ffe0f0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-links a {
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  background: rgba(255,255,255,0.15);
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  background: white;
+  color: var(--pink-primary);
+}
+
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+/* Banner */
+.banner {
+  width: 100%;
+  overflow: hidden;
+  background: white;
+}
+
+.banner img {
+  width: 100%;
+  display: block;
+  max-height: 280px;
+  object-fit: cover;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(180deg, var(--pink-soft) 0%, var(--pink-bg) 100%);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 2.4rem;
+  color: var(--pink-primary);
+  margin-bottom: 12px;
+  text-shadow: 0 2px 10px rgba(255,45,135,0.2);
+}
+
+.hero p {
+  font-size: 1.15rem;
+  color: var(--text-light);
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--pink-primary), var(--pink-dark));
+  color: white;
+  box-shadow: 0 6px 20px rgba(255,45,135,0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255,45,135,0.5);
+}
+
+.btn-outline {
+  background: white;
+  color: var(--pink-primary);
+  border: 2px solid var(--pink-primary);
+}
+
+.btn-outline:hover {
+  background: var(--pink-primary);
+  color: white;
+}
+
+.btn-wa {
+  background: #25D366;
+  color: white;
+}
+
+.btn-wa:hover {
+  background: #1da851;
+  transform: translateY(-2px);
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.section-title h2 {
+  font-size: 2rem;
+  color: var(--pink-primary);
+  margin-bottom: 8px;
+}
+
+.section-title p {
+  color: var(--text-light);
+}
+
+/* Cards */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid #ffe0f0;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(255,45,135,0.2);
+}
+
+.card h3 {
+  color: var(--pink-primary);
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.card .price {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--pink-dark);
+  margin: 12px 0;
+}
+
+.card .duration {
+  display: inline-block;
+  background: var(--pink-soft);
+  color: var(--pink-primary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+/* Product list */
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  border-left: 4px solid var(--pink-primary);
+  transition: all 0.2s;
+}
+
+.product-item:hover {
+  background: var(--pink-soft);
+  transform: translateX(4px);
+}
+
+.product-name {
+  font-weight: 600;
+  flex: 1;
+}
+
+.product-price {
+  font-weight: 800;
+  color: var(--pink-primary);
+  margin: 0 16px;
+  white-space: nowrap;
+}
+
+/* About */
+.about-box {
+  background: white;
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.about-box h3 {
+  color: var(--pink-primary);
+  margin-bottom: 16px;
+}
+
+.contact-info {
+  background: var(--pink-soft);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.contact-info a {
+  color: var(--pink-primary);
+  font-weight: 700;
+}
+
+.note {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+  font-size: 0.95rem;
+}
+
+/* Queue / Status */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-process { background: #cce5ff; color: #004085; }
+.status-done { background: #d4edda; color: #155724; }
+
+/* Footer */
+.footer {
+  background: linear-gradient(135deg, var(--pink-dark), #c2185b);
+  color: white;
+  padding: 40px 20px 24px;
+  margin-top: 60px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 32px;
+}
+
+.footer h4 {
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.footer a {
+  color: #ffe0f0;
+  display: block;
+  margin-bottom: 6px;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: white;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+/* Admin */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 260px;
+  background: linear-gradient(180deg, var(--pink-primary), var(--pink-dark));
+  color: white;
+  padding: 24px 0;
+  flex-shrink: 0;
+}
+
+.sidebar .logo {
+  padding: 0 20px 24px;
+  font-size: 1.3rem;
+  font-weight: 800;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  margin-bottom: 16px;
+}
+
+.sidebar a {
+  display: block;
+  padding: 12px 24px;
+  color: rgba(255,255,255,0.85);
+  transition: all 0.2s;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+  background: rgba(255,255,255,0.15);
+  color: white;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 32px;
+  background: var(--pink-bg);
+}
+
+.admin-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.table th {
+  background: var(--pink-soft);
+  color: var(--pink-primary);
+  font-weight: 700;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #ffe0f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--pink-primary);
+}
+
+.login-box {
+  max-width: 420px;
+  margin: 80px auto;
+  background: white;
+  padding: 40px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.login-box img {
+  width: 80px;
+  border-radius: 50%;
+  margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: var(--pink-dark);
+    flex-direction: column;
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .product-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .product-price {
+    margin: 0;
+  }
+}
+
+/* Utility */
+.text-center { text-align: center; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-2 { margin-bottom: 16px; }
+.flex { display: flex; }
+.gap-2 { gap: 12px; }
+.flex-wrap { flex-wrap: wrap; }
+.justify-center { justify-content: center; }
+
+/* SAFETY FALLBACK - pink theme always visible */
+body { background: #fff5f9 !important; color: #2d2d2d; font-family: system-ui, sans-serif; }
+.header { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; }
+.btn-primary { background: linear-gradient(135deg, #ff2d87, #e91e63) !important; color: white !important; border: none; padding: 12px 24px; border-radius: 50px; font-weight: 700; }
+.btn-outline { border: 2px solid #ff2d87; color: #ff2d87; background: white; padding: 10px 22px; border-radius: 50px; font-weight: 700; }
+.btn-wa { background: #25D366 !important; color: white !important; }
+.card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 8px 30px rgba(255,45,135,0.15); border: 1px solid #ffe0f0; }
+.price { color: #e91e63; font-weight: 800; font-size: 1.4rem; }
+
+</style>
+<link rel="icon" href="assets/1000332841.jpg">
 </head>
 <body>
   <header class="header">
-    <div class="brand">
-      <img src="logo.png" class="logo" alt="VOXY MARKET">
-      <div>
-        <h1>VOXY <span style="color:#1565c0">MARKET</span> <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Tentang kami</p>
-      </div>
+    <div class="nav-container">
+      <a href="index.html" class="logo-area">
+        <img src="assets/1000332841.jpg" alt="ELZKII Logo">
+        <div class="logo-text">ELZKII <span>JOKI</span></div>
+      </a>
+      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html">Beranda</a>
+        <a href="joki.html">Jasa Joki</a>
+        <a href="produk.html">Produk</a>
+        <a href="antrian.html">Antrian</a>
+        <a href="tentang.html" class="active">Tentang</a>
+        <a href="admin/login.html">Admin</a>
+      </nav>
     </div>
   </header>
 
-  <div class="about-hero">
-    <img src="logo.png" alt="VOXY MARKET" class="logo">
-    <h2 id="aboutNama">VOXY MARKET</h2>
-    <p>Digital Store · Order resmi lewat website</p>
+  <div class="banner">
+    <img src="assets/1000332754.jpg" alt="ELZKII Banner">
   </div>
 
-  <div class="about-card" id="aboutDesc">
-    <strong id="aboutCopy">VOXY MARKET</strong> adalah pusat produk digital &amp; jasa. Order, bayar, dan terima produk langsung dari website.
+  <div class="container">
+    <div class="section-title">
+      <h2>ℹ️ Tentang ELZKII JOKI</h2>
+      <p>Info admin & channel resmi</p>
+    </div>
+
+    <div class="about-box">
+      <div style="text-align:center;margin-bottom:24px;">
+        <img src="assets/1000332841.jpg" alt="Logo" style="width:120px;border-radius:50%;border:4px solid var(--pink-primary);">
+        <h3 style="margin-top:12px;">ELZKII STR</h3>
+        <p style="color:var(--text-light);">Admin Utama</p>
+      </div>
+
+      <div class="contact-info">
+        <h4 style="color:var(--pink-primary);margin-bottom:8px;">📱 Kontak Admin</h4>
+        <p><strong>ADMIN UTAMA :</strong> [ELZKII STR]</p>
+        <p>• <a href="https://wa.me/6282364307699" target="_blank">wa.me/6282364307699</a></p>
+      </div>
+
+      <div class="note">
+        <strong>NOTE:</strong> SELAIN NO DI ATAS WASPADA CLONE / PENIPUAN
+      </div>
+
+      <div class="mt-3">
+        <h4 style="color:var(--pink-primary);margin-bottom:12px;">📢 Channel Resmi</h4>
+        <p style="margin-bottom:8px;">
+          <strong>LINK SL :</strong><br>
+          <a href="https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08" target="_blank" style="word-break:break-all;">
+            https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08
+          </a>
+        </p>
+        <p>
+          <strong>LINK SL KEDUA:</strong><br>
+          <a href="https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P" target="_blank" style="word-break:break-all;">
+            https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P
+          </a>
+        </p>
+      </div>
+
+      <div class="mt-3 text-center">
+        <a href="https://wa.me/6282364307699" target="_blank" class="btn btn-wa">Chat Admin Sekarang</a>
+      </div>
+    </div>
   </div>
 
-  <h3 style="padding:8px 14px 0;font-size:14px;color:#90caf9;">Kontak &amp; Saluran</h3>
-  <p style="padding:0 14px;font-size:12px;color:#6a7a90;margin:4px 0 8px;">Dikelola admin — update otomatis di semua device.</p>
-  <div class="contact-list" id="contactList"></div>
+  <footer class="footer">
+    <div class="footer-content">
+      <div>
+        <h4>ELZKII JOKI</h4>
+        <p>Jasa joki & produk premium terpercaya.</p>
+      </div>
+      <div>
+        <h4>Menu</h4>
+        <a href="joki.html">Jasa Joki</a>
+        <a href="produk.html">Produk</a>
+        <a href="antrian.html">Cek Antrian</a>
+        <a href="tentang.html">Tentang Kami</a>
+      </div>
+      <div>
+        <h4>Kontak</h4>
+        <a href="https://wa.me/6282364307699" target="_blank">Admin Utama WA</a>
+        <a href="https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08" target="_blank">Channel 1</a>
+        <a href="https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P" target="_blank">Channel 2</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2026 ELZKII JOKI / ELZKII STR. All rights reserved.
+    </div>
+  </footer>
+<script>
+function toggleMenu() {
+  var nav = document.getElementById("navLinks");
+  if (nav) nav.classList.toggle("open");
+}
+</script>
 
-  <nav class="bottom-nav nav-5">
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i><span>Produk</span></a>
-    <a href="kategori.html" class="nav-item"><i class="fa-solid fa-grip"></i><span>Kategori</span></a>
-    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clipboard-list"></i><span>Pesanan</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-circle-user"></i><span>Akun</span></a>
-  </nav>
-
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="auth.js"></script>
-  <script src="auth-guard.js"></script>
-  <script src="branding.js"></script>
-  <script>
-    function iconFor(name, url) {
-      var n = String(name || "").toLowerCase();
-      var u = String(url || "").toLowerCase();
-      if (n.indexOf("wa") >= 0 || u.indexOf("wa.me") >= 0 || u.indexOf("whatsapp") >= 0)
-        return { cls: "wa", icon: "fa-brands fa-whatsapp" };
-      if (n.indexOf("telegram") >= 0 || u.indexOf("t.me") >= 0)
-        return { cls: "", icon: "fa-brands fa-telegram" };
-      if (n.indexOf("instagram") >= 0 || u.indexOf("instagram") >= 0)
-        return { cls: "", icon: "fa-brands fa-instagram" };
-      if (n.indexOf("youtube") >= 0 || u.indexOf("youtube") >= 0 || u.indexOf("youtu.be") >= 0)
-        return { cls: "", icon: "fa-brands fa-youtube" };
-      if (n.indexOf("channel") >= 0 || n.indexOf("saluran") >= 0)
-        return { cls: "wa", icon: "fa-solid fa-bullhorn" };
-      return { cls: "", icon: "fa-solid fa-link" };
-    }
-
-    function buildLinks(s) {
-      var list = [];
-      if (s.customLinks && Array.isArray(s.customLinks) && s.customLinks.length) {
-        s.customLinks.forEach(function (L) {
-          if (L && L.url) list.push({ name: L.name || "Link", url: L.url });
-        });
-      } else {
-        if (s.linkChannel) list.push({ name: "Saluran / Channel", url: s.linkChannel });
-        if (s.linkCs) list.push({ name: "CS WhatsApp", url: s.linkCs });
-        if (s.linkTelegram) list.push({ name: "Telegram", url: s.linkTelegram });
-        if (s.linkIg) list.push({ name: "Instagram", url: s.linkIg });
-      }
-      // WA admin selalu ada
-      var wa = String(s.waAdmin || "6285151982250").replace(/\D/g, "");
-      if (wa) {
-        var hasWa = list.some(function (x) {
-          return String(x.url || "").indexOf("wa.me") >= 0;
-        });
-        if (!hasWa) list.unshift({ name: "WhatsApp Admin", url: "https://wa.me/" + wa });
-      }
-      return list;
-    }
-
-    function renderContacts(s) {
-      s = s || {};
-      var nama = s.namaToko || "VOXY MARKET";
-      var elN = document.getElementById("aboutNama");
-      var elC = document.getElementById("aboutCopy");
-      if (elN) elN.textContent = nama;
-      if (elC) elC.textContent = nama;
-      var box = document.getElementById("contactList");
-      if (!box) return;
-      var links = buildLinks(s);
-      if (!links.length) {
-        box.innerHTML = '<p style="color:#6a7a90;font-size:13px;padding:8px;">Belum ada link kontak.</p>';
-        return;
-      }
-      box.innerHTML = links.map(function (L) {
-        var ic = iconFor(L.name, L.url);
-        return (
-          '<a class="contact-item" href="' + String(L.url).replace(/"/g, "") + '" target="_blank" rel="noopener">' +
-          '<div class="icon-wrap ' + ic.cls + '"><i class="' + ic.icon + '"></i></div>' +
-          '<div><div style="font-weight:700;font-size:14px;">' + String(L.name || "Link").replace(/</g, "") + '</div>' +
-          '<div style="font-size:11px;color:#6a7a90;word-break:break-all;">' + String(L.url || "").replace(/</g, "") + '</div></div></a>'
-        );
-      }).join("");
-    }
-
-    async function boot() {
-      var s = {};
-      try {
-        s = JSON.parse(localStorage.getItem("voxyy_settings") || "{}");
-      } catch (e) {}
-      renderContacts(s);
-      try {
-        if (window.VoxyyOrders && window.VoxyyOrders.initFirebase) window.VoxyyOrders.initFirebase();
-        if (window.VoxyyOrders && window.VoxyyOrders.getSettings) {
-          var cloud = await window.VoxyyOrders.getSettings();
-          if (cloud && typeof cloud === "object") {
-            s = Object.assign({}, s, cloud);
-            localStorage.setItem("voxyy_settings", JSON.stringify(s));
-            renderContacts(s);
-          }
-        }
-        if (window.VoxyyOrders && window.VoxyyOrders.onSettingsChange) {
-          window.VoxyyOrders.onSettingsChange(function (ns) {
-            if (ns) {
-              localStorage.setItem("voxyy_settings", JSON.stringify(ns));
-              renderContacts(ns);
-            }
-          });
-        }
-      } catch (e) {}
-    }
-    document.addEventListener("DOMContentLoaded", boot);
-  </script>
-  <script src="bgm.js"></script>
 </body>
 </html>
