@@ -424,7 +424,7 @@
         </div>
       </div>
     </div>
-    <iframe id="frame" src="about:blank" title="Konten Doxy Joki" allow="autoplay; fullscreen" loading="eager" referrerpolicy="same-origin"></iframe>
+    <iframe id="frame" src="about:blank" title="Doxy Joki" allow="autoplay"></iframe>
 
     <nav class="shell-nav" id="shellNav">
       <a href="joki.html" data-page="joki.html"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
@@ -509,28 +509,18 @@
 
       function navigate(page) {
         if (!page) return;
-        let target;
-        try {
-          // Semua halaman lokal diarahkan dari root domain agar URL tetap benar
-          // walaupun shell dibuka melalui path atau query tertentu.
-          target = new URL(String(page), window.location.origin + "/");
-        } catch (err) {
-          console.error("Alamat halaman tidak valid:", page, err);
+        if (page.indexOf("http") === 0) {
+          window.open(page, "_blank");
           return;
         }
-
-        if (target.origin !== window.location.origin) {
-          window.open(target.href, "_blank", "noopener");
-          return;
-        }
-
-        frame.src = target.href;
-
+        const cleanPage = page.split("#")[0];
+        frame.src = cleanPage;
+        
         if (!isAdminMode) {
-          const currentPage = target.pathname.split("/").pop() || "index.html";
           nav.querySelectorAll("a").forEach(function (a) {
-            const navPage = (a.getAttribute("data-page") || "").split("?")[0].split("/").pop();
-            a.classList.toggle("active", currentPage === navPage);
+            const p = (a.getAttribute("data-page") || "").split("?")[0];
+            const base = cleanPage.split("?")[0];
+            a.classList.toggle("active", base === p);
           });
         }
         if (wantMusic) kickPlay();
@@ -691,7 +681,8 @@
 
       // Menerima pesan dari dalam iframe (ketukan 5x pada logo di halaman dalam/home.html)
       window.addEventListener("message", function (e) {
-        if (e.origin !== window.location.origin || e.source !== frame.contentWindow) return;
+        // Hanya terima navigasi/admin dari iframe pada origin website yang sama.
+        if (e.origin !== window.location.origin) return;
         if (!e.data) return;
         if (e.data.type === "doxy-admin-open") {
           openAdminModal();
