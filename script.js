@@ -141,14 +141,18 @@ async function buatPesanan() {
   const timePart = String(Date.now()).slice(-3);
   const kode = `DJ-2026-${rand}${timePart}`;
 
+  const isJokiOrder = String(window.orderType || "").toLowerCase().includes("joki");
   let order = {
     kode,
     nama,
     wa,
     catatan,
+    formatJoki: catatan,
     total,
     paket: (window.orderPaketName || window.orderType || "Joki Kontak"),
-    status: "Belum Bayar",
+    // Order joki langsung masuk antrian admin; produk lain tetap melalui pembayaran.
+    status: isJokiOrder ? "Proses" : "Belum Bayar",
+    jenisOrder: isJokiOrder ? "Joki Kontak" : (window.orderType || "Produk"),
     waktu: new Date().toLocaleString("id-ID")
   };
 
@@ -172,7 +176,18 @@ async function buatPesanan() {
   if (namaEl) namaEl.value = "";
   if (waEl) waEl.value = "";
 
-  // Redirect ke halaman pembayaran QRIS (Telegram dikirim saat customer klik "Saya Sudah Bayar")
+  // Joki: setelah dikirim langsung ke halaman antrian, tanpa diarahkan ke WhatsApp/pembayaran.
+  if (isJokiOrder) {
+    if (typeof showSiteModal === "function") {
+      showSiteModal("Pesanan joki berhasil dikirim dan masuk ke antrian admin.", "success");
+    }
+    setTimeout(() => {
+      window.location.href = `antrian.html?kode=${encodeURIComponent(kode)}`;
+    }, 650);
+    return;
+  }
+
+  // Produk non-joki tetap melalui halaman pembayaran QRIS.
   window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
 }
 
