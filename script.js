@@ -150,8 +150,8 @@ async function buatPesanan() {
     formatJoki: catatan,
     total,
     paket: (window.orderPaketName || window.orderType || "Joki Kontak"),
-    // Order joki langsung masuk antrian admin; produk lain tetap melalui pembayaran.
-    status: isJokiOrder ? "Proses" : "Belum Bayar",
+    // Semua pesanan wajib melewati pembayaran dan upload bukti TF terlebih dahulu.
+    status: "Belum Bayar",
     jenisOrder: isJokiOrder ? "Joki Kontak" : (window.orderType || "Produk"),
     waktu: new Date().toLocaleString("id-ID")
   };
@@ -170,24 +170,13 @@ async function buatPesanan() {
   }
   if (kode) localStorage.setItem("voxyy_saved_kode", kode);
 
-  // Reset form fields
+  // Reset form fields setelah data pesanan berhasil disimpan.
   const namaEl = document.getElementById("nama");
   const waEl = document.getElementById("wa");
   if (namaEl) namaEl.value = "";
   if (waEl) waEl.value = "";
 
-  // Joki: setelah dikirim langsung ke halaman antrian, tanpa diarahkan ke WhatsApp/pembayaran.
-  if (isJokiOrder) {
-    if (typeof showSiteModal === "function") {
-      showSiteModal("Pesanan joki berhasil dikirim dan masuk ke antrian admin.", "success");
-    }
-    setTimeout(() => {
-      window.location.href = `antrian.html?kode=${encodeURIComponent(kode)}`;
-    }, 650);
-    return;
-  }
-
-  // Produk non-joki tetap melalui halaman pembayaran QRIS.
+  // Semua jenis pesanan menuju pembayaran; belum tampil di antrian sebelum bukti TF dikonfirmasi.
   window.location.href = `pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(total)}`;
 }
 

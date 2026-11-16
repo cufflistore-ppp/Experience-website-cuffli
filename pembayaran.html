@@ -147,6 +147,22 @@
       color: #888;
       margin-top: 6px;
     }
+    .format-order-box {
+      display:none;
+      text-align:left;
+      white-space:pre-wrap;
+      overflow-wrap:anywhere;
+      background:#0a0e1a;
+      border:1px solid #1a2740;
+      border-radius:10px;
+      padding:12px;
+      margin:14px 0;
+      color:#ddd;
+      font-size:12px;
+      line-height:1.65;
+    }
+    .format-order-box b { color:#64b5f6; display:block; margin-bottom:6px; }
+    .form-group-bukti .hint { color:#888; font-size:11px; margin-top:7px; }
   </style>
 </head>
 <body>
@@ -197,24 +213,27 @@
       </div>
       <p class="qris-label">QRIS</p>
 
+      <div class="format-order-box" id="formatOrderBox"><b>FORMAT / DETAIL PESANAN</b><span id="formatOrderText"></span></div>
+
       <p class="info-bayar" id="infoBayar">
         1. Scan <b>QRIS</b> di atas pakai e-wallet / mobile banking<br>
         2. Transfer sesuai <b>nominal total</b> di atas<br>
         3. Upload foto <b>bukti transfer</b> pada form di bawah<br>
-        4. Klik <b>Saya Sudah Bayar</b> untuk mengirim data ke WhatsApp Admin.
+        4. Klik <b>Konfirmasi Pembayaran</b>. Pesanan dan bukti TF akan masuk ke halaman Antrian serta panel Admin untuk diperiksa.
       </p>
 
       <!-- FORM UPLOAD BUKTI TRANSFER -->
       <div class="form-group-bukti">
         <label for="inputBuktiTf"><i class="fa-solid fa-receipt"></i> Upload Bukti Transfer (Wajib)</label>
         <input type="file" id="inputBuktiTf" accept="image/*" onchange="previewBukti(this)">
+        <p class="hint">Gunakan foto/screenshot bukti transfer yang jelas. Bukti ini akan terlihat oleh Admin.</p>
         <div class="preview-container" id="previewContainer">
           <img id="imgPreview" src="" alt="Pratinjau Bukti TF">
         </div>
       </div>
 
       <button class="btn-konfirmasi" id="btnKonfirmasi" onclick="konfirmasiPembayaran()">
-        <i class="fa-solid fa-check-circle"></i> Saya Sudah Bayar
+        <i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran
       </button>
 
       <div class="status-box" id="statusBox">
@@ -255,11 +274,28 @@
     function previewBukti(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
+        if (!file.type.startsWith("image/")) {
+          alert("File bukti harus berupa gambar.");
+          input.value = "";
+          return;
+        }
         const reader = new FileReader();
         reader.onload = function(e) {
-          buktiTfBase64 = e.target.result;
-          document.getElementById("imgPreview").src = buktiTfBase64;
-          document.getElementById("previewContainer").style.display = "block";
+          const img = new Image();
+          img.onload = function() {
+            // Kompres bukti agar lebih ringan saat disimpan ke Firebase.
+            const maxSide = 1200;
+            const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.round(img.width * scale);
+            canvas.height = Math.round(img.height * scale);
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            buktiTfBase64 = canvas.toDataURL("image/jpeg", 0.72);
+            document.getElementById("imgPreview").src = buktiTfBase64;
+            document.getElementById("previewContainer").style.display = "block";
+          };
+          img.onerror = function() { alert("Gambar bukti tidak dapat dibaca."); };
+          img.src = e.target.result;
         };
         reader.readAsDataURL(file);
       }
@@ -342,6 +378,11 @@
       window.currentOrder = order;
 
       document.getElementById("kodeOrder").textContent = order.kode;
+      const formatText = order.formatJoki || order.catatan || order.detail || "-";
+      if (formatText && formatText !== "-") {
+        document.getElementById("formatOrderText").textContent = formatText;
+        document.getElementById("formatOrderBox").style.display = "block";
+      }
       if (order.kode && order.status !== "Sukses" && order.status !== "SELESAI") {
         localStorage.setItem("doxyy_saved_kode", order.kode);
       }
@@ -357,7 +398,11 @@
       document.getElementById("totalBayar").textContent = formatRupiah(totalNum);
     }
 
-        async function konfirmasiPembayaran() {
+    async function konfirmasiPembayaran() {
+      if (!currentOrder || !currentOrder.kode) {
+        alert("Data pesanan tidak ditemukan. Silakan ulangi pemesanan.");
+        return;
+      }
       if (!buktiTfBase64) {
         alert("Harap upload foto bukti transfer terlebih dahulu!");
         return;
@@ -365,50 +410,39 @@
 
       const btn = document.getElementById("btnKonfirmasi");
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim ke WhatsApp...';
-
-      const order = currentOrder || {};
-      const finalAmt = order.finalAmount || Number(String(order.total).replace(/[^\d]/g, "")) || 0;
-
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim konfirmasi...';
+      const order = currentOrder;
       const updateData = {
         status: "Menunggu Verifikasi",
         buktiTf: buktiTfBase64,
-        buktiTF: buktiTfBase64
+        buktiTF: buktiTfBase64,
+        buktiTransfer: buktiTfBase64,
+        waktuKonfirmasi: new Date().toLocaleString("id-ID"),
+        paymentConfirmedAt: Date.now()
       };
 
       try {
         if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrderByKode === "function") {
           await window.VoxyyOrders.updateOrderByKode(order.kode, updateData);
         } else {
-          let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
+          const orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
           const idx = orders.findIndex(o => o.kode === order.kode);
-          if (idx >= 0) {
-            orders[idx].status = "Menunggu Verifikasi";
-            orders[idx].buktiTf = buktiTfBase64;
-            orders[idx].buktiTF = buktiTfBase64;
-            localStorage.setItem("voxyy_orders", JSON.stringify(orders));
-          }
+          if (idx < 0) throw new Error("Pesanan tidak ditemukan di penyimpanan browser.");
+          orders[idx] = { ...orders[idx], ...updateData };
+          localStorage.setItem("voxyy_orders", JSON.stringify(orders));
         }
-      } catch(e) {
-        console.error("Gagal update order:", e);
+        document.getElementById("statusBox").innerHTML = '✅ <b>Konfirmasi berhasil dikirim!</b><br>Pesanan dan bukti transfer masuk ke Antrian untuk diperiksa Admin.';
+        document.getElementById("statusBox").classList.add("show");
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Berhasil dikonfirmasi';
+        setTimeout(() => {
+          window.location.href = `antrian.html?kode=${encodeURIComponent(order.kode)}`;
+        }, 900);
+      } catch (e) {
+        console.error("Gagal menyimpan konfirmasi pembayaran:", e);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran';
+        alert("Konfirmasi belum berhasil disimpan. Periksa koneksi internet lalu coba lagi.");
       }
-
-      document.getElementById("statusBox").classList.add("show");
-
-      // Langsung buka WhatsApp tanpa setTimeout agar tidak diblokir browser HP
-      const nomorAdminWhatsApp = "6281252384673";
-      
-      const pesanWa = encodeURIComponent(
-        `HALLO ADMIN DOXY\n\n` +
-        `Saya sudah melakukan pembayaran untuk joki. Berikut adalah format joki yang sudah diisi:\n\n` +
-        `🆔 Kode Pesanan: *${order.kode || "-"}*\n` +
-        `📦 Paket/Layanan: *${order.paket || "Jasa Joki"}*\n` +
-        `📝 Catatan / Detail: *${order.catatan || "-"}*\n` +
-        `💰 Total Pembayaran: *${formatRupiah(finalAmt)}*\n\n` +
-        `Bukti transfer sudah saya upload di web. Mohon segera diproses ya kak. Terima kasih!`
-      );
-
-      window.top.location.href = `https://wa.me/${nomorAdminWhatsApp}?text=${pesanWa}`;
     }
 
     document.addEventListener("DOMContentLoaded", loadOrderData);
