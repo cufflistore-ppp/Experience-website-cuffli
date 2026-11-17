@@ -1,4 +1,4 @@
-const JOKI_CATALOG_VER = "8";
+const JOKI_CATALOG_VER = "9";
 
 const paketJoki = [
   {
@@ -99,7 +99,7 @@ function renderPaketJoki() {
   if (!container) return;
 
   container.innerHTML = paketJoki.map(p => {
-    const href = "pesan.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga)) 
+    const href = "pesan.html?type=joki&id=" + encodeURIComponent(String(p.id)) + "&paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga)) 
     const badgeHtml = p.badge
       ? `<span class="badge-laris">${p.badge}</span>`
       : "";

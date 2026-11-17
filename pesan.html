@@ -73,7 +73,7 @@
     <a href="javascript:history.back()" class="back"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
 
     <div class="order-header" style="margin-bottom:16px;">
-      <img src="logo.png" class="order-logo"  >
+      <img src="logo.jpg" alt="Logo Doxy Joki" class="order-logo"  >
       <div>
         <h3 id="paketJudul">Joki Kontak</h3>
         <p>Doxy Joki · <span class="tag">Proses Cepat</span> · <span class="tag aman">Aman</span></p>
@@ -217,6 +217,8 @@ Wa.me/628…
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "joki";
       const id = parseInt(params.get("id") || "1", 10);
+      const selectedPaketName = params.get("paket") || "";
+      const selectedTotal = parseInt(String(params.get("total") || "").replace(/[^\d]/g, ""), 10) || 0;
 
       window.isJaspost = false;
       window.orderType = "Joki Kontak";
@@ -291,8 +293,15 @@ Wa.me/628…
           document.getElementById("namaPaketRow").textContent = paket.judul;
           document.getElementById("hargaPaket").textContent = "Rp " + Number(paket.harga).toLocaleString("id-ID");
           if (typeof updateTotal === "function") updateTotal();
-          window.orderPaketName = paket.judul;
+          // Simpan identitas paket yang benar sampai pembayaran dan panel admin.
+          window.orderPaketName = selectedPaketName || paket.judul;
           window.orderType = "Joki Kontak";
+          window.orderPaketId = paket.id;
+          if (selectedTotal > 0) baseHarga = selectedTotal;
+          document.getElementById("paketJudul").textContent = window.orderPaketName;
+          document.getElementById("namaPaketRow").textContent = window.orderPaketName;
+          document.getElementById("hargaPaket").textContent = "Rp " + Number(baseHarga).toLocaleString("id-ID");
+          if (typeof updateTotal === "function") updateTotal();
         }
       }
     });
