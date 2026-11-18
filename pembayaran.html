@@ -1,452 +1,215 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pembayaran - Doxy Joki</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran - VOXY MARKET</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .pay-container {
-      max-width: 420px;
-      margin: 0 auto;
-      padding: 16px 14px 90px;
-    }
-    .pay-card {
-      background: #10182a;
-      border: 1px solid #1a2740;
-      border-radius: 16px;
-      padding: 20px 16px;
-      text-align: center;
-    }
-    .pay-card h2 {
-      font-size: 18px;
-      margin-bottom: 4px;
-      color: #2196f3;
-    }
-    .kode {
-      background: #0a0e1a;
-      border: 1px dashed #2196f355;
-      border-radius: 8px;
-      padding: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin: 12px 0;
-      color: #2196f3;
-      word-break: break-all;
-    }
-    .total-bayar {
-      font-size: 28px;
-      font-weight: 800;
-      color: #2196f3;
-      margin: 8px 0 4px;
-    }
-    .rincian {
-      font-size: 12px;
-      color: #aaa;
-      margin-bottom: 14px;
-      line-height: 1.5;
-    }
-    .qris-box-big {
-      background: #fff;
-      border-radius: 12px;
-      padding: 12px;
-      margin: 12px auto;
-      max-width: 280px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .qris-box-big img {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 6px;
-    }
-    .info-bayar {
-      font-size: 12px;
-      color: #bbb;
-      text-align: left;
-      line-height: 1.6;
-      margin: 14px 0;
-      background: #0a0e1a;
-      padding: 12px;
-      border-radius: 10px;
-    }
-    .form-group-bukti {
-      text-align: left;
-      margin: 14px 0;
-      background: #0a0e1a;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #1a2740;
-    }
-    .form-group-bukti label {
-      font-size: 12px;
-      color: #bbb;
-      display: block;
-      margin-bottom: 6px;
-      font-weight: 600;
-    }
-    .form-group-bukti input[type="file"] {
-      width: 100%;
-      background: #10182a;
-      border: 1px solid #2196f355;
-      padding: 8px;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 12px;
-    }
-    .preview-container {
-      margin-top: 8px;
-      display: none;
-      text-align: center;
-    }
-    .preview-container img {
-      max-height: 140px;
-      border-radius: 6px;
-      border: 1px solid #2196f3;
-    }
-    .btn-konfirmasi {
-      width: 100%;
-      background: linear-gradient(135deg, #2196f3, #1565c0);
-      color: #0a0e1a;
-      border: none;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-konfirmasi:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-    .status-box {
-      display: none;
-      margin-top: 14px;
-      padding: 12px;
-      border-radius: 10px;
-      font-size: 13px;
-      line-height: 1.5;
-      background: #0d2137;
-      color: #64b5f6;
-      border: 1px solid #2d5a00;
-      text-align: left;
-    }
-    .status-box.show {
-      display: block;
-    }
-    .qris-label {
-      font-size: 11px;
-      color: #888;
-      margin-top: 6px;
-    }
-    .format-order-box {
-      display:none;
-      text-align:left;
-      white-space:pre-wrap;
-      overflow-wrap:anywhere;
-      background:#0a0e1a;
-      border:1px solid #1a2740;
-      border-radius:10px;
-      padding:12px;
-      margin:14px 0;
-      color:#ddd;
-      font-size:12px;
-      line-height:1.65;
-    }
-    .format-order-box b { color:#64b5f6; display:block; margin-bottom:6px; }
-    .form-group-bukti .hint { color:#888; font-size:11px; margin-top:7px; }
-  </style>
-</head>
-<body>
-
-  <audio id="bgMusic" loop preload="auto">
-    <source src="music.m4a" type="audio/mp4">
-  </audio>
-
-  <header class="header">
-    <div class="brand">
-      <img src="logo.jpg" alt="Doxy Joki" class="logo">
-      <div>
-        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pembayaran</p>
-      </div>
-    </div>
-  
-    <div class="header-right">
-      <div class="music-controls" id="musicControls">
-        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
-          <i class="fa-solid fa-pause" id="musicIcon"></i>
-        </button>
-        <span class="music-label">Lagu</span>
-      </div>
-    </div>
-  </header>
-
-  <div class="top-notif" id="topNotif" style="display:none;"></div>
-
-  <div class="pay-container">
-    <div class="pay-card">
-      <h2>Scan QRIS untuk Bayar</h2>
-      <p style="font-size:13px;color:#aaa;">Order kamu sudah dibuat</p>
-      
-      <div class="kode" id="kodeOrder">DJ-2026-0000</div>
-      
-      <div class="total-bayar" id="totalBayar">Rp 0</div>
-      <div class="rincian" id="rincianBayar" style="display:none;"></div>
-
-      <!-- FOTO QRIS -->
-      <div class="qris-box-big" id="qrisContainer">
-        <img src="qris.jpg" alt="QRIS" id="qrisImg"
-             onerror="this.style.display='none'; document.getElementById('qrisFallback').style.display='block';">
-        <div id="qrisFallback" style="display:none;padding:30px 10px;color:#333;font-size:13px;font-weight:600;">
-          <i class="fa-solid fa-image" style="font-size:32px;color:#ff9800;display:block;margin-bottom:8px;"></i>
-          Letakkan file <b>qris.jpg</b><br>di folder website
-        </div>
-      </div>
-      <p class="qris-label">QRIS</p>
-
-      <div class="format-order-box" id="formatOrderBox"><b>FORMAT / DETAIL PESANAN</b><span id="formatOrderText"></span></div>
-
-      <p class="info-bayar" id="infoBayar">
-        1. Scan <b>QRIS</b> di atas pakai e-wallet / mobile banking<br>
-        2. Transfer sesuai <b>nominal total</b> di atas<br>
-        3. Upload foto <b>bukti transfer</b> pada form di bawah<br>
-        4. Klik <b>Konfirmasi Pembayaran</b>. Pesanan dan bukti TF akan masuk ke halaman Antrian serta panel Admin untuk diperiksa.
-      </p>
-
-      <!-- FORM UPLOAD BUKTI TRANSFER -->
-      <div class="form-group-bukti">
-        <label for="inputBuktiTf"><i class="fa-solid fa-receipt"></i> Upload Bukti Transfer (Wajib)</label>
-        <input type="file" id="inputBuktiTf" accept="image/*" onchange="previewBukti(this)">
-        <p class="hint">Gunakan foto/screenshot bukti transfer yang jelas. Bukti ini akan terlihat oleh Admin.</p>
-        <div class="preview-container" id="previewContainer">
-          <img id="imgPreview" src="" alt="Pratinjau Bukti TF">
-        </div>
-      </div>
-
-      <button class="btn-konfirmasi" id="btnKonfirmasi" onclick="konfirmasiPembayaran()">
-        <i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran
-      </button>
-
-      <div class="status-box" id="statusBox">
-        ✅ <b>Konfirmasi Berhasil!</b><br>
-        Mengalihkan ke WhatsApp Admin...
-      </div>
-    </div>
-
-    <p style="text-align:center;margin-top:16px;font-size:12px;color:#888;">
-      Ada kendala? <a href="laporan.html" style="color:#2196f3;">Kirim Laporan</a>
-    </p>
-  </div>
-
-  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
-
-  <nav class="bottom-nav nav-6">
-    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
-    <a href="digital.html" class="nav-item active"><i class="fa-solid fa-box"></i><span>Digital</span></a>
-    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
-    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
-  </nav>
-
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script>
-  <script src="script.js"></script>
-  <script>
-    let currentOrder = null;
-    let buktiTfBase64 = "";
+</head>
+<body>
+  <header class="app-header">
+    <button class="icon-btn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span>Pembayaran</span></div>
+    <div style="width:40px"></div>
+  </header>
+  <main class="page">
+    <div class="pay-card">
+      <h2>Ringkasan Pesanan</h2>
+      <div class="pay-row"><span>Produk</span><span id="namaProduk">-</span></div>
+      <div class="pay-row"><span>Kategori</span><span id="kategori">-</span></div>
+      <div class="pay-row"><span>Total</span><span id="totalHarga">-</span></div>
+    </div>
+    <div class="pay-card">
+      <h2>Transfer / QRIS</h2>
+      <div class="qris-box">
+        <img id="qrisImg" src="qris.jpg" alt="QRIS" onerror="this.style.display='none'">
+        <p style="font-size:13px;color:var(--muted)">Scan QRIS atau transfer ke rekening di bawah</p>
+      </div>
+      <div class="rekening" id="rekeningBox">Memuat info rekening...</div>
+    </div>
+    <div class="pay-card">
+      <h2>Upload Bukti Transfer</h2>
+      <label class="upload-area" for="buktiFile">
+        <i data-lucide="upload" class="upload-icon"></i>
+        <div class="upload-text">Pilih foto bukti TF</div>
+        <div class="upload-hint">Dari galeri atau kamera • JPG / PNG</div>
+        <input type="file" id="buktiFile" accept="image/*">
+      </label>
+      <div class="preview-bukti-wrap">
+        <img id="previewBukti" class="preview-bukti hidden" alt="Preview bukti transfer">
+      </div>
+    </div>
+    <button class="btn" style="width:100%;margin-top:8px" id="btnKonfirmasi" onclick="konfirmasi()">Konfirmasi Pembayaran</button>
+  </main>
+    <div class="site-footer voxy-landing-footer">
+    <div class="voxy-lf-brand">
+      <img src="logo.png" alt="">
+      <div>
+        <div class="voxy-lf-name">VOXY MARKET</div>
+        <div class="voxy-lf-tag">Produk Digital, Akun Premium &amp; Jasa</div>
+      </div>
+    </div>
+    <p class="voxy-lf-desc">Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.</p>
+    <a href="home.html" class="btn voxy-lf-cta">Lihat Produk</a>
+    <div class="voxy-lf-sec">Bantuan</div>
+    <div class="voxy-lf-links">
+      <a href="riwayat.html">Cek Pesanan</a>
+      <a href="home.html">Buat Pesanan</a>
+      <a href="chat.html">Chat Admin</a>
+    </div>
+    <div class="voxy-lf-sec">Layanan</div>
+    <div class="voxy-lf-list">
+      Akun Premium<br>
+      Produk Digital / APK<br>
+      Jasa Suntik<br>
+      Jasa Lainnya
+    </div>
+    <div class="voxy-lf-copy">
+      Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
+      Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
+    </div>
+  </div>
 
-    function formatRupiah(n) {
-      return "Rp " + Number(n).toLocaleString("id-ID");
+  <script src="global-orders.js"></script>
+  <script>
+    lucide.createIcons();
+    var produk = null, buktiDataUrl = null, existingKode = null, existingOrder = null;
+    var q = new URLSearchParams(location.search);
+    existingKode = q.get("kode") || null;
+
+    function loadSettings() {
+      return VOXY.getSettings().then(function (s) {
+        s = s || {};
+        document.getElementById("rekeningBox").innerHTML = s.rekening
+          ? ("<b>Rekening:</b><br>" + s.rekening)
+          : "Hubungi admin untuk rekening.";
+        if (s.qrisUrl) document.getElementById("qrisImg").src = s.qrisUrl;
+        VOXY.applyBrandingToPage();
+      });
     }
 
-    function previewBukti(input) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        if (!file.type.startsWith("image/")) {
-          alert("File bukti harus berupa gambar.");
-          input.value = "";
+    VOXY.requireAuth().then(function (user) {
+      loadSettings();
+      if (existingKode) {
+        return VOXY.getOrder(existingKode).then(function (o) {
+          if (!o) {
+            alert("Pesanan tidak ditemukan");
+            location.href = "home.html";
+            return;
+          }
+          existingOrder = o;
+          document.getElementById("namaProduk").textContent = o.nama || o.namaProduk || "-";
+          document.getElementById("kategori").textContent = o.kategori || o.jenis || "-";
+          document.getElementById("totalHarga").textContent = VOXY.formatRp(o.harga);
+        });
+      }
+      try { produk = JSON.parse(sessionStorage.getItem("produkDipilih") || "null"); } catch (e) { produk = null; }
+      if (!produk) { alert("Produk tidak ditemukan"); window.location.href = "home.html"; return; }
+      document.getElementById("namaProduk").textContent = produk.nama || "-";
+      document.getElementById("kategori").textContent = produk.kategori || "-";
+      var hargaTampil = (function () {
+        var flash = produk.flashSale === true || produk.flashSale === "true" || produk.flashSale === 1;
+        if (flash && produk.flashEnd && Date.now() >= Number(produk.flashEnd)) flash = false;
+        var normal = Number(produk.harga) || 0;
+        var disc = Number(produk.flashDiskon) || 0;
+        if (flash && disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
+        var fh = Number(produk.flashHarga);
+        if (flash && fh > 0) return fh;
+        return normal;
+      })();
+      document.getElementById("totalHarga").textContent = VOXY.formatRp(hargaTampil);
+    });
+
+    document.getElementById("buktiFile").addEventListener("change", function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      VOXY.fileToDataURL(file).then(function (url) {
+        buktiDataUrl = url;
+        var prev = document.getElementById("previewBukti");
+        prev.src = url; prev.classList.remove("hidden");
+      }).catch(function () { alert("Gagal membaca file"); });
+    });
+
+    function konfirmasi() {
+      if (!buktiDataUrl) { alert("Upload bukti transfer dulu"); return; }
+      var btn = document.getElementById("btnKonfirmasi");
+      btn.disabled = true; btn.textContent = "Mengirim...";
+
+      /* Order sudah ada (joki / pre-created) */
+      if (existingKode && existingOrder) {
+        VOXY.simpanBukti(existingKode, buktiDataUrl)
+          .then(function () {
+            return VOXY.updateOrder(existingKode, {
+              status: "Menunggu",
+              buktiUploaded: true,
+              updatedAt: Date.now()
+            });
+          })
+          .then(function () {
+            if (VOXY.showToast) VOXY.showToast("Bukti TF terkirim. Menunggu admin.");
+            setTimeout(function () { location.href = "riwayat.html"; }, 400);
+          })
+          .catch(function (err) {
+            alert(err.message || "Gagal kirim bukti");
+            btn.disabled = false; btn.textContent = "Konfirmasi Pembayaran";
+          });
+        return;
+      }
+
+      if (!produk) return;
+      var user = VOXY.getCurrentUser();
+      var harga = (function () {
+        var flash = produk.flashSale === true || produk.flashSale === "true" || produk.flashSale === 1;
+        if (flash && produk.flashEnd && Date.now() >= Number(produk.flashEnd)) flash = false;
+        var normal = Number(produk.harga) || 0;
+        var disc = Number(produk.flashDiskon) || 0;
+        if (flash && disc > 0 && disc < 100) return Math.round(normal * (100 - disc) / 100);
+        var fh = Number(produk.flashHarga);
+        if (flash && fh > 0) return fh;
+        return normal;
+      })();
+      var order = {
+        kode: VOXY.generateKode(),
+        produkId: produk.id || "",
+        nama: produk.nama || "",
+        namaProduk: produk.nama || "",
+        kategori: produk.kategori || "",
+        harga: harga,
+        hargaAsli: Number(produk.harga) || 0,
+        gambar: produk.gambar || "",
+        status: "Menunggu",
+        email: user ? user.email : "",
+        uid: user ? user.uid : "",
+        linkTarget: "",
+        catatan: "",
+        tipeKirim: produk.tipeKirim || "link",
+        buktiUploaded: true
+      };
+      VOXY.simpanOrder(order).then(function (kode) {
+        return VOXY.simpanBukti(kode, buktiDataUrl).then(function () { return kode; });
+      }).then(function (kode) {
+        sessionStorage.removeItem("produkDipilih");
+        var tipe = produk.tipeKirim || "";
+        var kat = (produk.kategori || "").toLowerCase();
+        if (tipe === "link_target" || produk.butuhTarget || kat.indexOf("suntik") !== -1) {
+          sessionStorage.setItem("kodePesanan", kode);
+          window.location.href = "jasa-link.html?kode=" + encodeURIComponent(kode);
           return;
         }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            // Kompres bukti agar lebih ringan saat disimpan ke Firebase.
-            const maxSide = 1200;
-            const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-            const canvas = document.createElement("canvas");
-            canvas.width = Math.round(img.width * scale);
-            canvas.height = Math.round(img.height * scale);
-            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-            buktiTfBase64 = canvas.toDataURL("image/jpeg", 0.72);
-            document.getElementById("imgPreview").src = buktiTfBase64;
-            document.getElementById("previewContainer").style.display = "block";
-          };
-          img.onerror = function() { alert("Gambar bukti tidak dapat dibaca."); };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      }
+        if (VOXY.showToast) VOXY.showToast("Pesanan terkirim. Menunggu verifikasi admin.");
+        setTimeout(function () { window.location.href = "riwayat.html"; }, 400);
+      }).catch(function (err) {
+        alert(err.message || "Gagal menyimpan pesanan");
+        btn.disabled = false; btn.textContent = "Konfirmasi Pembayaran";
+      });
     }
-
-    async function loadOrderData() {
-      const paramsEarly = new URLSearchParams(window.location.search);
-      const paketEarly = (paramsEarly.get("paket") || "").trim();
-      if (paketEarly && !paramsEarly.get("kode")) {
-        const totalNum = parseInt(String(paramsEarly.get("total") || "0").replace(/[^\d]/g, ""), 10) || 0;
-        const rand = Math.floor(1000 + Math.random() * 9000);
-        const timePart = String(Date.now()).slice(-3);
-        const kode = `DJ-2026-${rand}${timePart}`;
-        const isWebsite = /website/i.test(paketEarly);
-        const isDigitalProduct = !isWebsite && (window.location.pathname.includes("digital") || paramsEarly.get("digital") === "1" || /apk|script| akun |prem|netflix|spotify|canva|viu|digital/i.test(paketEarly));
-        
-        const order = {
-          kode,
-          nama: "Customer",
-          wa: "-",
-          catatan: paketEarly + " — bayar QRIS, konfirmasi via web panel",
-          total: "Rp " + totalNum.toLocaleString("id-ID"),
-          paket: paketEarly,
-          status: "Belum Bayar",
-          waktu: new Date().toLocaleString("id-ID"),
-          createdAt: Date.now(),
-          finalAmount: totalNum,
-          isWebsite: isWebsite,
-          isDigital: isDigitalProduct
-        };
-        if (window.VoxyyOrders && typeof window.VoxyyOrders.addOrder === "function") {
-          await window.VoxyyOrders.addOrder(order);
-        } else {
-          let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-          orders.unshift(order);
-          localStorage.setItem("voxyy_orders", JSON.stringify(orders));
-        }
-        if (kode) localStorage.setItem("doxyy_saved_kode", kode);
-        const extra = isDigitalProduct ? "&digital=1" : (isWebsite ? "&website=1" : "");
-        window.location.replace(`pembayaran.html?kode=${encodeURIComponent(kode)}&total=${encodeURIComponent(order.total)}${extra}`);
-        return;
-      }
-
-      let orders = [];
-      if (window.VoxyyOrders && typeof window.VoxyyOrders.getOrders === "function") {
-        orders = await window.VoxyyOrders.getOrders();
-      } else {
-        orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-      }
-      const params = new URLSearchParams(window.location.search);
-      const kodeParam = params.get("kode");
-
-      let order = null;
-      if (kodeParam) {
-        order = orders.find(o => o.kode === kodeParam) || null;
-      }
-      if (!order && orders.length > 0) {
-        order = orders[0];
-      }
-
-      if (!order) {
-        const total = params.get("total") || "Rp 5.000";
-        order = {
-          kode: kodeParam || "DJ-2026-0000",
-          total: total,
-          nama: "-",
-          wa: "-",
-          status: "Belum Bayar"
-        };
-      }
-
-      if (params.get("website") === "1") {
-        order.isWebsite = true;
-        order.paket = order.paket || "Jasa Bikin Website";
-      }
-      if (params.get("digital") === "1" || /digital|apk|script| akun |prem|netflix|spotify|canva|viu/i.test(order.paket || "")) {
-        order.isDigital = true;
-      }
-      currentOrder = order;
-      window.currentOrder = order;
-
-      document.getElementById("kodeOrder").textContent = order.kode;
-      const formatText = order.formatJoki || order.catatan || order.detail || "-";
-      if (formatText && formatText !== "-") {
-        document.getElementById("formatOrderText").textContent = formatText;
-        document.getElementById("formatOrderBox").style.display = "block";
-      }
-      if (order.kode && order.status !== "Sukses" && order.status !== "SELESAI") {
-        localStorage.setItem("doxyy_saved_kode", order.kode);
-      }
-      const h2 = document.querySelector(".pay-card h2");
-      if (h2 && order.paket) {
-        h2.textContent = "Bayar " + order.paket;
-      }
-
-      const totalNum = order.finalAmount
-        || Number(String(order.total).replace(/[^\d]/g, ""))
-        || 0;
-
-      document.getElementById("totalBayar").textContent = formatRupiah(totalNum);
-    }
-
-    async function konfirmasiPembayaran() {
-      if (!currentOrder || !currentOrder.kode) {
-        alert("Data pesanan tidak ditemukan. Silakan ulangi pemesanan.");
-        return;
-      }
-      if (!buktiTfBase64) {
-        alert("Harap upload foto bukti transfer terlebih dahulu!");
-        return;
-      }
-
-      const btn = document.getElementById("btnKonfirmasi");
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim konfirmasi...';
-      const order = currentOrder;
-      const updateData = {
-        status: "Menunggu Verifikasi",
-        buktiTf: buktiTfBase64,
-        buktiTF: buktiTfBase64,
-        buktiTransfer: buktiTfBase64,
-        waktuKonfirmasi: new Date().toLocaleString("id-ID"),
-        paymentConfirmedAt: Date.now()
-      };
-
-      try {
-        if (window.VoxyyOrders && typeof window.VoxyyOrders.updateOrderByKode === "function") {
-          await window.VoxyyOrders.updateOrderByKode(order.kode, updateData);
-        } else {
-          const orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-          const idx = orders.findIndex(o => o.kode === order.kode);
-          if (idx < 0) throw new Error("Pesanan tidak ditemukan di penyimpanan browser.");
-          orders[idx] = { ...orders[idx], ...updateData };
-          localStorage.setItem("voxyy_orders", JSON.stringify(orders));
-        }
-        document.getElementById("statusBox").innerHTML = '✅ <b>Konfirmasi berhasil dikirim!</b><br>Pesanan dan bukti transfer masuk ke Antrian untuk diperiksa Admin.';
-        document.getElementById("statusBox").classList.add("show");
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> Berhasil dikonfirmasi';
-        setTimeout(() => {
-          window.location.href = `antrian.html?kode=${encodeURIComponent(order.kode)}`;
-        }, 900);
-      } catch (e) {
-        console.error("Gagal menyimpan konfirmasi pembayaran:", e);
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Konfirmasi Pembayaran';
-        alert("Konfirmasi belum berhasil disimpan. Periksa koneksi internet lalu coba lagi.");
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", loadOrderData);
   </script>
-  <script src="music.js"></script>
+  <script src="music-player.js"></script>
 </body>
 </html>

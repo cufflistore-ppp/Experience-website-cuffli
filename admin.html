@@ -1,56 +1,1544 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Doxy Joki</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <title>Admin Panel - VOXY MARKET</title>
   <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="admin-header">
-    <i class="fa-solid fa-user-shield"></i> PANEL ADMIN - DOXY JOKI
-  </div>
-
-  <div class="page-content">
-    <h3 style="margin-bottom:12px;color:#2196f3;">Tambah Pesanan Manual</h3>
-    
-    <div class="form-section">
-      <label>Kode Antrian</label>
-      <input type="text" id="admKode" placeholder="DJ-2026-XXXX (kosongkan = auto)">
-      
-      <label>Nama</label>
-      <input type="text" id="admNama" placeholder="Nama customer">
-      
-      <label>WhatsApp</label>
-      <input type="text" id="admWA" placeholder="08xxxxxxxxxx">
-      
-      <label>Total</label>
-      <input type="text" id="admTotal" placeholder="Rp 5.000">
-      
-      <label>Status</label>
-      <select id="admStatus">
-        <option value="Belum Bayar">Belum Bayar</option>
-        <option value="Proses">Proses</option>
-        <option value="Sukses">Sukses</option>
-      </select>
-      
-      <button class="btn-buat" style="margin-top:12px;" onclick="tambahOrderAdmin()">
-        <i class="fa-solid fa-plus"></i> Tambah Pesanan
-      </button>
-    </div>
-
-    <h3 style="margin:24px 0 12px;color:#2196f3;">Daftar Pesanan</h3>
-    <div id="listOrders"></div>
-  </div>
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://unpkg.com" crossorigin>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body class="admin-body" style="visibility:hidden">
+  <div class="admin-overlay" id="overlay" onclick="closeSidebar()"></div>
+  <aside class="admin-sidebar" id="sidebar">
+    <div class="profile">
+      <img src="logo.png" alt="VOXY">
+      <h2>VOXY ADMIN</h2>
+      <p>2 email admin · data sinkron semua device</p>
+    </div>
+    <nav>
+      <a href="#" class="active" data-tab="dashboard" onclick="switchTab('dashboard',this)"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+      <a href="#" data-tab="pesanan" onclick="switchTab('pesanan',this)"><i data-lucide="shopping-bag"></i> Pesanan</a>
+      <a href="#" data-tab="joki" onclick="switchTab('joki',this)"><i data-lucide="zap"></i> Order Joki</a>
+      <a href="admin-joki-harga.html"><i data-lucide="tags"></i> Harga Joki</a>
+      <a href="#" data-tab="produk" onclick="switchTab('produk',this)"><i data-lucide="package"></i> Produk</a>
+      <a href="#" data-tab="flash" onclick="switchTab('flash',this)"><i data-lucide="zap"></i> Flash Sale</a>
+      <a href="#" data-tab="menu" onclick="switchTab('menu',this)"><i data-lucide="layout-grid"></i> Menu Layanan</a>
+      <a href="#" data-tab="chat" onclick="switchTab('chat',this)">
+        <i data-lucide="message-circle"></i> Chat User
+        <span class="nav-badge hidden" id="chatNavBadge">0</span>
+      </a>
+      <a href="#" data-tab="pengaturan" onclick="switchTab('pengaturan',this)"><i data-lucide="settings"></i> Pengaturan</a>
+      <a href="home.html"><i data-lucide="store"></i> Ke Toko</a>
+      <a href="#" onclick="doLogout()"><i data-lucide="log-out"></i> Logout</a>
+    </nav>
+  </aside>
+
+  <div class="admin-main">
+    <div class="admin-header">
+      <button class="menu-toggle" onclick="openSidebar()"><i data-lucide="menu"></i></button>
+      <div>
+        <h1 id="pageTitle">Dashboard</h1>
+        <p>Panel admin VOXY MARKET</p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="revenue-note"><i class="fa-solid fa-coins"></i> Pendapatan dihitung dari pesanan <b>Selesai</b> dalam 30 hari terakhir (rolling otomatis).</div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue"><i data-lucide="shopping-cart"></i></div><div><div class="num" id="statTotal">0</div><div class="label">Total Pesanan</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange"><i data-lucide="clock"></i></div><div><div class="num" id="statMenunggu">0</div><div class="label">Menunggu</div></div></div>
+        <div class="stat-card"><div class="stat-icon cyan"><i data-lucide="loader"></i></div><div><div class="num" id="statProses">0</div><div class="label">Diproses</div></div></div>
+        <div class="stat-card"><div class="stat-icon green"><i data-lucide="check-circle"></i></div><div><div class="num" id="statSelesai">0</div><div class="label">Selesai</div></div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon green"><i data-lucide="wallet"></i></div><div><div class="num" id="statPendapatan">Rp0</div><div class="label">Pendapatan 30 Hari</div></div></div>
+        <div class="stat-card"><div class="stat-icon cyan"><i data-lucide="package"></i></div><div><div class="num" id="statProduk">0</div><div class="label">Total Produk</div></div></div>
+      </div>
+    </div>
+
+    <!-- PESANAN -->
+    <div class="panel" id="panel-pesanan">
+      <div class="search-box-admin">
+        <input id="cariKode" type="text" placeholder="Cari kode / email / produk...">
+        <button class="btn btn-sm" onclick="renderPesanan()">Cari</button>
+      </div>
+      <div class="filter-row" id="filterStatus">
+        <button class="active" onclick="setFilterStatus('aktif',this)">Aktif</button>
+        <button onclick="setFilterStatus('Menunggu',this)">Menunggu</button>
+        <button onclick="setFilterStatus('Diproses',this)">Diproses</button>
+        <button onclick="setFilterStatus('Selesai',this)">Arsip Selesai</button>
+        <button onclick="setFilterStatus('Ditolak',this)">Ditolak</button>
+        <button onclick="setFilterStatus('semua',this)">Semua</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Pesanan tetap tampil saat Diproses. Hilang dari Aktif setelah <b>Kirim Hasil</b> (Selesai) atau <b>Tolak</b>.</p>
+<div id="tabelPesanan"><div class="empty-state">Memuat...</div></div>
+      <div class="admin-card hidden" id="detailPesananBox">
+        <h2>Detail Pesanan <span id="detailKode"></span></h2>
+        <div id="detailContent"></div>
+        <div id="buktiAdmin" style="margin-top:8px"></div>
+
+        <div class="admin-card" style="margin-top:12px;background:#0c1228">
+          <h2 style="margin-bottom:6px">Kelola + Kirim Hasil</h2>
+          <p id="hasilTipeHint" style="font-size:12px;color:var(--muted);margin-bottom:10px">Isi sesuai tipe pesanan, lalu pilih aksi di bawah.</p>
+
+          <div class="form-group"><label>Catatan admin (opsional)</label>
+            <input id="catatanAdmin" type="text" placeholder="Catatan singkat untuk pembeli">
+          </div>
+
+          <div id="boxHasilTeks" class="form-group" style="display:none">
+            <label>Teks akun (Email + Password) — pembeli bisa salin</label>
+            <textarea id="hasilTeks" rows="3" placeholder="Email: xxx@gmail.com&#10;Password: rahasia123"></textarea>
+          </div>
+          <div id="boxHasilUrl" class="form-group" style="display:none">
+            <label>Link / URL hasil</label>
+            <input id="hasilUrl" type="url" placeholder="https://...">
+          </div>
+          <div id="boxHasilPtero" style="display:none">
+            <div class="form-group">
+              <label>Username Pterodactyl</label>
+              <input id="pteroUser" type="text" placeholder="username" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label>Password Pterodactyl</label>
+              <input id="pteroPass" type="text" placeholder="password" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label>Link Panel Pterodactyl</label>
+              <input id="pteroLink" type="url" placeholder="https://panel.contoh.com">
+            </div>
+          </div>
+          <div id="boxHasilFile" class="form-group" style="display:none">
+            <label>Upload file (APK / ZIP / dll)</label>
+            <input type="file" id="fileHasil">
+          </div>
+          <div id="boxHasilCatatan" class="form-group" style="display:none">
+            <label>Petunjuk untuk pembeli</label>
+            <textarea id="hasilCatatan" rows="2" placeholder="Contoh: Download APK dulu, install, lalu buka link"></textarea>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button type="button" class="btn btn-sm btn-outline" onclick="ubahStatus('Diproses')">Proses</button>
+            <button type="button" class="btn btn-sm btn-success" onclick="kirimHasil()">Kirim hasil + Sukses</button>
+            <button type="button" class="btn btn-sm btn-danger" onclick="ubahStatus('Ditolak')">Tolak</button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="tutupDetail()">Tutup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUK -->
+    <div class="panel" id="panel-joki">
+      <div class="admin-card">
+        <h2><i data-lucide="zap"></i> Order Joki Khusus</h2>
+        <div class="admin-hint">Khusus order <b>joki</b>: cukup <b>ubah status</b> (Proses/Selesai/Tolak) dan <b>Salin Teks</b>. Tidak perlu kirim file produk. <b>Prioritas</b> tampil paling atas, lalu <b>FaceCam/Video</b>.</div>
+        <div style="margin-bottom:12px">
+          <a href="admin-joki-harga.html" class="btn btn-sm btn-outline"><i data-lucide="settings-2" style="width:14px;height:14px"></i> Atur Harga Paket Joki</a>
+        </div>
+        <div class="filter-row" id="filterJoki">
+          <button class="active" type="button" onclick="setFilterJoki('aktif',this)">Aktif</button>
+          <button type="button" onclick="setFilterJoki('Menunggu',this)">Menunggu</button>
+          <button type="button" onclick="setFilterJoki('Diproses',this)">Diproses</button>
+          <button type="button" onclick="setFilterJoki('Selesai',this)">Selesai</button>
+          <button type="button" onclick="setFilterJoki('semua',this)">Semua</button>
+        </div>
+        <div id="tabelJoki"><div class="empty-state">Memuat...</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-produk">
+      <div class="admin-card">
+        <h2><i data-lucide="package"></i> Tambah / Edit Produk</h2>
+        <div class="admin-hint">
+          Data produk tersimpan di Firebase — <b>kedua email admin</b> melihat & mengedit data yang sama di semua device.
+          Kategori harus cocok dengan <b>filter Menu Layanan</b> agar muncul di tombol home.
+        </div>
+        <input type="hidden" id="produkId">
+        <div class="form-grid">
+          <div class="form-group"><label>Nama Produk</label><input id="pNama" type="text" placeholder="Contoh: Canva Pro"></div>
+          <div class="form-group full">
+            <label>Masuk ke Menu Layanan mana?</label>
+            <select id="pMenuPilih" onchange="onPilihMenuProdukTab()">
+              <option value="">— Pilih menu dulu —</option>
+            </select>
+            <input type="hidden" id="pKategori" value="">
+            <p style="font-size:11px;color:var(--muted);margin-top:6px">Produk hanya tampil di menu yang dipilih (kategori filter menu).</p>
+          </div>
+          <div class="form-group"><label>Harga normal</label><input id="pHarga" type="number" min="0"></div>
+          <div class="form-group">
+            <label>Tipe kirim hasil</label>
+            <select id="pTipeKirim">
+              <option value="email_password">Email + Password (teks)</option>
+              <option value="apk_zip">APK / ZIP (file)</option>
+              <option value="link">Link (URL)</option>
+              <option value="link_target">Link Target (jasa suntik)</option>
+              <option value="pterodactyl">Pterodactyl (Username + PW + Link Panel)</option>
+              <option value="wa_admin">WhatsApp Admin</option>
+            </select>
+          </div>
+          <div class="form-group full"><label>Deskripsi</label><textarea id="pDeskripsi" rows="3"></textarea></div>
+          <div class="form-group full"><label>Upload foto produk</label><input type="file" id="pGambarFile" accept="image/*"></div>
+          <div class="form-group"><label>Stok</label><input id="pStok" type="number" min="0" value="10" placeholder="Jumlah stok"></div>
+          <div class="form-group full"><label style="font-size:12px;color:var(--muted)">Stok otomatis berkurang saat ada order. Stok 0 = Habis.</label></div>
+          <div class="form-group full"><label><input type="checkbox" id="pFlashSale" onchange="toggleFlash()"> Aktifkan Flash Sale</label></div>
+          <div class="form-group" id="flashFields" style="display:none">
+            <label>Diskon Flash Sale (%)</label>
+            <input id="pFlashDiskon" type="number" min="1" max="99" placeholder="Contoh: 20 = potong 20%">
+          </div>
+          <div class="form-group" id="flashFields2" style="display:none">
+            <label>Flash sale berakhir</label>
+            <input id="pFlashEnd" type="datetime-local">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-sm" onclick="simpanProdukForm()">Simpan Produk</button>
+          <button class="btn btn-sm btn-outline" onclick="resetProdukForm()">Reset</button>
+        </div>
+      </div>
+      <div class="admin-card">
+        <h2><i data-lucide="list"></i> Daftar Produk</h2>
+        <div id="tabelProduk"><div class="empty-state">Memuat...</div></div>
+      </div>
+    </div>
+
+    <!-- CHAT USER -->
+    
+    <div class="panel" id="panel-flash">
+      <div class="admin-card">
+        <h2><i class="fa-solid fa-bolt"></i> Flash Sale Massal</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">
+          Pilih produk, isi <b>satu diskon %</b> dan <b>satu waktu berakhir</b>, lalu terapkan ke semua yang dicentang.
+          Tidak perlu edit produk satu-satu.
+        </p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Diskon untuk semua yang dipilih (%)</label>
+            <input id="fsDiskon" type="number" min="1" max="99" placeholder="Contoh: 20">
+          </div>
+          <div class="form-group">
+            <label>Berakhir pada</label>
+            <input id="fsEnd" type="datetime-local">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px">
+          <button type="button" class="btn btn-sm btn-success" onclick="terapkanFlashSale()">Terapkan Flash Sale</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="matikanFlashSale()">Matikan Flash (yang dicentang)</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="pilihSemuaFlash(true)">Centang semua</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="pilihSemuaFlash(false)">Hapus centang</button>
+        </div>
+        <div id="flashProdukList"><div class="empty-state">Memuat produk...</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-menu">
+      <div class="admin-card">
+        <h2><i class="fa-solid fa-table-cells-large"></i> Menu Layanan (Beranda)</h2>
+        <div class="admin-hint">
+          <b>Halaman ini = MENU LAYANAN saja</b> (tombol di home).<br>
+          Isi <b>produk</b> di bagian bawah “Isi Produk ke Menu” atau tab <b>Produk</b> (halaman terpisah).<br>
+          Kategori filter menu harus sama dengan kategori produk. Icon Lucide: server, smartphone, package, dll.
+        </div>
+        <div class="form-grid">
+          <div class="form-group"><label>Judul</label><input id="mJudul" type="text" placeholder="PANEL PTERODACTYL"></div>
+          <div class="form-group"><label>Subjudul (opsional)</label><input id="mSub" type="text" placeholder="Hosting panel"></div>
+          <div class="form-group"><label>Icon (Lucide)</label><input id="mIcon" type="text" placeholder="server"></div>
+          <div class="form-group"><label>Kategori filter</label><input id="mKat" type="text" placeholder="sama seperti kategori produk"></div>
+          <div class="form-group"><label>Urutan</label><input id="mUrut" type="number" value="1" min="0"></div>
+          <div class="form-group"><label>Aktif</label>
+            <select id="mAktif"><option value="1">Ya</option><option value="0">Tidak</option></select>
+          </div>
+        </div>
+        <input type="hidden" id="mId" value="">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button type="button" class="btn btn-sm btn-success" onclick="simpanMenuItem()">Simpan Menu</button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="resetMenuForm()">Reset Form</button>
+        </div>
+        <div id="menuListAdmin" style="margin-top:16px"><div class="empty-state">Memuat...</div></div>
+      </div>
+
+      <div class="admin-card">
+        <h2><i class="fa-solid fa-box"></i> Isi Produk ke Menu</h2>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
+          Pilih menu, lalu tambah produk. Kategori produk otomatis mengikuti <b>kategori filter</b> menu itu.
+        </p>
+        <div class="form-group">
+          <label>Pilih Menu Layanan</label>
+          <select id="mpMenuSelect" onchange="onPilihMenuUntukProduk()">
+            <option value="">— Pilih menu dulu —</option>
+          </select>
+        </div>
+        <div id="mpFormWrap" style="display:none">
+          <input type="hidden" id="mpProdukId" value="">
+          <div class="form-grid">
+            <div class="form-group"><label>Nama Produk</label><input id="mpNama" type="text" placeholder="Nama produk"></div>
+            <div class="form-group"><label>Kategori (otomatis)</label><input id="mpKategori" type="text" readonly style="opacity:.85"></div>
+            <div class="form-group"><label>Harga</label><input id="mpHarga" type="number" min="0" placeholder="0"></div>
+            <div class="form-group"><label>Stok</label><input id="mpStok" type="number" min="0" value="10"></div>
+            <div class="form-group">
+              <label>Tipe kirim</label>
+              <select id="mpTipeKirim">
+                <option value="email_password">Email + Password</option>
+                <option value="apk_zip">APK / ZIP</option>
+                <option value="link">Link URL</option>
+                <option value="link_target">Link Target (suntik)</option>
+                <option value="pterodactyl">Pterodactyl (User+PW+Panel)</option>
+                <option value="wa_admin">WhatsApp Admin</option>
+              </select>
+            </div>
+            <div class="form-group"><label>Upload foto</label><input type="file" id="mpGambar" accept="image/*"></div>
+            <div class="form-group full"><label>Deskripsi</label><textarea id="mpDeskripsi" rows="2"></textarea></div>
+            <div class="form-group full"><label><input type="checkbox" id="mpFlash"> Flash Sale</label></div>
+            <div class="form-group"><label>Diskon %</label><input id="mpFlashDiskon" type="number" min="1" max="99" placeholder="20"></div>
+            <div class="form-group"><label>Flash berakhir</label><input id="mpFlashEnd" type="datetime-local"></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <button type="button" class="btn btn-sm btn-success" onclick="simpanProdukMenu()">Simpan Produk ke Menu</button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="resetProdukMenuForm()">Reset</button>
+          </div>
+        </div>
+        <div id="mpProdukList" style="margin-top:16px"><div class="empty-state">Pilih menu untuk lihat produknya</div></div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-chat">
+      <div class="admin-card">
+        <h2><i class="fa-solid fa-comments"></i> Chat User — Kelola pesan customer</h2>
+        <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px" id="chatLayout">
+          <div>
+            <div class="chat-list-admin" id="chatList"><div class="empty-state">Belum ada chat</div></div>
+          </div>
+          <div>
+            <div id="chatDetailEmpty" class="empty-state">Pilih chat di kiri</div>
+            <div id="chatDetail" class="hidden">
+              <div style="margin-bottom:8px;font-size:13px;color:var(--muted)">Chat dengan: <b id="chatWithEmail">-</b></div>
+              <div class="admin-chat-view">
+                <div class="chat-messages" id="adminMessages"></div>
+                <div class="chat-input-bar" style="padding:0;border:none;background:transparent">
+                  <label class="chat-attach" title="Kirim foto">
+                    <i data-lucide="image"></i>
+                    <input type="file" id="adminChatFoto" accept="image/*" hidden onchange="kirimAdminFoto(this)">
+                  </label>
+                  <input id="adminReply" type="text" placeholder="Tulis balasan...">
+                  <button onclick="kirimBalasanAdmin()" class="btn btn-sm" style="width:auto;border-radius:12px;padding:12px 16px"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENGATURAN -->
+    <div class="panel" id="panel-pengaturan">
+      <div class="admin-card">
+        <h2>Pengaturan Toko</h2>
+        <div class="form-group"><label>Nama Toko</label><input id="sNamaToko" type="text" placeholder="VOXY MARKET"></div>
+        <div class="form-group"><label>WA Admin (628xxx)</label><input id="sWa" type="text" placeholder="628xxxxxxxxxx"></div>
+        <div class="form-group"><label>Rekening / Info Transfer</label><textarea id="sRekening" rows="3" placeholder="Bank BCA 123456789 a/n Nama"></textarea></div>
+        <div class="form-group"><label>Pesan sukses jasa suntik (ke pembeli)</label>
+        <textarea id="sPesanSuntik" rows="2" placeholder="Coba cek saluran kamu ya. Order sudah diproses."></textarea></div>
+        <button class="btn btn-sm" onclick="simpanPengaturan()">Simpan Info Toko</button>
+      </div>
+
+      <div class="admin-card">
+        <h2><i class="fa-solid fa-image"></i> Ganti Logo, Banner & QRIS</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Pilih dari <b>galeri</b> atau file di HP/PC. Kosongkan = tetap pakai gambar default. Perubahan tersinkron ke semua device.</p>
+
+        <div class="form-group">
+          <label>Logo toko</label>
+          <input type="file" id="fileLogo" accept="image/*">
+          <img id="prevLogo" class="brand-preview logo" src="logo.png" alt="Logo">
+        </div>
+
+        <div class="form-group">
+          <label>Banner 1</label>
+          <input type="file" id="fileBanner1" accept="image/*">
+          <img id="prevBanner1" class="brand-preview" src="banner.jpg" alt="Banner 1">
+        </div>
+        <div class="form-group">
+          <label>Banner 2</label>
+          <input type="file" id="fileBanner2" accept="image/*">
+          <img id="prevBanner2" class="brand-preview" src="banner2.jpg" alt="Banner 2">
+        </div>
+        <div class="form-group">
+          <label>Banner 3</label>
+          <input type="file" id="fileBanner3" accept="image/*">
+          <img id="prevBanner3" class="brand-preview" src="banner3.jpg" alt="Banner 3">
+        </div>
+
+        <div class="form-group">
+          <label>Foto QRIS</label>
+          <input type="file" id="fileQris" accept="image/*">
+          <img id="prevQris" class="brand-preview qris" src="qris.jpg" alt="QRIS">
+        </div>
+
+        <button class="btn btn-sm btn-success" onclick="simpanBranding()">Simpan Logo / Banner / QRIS</button>
+      </div>
+    </div>
+  </div>
+
   <script src="global-orders.js"></script>
-  <script src="telegram.js"></script>
-  <script src="script.js"></script>
-  <script src="admin.js"></script>
+  <script>
+    lucide.createIcons();
+    var allOrders = [], filterStatus = "aktif", selectedKode = null;
+    var selectedChatUid = null, allChats = [];
+
+    VOXY.requireAdmin().then(function () {
+      document.body.style.visibility = "visible";
+      var loadDone = false;
+      /* Fallback sekali jika listener lama (jaringan jelek), bukan delay sengaja */
+      var loadTimer = setTimeout(function () {
+        if (!loadDone) {
+          VOXY.getAllOrders().then(function (list) {
+            if (loadDone) return;
+            allOrders = list || [];
+            updateDashboard();
+            renderPesanan();
+            loadDone = true;
+          }).catch(function () {
+            var box = document.getElementById("tabelPesanan");
+            if (box && box.textContent.indexOf("Memuat") !== -1) {
+              box.innerHTML = '<div class="empty-state">Koneksi lambat… <button class="btn btn-sm" onclick="location.reload()">Muat ulang</button></div>';
+            }
+          });
+        }
+      }, 12000);
+      VOXY.listenOrders(function (list) {
+        loadDone = true;
+        clearTimeout(loadTimer);
+        allOrders = list || [];
+        updateDashboard();
+        renderPesanan();
+        if (typeof renderJoki === 'function') renderJoki();
+      });
+      loadProdukAdmin();
+      loadPengaturan();
+      loadMenuAdmin();
+      VOXY.listenAllChats(function (list) {
+        allChats = list || [];
+        renderChatList();
+        var unread = allChats.filter(function (c) { return c.unreadAdmin; }).length;
+        var badge = document.getElementById("chatNavBadge");
+        if (badge) {
+          if (unread > 0) {
+            badge.textContent = unread;
+            badge.classList.remove("hidden");
+          } else {
+            badge.classList.add("hidden");
+          }
+        }
+      });
+    });
+
+    function openSidebar() {
+      document.getElementById("sidebar").classList.add("open");
+      document.getElementById("overlay").classList.add("show");
+    }
+    function closeSidebar() {
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("overlay").classList.remove("show");
+    }
+    function switchTab(name, el) {
+      document.querySelectorAll(".panel").forEach(function (p) { p.classList.remove("active"); });
+      document.getElementById("panel-" + name).classList.add("active");
+      document.querySelectorAll(".admin-sidebar nav a[data-tab]").forEach(function (a) { a.classList.remove("active"); });
+      if (el) el.classList.add("active");
+      var titles = { dashboard: "Dashboard", pesanan: "Kelola Pesanan", joki: "Order Joki", produk: "Kelola Produk", flash: "Flash Sale", menu: "Menu Layanan", chat: "Chat User", pengaturan: "Pengaturan" };
+      document.getElementById("pageTitle").textContent = titles[name] || "Admin";
+      if (name === "menu") loadMenuAdmin();
+      if (name === "joki" && typeof renderJoki === "function") renderJoki();
+      closeSidebar();
+      if (name === "produk") { loadProdukAdmin(); loadMenuAdmin(); }
+      if (name === "pengaturan") loadPengaturan();
+      if (name === "flash") loadFlashList();
+    }
+
+    function updateDashboard() {
+      var menunggu = 0, proses = 0, selesai = 0;
+      allOrders.forEach(function (o) {
+        var s = (o.status || "").toLowerCase();
+        if (s.indexOf("menunggu") !== -1) menunggu++;
+        else if (s.indexOf("proses") !== -1) proses++;
+        else if (s.indexOf("selesai") !== -1) selesai++;
+      });
+      document.getElementById("statTotal").textContent = allOrders.length;
+      document.getElementById("statMenunggu").textContent = menunggu;
+      document.getElementById("statProses").textContent = proses;
+      document.getElementById("statSelesai").textContent = selesai;
+      var rev = VOXY.hitungPendapatan30Hari(allOrders);
+      document.getElementById("statPendapatan").textContent = VOXY.formatRp(rev.total);
+    }
+
+    function setFilterStatus(s, el) {
+      filterStatus = s;
+      document.querySelectorAll("#filterStatus button").forEach(function (b) { b.classList.remove("active"); });
+      if (el) el.classList.add("active");
+      renderPesanan();
+    }
+
+    function renderPesanan() {
+      var q = (document.getElementById("cariKode").value || "").trim().toLowerCase();
+      /* produk biasa saja — order joki ada di tab Order Joki */
+      var list = allOrders.filter(function (o) {
+        return o.jenis !== "joki" && ((o.kategori || "").toLowerCase() !== "joki");
+      }).slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
+      if (filterStatus === "aktif") {
+        list = list.filter(function (o) {
+          var s = (o.status || "").toLowerCase();
+          return s.indexOf("selesai") === -1 && s.indexOf("tolak") === -1 && s.indexOf("ditolak") === -1;
+        });
+      } else if (filterStatus !== "semua") {
+        list = list.filter(function (o) {
+          return (o.status || "").toLowerCase().indexOf(filterStatus.toLowerCase()) !== -1;
+        });
+      }
+      if (q) {
+        list = list.filter(function (o) {
+          return (o.kode || "").toLowerCase().indexOf(q) !== -1 ||
+                 (o.email || "").toLowerCase().indexOf(q) !== -1 ||
+                 (o.namaProduk || o.nama || "").toLowerCase().indexOf(q) !== -1;
+        });
+      }
+      var box = document.getElementById("tabelPesanan");
+      if (!list.length) { box.innerHTML = '<div class="empty-state">Tidak ada pesanan</div>'; return; }
+      box.innerHTML = list.map(function (o) {
+        var st = o.status || "Menunggu";
+        var cls = "menunggu";
+        var sl = st.toLowerCase();
+        if (sl.indexOf("proses") !== -1) cls = "diproses";
+        else if (sl.indexOf("selesai") !== -1) cls = "selesai";
+        else if (sl.indexOf("tolak") !== -1) cls = "ditolak";
+        var kode = String(o.kode || "").replace(/'/g, "");
+        return (
+          '<div class="admin-order-card">' +
+            '<div class="top"><b>' + (o.kode || "-") + '</b><span class="badge ' + cls + '">' + st + '</span></div>' +
+            '<div class="meta">Email: <b>' + (o.email || "-") + '</b></div>' +
+            '<div class="meta">Pesanan: <b>' + (o.namaProduk || o.nama || "-") + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
+            (o.linkTarget ? '<div class="meta" style="background:rgba(59,130,246,.15);padding:8px;border-radius:8px;margin-top:6px">' +
+              '<div style="font-size:11px;color:#1d4ed8;font-weight:700">Link target pembeli</div>' +
+              '<div style="word-break:break-all;font-size:12px;margin:4px 0">' + String(o.linkTarget).replace(/</g,'&lt;') + '</div>' +
+              '<button type="button" class="btn btn-sm" data-target="' + String(o.linkTarget).replace(/"/g,'&quot;').replace(/'/g,'') + '" onclick="navigator.clipboard.writeText(this.dataset.target).then(function(){if(VOXY.showToast)VOXY.showToast(\'Tersalin\')})"><i class="fa-solid fa-clipboard"></i> Salin</button>' +
+            '</div>' : '') +
+            '<div class="actions">' +
+              '<button type="button" class="btn btn-sm" data-kode="' + kode + '" onclick="bukaDetail(this.dataset.kode)">Kelola (status + kirim)</button>' +
+              '<button type="button" class="btn btn-sm btn-danger" data-kode="' + kode + '" onclick="ubahStatusCepat(this.dataset.kode,\'Ditolak\')">Tolak</button>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join("");
+    }
+
+    function ubahStatusCepat(kode, status) {
+      selectedKode = kode;
+      VOXY.updateOrder(kode, { status: status }).then(function () {
+        if (VOXY.showToast) VOXY.showToast(kode + " → " + status);
+        if (status === "Ditolak" || status === "Selesai") selectedKode = null;
+      }).catch(function (e) { alert(e.message); });
+    }
+
+    function bukaDetail(kode) {
+      /* pindah halaman khusus — tidak scroll ke bawah */
+      location.href = "admin-kelola.html?kode=" + encodeURIComponent(kode);
+      return;
+      selectedKode = kode;
+      var o = allOrders.find(function (x) { return x.kode === kode; });
+      if (!o) return;
+      document.getElementById("detailPesananBox").classList.remove("hidden");
+      document.getElementById("detailKode").textContent = kode;
+      document.getElementById("catatanAdmin").value = o.catatanAdmin || "";
+      var hu = document.getElementById("hasilUrl");
+      var hc = document.getElementById("hasilCatatan");
+      if (hu) hu.value = o.hasilUrl || "";
+      if (hc) hc.value = o.hasilCatatan || "";
+      document.getElementById("detailContent").innerHTML =
+        "<div class=\"pay-row\"><span>Email</span><span>" + (o.email || "-") + "</span></div>" +
+        "<div class=\"pay-row\"><span>Kode</span><span><b>" + (o.kode || "-") + "</b></span></div>" +
+        "<div class=\"pay-row\"><span>Pesanan</span><span>" + (o.namaProduk || o.nama || "-") + " · " + VOXY.formatRp(o.harga) + "</span></div>" +
+        (o.linkTarget ? "<div class=\"pay-row\"><span>Link target</span><span style=\"word-break:break-all\">" + o.linkTarget +
+          " <button type=\"button\" class=\"btn btn-sm\" onclick=\"navigator.clipboard.writeText('" + String(o.linkTarget).replace(/'/g,"") + "')\">Salin</button></span></div>" : "") +
+        "<div class=\"pay-row\"><span>Status</span><span>" + (o.status || "-") + "</span></div>";
+      setupHasilFields(o);
+      VOXY.getBukti(kode).then(function (data) {
+        var box = document.getElementById("buktiAdmin");
+        box.innerHTML = data
+          ? "<p style=\"font-size:13px;margin-bottom:6px\"><b>Foto bukti TF</b></p><img src=\"" + data + "\" style=\"max-width:100%;border-radius:12px;border:1px solid var(--border)\">"
+          : "<p style=\"font-size:13px;color:var(--muted)\">Belum ada foto bukti TF</p>";
+      });
+    }
+
+    function setupHasilFields(o) {
+      var tipe = (o && o.tipeKirim) || "-";
+      var isPtero = tipe === "pterodactyl";
+      document.getElementById("boxHasilTeks").style.display = isPtero ? "none" : "block";
+      document.getElementById("boxHasilUrl").style.display = isPtero ? "none" : "block";
+      document.getElementById("boxHasilFile").style.display = isPtero ? "none" : "block";
+      document.getElementById("boxHasilCatatan").style.display = "block";
+      var pteroBox = document.getElementById("boxHasilPtero");
+      if (pteroBox) pteroBox.style.display = isPtero ? "block" : "none";
+      var labels = {
+        email_password: "Tipe order: Email+Password — isi teks akun, tekan Kirim hasil + Sukses",
+        apk_zip: "Tipe order: APK/ZIP — upload file (boleh + link), tekan Kirim hasil + Sukses",
+        link: "Tipe order: Link — isi URL, tekan Kirim hasil + Sukses",
+        link_target: "Tipe order: Jasa suntik — proses target, boleh isi hasil, tekan Kirim hasil + Sukses",
+        pterodactyl: "Tipe order: Pterodactyl — isi Username, Password, dan Link Panel, lalu Kirim hasil + Sukses",
+        wa_admin: "Tipe order: WA Admin — boleh kirim hasil atau langsung Proses/Tolak"
+      };
+      document.getElementById("hasilTipeHint").textContent =
+        (labels[tipe] || "Isi teks / link / file (boleh kombinasi), lalu tekan Kirim hasil + Sukses. Atau Proses / Tolak.") +
+        " · Tipe: " + tipe;
+      document.getElementById("hasilTeks").value = (o && o.hasilTeks) || "";
+      document.getElementById("hasilUrl").value = (o && o.hasilUrl) || "";
+      document.getElementById("hasilCatatan").value = (o && o.hasilCatatan) || "";
+      if (isPtero) {
+        var teks = (o && o.hasilTeks) || "";
+        var u = "", p = "", l = (o && o.hasilUrl) || "";
+        var mU = teks.match(/Username\s*:\s*(.+)/i);
+        var mP = teks.match(/Password\s*:\s*(.+)/i);
+        if (mU) u = mU[1].trim();
+        if (mP) p = mP[1].trim();
+        var elU = document.getElementById("pteroUser");
+        var elP = document.getElementById("pteroPass");
+        var elL = document.getElementById("pteroLink");
+        if (elU) elU.value = u;
+        if (elP) elP.value = p;
+        if (elL) elL.value = l;
+      }
+      var ff = document.getElementById("fileHasil");
+      if (ff) ff.value = "";
+    }
+    function tutupDetail() { selectedKode = null; document.getElementById("detailPesananBox").classList.add("hidden"); }
+    function ubahStatus(status) {
+      if (!selectedKode) return;
+      var catatan = document.getElementById("catatanAdmin").value.trim();
+      var extra = { status: status, catatanAdmin: catatan };
+      VOXY.updateOrder(selectedKode, extra).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Status: " + status); else alert("Status: " + status);
+        if (status === "Ditolak" || status === "Selesai") tutupDetail();
+      }).catch(function (e) { alert(e.message); });
+    }
+    function kirimHasil() {
+      if (!selectedKode) return;
+      var o = (allOrders || []).filter(function (x) { return x.kode === selectedKode; })[0];
+      var isPtero = o && o.tipeKirim === "pterodactyl";
+      var url = (document.getElementById("hasilUrl").value || "").trim();
+      var teks = (document.getElementById("hasilTeks").value || "").trim();
+      var catatan = (document.getElementById("hasilCatatan").value || "").trim();
+      var file = document.getElementById("fileHasil").files[0];
+
+      if (isPtero) {
+        var pu = (document.getElementById("pteroUser").value || "").trim();
+        var pp = (document.getElementById("pteroPass").value || "").trim();
+        var pl = (document.getElementById("pteroLink").value || "").trim();
+        if (!pu || !pp || !pl) return alert("Isi Username, Password, dan Link Panel Pterodactyl");
+        teks = "Username: " + pu + "\nPassword: " + pp + "\nPanel: " + pl;
+        url = pl;
+        if (!catatan) catatan = "Login ke panel Pterodactyl dengan username & password di atas. Simpan data dengan aman.";
+      } else {
+        if (!url && !file && !teks) {
+          if (!confirm("Belum isi teks/link/file. Tetap tandai Sukses tanpa kirim hasil?")) return;
+        }
+        if (!catatan) {
+          catatan = "Sebelum membuka konten: unduh dulu file/APK lewat tombol Download (jika ada), install jika perlu, lalu tekan Lihat untuk membuka link hasil.";
+        }
+      }
+      var opts = { url: url, catatan: catatan, status: "Selesai", teks: teks };
+      var go = function () {
+        return VOXY.simpanHasilPesanan(selectedKode, opts).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Hasil terkirim. Status: Selesai"); else alert("Hasil terkirim. Status: Selesai");
+          tutupDetail();
+          document.getElementById("hasilUrl").value = "";
+          document.getElementById("hasilTeks").value = "";
+          document.getElementById("hasilCatatan").value = "";
+          document.getElementById("fileHasil").value = "";
+          var elU = document.getElementById("pteroUser"); if (elU) elU.value = "";
+          var elP = document.getElementById("pteroPass"); if (elP) elP.value = "";
+          var elL = document.getElementById("pteroLink"); if (elL) elL.value = "";
+        });
+      };
+      if (file && !isPtero) {
+        VOXY.fileToDataURL(file).then(function (dataUrl) {
+          opts.fileData = dataUrl;
+          opts.fileNama = file.name;
+          return go();
+        }).catch(function (e) { alert(e.message || "Gagal baca file"); });
+      } else {
+        go().catch(function (e) { alert(e.message || "Gagal kirim"); });
+      }
+    }
+
+    function uploadHasil() { kirimHasil(); }
+
+    /* Produk */
+    function loadProdukAdmin() {
+      VOXY.getProdukList().then(function (list) {
+        var elStat = document.getElementById("statProduk");
+        if (elStat) elStat.textContent = (list || []).length;
+        var box = document.getElementById("tabelProduk");
+        if (!box) return;
+        if (!list || !list.length) {
+          box.innerHTML = '<div class="empty-state">Belum ada produk</div>';
+          return;
+        }
+        box.innerHTML = list.map(function (p) {
+          var img = p.gambar || "produk1.jpg";
+          var flash = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1;
+          return (
+            '<div class="admin-produk-list-card">' +
+              '<img src="' + img + '" alt="" onerror="this.src=\'produk1.jpg\'">' +
+              '<div class="info">' +
+                '<b>' + (p.nama || "-") + '</b>' +
+                '<span>' + (p.kategori || "-") + " · " + VOXY.formatRp(p.harga) +
+                  (flash ? " · Flash" : "") +
+                  (p.stok != null ? " · Stok " + p.stok : "") +
+                '</span>' +
+              '</div>' +
+              '<div class="actions" style="flex-shrink:0;display:flex;gap:6px">' +
+                '<button type="button" class="btn btn-sm" onclick="editProduk(\'' + p.id + '\')">Edit</button>' +
+                '<button type="button" class="btn btn-sm btn-danger" onclick="hapusProdukId(\'' + p.id + '\')">Hapus</button>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join("");
+        if (window.lucide) lucide.createIcons();
+      });
+    }
+    function toggleFlash() {
+      var on = document.getElementById("pFlashSale").checked;
+      document.getElementById("flashFields").style.display = on ? "block" : "none";
+      document.getElementById("flashFields2").style.display = on ? "block" : "none";
+    }
+    function onPilihMenuProdukTab() {
+      var sel = document.getElementById("pMenuPilih");
+      if (!sel) return;
+      var opt = sel.options[sel.selectedIndex];
+      var kat = opt ? (opt.getAttribute("data-kat") || "") : "";
+      document.getElementById("pKategori").value = kat;
+    }
+    function resetProdukForm() {
+      document.getElementById("produkId").value = "";
+      document.getElementById("pNama").value = "";
+      document.getElementById("pKategori").value = "";
+      var pm = document.getElementById("pMenuPilih"); if (pm) pm.value = "";
+      document.getElementById("pHarga").value = "";
+      document.getElementById("pTipeKirim").value = "email_password";
+      document.getElementById("pDeskripsi").value = "";
+      document.getElementById("pStok").value = "10";
+      document.getElementById("pFlashSale").checked = false;
+      document.getElementById("pFlashDiskon").value = "";
+      document.getElementById("pFlashEnd").value = "";
+      document.getElementById("pGambarFile").value = "";
+      toggleFlash();
+    }
+    function editProduk(id) {
+      VOXY.getProdukList().then(function (list) {
+        var p = list.find(function (x) { return x.id === id; });
+        if (!p) return;
+        document.getElementById("produkId").value = p.id;
+        document.getElementById("pNama").value = p.nama || "";
+        document.getElementById("pKategori").value = p.kategori || "";
+        var pm = document.getElementById("pMenuPilih");
+        if (pm) {
+          var found = "";
+          for (var i = 0; i < pm.options.length; i++) {
+            if ((pm.options[i].getAttribute("data-kat") || "") === (p.kategori || "")) { found = pm.options[i].value; break; }
+          }
+          pm.value = found;
+        }
+        document.getElementById("pHarga").value = p.harga || 0;
+        document.getElementById("pTipeKirim").value = p.tipeKirim || "email_password";
+        document.getElementById("pDeskripsi").value = p.deskripsi || "";
+        document.getElementById("pStok").value = (p.stok != null ? p.stok : (p.stokHabis ? 0 : 10));
+        document.getElementById("pFlashSale").checked = !!p.flashSale;
+        document.getElementById("pFlashDiskon").value = p.flashDiskon || p.flashHarga || "";
+        if (p.flashEnd) {
+          try {
+            var d = new Date(Number(p.flashEnd));
+            var local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById("pFlashEnd").value = local;
+          } catch (e) {}
+        } else {
+          document.getElementById("pFlashEnd").value = "";
+        }
+        toggleFlash();
+        switchTab("produk", document.querySelector('[data-tab="produk"]'));
+        window.scrollTo(0, 0);
+      });
+    }
+    function simpanProdukForm() {
+      var id = document.getElementById("produkId").value || null;
+      var nama = document.getElementById("pNama").value.trim();
+      if (!nama) { alert("Nama produk wajib"); return; }
+      onPilihMenuProdukTab();
+      var katCek = document.getElementById("pKategori").value.trim();
+      if (!katCek) { alert("Pilih Menu Layanan dulu (produk masuk ke menu mana)"); return; }
+      var flashOn = !!document.getElementById("pFlashSale").checked;
+      var flashHarga = Number(document.getElementById("pFlashDiskon").value) || 0;
+      var flashEndVal = document.getElementById("pFlashEnd").value;
+      var flashEnd = null;
+      if (flashOn) {
+        if (flashEndVal) {
+          flashEnd = new Date(flashEndVal).getTime();
+          if (isNaN(flashEnd)) flashEnd = Date.now() + 7 * 24 * 3600 * 1000;
+        } else {
+          flashEnd = Date.now() + 7 * 24 * 3600 * 1000;
+        }
+        if (flashHarga <= 0) {
+          alert("Isi persen diskon Flash Sale (1–99)");
+          return;
+        }
+      }
+      var data = {
+        nama: nama,
+        kategori: document.getElementById("pKategori").value,
+        harga: Number(document.getElementById("pHarga").value) || 0,
+        deskripsi: document.getElementById("pDeskripsi").value.trim(),
+        tipeKirim: document.getElementById("pTipeKirim").value,
+        stok: Math.max(0, Number(document.getElementById("pStok").value) || 0),
+        stokHabis: (Math.max(0, Number(document.getElementById("pStok").value) || 0) <= 0),
+        flashSale: flashOn,
+        flashDiskon: flashOn ? flashHarga : 0,
+          flashHarga: 0,
+        flashEnd: flashOn ? flashEnd : 0,
+        butuhTarget: document.getElementById("pTipeKirim").value === "link_target"
+      };
+      var file = document.getElementById("pGambarFile").files[0];
+      var go = function (imgUrl) {
+        if (imgUrl) data.gambar = imgUrl;
+        else if (!id) data.gambar = "produk1.jpg";
+        /* edit tanpa ganti foto: jangan sentuh field gambar */
+        return VOXY.simpanProduk(id, data).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Produk tersimpan" + (flashOn ? " · Flash Sale ON" : ""));
+          else alert("Produk tersimpan" + (flashOn ? " · Flash Sale ON" : ""));
+          resetProdukForm();
+          loadProdukAdmin();
+        });
+      };
+      var btn = document.querySelector('#panel-produk button.btn.btn-sm');
+      if (file) {
+        if (VOXY.showToast) VOXY.showToast("Menyimpan...");
+        VOXY.compressChatImage(file).then(function (url) {
+          return go(url);
+        }).catch(function (e) {
+          /* fallback tanpa kompres */
+          return VOXY.fileToDataURL(file).then(go);
+        }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+      } else {
+        go(null).catch(function (e) { alert(e.message || "Gagal simpan"); });
+      }
+    }
+    function hapusProdukId(id) {
+      if (!confirm("Hapus produk ini?")) return;
+      VOXY.hapusProduk(id).then(function () { loadProdukAdmin(); }).catch(function (e) { alert(e.message); });
+    }
+
+    /* Chat Admin */
+    var unsubMsg = null;
+    function renderChatList() {
+      var box = document.getElementById("chatList");
+      if (!allChats.length) {
+        box.innerHTML = '<div class="empty-state">Belum ada chat.<br><span style="font-size:11px;color:var(--muted)">User harus kirim pesan dulu dari Chat Admin. Pastikan Firebase Rules sudah di-Publish (chat + chat_inbox).</span></div>';
+        return;
+      }
+      box.innerHTML = allChats.map(function (c) {
+        var initial = (c.email || "?")[0].toUpperCase();
+        var active = selectedChatUid === c.uid ? " active" : "";
+        return '<div class="chat-list-item' + active + '" onclick="bukaChat(\'' + c.uid + '\',\'' + (c.email || "").replace(/'/g, "") + '\')">' +
+          '<div class="avatar-sm">' + initial + '</div>' +
+          '<div class="info"><h4>' + (c.email || c.uid) + '</h4><p>' + (c.lastMessage || "") + '</p></div>' +
+          (c.unreadAdmin ? '<div class="unread"></div>' : '') + '</div>';
+      }).join("");
+    }
+    function bukaChat(uid, email) {
+      selectedChatUid = uid;
+      document.getElementById("chatDetailEmpty").classList.add("hidden");
+      document.getElementById("chatDetail").classList.remove("hidden");
+      document.getElementById("chatWithEmail").textContent = email || uid;
+      VOXY.markChatReadByAdmin(uid);
+      if (unsubMsg) unsubMsg();
+      unsubMsg = VOXY.listenChatMessages(uid, function (list) {
+        var box = document.getElementById("adminMessages");
+        if (!list.length) { box.innerHTML = '<div class="empty-state">Belum ada pesan</div>'; return; }
+        box.innerHTML = list.map(function (m) {
+          var isAdmin = m.from === "admin";
+          var row = isAdmin ? "msg-row mine" : "msg-row";
+          var label = isAdmin ? "Admin (kamu)" : "Pelanggan";
+          var cls = isAdmin ? "msg msg-admin" : "msg msg-user";
+          var txt = (m.text || "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+          if ((txt === "📷 Foto" || txt === "Foto") && m.image) txt = "";
+          var imgHtml = m.image ? '<div class="msg-img"><img src="' + m.image + '" alt="foto"></div>' : "";
+          var av = isAdmin
+            ? '<img class="msg-avatar admin" src="logo.png" alt="">'
+            : '<div class="msg-avatar" style="display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;background:#94a3b8;font-size:12px">U</div>';
+          return '<div class="' + row + '">' + av + '<div class="msg-bubble-wrap"><div class="msg-label">' + label + '</div><div class="' + cls + '">' + imgHtml + txt + '<small>' + VOXY.formatTanggal(m.at) + '</small></div></div></div>';
+        }).join("");
+        box.scrollTop = box.scrollHeight;
+      });
+      renderChatList();
+    }
+    function kirimBalasanAdmin() {
+      if (!selectedChatUid) return;
+      var input = document.getElementById("adminReply");
+      var text = (input.value || "").trim();
+      if (!text) return;
+      VOXY.kirimPesanAdmin(selectedChatUid, text).then(function () {
+        input.value = "";
+      }).catch(function (e) { alert(e.message); });
+    }
+    function kirimAdminFoto(el) {
+      if (!selectedChatUid) { alert("Pilih chat dulu"); return; }
+      var file = el.files && el.files[0];
+      el.value = "";
+      if (!file) return;
+      VOXY.compressChatImage(file).then(function (dataUrl) {
+        return VOXY.kirimPesanAdmin(selectedChatUid, "", dataUrl);
+      }).catch(function (e) { alert(e.message || "Gagal kirim foto"); });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && document.activeElement && document.activeElement.id === "adminReply") {
+        kirimBalasanAdmin();
+      }
+    });
+
+
+    function loadFlashList() {
+      VOXY.getProdukList().then(function (list) {
+        var box = document.getElementById("flashProdukList");
+        if (!list || !list.length) {
+          box.innerHTML = '<div class="empty-state">Belum ada produk. Tambah di tab Produk dulu.</div>';
+          return;
+        }
+        list.sort(function (a, b) { return (a.nama || "").localeCompare(b.nama || ""); });
+        box.innerHTML = list.map(function (p) {
+          var on = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1;
+          var disc = Number(p.flashDiskon) || 0;
+          var badge = on
+            ? '<span class="badge selesai">Flash -' + disc + '%</span>'
+            : '<span class="badge menunggu">Normal</span>';
+          return (
+            '<label class="admin-order-card" style="display:flex;align-items:center;gap:12px;cursor:pointer">' +
+              '<input type="checkbox" class="fs-check" value="' + p.id + '" style="width:18px;height:18px">' +
+              '<img src="' + (p.gambar || "produk1.jpg") + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover" onerror="this.src=\'produk1.jpg\'">' +
+              '<div style="flex:1;min-width:0">' +
+                '<div style="font-weight:700;font-size:13px">' + (p.nama || "-") + '</div>' +
+                '<div style="font-size:12px;color:var(--muted)">' + (p.kategori || "") + ' · ' + VOXY.formatRp(p.harga) + '</div>' +
+              '</div>' + badge +
+            '</label>'
+          );
+        }).join("");
+      }).catch(function (e) {
+        document.getElementById("flashProdukList").innerHTML = '<div class="empty-state">' + (e.message || "Gagal muat") + '</div>';
+      });
+    }
+    function pilihSemuaFlash(on) {
+      document.querySelectorAll(".fs-check").forEach(function (c) { c.checked = !!on; });
+    }
+    function getFlashSelectedIds() {
+      return Array.prototype.slice.call(document.querySelectorAll(".fs-check:checked")).map(function (c) { return c.value; });
+    }
+    function terapkanFlashSale() {
+      var ids = getFlashSelectedIds();
+      if (!ids.length) { alert("Centang minimal 1 produk"); return; }
+      var disc = Number(document.getElementById("fsDiskon").value) || 0;
+      if (disc < 1 || disc > 99) { alert("Isi diskon 1–99%"); return; }
+      var endVal = document.getElementById("fsEnd").value;
+      var end = endVal ? new Date(endVal).getTime() : (Date.now() + 7 * 24 * 3600 * 1000);
+      if (isNaN(end)) end = Date.now() + 7 * 24 * 3600 * 1000;
+      var chain = Promise.resolve();
+      ids.forEach(function (id) {
+        chain = chain.then(function () {
+          return VOXY.simpanProduk(id, {
+            flashSale: true,
+            flashDiskon: disc,
+            flashHarga: 0,
+            flashEnd: end
+          });
+        });
+      });
+      chain.then(function () {
+        if (VOXY.showToast) VOXY.showToast("Flash Sale -" + disc + "% diterapkan ke " + ids.length + " produk");
+        else alert("Flash Sale diterapkan ke " + ids.length + " produk");
+        loadFlashList();
+        if (typeof loadProdukAdmin === "function") loadProdukAdmin();
+      }).catch(function (e) { alert(e.message || "Gagal menerapkan"); });
+    }
+    function matikanFlashSale() {
+      var ids = getFlashSelectedIds();
+      if (!ids.length) { alert("Centang produk yang mau dimatikan flash-nya"); return; }
+      if (!confirm("Matikan Flash Sale untuk " + ids.length + " produk?")) return;
+      var chain = Promise.resolve();
+      ids.forEach(function (id) {
+        chain = chain.then(function () {
+          return VOXY.simpanProduk(id, {
+            flashSale: false,
+            flashDiskon: 0,
+            flashHarga: 0,
+            flashEnd: 0
+          });
+        });
+      });
+      chain.then(function () {
+        if (VOXY.showToast) VOXY.showToast("Flash Sale dimatikan");
+        else alert("Flash Sale dimatikan");
+        loadFlashList();
+      }).catch(function (e) { alert(e.message || "Gagal"); });
+    }
+
+    /* Pengaturan */
+    function loadPengaturan() {
+      VOXY.getSettings().then(function (s) {
+        s = s || {};
+        document.getElementById("sNamaToko").value = s.namaToko || "";
+        document.getElementById("sWa").value = s.waAdmin || "";
+        document.getElementById("sRekening").value = s.rekening || "";
+        var ps = document.getElementById("sPesanSuntik");
+        if (ps) ps.value = s.pesanSuntik || "Coba cek saluran kamu ya. Order sudah diproses admin.";
+      });
+      VOXY.getBranding().then(function (b) {
+        b = b || {};
+        if (b.logo) document.getElementById("prevLogo").src = b.logo;
+        if (b.banner1) document.getElementById("prevBanner1").src = b.banner1;
+        if (b.banner2) document.getElementById("prevBanner2").src = b.banner2;
+        if (b.banner3) document.getElementById("prevBanner3").src = b.banner3;
+        if (b.qris) document.getElementById("prevQris").src = b.qris;
+      });
+      // live preview on file pick
+      function bindPrev(inputId, imgId) {
+        var inp = document.getElementById(inputId);
+        if (!inp) return;
+        inp.onchange = function () {
+          var f = inp.files[0];
+          if (!f) return;
+          VOXY.fileToDataURL(f).then(function (url) {
+            document.getElementById(imgId).src = url;
+          });
+        };
+      }
+      bindPrev("fileLogo", "prevLogo");
+      bindPrev("fileBanner1", "prevBanner1");
+      bindPrev("fileBanner2", "prevBanner2");
+      bindPrev("fileBanner3", "prevBanner3");
+      bindPrev("fileQris", "prevQris");
+    }
+    function simpanPengaturan() {
+      VOXY.simpanSettings({
+        namaToko: document.getElementById("sNamaToko").value.trim(),
+        waAdmin: document.getElementById("sWa").value.trim(),
+        rekening: document.getElementById("sRekening").value.trim(),
+        pesanSuntik: (document.getElementById("sPesanSuntik") && document.getElementById("sPesanSuntik").value.trim()) || "Coba cek saluran kamu ya. Order sudah diproses admin."
+      }).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Info toko tersimpan");
+        else alert("Info toko tersimpan");
+      }).catch(function (e) { alert(e.message); });
+    }
+    function simpanBranding() {
+      var keys = [
+        ["fileLogo", "logo"],
+        ["fileBanner1", "banner1"],
+        ["fileBanner2", "banner2"],
+        ["fileBanner3", "banner3"],
+        ["fileQris", "qris"]
+      ];
+      var data = {};
+      var chain = Promise.resolve();
+      keys.forEach(function (pair) {
+        var input = document.getElementById(pair[0]);
+        var f = input && input.files[0];
+        if (f) {
+          chain = chain.then(function () {
+            return VOXY.fileToDataURL(f).then(function (url) {
+              data[pair[1]] = url;
+            });
+          });
+        }
+      });
+      chain.then(function () {
+        if (!Object.keys(data).length) {
+          alert("Pilih minimal 1 foto untuk diganti");
+          return;
+        }
+        return VOXY.simpanBranding(data).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Logo / Banner / QRIS tersimpan");
+          else alert("Logo / Banner / QRIS tersimpan");
+          // clear file inputs
+          keys.forEach(function (pair) {
+            var input = document.getElementById(pair[0]);
+            if (input) input.value = "";
+          });
+        });
+      }).catch(function (e) { alert(e.message || "Gagal simpan branding"); });
+    }
+    function resetMenuForm() {
+      document.getElementById("mId").value = "";
+      document.getElementById("mJudul").value = "";
+      document.getElementById("mSub").value = "";
+      document.getElementById("mIcon").value = "package";
+      document.getElementById("mKat").value = "";
+      document.getElementById("mUrut").value = "1";
+      document.getElementById("mAktif").value = "1";
+    }
+    function loadMenuAdmin() {
+      var box = document.getElementById("menuListAdmin");
+      if (!box) return;
+      if (!VOXY.db) {
+        box.innerHTML = '<div class="empty-state">Database belum siap</div>';
+        return;
+      }
+      VOXY.db.ref("menu_layanan").once("value").then(function (snap) {
+        var val = snap.val() || {};
+        return Object.keys(val).map(function (id) {
+          return Object.assign({ id: id }, val[id]);
+        }).sort(function (a, b) {
+          return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
+        });
+      }).then(function (list) {
+        window._menuAdminList = list || [];
+        var sel = document.getElementById("mpMenuSelect");
+        var dl = document.getElementById("listKategoriMenu");
+        if (sel) {
+          var cur = sel.value;
+          sel.innerHTML = '<option value="">— Pilih menu dulu —</option>' + list.map(function (m) {
+            return '<option value="' + m.id + '">' + (m.judul || m.id) + (m.kategori ? " (" + m.kategori + ")" : "") + '</option>';
+          }).join("");
+          if (cur) sel.value = cur;
+        }
+        var selP = document.getElementById("pMenuPilih");
+        if (selP) {
+          var curP = selP.value;
+          selP.innerHTML = '<option value="">— Pilih menu dulu —</option>' + list.map(function (m) {
+            return '<option value="' + m.id + '" data-kat="' + String(m.kategori || "").replace(/"/g, "") + '">' + (m.judul || m.id) + (m.kategori ? " → " + m.kategori : "") + '</option>';
+          }).join("");
+          if (curP) selP.value = curP;
+        }
+        if (dl) {
+          dl.innerHTML = list.filter(function (m) { return m.kategori; }).map(function (m) {
+            return '<option value="' + String(m.kategori).replace(/"/g, "") + '">';
+          }).join("");
+        }
+        if (!list.length) {
+          box.innerHTML = '<div class="empty-state">Belum ada menu. Tambah di form atas.</div>';
+          return;
+        }
+        box.innerHTML = list.map(function (m) {
+          var on = m.aktif !== false && m.aktif !== "false";
+          return (
+            '<div class="admin-order-card" style="margin-bottom:8px">' +
+              '<div class="top"><b>' + (m.judul || "-") + '</b><span class="badge ' + (on ? "selesai" : "ditolak") + '">' + (on ? "Aktif" : "Off") + '</span></div>' +
+              '<div class="meta">Icon: <b>' + (m.icon || "-") + '</b> · Filter kategori: <b>' + (m.kategori || "-") + '</b> · Urutan: ' + (m.urutan || 0) + '</div>' +
+              (m.subjudul ? '<div class="meta">' + String(m.subjudul).replace(/</g, "&lt;") + '</div>' : '') +
+              '<div class="actions">' +
+                '<button type="button" class="btn btn-sm" data-id="' + m.id + '" onclick="editMenuItem(this.dataset.id)">Edit</button>' +
+                '<button type="button" class="btn btn-sm" data-id="' + m.id + '" onclick="pilihMenuIsiProduk(this.dataset.id)">Isi Produk</button>' +
+                '<button type="button" class="btn btn-sm btn-danger" data-id="' + m.id + '" onclick="hapusMenuItem(this.dataset.id)">Hapus</button>' +
+              '</div>' +
+            '</div>'
+          );
+        }).join("");
+        if (sel && sel.value) onPilihMenuUntukProduk();
+      }).catch(function (e) {
+        box.innerHTML = '<div class="empty-state">' + (e.message || "Gagal muat menu") + '</div>';
+      });
+    }
+    function editMenuItem(id) {
+      VOXY.db.ref("menu_layanan/" + id).once("value").then(function (snap) {
+        var m = snap.val();
+        if (!m) return alert("Menu tidak ditemukan");
+        document.getElementById("mId").value = id;
+        document.getElementById("mJudul").value = m.judul || "";
+        document.getElementById("mSub").value = m.subjudul || "";
+        document.getElementById("mIcon").value = m.icon || "package";
+        document.getElementById("mKat").value = m.kategori || "";
+        document.getElementById("mUrut").value = m.urutan || 0;
+        document.getElementById("mAktif").value = (m.aktif === false || m.aktif === "false") ? "0" : "1";
+        switchTab("menu", document.querySelector('[data-tab="menu"]'));
+      });
+    }
+    function simpanMenuItem() {
+      var judul = document.getElementById("mJudul").value.trim();
+      var kat = document.getElementById("mKat").value.trim();
+      if (!judul) return alert("Judul wajib diisi");
+      if (!kat) return alert("Kategori filter wajib diisi (dipakai untuk menampung produk menu ini)");
+      var data = {
+        id: document.getElementById("mId").value || undefined,
+        judul: judul,
+        subjudul: document.getElementById("mSub").value.trim(),
+        icon: document.getElementById("mIcon").value.trim() || "package",
+        kategori: kat,
+        urutan: Number(document.getElementById("mUrut").value) || 0,
+        aktif: document.getElementById("mAktif").value === "1"
+      };
+      VOXY.simpanMenuLayanan(data).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Menu tersimpan");
+        else alert("Menu tersimpan");
+        resetMenuForm();
+        loadMenuAdmin();
+      }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+    }
+    function hapusMenuItem(id) {
+      if (!confirm("Hapus menu ini?")) return;
+      VOXY.hapusMenuLayanan(id).then(function () {
+        loadMenuAdmin();
+      }).catch(function (e) { alert(e.message); });
+    }
+    function pilihMenuIsiProduk(id) {
+      var sel = document.getElementById("mpMenuSelect");
+      if (sel) sel.value = id;
+      onPilihMenuUntukProduk();
+      var wrap = document.getElementById("mpFormWrap");
+      if (wrap) wrap.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    function onPilihMenuUntukProduk() {
+      var id = document.getElementById("mpMenuSelect").value;
+      var wrap = document.getElementById("mpFormWrap");
+      var listBox = document.getElementById("mpProdukList");
+      if (!id) {
+        if (wrap) wrap.style.display = "none";
+        if (listBox) listBox.innerHTML = '<div class="empty-state">Pilih menu untuk lihat produknya</div>';
+        return;
+      }
+      var menus = window._menuAdminList || [];
+      var m = null;
+      for (var i = 0; i < menus.length; i++) if (menus[i].id === id) { m = menus[i]; break; }
+      if (!m) {
+        if (wrap) wrap.style.display = "none";
+        return;
+      }
+      if (wrap) wrap.style.display = "block";
+      document.getElementById("mpKategori").value = m.kategori || "";
+      resetProdukMenuForm(true);
+      loadProdukUntukMenu(m.kategori || "");
+    }
+    function resetProdukMenuForm(keepKat) {
+      document.getElementById("mpProdukId").value = "";
+      document.getElementById("mpNama").value = "";
+      if (!keepKat) document.getElementById("mpKategori").value = "";
+      document.getElementById("mpHarga").value = "";
+      document.getElementById("mpStok").value = "10";
+      document.getElementById("mpTipeKirim").value = "email_password";
+      document.getElementById("mpDeskripsi").value = "";
+      document.getElementById("mpGambar").value = "";
+      document.getElementById("mpFlash").checked = false;
+      document.getElementById("mpFlashDiskon").value = "";
+      document.getElementById("mpFlashEnd").value = "";
+    }
+    function matchKatAdmin(p, cat) {
+      var k = ((p.kategori || "") + "").trim().toLowerCase();
+      var c = (cat || "").trim().toLowerCase();
+      if (!c) return false;
+      return k === c || k.indexOf(c) !== -1 || c.indexOf(k) !== -1;
+    }
+    function loadProdukUntukMenu(kat) {
+      var listBox = document.getElementById("mpProdukList");
+      if (!listBox) return;
+      listBox.innerHTML = '<div class="empty-state">Memuat produk...</div>';
+      VOXY.getProdukList().then(function (list) {
+        var filtered = (list || []).filter(function (p) { return matchKatAdmin(p, kat); });
+        if (!filtered.length) {
+          listBox.innerHTML = '<div class="empty-state">Belum ada produk di kategori <b>' + (kat || "-") + '</b>. Tambah lewat form di atas.</div>';
+          return;
+        }
+        listBox.innerHTML = '<div style="font-size:13px;font-weight:700;margin-bottom:8px">' + filtered.length + ' produk di menu ini</div>' +
+          filtered.map(function (p) {
+            return (
+              '<div class="admin-order-card" style="margin-bottom:8px">' +
+                '<div class="top"><b>' + (p.nama || "-") + '</b><span class="meta">' + VOXY.formatRp(p.harga) + '</span></div>' +
+                '<div class="meta">Stok: ' + (p.stok != null ? p.stok : "-") + (p.flashSale ? ' · Flash Sale' : '') + '</div>' +
+                '<div class="actions">' +
+                  '<button type="button" class="btn btn-sm" data-id="' + p.id + '" onclick="editProdukMenu(this.dataset.id)">Edit</button>' +
+                  '<button type="button" class="btn btn-sm btn-danger" data-id="' + p.id + '" onclick="hapusProdukMenu(this.dataset.id)">Hapus</button>' +
+                '</div>' +
+              '</div>'
+            );
+          }).join("");
+      }).catch(function (e) {
+        listBox.innerHTML = '<div class="empty-state">' + (e.message || "Gagal muat") + '</div>';
+      });
+    }
+    function editProdukMenu(id) {
+      VOXY.getProdukList().then(function (list) {
+        var p = (list || []).filter(function (x) { return x.id === id; })[0];
+        if (!p) return alert("Produk tidak ditemukan");
+        document.getElementById("mpProdukId").value = p.id;
+        document.getElementById("mpNama").value = p.nama || "";
+        document.getElementById("mpKategori").value = p.kategori || document.getElementById("mpKategori").value;
+        document.getElementById("mpHarga").value = p.harga || 0;
+        document.getElementById("mpStok").value = p.stok != null ? p.stok : 10;
+        document.getElementById("mpTipeKirim").value = p.tipeKirim || "email_password";
+        document.getElementById("mpDeskripsi").value = p.deskripsi || "";
+        document.getElementById("mpFlash").checked = !!(p.flashSale === true || p.flashSale === "true" || p.flashSale === 1);
+        document.getElementById("mpFlashDiskon").value = p.flashDiskon || "";
+        if (p.flashEnd) {
+          try {
+            var d = new Date(Number(p.flashEnd));
+            document.getElementById("mpFlashEnd").value = d.toISOString().slice(0, 16);
+          } catch (e) {}
+        }
+        document.getElementById("mpFormWrap").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+    function hapusProdukMenu(id) {
+      if (!confirm("Hapus produk ini?")) return;
+      VOXY.hapusProduk(id).then(function () {
+        var kat = document.getElementById("mpKategori").value;
+        loadProdukUntukMenu(kat);
+        if (typeof loadProdukAdmin === "function") loadProdukAdmin();
+      }).catch(function (e) { alert(e.message); });
+    }
+    function simpanProdukMenu() {
+      var nama = document.getElementById("mpNama").value.trim();
+      var kat = document.getElementById("mpKategori").value.trim();
+      if (!document.getElementById("mpMenuSelect").value) return alert("Pilih menu dulu");
+      if (!nama) return alert("Nama produk wajib");
+      if (!kat) return alert("Menu ini belum punya kategori filter. Edit menu dan isi kategori filter dulu.");
+      var flashOn = !!document.getElementById("mpFlash").checked;
+      var disc = Number(document.getElementById("mpFlashDiskon").value) || 0;
+      var flashEndVal = document.getElementById("mpFlashEnd").value;
+      var flashEnd = 0;
+      if (flashOn) {
+        if (disc <= 0) return alert("Isi diskon flash 1–99");
+        flashEnd = flashEndVal ? new Date(flashEndVal).getTime() : (Date.now() + 7 * 24 * 3600 * 1000);
+        if (isNaN(flashEnd)) flashEnd = Date.now() + 7 * 24 * 3600 * 1000;
+      }
+      var id = document.getElementById("mpProdukId").value || null;
+      var data = {
+        nama: nama,
+        kategori: kat,
+        harga: Number(document.getElementById("mpHarga").value) || 0,
+        deskripsi: document.getElementById("mpDeskripsi").value.trim(),
+        tipeKirim: document.getElementById("mpTipeKirim").value,
+        stok: Math.max(0, Number(document.getElementById("mpStok").value) || 0),
+        stokHabis: (Math.max(0, Number(document.getElementById("mpStok").value) || 0) <= 0),
+        flashSale: flashOn,
+        flashDiskon: flashOn ? disc : 0,
+        flashHarga: 0,
+        flashEnd: flashOn ? flashEnd : 0,
+        butuhTarget: document.getElementById("mpTipeKirim").value === "link_target"
+      };
+      var file = document.getElementById("mpGambar").files[0];
+      var go = function (imgUrl) {
+        if (imgUrl) data.gambar = imgUrl;
+        else if (!id) data.gambar = "produk1.jpg";
+        return VOXY.simpanProduk(id, data).then(function () {
+          if (VOXY.showToast) VOXY.showToast("Produk tersimpan di menu");
+          else alert("Produk tersimpan di menu");
+          resetProdukMenuForm(true);
+          loadProdukUntukMenu(kat);
+          if (typeof loadProdukAdmin === "function") loadProdukAdmin();
+        });
+      };
+      if (file) {
+        VOXY.compressChatImage(file).then(function (url) { return go(url); })
+          .catch(function (e) { alert(e.message || "Gagal upload"); });
+      } else {
+        go(null).catch(function (e) { alert(e.message || "Gagal simpan"); });
+      }
+    }
+
+    var filterJokiStatus = "aktif";
+    function setFilterJoki(st, el) {
+      filterJokiStatus = st;
+      document.querySelectorAll("#filterJoki button").forEach(function (b) { b.classList.remove("active"); });
+      if (el) el.classList.add("active");
+      renderJoki();
+    }
+    function renderJoki() {
+      var box = document.getElementById("tabelJoki");
+      if (!box) return;
+      var list = (allOrders || []).filter(function (o) {
+        return (o.jenis === "joki") || ((o.kategori || "").toLowerCase() === "joki");
+      });
+      if (filterJokiStatus === "aktif") {
+        list = list.filter(function (o) {
+          var s = (o.status || "").toLowerCase();
+          return s !== "selesai" && s !== "ditolak" && s !== "completed";
+        });
+      } else if (filterJokiStatus !== "semua") {
+        list = list.filter(function (o) { return (o.status || "") === filterJokiStatus; });
+      }
+      list.sort(function (a, b) {
+        function rank(o) {
+          var hasPrio = o.serobot || (o.jokiIncludes || []).some(function (x) { return x.id === "prioritas" || x.prioritas; });
+          var hasFc = o.facecam || (o.jokiIncludes || []).some(function (x) { return x.id === "facecam" || x.facecam; });
+          if (hasPrio) return 2;
+          if (hasFc) return 1;
+          return 0;
+        }
+        var ra = rank(a), rb = rank(b);
+        if (rb !== ra) return rb - ra;
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      });
+      if (!list.length) {
+        box.innerHTML = '<div class="empty-state">Belum ada order joki</div>';
+        return;
+      }
+      box.innerHTML = list.map(function (o) {
+        var preview = (o.jokiPreview || "").replace(/</g, "&lt;");
+        var hasPrio = o.serobot || (o.jokiIncludes || []).some(function (x) { return x.id === "prioritas" || x.prioritas; });
+        var hasFc = o.facecam || (o.jokiIncludes || []).some(function (x) { return x.id === "facecam" || x.facecam; });
+        var badges = "";
+        if (hasPrio) badges += '<span class="admin-joki-badge prio">PRIORITAS</span>';
+        if (hasFc) badges += '<span class="admin-joki-badge facecam">FACECAM / VIDEO</span>';
+        var includes = "";
+        if (o.jokiIncludes && o.jokiIncludes.length) {
+          includes = '<div class="meta">Include: ' + o.jokiIncludes.map(function (x) {
+            return (x.nama || "") + " (+" + VOXY.formatRp(x.harga || 0) + ")";
+          }).join(", ") + '</div>';
+        } else if (o.serobot) {
+          includes = '<div class="meta">Include: Prioritas Antrian</div>';
+        }
+        var nama = o.namaProduk || o.nama || "Joki";
+        return (
+          '<div class="admin-order-card" style="margin-bottom:10px">' +
+            '<div class="top"><b>' + (o.kode || "-") + '</b>' +
+              '<span class="badge">' + (o.status || "-") + '</span></div>' +
+            (badges ? '<div style="margin:4px 0 2px">' + badges + '</div>' : '') +
+            '<div class="meta"><b>' + nama + '</b> · ' + VOXY.formatRp(o.harga) + '</div>' +
+            '<div class="meta">Store: <b>' + (o.jokiStore || "-") + '</b> · WA: <b>' + (o.jokiWa || "-") + '</b></div>' +
+            '<div class="meta">Email: ' + (o.email || "-") + '</div>' +
+            includes +
+            '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">' +
+              '<div style="font-size:12px;font-weight:700;margin-bottom:6px">Bukti TF</div>' +
+              '<div id="jokiBukti_' + (o.kode || "") + '" class="meta" style="color:var(--muted)">Memuat bukti...</div>' +
+            '</div>' +
+            (preview ? (
+              '<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">' +
+                '<div style="font-size:12px;font-weight:700;margin-bottom:6px">Teks format joki</div>' +
+                '<pre class="joki-admin-preview" id="jokiPrev_' + (o.kode || "") + '">' + preview + '</pre>' +
+                '<button type="button" class="btn btn-sm btn-outline" style="margin:6px 0 0" onclick="salinTeksJoki(\'' + (o.kode || "") + '\')">Salin Teks</button>' +
+              '</div>'
+            ) : '') +
+            '<div class="actions" style="flex-wrap:wrap;gap:6px;margin-top:10px">' +
+              '<button type="button" class="btn btn-sm" onclick="updateStatusJoki(\'' + o.kode + '\',\'Diproses\')">Proses</button>' +
+              '<button type="button" class="btn btn-sm btn-success" onclick="updateStatusJoki(\'' + o.kode + '\',\'Selesai\')">Selesai</button>' +
+              '<button type="button" class="btn btn-sm btn-danger" onclick="updateStatusJoki(\'' + o.kode + '\',\'Ditolak\')">Tolak</button>' +
+            '</div>' +
+            '<p style="font-size:11px;color:var(--muted);margin-top:8px">Cek bukti TF + teks di atas. Joki: cukup ubah status, tidak perlu kirim produk.</p>' +
+          '</div>'
+        );
+      }).join("");
+      /* muat bukti TF per order (satu halaman dengan teks) */
+      list.forEach(function (o) {
+        var kode = o.kode;
+        if (!kode) return;
+        var el = document.getElementById("jokiBukti_" + kode);
+        if (!el) return;
+        VOXY.getBukti(kode).then(function (data) {
+          if (data) {
+            el.innerHTML = '<img src="' + data + '" alt="Bukti TF" style="max-width:100%;max-height:220px;border-radius:10px;border:1px solid var(--border);margin-top:4px">' +
+              '<div style="font-size:11px;color:#22c55e;margin-top:4px;font-weight:700">✓ Sudah kirim bukti TF</div>';
+          } else {
+            el.innerHTML = '<span style="color:#f59e0b;font-weight:600">Belum ada bukti TF</span>';
+          }
+        }).catch(function () {
+          el.innerHTML = '<span style="color:var(--muted)">Gagal muat bukti</span>';
+        });
+      });
+    }
+function salinTeksJoki(kode) {
+      var el = document.getElementById("jokiPrev_" + kode);
+      var text = el ? el.textContent : "";
+      if (!text) {
+        var o = (allOrders || []).filter(function (x) { return x.kode === kode; })[0];
+        text = (o && o.jokiPreview) || "";
+      }
+      if (!text) return alert("Teks kosong");
+      function ok() { if (VOXY.showToast) VOXY.showToast("Teks disalin"); else alert("Teks disalin"); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok).catch(function () {
+          var ta = document.createElement("textarea");
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); ok(); } catch (e) { alert("Gagal salin"); }
+          document.body.removeChild(ta);
+        });
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); ok(); } catch (e) { alert("Gagal salin"); }
+        document.body.removeChild(ta);
+      }
+    }
+
+    function updateStatusJoki(kode, status) {
+      if (!kode) return;
+      VOXY.updateOrder(kode, { status: status }).then(function () {
+        if (VOXY.showToast) VOXY.showToast("Status: " + status);
+      }).catch(function (e) { alert(e.message); });
+    }
+
+    var _jokiCfgCache = null;
+    function loadJokiConfigAdmin() {
+      var box = document.getElementById("jokiConfigBox");
+      if (!box) return;
+      box.innerHTML = '<div class="empty-state">Memuat harga...</div>';
+      VOXY.getJokiConfig().then(function (cfg) {
+        _jokiCfgCache = cfg;
+        renderJokiConfigForm(cfg);
+      }).catch(function () {
+        _jokiCfgCache = { paket: VOXY.DEFAULT_JOKI_PAKET, includes: VOXY.DEFAULT_JOKI_INCLUDES };
+        renderJokiConfigForm(_jokiCfgCache);
+      });
+    }
+    function renderJokiConfigForm(cfg) {
+      var box = document.getElementById("jokiConfigBox");
+      if (!box) return;
+      var html = '<h3 style="font-size:14px;margin:0 0 8px">Paket Joki</h3>';
+      html += '<div style="display:grid;gap:8px;margin-bottom:16px">';
+      (cfg.paket || []).forEach(function (p, i) {
+        html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid var(--border);border-radius:8px">' +
+          '<span style="min-width:110px;font-weight:700;font-size:13px">' + (p.nama || p.id) + '</span>' +
+          '<label style="font-size:12px;color:var(--muted)">Harga <input type="number" min="0" data-joki-paket="' + i + '" value="' + (Number(p.harga) || 0) + '" style="width:100px;margin-left:4px"></label>' +
+          '</div>';
+      });
+      html += '</div><h3 style="font-size:14px;margin:0 0 8px">Tambahan (Prioritas, FaceCam, +hari)</h3>';
+      html += '<div style="display:grid;gap:8px">';
+      (cfg.includes || []).forEach(function (inc, i) {
+        var tag = "";
+        if (inc.prioritas) tag = ' <span class="admin-joki-badge prio">PRIORITAS</span>';
+        if (inc.facecam) tag = ' <span class="admin-joki-badge facecam">FACECAM</span>';
+        html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px;border:1px solid var(--border);border-radius:8px">' +
+          '<span style="min-width:160px;font-weight:700;font-size:13px">' + (inc.nama || inc.id) + tag + '</span>' +
+          '<label style="font-size:12px;color:var(--muted)">Harga <input type="number" min="0" data-joki-inc="' + i + '" value="' + (Number(inc.harga) || 0) + '" style="width:100px;margin-left:4px"></label>' +
+          '</div>';
+      });
+      html += '</div>';
+      box.innerHTML = html;
+    }
+    function simpanJokiHarga() {
+      if (!_jokiCfgCache) return alert("Belum dimuat");
+      var paket = (_jokiCfgCache.paket || []).map(function (p, i) {
+        var el = document.querySelector('[data-joki-paket="' + i + '"]');
+        var harga = el ? Number(el.value) || 0 : Number(p.harga) || 0;
+        return Object.assign({}, p, { harga: harga });
+      });
+      var includes = (_jokiCfgCache.includes || []).map(function (inc, i) {
+        var el = document.querySelector('[data-joki-inc="' + i + '"]');
+        var harga = el ? Number(el.value) || 0 : Number(inc.harga) || 0;
+        return Object.assign({}, inc, { harga: harga });
+      });
+      VOXY.simpanJokiConfig({ paket: paket, includes: includes }).then(function () {
+        _jokiCfgCache = { paket: paket, includes: includes };
+        if (VOXY.showToast) VOXY.showToast("Harga joki tersimpan"); else alert("Harga joki tersimpan");
+      }).catch(function (e) { alert(e.message || "Gagal simpan"); });
+    }
+    function resetJokiHarga() {
+      if (!confirm("Reset semua harga joki ke default?")) return;
+      var def = { paket: JSON.parse(JSON.stringify(VOXY.DEFAULT_JOKI_PAKET)), includes: JSON.parse(JSON.stringify(VOXY.DEFAULT_JOKI_INCLUDES)) };
+      VOXY.simpanJokiConfig(def).then(function () {
+        _jokiCfgCache = def;
+        renderJokiConfigForm(def);
+        if (VOXY.showToast) VOXY.showToast("Reset ke default"); else alert("Reset ke default");
+      }).catch(function (e) { alert(e.message || "Gagal"); });
+    }
+    function doLogout() {
+
+      if (!confirm("Logout admin?")) return;
+      VOXY.logoutUser().then(function () { window.location.href = "login.html"; });
+    }
+  </script>
 </body>
 </html>

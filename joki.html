@@ -1,85 +1,78 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Paket Joki Kontak - Doxy Joki</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Joki Kontak - VOXY MARKET</title>
   <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  
-<script>
-  if (window.self !== window.top) {
-    document.documentElement.classList.add('in-iframe');
-  }
-</script>
-
-  <audio id="bgMusic" loop preload="auto">
-    <source src="music.m4a" type="audio/mp4">
-  </audio>
-
-<header class="header">
-    <div class="brand">
-      <img src="logo.jpg
-        " alt="Doxy Joki" class="logo"  >
-      <div>
-        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pusat Layanan Doxy Joki</p>
-      </div>
-    </div>
-  
-    <div class="header-right">
-      <div class="music-controls" id="musicControls">
-        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
-          <i class="fa-solid fa-pause" id="musicIcon"></i>
-        </button>
-        <span class="music-label">Lagu</span>
-      </div>
-    </div>
-  </header>
-  <!-- Notif (hanya muncul jika ada order real) -->
-  <div class="top-notif" id="topNotif" style="display:none;"></div>
-
-
-  <div class="page-content">
-    <div class="badge">JASA JOKI KONTAK</div>
-    <h2 class="page-title">Paket Joki Kontak.</h2>
-    <p class="page-desc">Pilih paket dinamis dari admin, isi data promo, lalu bayar dari website.</p>
-
-    <div class="warning-box">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-      <div class="marquee">
-        <span>KANG JOKI KONTAK DILARANG ORDER JOKI KONTAK DI SINI. JIKA KETAHUAN, TIDAK DILAYANI! &nbsp;&nbsp;&nbsp; KANG JOKI KONTAK DILARANG ORDER JOKI KONTAK DI SINI. JIKA KETAHUAN, TIDAK DILAYANI!</span>
-      </div>
-    </div>
-
-    <!-- Daftar Paket (diisi JS) -->
-    <div id="paketList"></div>
-  </div>
-
-  <!-- Form order pindah ke pesan.html / detail.html -->
-
-  <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
-
-        <nav class="bottom-nav nav-6">
-    <a href="joki.html" class="nav-item active"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
-    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
-    <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
-    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
-    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
-    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
-  </nav>
-
-  <script src="joki-produk.js"></script>
-  <script src="telegram.js"></script>
-
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <button class="icon-btn" onclick="location.href='home.html'"><i data-lucide="arrow-left"></i></button>
+    <div class="logo-area"><span>Joki Kontak</span></div>
+    <div style="width:40px"></div>
+  </header>
+
+  <main class="page layanan-page">
+    <div class="joki-marquee-wrap" aria-label="Peringatan">
+      <div class="joki-marquee">
+        <span>⚠ Kang joki kontak dilarang order joki di sini. Jika ketahuan, tidak dilayani!&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
+        <span>⚠ Kang joki kontak dilarang order joki di sini. Jika ketahuan, tidak dilayani!&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </div>
+
+    <div class="home-produk-head">
+      <h2>Pilih Paket Joki</h2>
+    </div>
+    <div class="paket-grid" id="jokiGrid">
+      <div class="empty-state" style="grid-column:1/-1">Memuat paket...</div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html"><i data-lucide="home"></i>Home</a>
+    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
+    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
+  </nav>
+
   <script src="global-orders.js"></script>
-  <script src="script.js"></script>
-<script src="music.js"></script>
+  <script>
+    lucide.createIcons();
+
+    function renderPaket(PAKET) {
+      document.getElementById("jokiGrid").innerHTML = PAKET.map(function (p) {
+        var fitur = (p.fitur || []).map(function (f) {
+          return '<li><i data-lucide="check-circle-2"></i> ' + f + '</li>';
+        }).join("");
+        return (
+          '<a class="paket-card' + (p.populer ? ' is-flash' : '') + '" href="joki-order.html?id=' + encodeURIComponent(p.id) + '">' +
+            (p.populer ? '<span class="paket-populer">POPULER</span>' : '') +
+            '<div class="paket-body" style="padding-top:14px">' +
+              '<span class="paket-badge" style="position:static;display:inline-flex;margin-bottom:8px">' + (p.badge || "") + '</span>' +
+              '<h3 class="paket-title">' + (p.nama || "") + '</h3>' +
+              '<p class="paket-desc">' + (p.desc || "") + '</p>' +
+              '<ul class="paket-fitur">' + fitur + '</ul>' +
+              '<div class="paket-price-wrap"><div class="paket-price">' + VOXY.formatRp(p.harga) + '</div></div>' +
+              '<span class="paket-cta">Pilih Paket</span>' +
+            '</div>' +
+          '</a>'
+        );
+      }).join("");
+      lucide.createIcons();
+    }
+
+    VOXY.requireAuth().then(function () {
+      VOXY.getJokiConfig().then(function (cfg) {
+        renderPaket(cfg.paket || VOXY.DEFAULT_JOKI_PAKET);
+      }).catch(function () {
+        renderPaket(VOXY.DEFAULT_JOKI_PAKET);
+      });
+    });
+  </script>
+  <script src="music-player.js"></script>
 </body>
 </html>

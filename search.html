@@ -43,9 +43,9 @@
       });
       if (!filtered.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Tidak ditemukan</div>'; return; }
       grid.innerHTML = filtered.map(function (p) {
-        var img = p.gambar || "produk1.png";
+        var img = p.gambar || "produk1.jpg";
         return '<a class="product-card" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
-          '<div class="thumb"><img src="' + img + '" onerror="this.src=\'produk1.png\'"></div>' +
+          '<div class="thumb"><img src="' + img + '" onerror="this.src=\'produk1.jpg\'"></div>' +
           '<div class="body"><div class="cat">' + (p.kategori || "Digital") + '</div>' +
           '<h3>' + (p.nama || "-") + '</h3><div class="price">' + VOXY.formatRp(p.harga) + '</div></div></a>';
       }).join("");
