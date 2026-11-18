@@ -2,18 +2,18 @@
 
 Semua file di root — **tanpa** folder `js/`, `css/`, `assets/`.
 
-## Optimasi Performa (update)
-- Gambar di-resize & kompres (logo 128px, banner ~800px, produk 400px) → load jauh lebih cepat.
+## Optimasi Loading (tanpa kurangi kualitas gambar)
 - LocalStorage cache untuk menu, produk, settings, branding, joki config.
-  - Data dari cache ditampilkan dulu (hampir instan), lalu sync ke Firebase di background.
-  - Hanya fetch ulang jika cache expired atau data diubah admin (invalidate otomatis).
-- Cache-Control header di Vercel untuk aset statis (JS/CSS/gambar) = 1 tahun.
+  - Data dari cache ditampilkan dulu (cepat), lalu sync ke Firebase di background.
+  - Hanya fetch ulang jika cache expired **atau** admin mengubah data (invalidate otomatis).
+- Cache-Control header di Vercel untuk aset statis.
 - Preconnect ke CDN Firebase & Lucide.
+- Gambar tetap kualitas asli seperti ZIP original.
 
 ## Path di kode
 - CSS: `style.css`
 - JS: `global-orders.js`
-- Gambar: `logo.png`, `banner.jpg`, `banner2.jpg`, `banner3.jpg`, `produk1.jpg`, dll.
+- Gambar: `logo.png`, `banner.png`, `qris.jpg`, dll.
 
 ## Fitur Chat / Laporan
 1. Tombol bulat kanan bawah (gambar chat) → pilih **Website** atau **WhatsApp**
@@ -29,7 +29,6 @@ Semua file di root — **tanpa** folder `js/`, `css/`, `assets/`.
   }
 }
 ```
-Atau longgarkan sementara untuk testing: `"chat": { ".read": "auth != null", ".write": "auth != null" }`
 
 ## Deploy Vercel
 Upload folder ini → Static Site → Done.

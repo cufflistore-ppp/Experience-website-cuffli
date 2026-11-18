@@ -542,7 +542,7 @@ function simpanProduk(id, data) {
   } else {
     var key = db.ref("produk").push().key;
     payload.id = key;
-    if (!payload.gambar) payload.gambar = "produk1.jpg";
+    if (!payload.gambar) payload.gambar = "produk1.png";
     p = db.ref("produk/" + key).set(payload).then(function () { return key; });
   }
   return p.then(function (rid) {

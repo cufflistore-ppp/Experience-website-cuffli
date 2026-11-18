@@ -76,7 +76,7 @@
       return k === c || k.indexOf(c) !== -1 || c.indexOf(k) !== -1;
     }
     function iconCard(p) {
-      var img = p.gambar || "produk1.jpg";
+      var img = p.gambar || "produk1.png";
       var stokNum = (p.stok != null) ? Number(p.stok) : null;
       var habis = p.stokHabis || (stokNum !== null && stokNum <= 0);
       var normal = Number(p.harga) || 0;
@@ -108,7 +108,7 @@
         '<a class="paket-card' + (habis ? ' is-habis' : '') + (flash ? ' is-flash' : '') + '" href="detail-produk.html?id=' + encodeURIComponent(p.id) + '">' +
           badgePop +
           '<div class="paket-thumb">' +
-            '<img src="' + img + '" alt="" loading="lazy" onerror="this.src=\'produk1.jpg\'">' +
+            '<img src="' + img + '" alt="" loading="lazy" onerror="this.src=\'produk1.png\'">' +
             badgeLeft +
           '</div>' +
           '<div class="paket-body">' +

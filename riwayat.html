@@ -44,10 +44,10 @@
         var el = document.getElementById("listRiwayat");
         if (!mine.length) { el.innerHTML = '<div class="empty-state">Belum ada transaksi</div>'; return; }
         el.innerHTML = mine.map(function (o) {
-          var img = o.gambar || "produk1.jpg";
+          var img = o.gambar || "produk1.png";
           var st = o.status || "Menunggu";
           return '<a class="order-item" href="detail-transaksi.html?kode=' + encodeURIComponent(o.kode) + '">' +
-            '<img class="thumb" src="' + img + '" onerror="this.src=\'produk1.jpg\'">' +
+            '<img class="thumb" src="' + img + '" onerror="this.src=\'produk1.png\'">' +
             '<div class="info"><h3>' + (o.namaProduk || o.nama || "-") + '</h3>' +
             '<div class="meta">' + (o.kode || "") + ' · ' + VOXY.formatTanggal(o.createdAt) + '</div>' +
             '<div class="meta" style="margin-top:4px">' + VOXY.formatRp(o.harga) +

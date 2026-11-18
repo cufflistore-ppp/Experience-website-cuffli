@@ -70,7 +70,7 @@
           return;
         }
         var p = produkData;
-        var img = p.gambar || "produk1.jpg";
+        var img = p.gambar || "produk1.png";
         var normal = Number(p.harga) || 0;
         var disc = isFlash(p) ? (Number(p.flashDiskon) || 0) : 0;
         var harga = (disc > 0 && disc < 100) ? Math.round(normal * (100 - disc) / 100) : normal;
@@ -89,7 +89,7 @@
           .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         var flashNote = isFlash(p) ? '<div class="admin-hint" style="margin-bottom:12px">Sedang <b>Flash Sale</b>' + (disc > 0 ? " (−" + disc + "%)" : "") + "</div>" : "";
         document.getElementById("detailPage").innerHTML =
-          '<div class="detail-hero"><img src="' + img + '" alt="' + String(p.nama || "").replace(/"/g, "") + '" onerror="this.src=\'produk1.jpg\'"></div>' +
+          '<div class="detail-hero"><img src="' + img + '" alt="' + String(p.nama || "").replace(/"/g, "") + '" onerror="this.src=\'produk1.png\'"></div>' +
           '<div class="detail-info">' +
             flashNote +
             '<div style="font-size:12px;color:var(--muted);margin-bottom:4px">' + (p.kategori || "Produk") + " · " + tipeLabel(tipe) + "</div>" +

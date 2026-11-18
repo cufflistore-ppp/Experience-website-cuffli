@@ -359,17 +359,17 @@
         <div class="form-group">
           <label>Banner 1</label>
           <input type="file" id="fileBanner1" accept="image/*">
-          <img id="prevBanner1" class="brand-preview" src="banner.jpg" alt="Banner 1">
+          <img id="prevBanner1" class="brand-preview" src="banner.png" alt="Banner 1">
         </div>
         <div class="form-group">
           <label>Banner 2</label>
           <input type="file" id="fileBanner2" accept="image/*">
-          <img id="prevBanner2" class="brand-preview" src="banner2.jpg" alt="Banner 2">
+          <img id="prevBanner2" class="brand-preview" src="banner2.png" alt="Banner 2">
         </div>
         <div class="form-group">
           <label>Banner 3</label>
           <input type="file" id="fileBanner3" accept="image/*">
-          <img id="prevBanner3" class="brand-preview" src="banner3.jpg" alt="Banner 3">
+          <img id="prevBanner3" class="brand-preview" src="banner3.png" alt="Banner 3">
         </div>
 
         <div class="form-group">
@@ -686,11 +686,11 @@
           return;
         }
         box.innerHTML = list.map(function (p) {
-          var img = p.gambar || "produk1.jpg";
+          var img = p.gambar || "produk1.png";
           var flash = p.flashSale === true || p.flashSale === "true" || p.flashSale === 1;
           return (
             '<div class="admin-produk-list-card">' +
-              '<img src="' + img + '" alt="" onerror="this.src=\'produk1.jpg\'">' +
+              '<img src="' + img + '" alt="" onerror="this.src=\'produk1.png\'">' +
               '<div class="info">' +
                 '<b>' + (p.nama || "-") + '</b>' +
                 '<span>' + (p.kategori || "-") + " · " + VOXY.formatRp(p.harga) +
@@ -810,7 +810,7 @@
       var file = document.getElementById("pGambarFile").files[0];
       var go = function (imgUrl) {
         if (imgUrl) data.gambar = imgUrl;
-        else if (!id) data.gambar = "produk1.jpg";
+        else if (!id) data.gambar = "produk1.png";
         /* edit tanpa ganti foto: jangan sentuh field gambar */
         return VOXY.simpanProduk(id, data).then(function () {
           if (VOXY.showToast) VOXY.showToast("Produk tersimpan" + (flashOn ? " · Flash Sale ON" : ""));
@@ -923,7 +923,7 @@
           return (
             '<label class="admin-order-card" style="display:flex;align-items:center;gap:12px;cursor:pointer">' +
               '<input type="checkbox" class="fs-check" value="' + p.id + '" style="width:18px;height:18px">' +
-              '<img src="' + (p.gambar || "produk1.jpg") + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover" onerror="this.src=\'produk1.jpg\'">' +
+              '<img src="' + (p.gambar || "produk1.png") + '" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover" onerror="this.src=\'produk1.png\'">' +
               '<div style="flex:1;min-width:0">' +
                 '<div style="font-weight:700;font-size:13px">' + (p.nama || "-") + '</div>' +
                 '<div style="font-size:12px;color:var(--muted)">' + (p.kategori || "") + ' · ' + VOXY.formatRp(p.harga) + '</div>' +
@@ -1322,7 +1322,7 @@
       var file = document.getElementById("mpGambar").files[0];
       var go = function (imgUrl) {
         if (imgUrl) data.gambar = imgUrl;
-        else if (!id) data.gambar = "produk1.jpg";
+        else if (!id) data.gambar = "produk1.png";
         return VOXY.simpanProduk(id, data).then(function () {
           if (VOXY.showToast) VOXY.showToast("Produk tersimpan di menu");
           else alert("Produk tersimpan di menu");
