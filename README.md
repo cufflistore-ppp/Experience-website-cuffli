@@ -2,14 +2,6 @@
 
 Semua file di root — **tanpa** folder `js/`, `css/`, `assets/`.
 
-## Optimasi Loading (tanpa kurangi kualitas gambar)
-- LocalStorage cache untuk menu, produk, settings, branding, joki config.
-  - Data dari cache ditampilkan dulu (cepat), lalu sync ke Firebase di background.
-  - Hanya fetch ulang jika cache expired **atau** admin mengubah data (invalidate otomatis).
-- Cache-Control header di Vercel untuk aset statis.
-- Preconnect ke CDN Firebase & Lucide.
-- Gambar tetap kualitas asli seperti ZIP original.
-
 ## Path di kode
 - CSS: `style.css`
 - JS: `global-orders.js`
@@ -29,6 +21,16 @@ Semua file di root — **tanpa** folder `js/`, `css/`, `assets/`.
   }
 }
 ```
+Atau longgarkan sementara untuk testing: `"chat": { ".read": "auth != null", ".write": "auth != null" }`
 
 ## Deploy Vercel
 Upload folder ini → Static Site → Done.
+
+
+## Kontrol Website ON/OFF (Maintenance Mode)
+- Buka `admin.html` → menu **Status Website**.
+- Isi judul dan pesan pemeliharaan, lalu tekan **OFF-kan Website** atau **ON-kan Website**.
+- Semua halaman pengunjung (login, daftar, home, produk, transaksi, chat, dan layanan) membaca status dari Firebase Realtime Database.
+- Saat status berubah, halaman pengunjung menampilkan hitung mundur 3–0. Jika OFF, halaman pemeliharaan tampil; jika ON, halaman normal kembali.
+- Halaman admin (`admin.html`, `admin-kelola.html`, `admin-joki-harga.html`) tidak diblokir agar admin tetap dapat mengelola website.
+- Pastikan rules Realtime Database terbaru dari `FIREBASE-RULES.txt` sudah dipublikasikan. Node `maintenance` harus bisa dibaca publik dan hanya dapat ditulis oleh dua email admin yang tercantum di rules.

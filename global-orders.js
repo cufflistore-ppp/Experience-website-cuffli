@@ -225,67 +225,6 @@ if (typeof firebase !== "undefined" && !firebase.apps.length) {
 const auth = typeof firebase !== "undefined" ? firebase.auth() : null;
 const db = typeof firebase !== "undefined" ? firebase.database() : null;
 
-/* ---------- Local cache (percepat load, kurangi delay Firebase) ---------- */
-var CACHE_TTL_MS = 60 * 1000; // 60 detik default; data statis lebih lama
-var CACHE_PREFIX = "voxy_cache_";
-
-function _cacheGet(key) {
-  try {
-    var raw = localStorage.getItem(CACHE_PREFIX + key);
-    if (!raw) return null;
-    var obj = JSON.parse(raw);
-    if (!obj || obj.t == null) return null;
-    return obj;
-  } catch (e) { return null; }
-}
-
-function _cacheSet(key, data, ttlMs) {
-  try {
-    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({
-      t: Date.now(),
-      ttl: ttlMs || CACHE_TTL_MS,
-      d: data
-    }));
-  } catch (e) { /* quota / private mode */ }
-}
-
-function _cacheValid(obj, ttlMs) {
-  if (!obj || obj.t == null) return false;
-  var ttl = ttlMs != null ? ttlMs : (obj.ttl || CACHE_TTL_MS);
-  return (Date.now() - obj.t) < ttl;
-}
-
-/** Ambil dari cache dulu (cepat), lalu refresh dari Firebase di background jika perlu */
-function cachedOnce(key, refPath, mapFn, ttlMs) {
-  ttlMs = ttlMs != null ? ttlMs : CACHE_TTL_MS;
-  var cached = _cacheGet(key);
-  if (cached && _cacheValid(cached, ttlMs) && cached.d != null) {
-    // Return cache immediately; optionally refresh in background
-    if (db) {
-      db.ref(refPath).once("value").then(function (snap) {
-        var val = snap.val();
-        var mapped = mapFn ? mapFn(val) : (val || {});
-        _cacheSet(key, mapped, ttlMs);
-      }).catch(function () {});
-    }
-    return Promise.resolve(cached.d);
-  }
-  if (!db) return Promise.resolve(mapFn ? mapFn(null) : (cached && cached.d) || null);
-  return db.ref(refPath).once("value").then(function (snap) {
-    var val = snap.val();
-    var mapped = mapFn ? mapFn(val) : (val || {});
-    _cacheSet(key, mapped, ttlMs);
-    return mapped;
-  }).catch(function (err) {
-    if (cached && cached.d != null) return cached.d;
-    throw err;
-  });
-}
-
-function invalidateCache(key) {
-  try { localStorage.removeItem(CACHE_PREFIX + key); } catch (e) {}
-}
-
 function isAdmin(email) {
   try {
     return !!( _vx && typeof _vx.check === "function" && _vx.check(email) );
@@ -495,30 +434,25 @@ function getHasilPesanan(kode) {
 }
 
 /* ---------- Produk ---------- */
-function _mapProdukList(val) {
-  val = val || {};
-  return Object.keys(val).map(function (id) {
-    return Object.assign({ id: id }, val[id]);
-  });
-}
-
 function getProdukList() {
-  return cachedOnce("produk", "produk", _mapProdukList, 90 * 1000);
+  if (!db) return Promise.resolve([]);
+  return db.ref("produk").once("value").then(function (snap) {
+    var val = snap.val() || {};
+    return Object.keys(val).map(function (id) {
+      return Object.assign({ id: id }, val[id]);
+    });
+  });
 }
 
 function listenProduk(callback) {
   if (!db) return function () {};
   var ref = db.ref("produk");
   var handler = function (snap) {
-    var list = _mapProdukList(snap.val());
-    _cacheSet("produk", list, 90 * 1000);
-    callback(list);
+    var val = snap.val() || {};
+    callback(Object.keys(val).map(function (id) {
+      return Object.assign({ id: id }, val[id]);
+    }));
   };
-  // Kirim cache dulu biar UI langsung tampil
-  var cached = _cacheGet("produk");
-  if (cached && cached.d) {
-    try { callback(cached.d); } catch (e) {}
-  }
   ref.on("value", handler);
   return function () { ref.off("value", handler); };
 }
@@ -536,38 +470,29 @@ function simpanProduk(id, data) {
   Object.keys(payload).forEach(function (k) {
     if (payload[k] === undefined || payload[k] === null) delete payload[k];
   });
-  var p;
   if (id) {
-    p = db.ref("produk/" + id).update(payload).then(function () { return id; });
-  } else {
-    var key = db.ref("produk").push().key;
-    payload.id = key;
-    if (!payload.gambar) payload.gambar = "produk1.png";
-    p = db.ref("produk/" + key).set(payload).then(function () { return key; });
+    return db.ref("produk/" + id).update(payload).then(function () { return id; });
   }
-  return p.then(function (rid) {
-    invalidateCache("produk");
-    return rid;
-  });
+  var key = db.ref("produk").push().key;
+  payload.id = key;
+  if (!payload.gambar) payload.gambar = "produk1.png";
+  return db.ref("produk/" + key).set(payload).then(function () { return key; });
 }
 
 function hapusProduk(id) {
   if (!db) return Promise.reject(new Error("Database belum siap"));
-  return db.ref("produk/" + id).remove().then(function () {
-    invalidateCache("produk");
-  });
+  return db.ref("produk/" + id).remove();
 }
 
 /* ---------- Settings ---------- */
 function getSettings() {
-  return cachedOnce("settings", "settings", function (v) { return v || {}; }, 120 * 1000);
+  if (!db) return Promise.resolve({});
+  return db.ref("settings").once("value").then(function (s) { return s.val() || {}; });
 }
 
 function simpanSettings(data) {
   if (!db) return Promise.reject(new Error("Database belum siap"));
-  return db.ref("settings").update(Object.assign({}, data, { updatedAt: Date.now() })).then(function () {
-    invalidateCache("settings");
-  });
+  return db.ref("settings").update(Object.assign({}, data, { updatedAt: Date.now() }));
 }
 
 /* ---------- Chat / Laporan ---------- */
@@ -805,36 +730,31 @@ function bukaWhatsApp(nomor, pesan) {
 
 
 /* ---------- Menu Layanan (home grid) ---------- */
-function _mapMenuLayanan(val) {
-  val = val || {};
-  return Object.keys(val).map(function (id) {
-    return Object.assign({ id: id }, val[id]);
-  }).sort(function (a, b) {
-    return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
-  });
-}
-
 function getMenuLayanan() {
-  return cachedOnce("menu_layanan", "menu_layanan", function (val) {
-    return _mapMenuLayanan(val).filter(function (m) {
+  if (!db) return Promise.resolve([]);
+  return db.ref("menu_layanan").once("value").then(function (snap) {
+    var val = snap.val() || {};
+    return Object.keys(val).map(function (id) {
+      return Object.assign({ id: id }, val[id]);
+    }).filter(function (m) {
       return m.aktif !== false && m.aktif !== "false";
+    }).sort(function (a, b) {
+      return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
     });
-  }, 120 * 1000);
+  });
 }
 function listenMenuLayanan(callback) {
   if (!db) return function () {};
   var ref = db.ref("menu_layanan");
   var handler = function (snap) {
-    var list = _mapMenuLayanan(snap.val());
-    _cacheSet("menu_layanan", list.filter(function (m) {
-      return m.aktif !== false && m.aktif !== "false";
-    }), 120 * 1000);
+    var val = snap.val() || {};
+    var list = Object.keys(val).map(function (id) {
+      return Object.assign({ id: id }, val[id]);
+    }).sort(function (a, b) {
+      return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
+    });
     callback(list);
   };
-  var cached = _cacheGet("menu_layanan");
-  if (cached && cached.d) {
-    try { callback(cached.d); } catch (e) {}
-  }
   ref.on("value", handler);
   return function () { ref.off("value", handler); };
 }
@@ -850,16 +770,11 @@ function simpanMenuLayanan(data) {
     aktif: data.aktif !== false && data.aktif !== "false",
     updatedAt: Date.now()
   };
-  return db.ref("menu_layanan/" + id).update(payload).then(function () {
-    invalidateCache("menu_layanan");
-    return id;
-  });
+  return db.ref("menu_layanan/" + id).update(payload).then(function () { return id; });
 }
 function hapusMenuLayanan(id) {
   if (!db || !id) return Promise.reject(new Error("ID kosong"));
-  return db.ref("menu_layanan/" + id).remove().then(function () {
-    invalidateCache("menu_layanan");
-  });
+  return db.ref("menu_layanan/" + id).remove();
 }
 
 /* ---------- Joki Config (paket + includes, editable admin) ---------- */
@@ -884,12 +799,13 @@ var DEFAULT_JOKI_INCLUDES = [
 ];
 
 function getJokiConfig() {
-  return cachedOnce("joki_config", "joki_config", function (val) {
-    val = val || {};
+  if (!db) return Promise.resolve({ paket: DEFAULT_JOKI_PAKET.slice(), includes: DEFAULT_JOKI_INCLUDES.slice() });
+  return db.ref("joki_config").once("value").then(function (snap) {
+    var val = snap.val() || {};
     var paket = Array.isArray(val.paket) && val.paket.length ? val.paket : DEFAULT_JOKI_PAKET.slice();
     var includes = Array.isArray(val.includes) && val.includes.length ? val.includes : DEFAULT_JOKI_INCLUDES.slice();
     return { paket: paket, includes: includes };
-  }, 180 * 1000);
+  });
 }
 
 function simpanJokiConfig(data) {
@@ -899,21 +815,18 @@ function simpanJokiConfig(data) {
     includes: Array.isArray(data.includes) ? data.includes : DEFAULT_JOKI_INCLUDES,
     updatedAt: Date.now()
   };
-  return db.ref("joki_config").set(payload).then(function () {
-    invalidateCache("joki_config");
-  });
+  return db.ref("joki_config").set(payload);
 }
 
 /* ---------- Branding (logo, banner x3, qris) ---------- */
 function getBranding() {
-  return cachedOnce("branding_assets", "branding_assets", function (v) { return v || {}; }, 300 * 1000);
+  if (!db) return Promise.resolve({});
+  return db.ref("branding_assets").once("value").then(function (s) { return s.val() || {}; });
 }
 
 function simpanBranding(data) {
   if (!db) return Promise.reject(new Error("Database belum siap"));
-  return db.ref("branding_assets").update(Object.assign({}, data, { updatedAt: Date.now() })).then(function () {
-    invalidateCache("branding_assets");
-  });
+  return db.ref("branding_assets").update(Object.assign({}, data, { updatedAt: Date.now() }));
 }
 
 function applyBrandingToPage() {
