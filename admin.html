@@ -31,7 +31,6 @@
         <i data-lucide="message-circle"></i> Chat User
         <span class="nav-badge hidden" id="chatNavBadge">0</span>
       </a>
-      <a href="#" data-tab="maintenance" onclick="switchTab('maintenance',this)"><i data-lucide="power"></i> Status Website</a>
       <a href="#" data-tab="pengaturan" onclick="switchTab('pengaturan',this)"><i data-lucide="settings"></i> Pengaturan</a>
       <a href="home.html"><i data-lucide="store"></i> Ke Toko</a>
       <a href="#" onclick="doLogout()"><i data-lucide="log-out"></i> Logout</a>
@@ -50,6 +49,32 @@
     <!-- DASHBOARD -->
     <div class="panel active" id="panel-dashboard">
       <div class="revenue-note"><i class="fa-solid fa-coins"></i> Pendapatan dihitung dari pesanan <b>Selesai</b> dalam 30 hari terakhir (rolling otomatis).</div>
+      <section class="vx-maintenance-admin" aria-label="Kontrol status website">
+        <div class="vx-maintenance-admin-info">
+          <b>Status Website</b>
+          <span id="vxMaintenanceStatusText">Memuat status...</span>
+        </div>
+        <div class="vx-maintenance-switch" id="vxMaintenanceSwitch">
+          <button type="button" id="vxMaintenanceOff" class="vx-maintenance-option vx-off" aria-pressed="false">OFF</button>
+          <button type="button" id="vxMaintenanceOn" class="vx-maintenance-option vx-on" aria-pressed="true">ON</button>
+          <span class="vx-maintenance-slider" id="vxMaintenanceSlider"></span>
+        </div>
+        <div class="vx-maintenance-countdown" id="vxMaintenanceAdminCountdown" aria-live="polite"></div>
+      </section>
+      <style>
+        .vx-maintenance-admin{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:12px}
+        .vx-maintenance-admin-info{display:flex;flex-direction:column;gap:1px;min-width:105px}
+        .vx-maintenance-admin-info b{font-size:12px}
+        .vx-maintenance-admin-info span{font-size:10px;color:var(--muted)}
+        .vx-maintenance-switch{position:relative;display:flex;align-items:center;gap:2px;padding:3px;border-radius:99px;background:#080e20;border:1px solid var(--border);width:126px;height:34px;isolation:isolate}
+        .vx-maintenance-option{position:relative;z-index:2;width:50%;height:26px;border-radius:99px;font-size:10px;font-weight:800;letter-spacing:.5px;color:#8793aa;transition:color .25s ease}
+        .vx-maintenance-option.active{color:#fff}
+        .vx-maintenance-slider{position:absolute;z-index:1;left:3px;top:3px;width:58px;height:26px;border-radius:99px;background:#ef4444;box-shadow:0 2px 9px rgba(239,68,68,.35);transition:transform .32s cubic-bezier(.2,.8,.2,1),background .32s,box-shadow .32s}
+        .vx-maintenance-switch.is-online .vx-maintenance-slider{transform:translateX(62px);background:#22c55e;box-shadow:0 2px 9px rgba(34,197,94,.35)}
+        .vx-maintenance-countdown{font-size:11px;font-weight:700;color:var(--muted);min-width:90px}
+        .vx-maintenance-switch button:disabled{opacity:.55;cursor:wait}
+        @media(max-width:480px){.vx-maintenance-admin{gap:8px}.vx-maintenance-admin-info{min-width:100%}.vx-maintenance-countdown{min-width:0}}
+      </style>
       <div class="stats-grid">
         <div class="stat-card"><div class="stat-icon blue"><i data-lucide="shopping-cart"></i></div><div><div class="num" id="statTotal">0</div><div class="label">Total Pesanan</div></div></div>
         <div class="stat-card"><div class="stat-icon orange"><i data-lucide="clock"></i></div><div><div class="num" id="statMenunggu">0</div><div class="label">Menunggu</div></div></div>
@@ -333,26 +358,6 @@
       </div>
     </div>
 
-    <!-- STATUS WEBSITE -->
-    <div class="panel" id="panel-maintenance">
-      <div class="admin-card">
-        <h2>Kontrol Status Website</h2>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:18px">Atur website untuk sementara OFF saat pemeliharaan. Halaman admin tetap bisa diakses untuk mengaktifkannya kembali.</p>
-        <div style="padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);margin-bottom:16px">
-          <div style="font-size:12px;color:var(--muted)">STATUS SAAT INI</div>
-          <div id="maintenanceStatusText" style="font-size:22px;font-weight:800;margin-top:4px">Memuat...</div>
-          <div id="maintenanceStatusDesc" style="font-size:12px;color:var(--muted);margin-top:4px">Mengambil status dari Firebase.</div>
-        </div>
-        <div class="form-group"><label>Judul saat website OFF</label><input id="maintenanceTitle" maxlength="70" value="Kami Sedang Melakukan Pemeliharaan"></div>
-        <div class="form-group"><label>Pesan untuk pengunjung</label><textarea id="maintenanceMessage" rows="3" maxlength="300">Website sedang dalam pemeliharaan. Kami akan segera kembali dengan layanan yang lebih baik.</textarea></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-danger" onclick="setWebsiteMaintenance(false)">OFF-kan Website</button>
-          <button class="btn btn-success" onclick="setWebsiteMaintenance(true)">ON-kan Website</button>
-        </div>
-        <p style="font-size:11px;color:var(--muted);margin-top:14px">Semua halaman pengunjung menampilkan hitung mundur 3–0 lalu halaman pemeliharaan/website normal. Status tersinkron ke semua perangkat.</p>
-      </div>
-    </div>
-
     <!-- PENGATURAN -->
     <div class="panel" id="panel-pengaturan">
       <div class="admin-card">
@@ -407,31 +412,6 @@
     lucide.createIcons();
     var allOrders = [], filterStatus = "aktif", selectedKode = null;
     var selectedChatUid = null, allChats = [];
-
-    var maintenanceStatusRef = VOXY.db.ref("maintenance");
-    maintenanceStatusRef.on("value", function (snap) {
-      var value = snap.val() || {};
-      var online = value.enabled !== false;
-      var status = document.getElementById("maintenanceStatusText");
-      var desc = document.getElementById("maintenanceStatusDesc");
-      if (status) { status.textContent = online ? "WEBSITE ONLINE" : "WEBSITE OFFLINE"; status.style.color = online ? "var(--success)" : "var(--danger)"; }
-      if (desc) desc.textContent = online ? "Website dapat diakses oleh pengunjung." : "Pengunjung melihat halaman pemeliharaan.";
-      if (value.title) document.getElementById("maintenanceTitle").value = value.title;
-      if (value.message) document.getElementById("maintenanceMessage").value = value.message;
-    });
-    function setWebsiteMaintenance(enabled) {
-      var title = (document.getElementById("maintenanceTitle").value || "Kami Sedang Melakukan Pemeliharaan").trim();
-      var message = (document.getElementById("maintenanceMessage").value || "Website sedang dalam pemeliharaan. Silakan kembali lagi nanti.").trim();
-      var question = enabled ? "Aktifkan kembali website untuk semua pengunjung?" : "OFF-kan website untuk semua pengunjung?";
-      if (!confirm(question + "\\nPengunjung akan melihat hitung mundur 3–0.")) return;
-      VOXY.db.ref("maintenance").set({
-        enabled: !!enabled, title: title, message: message,
-        updatedAt: firebase.database.ServerValue.TIMESTAMP,
-        updatedBy: (VOXY.auth.currentUser && VOXY.auth.currentUser.email) || "admin"
-      }).then(function () {
-        if (VOXY.showToast) VOXY.showToast(enabled ? "Website berhasil diaktifkan." : "Website berhasil di-OFF-kan.");
-      }).catch(function (err) { alert("Gagal mengubah status website: " + (err.message || err)); });
-    }
 
     VOXY.requireAdmin().then(function () {
       document.body.style.visibility = "visible";
@@ -1584,5 +1564,76 @@ function salinTeksJoki(kode) {
       VOXY.logoutUser().then(function () { window.location.href = "login.html"; });
     }
   </script>
+
+  <script>
+    (function () {
+      function initMaintenanceAdmin() {
+        if (!window.VOXY || !VOXY.db || !VOXY.auth) return;
+        var offBtn = document.getElementById("vxMaintenanceOff");
+        var onBtn = document.getElementById("vxMaintenanceOn");
+        var slider = document.getElementById("vxMaintenanceSlider");
+        var switchBox = document.getElementById("vxMaintenanceSwitch");
+        var statusText = document.getElementById("vxMaintenanceStatusText");
+        var countdownText = document.getElementById("vxMaintenanceAdminCountdown");
+        if (!offBtn || !onBtn || !switchBox) return;
+
+        var busy = false;
+        function paint(online) {
+          switchBox.classList.toggle("is-online", online);
+          offBtn.classList.toggle("active", !online);
+          onBtn.classList.toggle("active", online);
+          offBtn.setAttribute("aria-pressed", String(!online));
+          onBtn.setAttribute("aria-pressed", String(online));
+          statusText.textContent = online ? "Website sedang online" : "Website sedang offline";
+          statusText.style.color = online ? "#22c55e" : "#ef4444";
+        }
+        function setBusy(value) {
+          busy = value;
+          offBtn.disabled = value;
+          onBtn.disabled = value;
+        }
+        function countdown() {
+          var end = Date.now() + 3000;
+          function tick() {
+            var left = Math.max(0, end - Date.now());
+            var sec = Math.ceil(left / 1000);
+            countdownText.textContent = left > 0 ? ("Berubah dalam " + sec + "...") : "Status diperbarui";
+            if (left <= 0) {
+              clearInterval(timer);
+              setBusy(false);
+              setTimeout(function(){ countdownText.textContent = ""; }, 1800);
+            }
+          }
+          tick();
+          var timer = setInterval(tick, 100);
+        }
+        VOXY.db.ref("settings/maintenance").on("value", function (snap) {
+          var val = snap.val() || {};
+          paint(val.online !== false);
+        });
+        function changeStatus(online) {
+          if (busy) return;
+          setBusy(true);
+          countdownText.textContent = "Menyimpan status...";
+          VOXY.db.ref("settings/maintenance").set({
+            online: online,
+            changedAt: Date.now(),
+            changedBy: (VOXY.auth.currentUser && VOXY.auth.currentUser.email) || "admin"
+          }).then(function () {
+            countdown();
+          }).catch(function (err) {
+            setBusy(false);
+            countdownText.textContent = "";
+            alert("Gagal mengubah status website: " + (err.message || err));
+          });
+        }
+        offBtn.addEventListener("click", function () { changeStatus(false); });
+        onBtn.addEventListener("click", function () { changeStatus(true); });
+      }
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initMaintenanceAdmin);
+      else initMaintenanceAdmin();
+    })();
+  </script>
+
 </body>
 </html>

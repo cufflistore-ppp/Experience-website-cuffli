@@ -27,10 +27,10 @@ Atau longgarkan sementara untuk testing: `"chat": { ".read": "auth != null", ".w
 Upload folder ini → Static Site → Done.
 
 
-## Kontrol Website ON/OFF (Maintenance Mode)
-- Buka `admin.html` → menu **Status Website**.
-- Isi judul dan pesan pemeliharaan, lalu tekan **OFF-kan Website** atau **ON-kan Website**.
-- Semua halaman pengunjung (login, daftar, home, produk, transaksi, chat, dan layanan) membaca status dari Firebase Realtime Database.
-- Saat status berubah, halaman pengunjung menampilkan hitung mundur 3–0. Jika OFF, halaman pemeliharaan tampil; jika ON, halaman normal kembali.
-- Halaman admin (`admin.html`, `admin-kelola.html`, `admin-joki-harga.html`) tidak diblokir agar admin tetap dapat mengelola website.
-- Pastikan rules Realtime Database terbaru dari `FIREBASE-RULES.txt` sudah dipublikasikan. Node `maintenance` harus bisa dibaca publik dan hanya dapat ditulis oleh dua email admin yang tercantum di rules.
+## Maintenance Mode (OFF / ON)
+- Kontrol ON/OFF tersedia di Dashboard `admin.html`.
+- Status global tersimpan di Realtime Database: `settings/maintenance`.
+- `online: false` menampilkan halaman offline VOXY MARKET17 untuk seluruh halaman publik.
+- `online: true` mengembalikan tampilan website setelah hitung mundur 3 detik.
+- Halaman `admin.html`, `admin-joki-harga.html`, dan `admin-kelola.html` dikecualikan agar admin tetap dapat mengelola website.
+- File `maintenance-gate.js` dipasang pada semua halaman publik.

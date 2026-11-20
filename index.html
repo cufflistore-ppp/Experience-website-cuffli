@@ -4,8 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VOXY MARKET</title>
-  <script>location.replace("login.html");</script>
-  <meta http-equiv="refresh" content="0;url=login.html">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="maintenance-gate.js"></script>
 </head>
-<body></body>
+<body>  <script>
+    window.addEventListener("voxy-maintenance-ready", function (event) {
+      if (event.detail && event.detail.online) window.location.replace("login.html");
+    });
+  </script>
+</body>
 </html>

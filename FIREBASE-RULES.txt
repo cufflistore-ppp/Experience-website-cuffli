@@ -1,4 +1,4 @@
-=== FIREBASE REALTIME DATABASE RULES — VERSI LENGKAP (UPDATE MAINTENANCE) ===
+=== FIREBASE REALTIME DATABASE RULES — VERSI LENGKAP ===
 
 Cara pasang:
 1. Buka Firebase Console → project voxyyjoki
@@ -19,54 +19,65 @@ Kalau ganti email admin, ganti SEMUA kemunculan email di rules ini.
   "rules": {
     ".read": false,
     ".write": false,
+
     "produk": {
       ".read": true,
       "$id": {
         ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com' || (data.exists() && newData.child('nama').val() == data.child('nama').val() && newData.child('harga').val() == data.child('harga').val() && newData.child('kategori').val() == data.child('kategori').val()))"
       }
     },
+
     "produk_images": {
       ".read": true,
       ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     },
+
     "settings": {
       ".read": true,
       ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     },
+
     "branding_assets": {
       ".read": true,
       ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     },
+
     "menu_layanan": {
       ".read": true,
       ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     },
+
     "joki_config": {
       ".read": true,
       ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     },
+
     "orders": {
       ".read": "auth != null",
       "$kode": {
         ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com' || (!data.exists() && newData.child('uid').val() == auth.uid && newData.child('status').val() == 'Menunggu') || (data.exists() && data.child('uid').val() == auth.uid && newData.child('uid').val() == data.child('uid').val() && newData.child('status').val() == data.child('status').val() && newData.child('harga').val() == data.child('harga').val() && newData.child('kode').val() == data.child('kode').val()))"
       }
     },
+
     "order_bukti": {
       "$kode": {
         ".read": "auth != null",
         ".write": "auth != null"
       }
     },
+
     "order_files": {
       "$kode": {
         ".read": "auth != null",
         ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
       }
     },
+
     "laporan": {
       ".read": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
       ".write": "auth != null"
     },
+
     "chat": {
       ".read": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
       "$uid": {
@@ -74,15 +85,12 @@ Kalau ganti email admin, ganti SEMUA kemunculan email di rules ini.
         ".write": "auth != null && (auth.uid == $uid || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
       }
     },
+
     "chat_inbox": {
       ".read": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
       "$uid": {
         ".write": "auth != null && (auth.uid == $uid || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
       }
-    },
-    "maintenance": {
-      ".read": true,
-      ".write": "auth != null && (auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')"
     }
   }
 }
@@ -95,7 +103,6 @@ Kalau ganti email admin, ganti SEMUA kemunculan email di rules ini.
 - settings, branding_assets
 - menu_layanan
 - joki_config          ← harga paket & tambahan joki
-- maintenance          ← status ON/OFF website (dibaca publik, hanya admin dapat mengubah)
 - orders, order_bukti, order_files
 - laporan, chat
 
