@@ -122,11 +122,11 @@ async function renderAntrian() {
   const configured = window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured && window.VoxyyOrders.isGlobalConfigured();
   if (configured) {
     modeBadge.innerHTML =
-      '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global (Realtime)</span> <span>' +
+      '<span style="background:#fff0f7;color:#e21b83;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global (Realtime)</span> <span>' +
       (orders.length || 0) + ' pesanan · sinkron antar HP</span>';
   } else {
     modeBadge.innerHTML =
-      '<span style="background:#3d2a0d;color:#ffb74d;padding:3px 8px;border-radius:6px;font-weight:600;">⚙️ Setup Firebase</span> <span>Isi FIREBASE_CONFIG di global-orders.js (gratis) agar antar-HP sinkron</span>';
+      '<span style="background:#fff0f7;color:#ffb74d;padding:3px 8px;border-radius:6px;font-weight:600;">⚙️ Setup Firebase</span> <span>Isi FIREBASE_CONFIG di global-orders.js (gratis) agar antar-HP sinkron</span>';
   }
 
   if (data.length === 0) {
@@ -200,8 +200,8 @@ function ensureStatusModal() {
       }
       .status-modal-box {
         position: relative;
-        background: #10182a;
-        border: 1px solid #1a2740;
+        background: #ffffff;
+        border: 1px solid #f3c5dd;
         border-radius: 16px;
         padding: 22px 16px 16px;
         width: 100%;
@@ -225,8 +225,8 @@ function ensureStatusModal() {
       }
       .status-modal-body {
         text-align: left;
-        background: #0a0e18;
-        border: 1px solid #1a2740;
+        background: #ffffff;
+        border: 1px solid #f3c5dd;
         border-radius: 12px;
         padding: 10px 12px;
         margin-bottom: 14px;
@@ -238,7 +238,7 @@ function ensureStatusModal() {
         gap: 8px;
         align-items: start;
         padding: 7px 0;
-        border-bottom: 1px solid #1a2740;
+        border-bottom: 1px solid #f3c5dd;
       }
       .status-row:last-child { border-bottom: none; }
       .status-row .k {
@@ -257,14 +257,14 @@ function ensureStatusModal() {
       .status-row .v code {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 12px;
-        background: #10182a;
-        border: 1px solid #1a2740;
+        background: #ffffff;
+        border: 1px solid #f3c5dd;
         padding: 2px 6px;
         border-radius: 6px;
         color: #90caf9;
       }
-      .status-row .v.sukses { color: #66bb6a; }
-      .status-row .v.proses { color: #42a5f5; }
+      .status-row .v.sukses { color: #e21b83; }
+      .status-row .v.proses { color: #f08abd; }
       .status-row .v.belum { color: #ffb74d; }
       .status-note {
         margin-top: 8px;
@@ -274,7 +274,7 @@ function ensureStatusModal() {
       }
       .status-modal-btn {
         width: 100%;
-        background: linear-gradient(135deg, #2196f3, #1565c0);
+        background: linear-gradient(135deg, #e21b83, #b91568);
         color: #fff;
         border: none;
         border-radius: 10px;
@@ -284,8 +284,8 @@ function ensureStatusModal() {
         cursor: pointer;
       }
       .antrian-empty {
-        background: #10182a;
-        border: 1px dashed #1a2740;
+        background: #ffffff;
+        border: 1px dashed #f3c5dd;
         border-radius: 14px;
         padding: 28px 16px;
         text-align: center;

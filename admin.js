@@ -32,7 +32,7 @@ async function loadOrders() {
   list.dataset.loaded = "1";
 
   const viewNow = new URLSearchParams(location.search).get("view") || "all";
-  const modeHint = `<p style="color:#66bb6a;font-size:12px;margin-bottom:10px;">📋 Panel ${viewNow === "joki" ? "JOKI" : viewNow === "digital" ? "PRODUK DIGITAL" : "SEMUA PESANAN"} · Data tersinkron Firebase</p>`;
+  const modeHint = `<p style="color:#e21b83;font-size:12px;margin-bottom:10px;">📋 Panel ${viewNow === "joki" ? "JOKI" : viewNow === "digital" ? "PRODUK DIGITAL" : "SEMUA PESANAN"} · Data tersinkron Firebase</p>`;
   const productManagementEarly = document.getElementById("productManagement");
   const deliveryManagementEarly = document.getElementById("deliveryManagement");
   if (productManagementEarly) productManagementEarly.style.display = viewNow === "joki" ? "none" : "block";
@@ -81,7 +81,7 @@ async function loadOrders() {
         const priorityHtml = o.prioritas || o.priority ? '<span class="priority-tag">⚡ PRIORITAS ANTRIAN</span>' : '';
         const isJokiOrder = o.jenis === "joki" || String(o.jenisOrder||"").toLowerCase().includes("joki");
         const durationHtml = isJokiOrder && (o.hari || o.durasiHari) ? `<br>🗓️ <b>Durasi Joki: ${escapeHtml(o.hari || o.durasiHari)} hari</b>` : "";
-        const formatHtml = isJokiOrder ? `<div style="margin-top:8px;background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;border-left:3px solid #2196f3"><span style="font-size:12px;color:#aaa">📝 Format Joki:</span><pre style="white-space:pre-wrap;font-family:inherit;margin:4px 0 6px;font-size:13px;color:#fff">${escapeHtml(formatVal)}</pre><button type="button" onclick="salinFormatJokiDariElement(this)" data-format="${escapeHtmlAttr(formatVal)}" style="background:#2196f3;color:#fff;border:0;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold"><i class="fa-solid fa-copy"></i> Salin Format</button></div>` : "";
+        const formatHtml = isJokiOrder ? `<div style="margin-top:8px;background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;border-left:3px solid #e21b83"><span style="font-size:12px;color:#aaa">📝 Format Joki:</span><pre style="white-space:pre-wrap;font-family:inherit;margin:4px 0 6px;font-size:13px;color:#fff">${escapeHtml(formatVal)}</pre><button type="button" onclick="salinFormatJokiDariElement(this)" data-format="${escapeHtmlAttr(formatVal)}" style="background:#e21b83;color:#fff;border:0;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold"><i class="fa-solid fa-copy"></i> Salin Format</button></div>` : "";
         
         // Deteksi bukti TF dari berbagai kemungkinan nama properti (termasuk Base64 dari pembayaran.html)
         const buktiVal = o.buktiTF || o.buktiTf || o.bukti || o.buktiTransfer || o.paymentProof || o.image || o.foto || "";
@@ -90,11 +90,11 @@ async function loadOrders() {
         if (buktiVal) {
           buktiHTML = `
             <div style="margin-top:8px; background:rgba(0,0,0,0.25); padding:8px; border-radius:6px; border:1px solid #444;">
-              <span style="font-size:12px;color:#2196f3;display:block;margin-bottom:4px;font-weight:bold;">📸 Bukti Transfer / Pembayaran:</span>
+              <span style="font-size:12px;color:#e21b83;display:block;margin-bottom:4px;font-weight:bold;">📸 Bukti Transfer / Pembayaran:</span>
               <a href="${escapeHtmlAttr(buktiVal)}" target="_blank" title="Klik untuk memperbesar gambar">
                 <img src="${escapeHtmlAttr(buktiVal)}" alt="Bukti TF" style="max-width:140px;max-height:140px;border-radius:4px;border:1px solid #555;object-fit:cover;display:block;margin-bottom:4px;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
               </a>
-              <a href="${escapeHtmlAttr(buktiVal)}" target="_blank" style="display:none;color:#64b5f6;font-size:12px;word-break:break-all;text-decoration:underline;">🔗 Buka Link Bukti</a>
+              <a href="${escapeHtmlAttr(buktiVal)}" target="_blank" style="display:none;color:#e21b83;font-size:12px;word-break:break-all;text-decoration:underline;">🔗 Buka Link Bukti</a>
             </div>
           `;
         }
@@ -102,7 +102,7 @@ async function loadOrders() {
         return `
     <div class="order-card ${borderClass}" data-kode="${escapeHtmlAttr(o.kode || "")}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <strong style="color:#2196f3;">${escapeHtml(o.kode || "-")}</strong>
+        <strong style="color:#e21b83;">${escapeHtml(o.kode || "-")}</strong>
         <span style="font-size:12px;padding:3px 8px;border-radius:6px;background:${bg};">
           ${escapeHtml(st)}
         </span>

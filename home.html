@@ -34,7 +34,7 @@
       height: 32px;
       border-radius: 50%;
       border: none;
-      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      background: linear-gradient(135deg, #1976d2, #b91568);
       color: #fff;
       font-size: 12px;
       cursor: pointer;
@@ -67,7 +67,7 @@
       height: 28px;
       border-radius: 50%;
       object-fit: cover;
-      border: 1.5px solid #2196f3;
+      border: 1.5px solid #e21b83;
     }
     .user-chip span {
       font-size: 12px;
@@ -164,7 +164,8 @@
   </div>
 
   <!-- Navigasi bawah ini akan otomatis disembunyikan via CSS saat berada di dalam iframe index.html -->
-  <nav class="bottom-nav nav-6">
+  <nav class="bottom-nav nav-7">
+    <a href="riwayat.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a>
     <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
     <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
@@ -182,9 +183,14 @@
   <script src="music.js"></script>
   <script>
     (function () {
-      // Akses halaman utama dilindungi oleh ej-auth.js (Firebase Auth).
-      // Jangan memakai flag sessionStorage: flag itu membuat pengguna yang sudah login
-      // dilempar kembali ke halaman login setiap kali membuka home secara langsung.
+      try {
+        if (window.self === window.top) {
+          if (sessionStorage.getItem("doxy_entered") !== "1") {
+            window.location.replace("index.html");
+            return;
+          }
+        }
+      } catch (e) {}
 
       function updateUserChip() {
         try {

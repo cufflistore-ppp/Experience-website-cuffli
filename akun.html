@@ -8,88 +8,31 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
+    .page-content { padding-bottom: 100px; }
+    .akun-heading { text-align:center; margin: 8px 0 20px; color:#d91b7a!important; letter-spacing:1px; }
     .akun-card {
-      background: #10182a;
-      border: 1px solid #1a2740;
-      border-radius: 16px;
-      padding: 24px 18px;
-      text-align: center;
-      margin-bottom: 16px;
+      position:relative; overflow:hidden; text-align:center;
+      background:linear-gradient(145deg,#fff 0%,#fff2f8 100%)!important;
+      border:1px solid #f2bfd8!important; border-radius:24px;
+      padding:28px 20px 22px; margin:0 auto 20px; max-width:520px;
+      box-shadow:0 12px 30px rgba(217,27,122,.10);
     }
-    .akun-avatar {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #2196f3;
-      margin-bottom: 12px;
-      background: #0a0e18;
-    }
-    .akun-avatar.placeholder {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      color: #8aa0b8;
-    }
-    .akun-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-    .akun-email { font-size: 13px; color: #8aa0b8; margin-bottom: 16px; word-break: break-all; }
-    .btn-google {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      background: #fff;
-      color: #3c4043;
-      border: 1px solid #dadce0;
-      border-radius: 12px;
-      padding: 12px 16px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-    }
-    .btn-google:active { background: #f7f8f8; }
-    .btn-google:disabled { opacity: 0.65; cursor: wait; }
-    .btn-google .g-icon {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-    .btn-logout {
-      width: 100%;
-      background: transparent;
-      border: 1px solid #442222;
-      color: #ef9a9a;
-      border-radius: 12px;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .akun-hint {
-      font-size: 12px;
-      color: #8aa0b8;
-      line-height: 1.5;
-      margin-top: 14px;
-      text-align: left;
-      background: #0a0e18;
-      border-radius: 12px;
-      padding: 12px;
-      border: 1px solid #1a2740;
-    }
-    .akun-status {
-      display: inline-block;
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-    .akun-status.on { background: #0d3d1a; color: #66bb6a; }
-    .akun-status.off { background: #3d2a0d; color: #ffb74d; }
+    .akun-card:before { content:""; position:absolute; width:170px;height:170px;right:-80px;top:-90px;border-radius:50%;background:#ffe0ef; }
+    .akun-avatar { width:94px;height:94px;border-radius:50%;object-fit:cover;border:4px solid #f4a8ce;margin:4px auto 14px;background:#fff;box-shadow:0 5px 16px rgba(217,27,122,.13);display:block; }
+    .akun-avatar.placeholder { display:flex;align-items:center;justify-content:center;font-size:34px;color:#df4b98!important; }
+    .akun-name { font-size:20px;font-weight:800;margin:0 0 5px;color:#8d2459!important; }
+    .akun-email { font-size:13px;color:#ad6a8c!important;margin:0 0 18px;word-break:break-word; }
+    .akun-status { position:relative;display:inline-flex;align-items:center;gap:6px;font-size:11px;padding:6px 12px;border-radius:99px;margin-bottom:18px;font-weight:700;background:#fff0f7!important;color:#c52878!important;border:1px solid #f3c5dd; }
+    .akun-status.on:before { content:"";width:7px;height:7px;border-radius:50%;background:#e21b83; }
+    .akun-status.off:before { content:"";width:7px;height:7px;border-radius:50%;background:#e9a1c6; }
+    .btn-google,.btn-logout { width:100%;display:flex;align-items:center;justify-content:center;gap:10px;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:750;cursor:pointer; }
+    .btn-google { background:#e21b83!important;color:#fff!important;border:1px solid #e21b83!important;box-shadow:0 7px 16px rgba(226,27,131,.18); }
+    .btn-google:active { background:#b91568!important; }
+    .btn-google:disabled { opacity:.65;cursor:wait; }
+    .btn-google .g-icon { width:20px;height:20px;flex-shrink:0; }
+    .btn-logout { background:#fff!important;border:1px solid #efb5d2!important;color:#c52878!important;margin-top:10px; }
+    .btn-logout i { color:#c52878!important; }
+    .akun-card #akunBody { position:relative; }
   </style>
 </head>
 <body>
@@ -118,30 +61,27 @@
   </header>
 
   <div class="page-content">
-    <h2 style="margin-bottom:6px;">AKUN</h2>
-    <p style="color:#aaa;font-size:13px;margin-bottom:16px;">Masuk hanya dengan akun Google.</p>
+    <h2 class="akun-heading">AKUN SAYA</h2>
 
     <div class="akun-card" id="akunCard">
       <div class="akun-status off" id="akunStatus">Memuat...</div>
       <div id="akunBody">
         <div class="akun-avatar placeholder"><i class="fa-solid fa-user"></i></div>
         <div class="akun-name">Belum masuk</div>
-        <div class="akun-email">Login Google untuk menyimpan profil di perangkat ini.</div>
+
       </div>
       <button type="button" class="btn-google" id="btnGoogle">
-        <svg class="g-icon" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        <span class="g-icon" aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;color:#fff!important;">G</span>
         Masuk dengan Google
       </button>
       <button type="button" class="btn-logout" id="btnLogout" style="display:none;">
         <i class="fa-solid fa-right-from-bracket"></i> Keluar
       </button>
-      <div class="akun-hint" id="akunHint">
-        <b>Login dlu menggunakan akun google kalian agar satu sama lain bisa melihat orderannya, ga login juga gpp</b>
-      </div>
     </div>
   </div>
 
-    <nav class="bottom-nav nav-6">
+    <nav class="bottom-nav nav-7">
+    <a href="riwayat.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a>
     <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
     <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
@@ -170,7 +110,7 @@
         body.innerHTML =
           '<div class="akun-avatar placeholder"><i class="fa-solid fa-gear"></i></div>' +
           '<div class="akun-name">Setup diperlukan</div>' +
-          '<div class="akun-email">Pastikan Google Sign-In aktif di Firebase Authentication.</div>';
+          '';
         btnG.disabled = true;
         btnG.style.display = "flex";
         btnL.style.display = "none";
@@ -195,7 +135,7 @@
         body.innerHTML =
           '<div class="akun-avatar placeholder"><i class="fa-solid fa-user"></i></div>' +
           '<div class="akun-name">Belum masuk</div>' +
-          '<div class="akun-email">Masuk dengan akun Google saja.</div>';
+          '';
         btnG.style.display = "flex";
         btnG.disabled = false;
         btnL.style.display = "none";
@@ -210,7 +150,7 @@
         .replace(/"/g, "&quot;");
     }
 
-    const G_ICON = `<svg class="g-icon" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>`;
+    const G_ICON = `<span class="g-icon" aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;color:#fff!important;">G</span>`;
 
     document.getElementById("btnGoogle").addEventListener("click", async function () {
       const btn = this;
