@@ -20,37 +20,7 @@
       align-items: center;
       gap: 10px;
     }
-    .music-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(33, 150, 243, 0.12);
-      border: 1px solid rgba(33, 150, 243, 0.3);
-      border-radius: 20px;
-      padding: 4px 8px 4px 6px;
-    }
-    .music-btn {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(135deg, #1976d2, #b91568);
-      color: #fff;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
-    }
-    .music-btn:active { transform: scale(0.92); }
-    .music-label {
-      font-size: 11px;
-      color: #90caf9;
-      font-weight: 600;
-      padding-right: 4px;
-    }
-    .user-chip {
+.user-chip {
       display: none;
       align-items: center;
       gap: 6px;
@@ -85,12 +55,7 @@
   </style>
 </head>
 <body>
-
-  <audio id="bgMusic" loop preload="auto">
-    <source src="music.m4a" type="audio/mp4">
-  </audio>
-
-  <header class="header">
+<header class="header">
     <div class="brand">
       <!-- Logo di sini sekarang berfungsi untuk shortcut Admin jika diketuk 5x -->
       <img src="logo.jpg" alt="ELZKII JOKI" class="logo" id="adminLogoHome" title="ELZKII JOKI">
@@ -100,13 +65,7 @@
       </div>
     </div>
     <div class="header-right">
-      <div class="music-controls" id="musicControls">
-        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
-          <i class="fa-solid fa-pause" id="musicIcon"></i>
-        </button>
-        <span class="music-label">Lagu</span>
-      </div>
-      <a href="akun.html" class="user-chip" id="userChip">
+<a href="akun.html" class="user-chip" id="userChip">
         <img src="" alt="" id="userAvatar">
         <span id="userName"></span>
       </a>
@@ -180,8 +139,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
   <script src="script.js"></script>
-  <script src="music.js"></script>
-  <script>
+<script>
     (function () {
       // Auth guard dikelola oleh ej-auth.js. Jangan memakai flag sessionStorage
       // doxy_entered karena flag ini tidak pernah dibuat dan menyebabkan loop

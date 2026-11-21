@@ -122,6 +122,13 @@ function tambahProduk(data) {
 
 document.addEventListener("DOMContentLoaded", renderProduk);
 
-// Produk tambahan dari Firebase Realtime Database (katalog bersama).
-async function ejLoadSharedHomeProducts(){const grid=document.getElementById('produkGrid');if(!grid||!window.EJ?.db)return;try{const snap=await EJ.db.ref('products').once('value'),v=snap.val()||{};const extras=Object.entries(v).map(([id,p])=>({id,judul:p.judul||p.nama,harga:Number(p.harga||0),img:p.img||'logo.jpg',status:p.status||'TERSEDIA'}));if(!extras.length)return;const existing=new Set(Array.from(grid.querySelectorAll('[data-ej-product]')).map(x=>x.dataset.ejProduct));grid.insertAdjacentHTML('beforeend',extras.filter(p=>!existing.has(String(p.id))).map(p=>`<div class="produk-card" data-ej-product="${String(p.id).replace(/["<>]/g,'')}"><img src="${String(p.img).replace(/["<>]/g,'')}" alt="Produk"><div class="produk-info"><small>${p.status}</small><h4>${String(p.judul).replace(/[<>]/g,'')}</h4><div class="harga">${formatRpProduk(p.harga)}</div><a class="btn" href="pembayaran-digital.html?paket=${encodeURIComponent(p.judul)}&total=${p.harga}">Pesan via WhatsApp</a></div></div>`).join(''))}catch(e){console.warn('Katalog Firebase belum dapat dimuat',e)}}
+// Produk tambahan dari Firebase Realtime Database; admin menentukan lokasi tampilnya.
+async function ejLoadSharedHomeProducts(){
+ const grid=document.getElementById('produkGrid');if(!grid||!window.EJ?.db)return;
+ try{const snap=await EJ.db.ref('products').once('value'),v=snap.val()||{};
+ const extras=Object.entries(v).filter(([id,p])=>['home','both',undefined,null,''].includes(p.placement)).map(([id,p])=>({id,judul:p.judul||p.nama,harga:Number(p.harga||0),img:p.img||'logo.jpg',status:p.status||'TERSEDIA'}));
+ const existing=new Set(Array.from(grid.querySelectorAll('[data-ej-product]')).map(x=>x.dataset.ejProduct));
+ grid.insertAdjacentHTML('beforeend',extras.filter(p=>!existing.has(String(p.id))).map(p=>`<div class="produk-card" data-ej-product="${String(p.id).replace(/["<>]/g,'')}"><img src="${p.img}" alt="Produk"><div class="produk-info"><small>${p.status}</small><h4>${String(p.judul).replace(/[<>]/g,'')}</h4><div class="harga">${formatRpProduk(p.harga)}</div><a class="btn" href="pembayaran-digital.html?paket=${encodeURIComponent(p.judul)}&total=${p.harga}">Pesan via WhatsApp</a></div></div>`).join(''));
+ }catch(e){console.warn('Katalog Firebase belum dapat dimuat',e)}
+}
 document.addEventListener('DOMContentLoaded',()=>setTimeout(ejLoadSharedHomeProducts,700));

@@ -2,62 +2,74 @@
 <html lang="id">
 <head>
   <script src="iframe-nav.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - ELZKII JOKI</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - ELZKII JOKI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="style.css">
+  <style>
+    :root{--adm-pink:#d91d80;--adm-text:#68616a;--adm-muted:#918993;--adm-line:#f0d5e2}
+    body.admin-page{background:#fff8fb;color:var(--adm-text)}
+    .admin-topbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--adm-line);padding:12px 16px;display:flex;align-items:center;gap:13px;box-shadow:0 3px 14px #8d31500d}
+    .admin-topbar h1{font-size:16px;color:#8b315f;margin:0}.admin-topbar p{font-size:11px;color:var(--adm-muted);margin:3px 0 0}
+    .admin-menu-btn{border:0;background:#fff0f7;color:var(--adm-pink);border-radius:10px;width:42px;height:42px;font-size:19px}
+    .admin-drawer{position:fixed;z-index:50;inset:0 auto 0 0;width:min(290px,82vw);background:#fff;box-shadow:12px 0 35px #44203322;transform:translateX(-110%);transition:.22s;padding:20px 14px}
+    .admin-drawer.open{transform:translateX(0)}.admin-overlay{position:fixed;z-index:45;inset:0;background:#25151f66;display:none}.admin-overlay.show{display:block}
+    .drawer-title{font-weight:800;color:#a52c68;padding:8px 10px 18px}.drawer-link{display:flex;align-items:center;gap:13px;padding:13px 12px;border-radius:11px;text-decoration:none;color:#69616a;font-size:14px;margin:3px 0}.drawer-link i{width:20px;color:var(--adm-pink);text-align:center}.drawer-link:hover,.drawer-link.active{background:#fff0f7;color:#a52c68}
+    .admin-section{max-width:850px;margin:18px auto;padding:0 14px}.admin-section h2{font-size:17px;color:#a52c68;margin:5px 0 14px}.admin-page .form-section{color:var(--adm-text)!important}.admin-page label{color:#756c76!important}.admin-page input,.admin-page textarea,.admin-page select{color:#5f5962!important;background:#fff!important;border:1px solid #e8dce2!important}.admin-page input::placeholder,.admin-page textarea::placeholder{color:#aaa3aa!important}.admin-page .order-card{color:#6b626b!important}.admin-page .order-card :is(b,small,span,div,strong,pre){color:#777078!important}.admin-page .order-card strong{color:#b52c70!important}.admin-page .order-card button{color:#fff!important}.admin-page .btn-buat{color:#fff!important}
+    .product-grid-admin{display:grid;grid-template-columns:1fr;gap:10px}.product-admin-card{background:#fff;border:1px solid var(--adm-line);border-radius:13px;padding:12px;color:#68616a}.product-admin-card img{width:64px;height:64px;object-fit:cover;border-radius:9px;background:#fff4f8}.product-admin-card .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.product-admin-card button{border:0;border-radius:8px;padding:8px 11px;background:#fff0f7;color:#a52c68}.product-admin-card button.danger{background:#fff0f0;color:#b54a55}
+    .empty-history{min-height:55vh;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:42px}
+    @media(min-width:650px){.product-grid-admin{grid-template-columns:1fr 1fr}}
+  </style>
 </head>
-<body>
-  <div class="admin-header">
-    <i class="fa-solid fa-user-shield"></i> PANEL ADMIN - ELZKII JOKI
-  </div>
+<body class="admin-page">
+  <header class="admin-topbar"><button class="admin-menu-btn" id="adminMenuToggle" aria-label="Buka menu"><i class="fa-solid fa-bars"></i></button><div><h1>PANEL ADMIN</h1><p>Kelola toko ELZKII JOKI</p></div></header>
+  <div class="admin-overlay" id="adminOverlay"></div>
+  <aside class="admin-drawer" id="adminDrawer"><div class="drawer-title"><i class="fa-solid fa-user-shield"></i> MENU ADMIN</div>
+    <a class="drawer-link" href="home.html"><i class="fa-solid fa-house"></i> Kembali ke Home</a>
+    <a class="drawer-link active" href="#orders" data-admin-view="orders"><i class="fa-solid fa-receipt"></i> Pesanan</a>
+    <a class="drawer-link" href="#products" data-admin-view="products"><i class="fa-solid fa-box-open"></i> Setting Produk</a>
+    <a class="drawer-link" href="#delivery" data-admin-view="delivery"><i class="fa-solid fa-paper-plane"></i> Kirim Produk</a>
+  </aside>
 
-  <div class="page-content" id="manualOrderSection"><h3 style="color:#e21b83;margin-bottom:10px">Manajemen Pesanan</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px"><a class="menu-item" href="admin.html?view=joki"><i class="fa-solid fa-bolt"></i><span>JOKI · Antrian & Durasi</span></a><a class="menu-item" href="admin.html?view=digital"><i class="fa-solid fa-box"></i><span>PRODUK DIGITAL · Pengiriman Web</span></a></div><p id="adminViewLabel" style="color:#9bb0c8;font-size:12px;margin-bottom:12px"></p>
-    <h3 style="margin-bottom:12px;color:#e21b83;">Tambah Pesanan Manual</h3>
-    
-    <div class="form-section">
-      <label>Kode Antrian</label>
-      <input type="text" id="admKode" placeholder="EJ-2026-XXXX (kosongkan = auto)">
-      
-      <label>Nama</label>
-      <input type="text" id="admNama" placeholder="Nama customer">
-      
-      <label>WhatsApp</label>
-      <input type="text" id="admWA" placeholder="08xxxxxxxxxx">
-      
-      <label>Total</label>
-      <input type="text" id="admTotal" placeholder="Rp 5.000">
-      
-      <label>Status</label>
-      <select id="admStatus">
-        <option value="Belum Bayar">Belum Bayar</option>
-        <option value="Proses">Proses</option>
-        <option value="Sukses">Sukses</option>
-      </select>
-      
-      <button class="btn-buat" style="margin-top:12px;" onclick="tambahOrderAdmin()">
-        <i class="fa-solid fa-plus"></i> Tambah Pesanan
-      </button>
-    </div>
+  <main>
+    <section class="admin-section" id="view-orders"><h2>Manajemen Pesanan</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><a class="menu-item" href="admin.html?view=joki"><i class="fa-solid fa-bolt"></i><span>JOKI</span></a><a class="menu-item" href="admin.html?view=digital"><i class="fa-solid fa-box"></i><span>PRODUK DIGITAL</span></a></div>
+      <p id="adminViewLabel" style="color:#918993;font-size:12px;margin-bottom:12px"></p>
+      <div class="form-section"><h3 style="color:#a52c68;margin:0 0 12px">Tambah Pesanan Manual</h3>
+        <label>Kode Antrian</label><input type="text" id="admKode" placeholder="Kosongkan untuk otomatis">
+        <label>Nama</label><input type="text" id="admNama" placeholder="Nama customer">
+        <label>WhatsApp</label><input type="text" id="admWA" placeholder="08xxxxxxxxxx">
+        <label>Total</label><input type="text" id="admTotal" placeholder="Rp 5.000">
+        <label>Status</label><select id="admStatus"><option>Belum Bayar</option><option>Proses</option><option>Sukses</option></select>
+        <button class="btn-buat" style="margin-top:12px" onclick="tambahOrderAdmin()"><i class="fa-solid fa-plus"></i> Tambah Pesanan</button>
+      </div><h2 style="margin-top:22px">Daftar Pesanan</h2><div id="listOrders"></div>
+    </section>
 
-    <h3 style="margin:24px 0 12px;color:#e21b83;">Daftar Pesanan</h3>
-    <div id="listOrders"></div>
-  </div>
+    <section class="admin-section" id="view-products" hidden><h2>Setting Produk</h2>
+      <div class="form-section"><label>Nama Produk</label><input id="ejProdName" placeholder="Nama produk">
+        <label>Harga (angka)</label><input id="ejProdPrice" type="number" min="0" placeholder="5000">
+        <label>Foto Produk (pilih file dari perangkat)</label><input id="ejProdFile" type="file" accept="image/*">
+        <small style="color:#918993">Format gambar JPG, PNG, atau WEBP. Maksimal 700 KB.</small>
+        <label>Isi produk / kode (opsional)</label><textarea id="ejProdDelivery" placeholder="Teks atau kode produk untuk buyer"></textarea>
+        <label>Kategori produk</label><select id="ejProdType"><option value="digital">Produk Digital</option><option value="joki">Jasa Joki</option></select>
+        <label>Tampilkan produk di</label><select id="ejProdPlacement"><option value="home">Home</option><option value="digital">Halaman Produk Digital</option><option value="both">Home dan Produk Digital</option><option value="hidden">Jangan tampilkan dulu</option></select>
+        <button class="btn-buat" type="button" onclick="ejAddProduct()"><i class="fa-solid fa-upload"></i> Upload & Tambah Produk</button>
+      </div><h2 style="margin-top:20px">Daftar Produk</h2><div id="ejProdList" class="product-grid-admin"></div>
+    </section>
 
+    <section class="admin-section" id="view-delivery" hidden><h2>Kirim Produk ke Buyer</h2><div class="form-section">
+      <label>Email akun buyer</label><input id="ejDeliveryEmail" type="email" placeholder="email buyer">
+      <label>Judul pengiriman</label><input id="ejDeliveryTitle" placeholder="Contoh: Produk Premium">
+      <label>Link download (opsional)</label><input id="ejDeliveryLink" type="url" placeholder="https://...">
+      <label>Teks / kode produk (opsional)</label><textarea id="ejDeliveryNote" placeholder="Isi produk atau instruksi"></textarea>
+      <button class="btn-buat" type="button" onclick="ejSendDelivery()">Kirim ke Buyer</button>
+    </div></section>
+  </main>
 
-  <div class="page-content" id="productManagement"><h3 style="color:#d91d80;margin:8px 0 12px">Kelola Produk Home</h3><div class="form-section"><label>Nama Produk</label><input id="ejProdName" placeholder="Nama produk"><label>Harga (angka)</label><input id="ejProdPrice" type="number" min="0" placeholder="5000"><label>URL / nama file gambar (opsional)</label><input id="ejProdImg" placeholder="logo.jpg"><label>Isi produk / kode (opsional)</label><textarea id="ejProdDelivery" placeholder="Teks atau kode produk yang akan diberikan buyer"></textarea><label>Kategori</label><select id="ejProdType"><option value="digital">Produk Digital</option><option value="joki">Jasa Joki</option></select><button class="btn-buat" type="button" onclick="ejAddProduct()">Tambah Produk ke Katalog</button><div id="ejProdList" style="margin-top:12px"></div></div><p style="font-size:12px;color:#98647f">Produk disimpan di Firebase dan tampil pada katalog buyer setelah login.</p></div>
-  <div class="page-content" id="deliveryManagement"><h3 style="color:#d91d80;margin:8px 0 12px">Kirim Produk ke Buyer</h3><div class="form-section"><label>Email akun buyer</label><input id="ejDeliveryEmail" type="email" placeholder="email buyer yang sudah login"><label>Judul pengiriman</label><input id="ejDeliveryTitle" placeholder="Contoh: Produk Premium"><label>Link download (opsional)</label><input id="ejDeliveryLink" type="url" placeholder="https://..."><label>Teks / kode produk (opsional)</label><textarea id="ejDeliveryNote" placeholder="Tuliskan produk digital atau instruksi untuk buyer"></textarea><button class="btn-buat" type="button" onclick="ejSendDelivery()">Kirim ke Buyer</button></div><p style="font-size:12px;color:#98647f">Buyer harus pernah login menggunakan email tersebut agar UID akunnya dapat ditemukan.</p></div>
   <script src="produk-admin.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script>
-  <script src="telegram.js"></script>
-  <script src="script.js"></script>
-  <script src="admin.js"></script>
-
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script>
-<script src="footer.js"></script>
-</body>
-</html>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script><script src="script.js"></script><script src="admin.js"></script>
+  <script src="ej-auth.js"></script><script src="footer.js"></script>
+  <script>
+    (()=>{const drawer=document.getElementById('adminDrawer'),overlay=document.getElementById('adminOverlay');const close=()=>{drawer.classList.remove('open');overlay.classList.remove('show')};document.getElementById('adminMenuToggle').addEventListener('click',()=>{drawer.classList.toggle('open');overlay.classList.toggle('show')});overlay.addEventListener('click',close);document.querySelectorAll('[data-admin-view]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const v=a.dataset.adminView;['orders','products','delivery'].forEach(k=>document.getElementById('view-'+k).hidden=k!==v);document.querySelectorAll('[data-admin-view]').forEach(x=>x.classList.toggle('active',x===a));close();if(v==='products'&&window.ejRenderProducts)ejRenderProducts()}));})();
+  </script>
+</body></html>

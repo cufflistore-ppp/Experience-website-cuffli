@@ -36,12 +36,7 @@
   </style>
 </head>
 <body>
-
-  <audio id="bgMusic" loop preload="auto">
-    <source src="music.m4a" type="audio/mp4">
-  </audio>
-
-  <header class="header">
+<header class="header">
     <div class="brand">
       <img src="logo.jpg" class="logo" alt="ELZKII JOKI">
       <div>
@@ -51,13 +46,7 @@
     </div>
   
     <div class="header-right">
-      <div class="music-controls" id="musicControls">
-        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
-          <i class="fa-solid fa-pause" id="musicIcon"></i>
-        </button>
-        <span class="music-label">Lagu</span>
-      </div>
-    </div>
+</div>
   </header>
 
   <div class="page-content">
@@ -126,7 +115,7 @@
         body.innerHTML =
           photo +
           '<div class="akun-name">' + escapeHtml(user.displayName || "Pengguna") + "</div>" +
-          '<div class="akun-email">' + escapeHtml(user.email || "-") + "</div>";
+          '<div class="akun-email">' + escapeHtml(user.email || "-") + "</div>" + (window.EJ && EJ.isAdmin(user) ? '<a class="btn-google" style="margin:12px 0 0;text-decoration:none" href="admin.html"><i class="fa-solid fa-user-shield"></i> Menuju Panel Admin</a>' : '');
         btnG.style.display = "none";
         btnL.style.display = "block";
       } else {
@@ -199,9 +188,6 @@
       }
     });
   </script>
-<script src="music.js"></script>
-
-
 <script src="footer.js"></script>
 </body>
 </html>
