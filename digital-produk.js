@@ -328,8 +328,9 @@ function tambahProdukDigital(data) {
 
 async function ejLoadSharedDigitalProducts(){
  const list=document.getElementById('digitalList');if(!list||!window.EJ?.db)return;
- try{const snap=await EJ.db.ref('products').once('value'),v=snap.val()||{};
- const extras=Object.entries(v).filter(([id,p])=>['digital','both'].includes(p.placement)).map(([id,p])=>({id,nama:p.nama||p.judul,harga:Number(p.harga||0),img:p.img||'logo.jpg',delivery:p.delivery||''}));
+ try{const snap=await EJ.db.ref('products').once('value'),v=snap.val()||{},managed=(await EJ.db.ref('settings/catalogsImportedV1').once('value')).val();
+ const extras=Object.entries(v).filter(([id,p])=>['digital','both'].includes(p.placement)).map(([id,p])=>({id,nama:p.nama||p.judul,harga:Number(p.harga||0),img:p.img||'logo.jpg',delivery:p.delivery||'',fitur:p.fitur||[]}));
+ if(managed)list.innerHTML='';
  if(!extras.length)return;
  const html=extras.map(p=>`<article class="paket-card"><img src="${p.img}" alt="${String(p.nama).replace(/[<>]/g,'')}" style="width:100%;max-height:150px;object-fit:cover;border-radius:10px"><span class="paket-label">DIGITAL</span><h3>${String(p.nama).replace(/[<>]/g,'')}</h3><p>${String(p.delivery).replace(/[<>]/g,'')}</p><div class="harga">${formatRpDigital(p.harga)}</div><a class="btn-pesan" href="${payUrl(p.nama,p.harga)}">Pesan via WhatsApp</a></article>`).join('');
  list.insertAdjacentHTML('beforeend',html);

@@ -181,20 +181,82 @@ async function buatPesanan() {
 }
 
 // ========== LAPORAN ==========
-async function kirimLaporan() {
-  const noPesanan = document.getElementById("noPesanan")?.value || "-";
-  const judul = document.getElementById("judulLaporan")?.value || "-";
-  const deskripsi = document.getElementById("deskripsiLaporan")?.value || "-";
-  const fileInput = document.getElementById("fotoLaporan");
+async function compressLaporanImage(file) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type.startsWith("image/")) return resolve(null);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const maxSide = 1200;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(img.width * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.72));
+      };
+      img.onerror = () => reject(new Error("Foto tidak dapat dibaca."));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error("Foto tidak dapat dibaca."));
+    reader.readAsDataURL(file);
+  });
+}
 
-  const data = { noPesanan, judul, deskripsi };
+async function kirimLaporan() {
+  const noPesanan = document.getElementById("noPesanan")?.value.trim() || "-";
+  const judul = document.getElementById("judulLaporan")?.value.trim() || "-";
+  const deskripsi = document.getElementById("deskripsiLaporan")?.value.trim() || "-";
+  const fileInput = document.getElementById("fotoLaporan");
   const files = fileInput ? Array.from(fileInput.files).slice(0, 3) : [];
 
-  if (typeof kirimLaporanKeTelegram === "function") {
-    await kirimLaporanKeTelegram(data, files);
+  if (noPesanan === "-" || judul === "-" || deskripsi === "-") {
+    showSiteModal("Nomor pesanan, judul, dan deskripsi wajib diisi.", "warning");
+    return;
+  }
+  if (files.some(f => f.size > 5 * 1024 * 1024)) {
+    showSiteModal("Ukuran setiap foto maksimal 5 MB.", "warning");
+    return;
+  }
+  if (!window.VoxyyReports || typeof window.VoxyyReports.addReport !== "function") {
+    showSiteModal("Fitur laporan belum siap. Silakan muat ulang halaman.", "warning");
+    return;
   }
 
-  showSiteModal("Laporan berhasil dikirim ke admin via Telegram!", "success");
+  const btn = document.querySelector("#formLaporan .btn-kirim");
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...'; }
+
+  try {
+    const photos = [];
+    for (const file of files) {
+      const dataUrl = await compressLaporanImage(file);
+      if (dataUrl) photos.push({ name: file.name, type: "image/jpeg", data: dataUrl });
+    }
+
+    const user = window.EJ && window.EJ.auth ? window.EJ.auth.currentUser : null;
+    const result = await window.VoxyyReports.addReport({
+      noPesanan,
+      judul,
+      deskripsi,
+      photos,
+      status: "Menunggu",
+      uid: user ? user.uid : "",
+      email: user ? (user.email || "") : "",
+      createdAt: Date.now()
+    });
+
+    if (!result || !result.ok) throw new Error(result && result.error ? result.error : "Gagal menyimpan laporan");
+    localStorage.setItem("elzkii_last_report_id", result.id || "");
+    showSiteModal("Laporan berhasil dikirim. Admin sekarang dapat melihatnya di Panel Admin.", "success");
+    document.getElementById("formLaporan")?.reset?.();
+  } catch (e) {
+    console.error("Gagal kirim laporan:", e);
+    showSiteModal("Laporan gagal dikirim. Coba lagi beberapa saat.", "warning");
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Laporan'; }
+  }
 }
 
 // ========== Custom Animated Modal ==========
