@@ -10,7 +10,7 @@
     body.admin-page{background:#fff8fb;color:var(--adm-text)}
     .admin-topbar{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--adm-line);padding:12px 16px;display:flex;align-items:center;gap:13px;box-shadow:0 3px 14px #8d31500d}
     .admin-topbar h1{font-size:16px;color:#8b315f;margin:0}.admin-topbar p{font-size:11px;color:var(--adm-muted);margin:3px 0 0}
-    .admin-menu-btn{border:0;background:var(--adm-pink);color:#fff!important;border-radius:10px;width:42px;height:42px;font-size:19px;box-shadow:0 3px 10px #d91d8040}
+    .admin-menu-btn{border:0;background:var(--adm-pink);color:#fff!important;border-radius:10px;width:42px;height:42px;font-size:19px;box-shadow:0 3px 10px #d91d8040}.admin-menu-btn i{color:#fff!important}
     .admin-drawer{position:fixed;z-index:50;inset:0 auto 0 0;width:min(290px,82vw);background:#fff;box-shadow:12px 0 35px #44203322;transform:translateX(-110%);transition:.22s;padding:20px 14px}
     .admin-drawer.open{transform:translateX(0)}.admin-overlay{position:fixed;z-index:45;inset:0;background:#25151f66;display:none}.admin-overlay.show{display:block}
     .drawer-title{font-weight:800;color:#a52c68;padding:8px 10px 18px}.drawer-link{display:flex;align-items:center;gap:13px;padding:13px 12px;border-radius:11px;text-decoration:none;color:#69616a;font-size:14px;margin:3px 0}.drawer-link i{width:20px;color:var(--adm-pink);text-align:center}.drawer-link:hover,.drawer-link.active{background:#fff0f7;color:#a52c68}
@@ -53,7 +53,7 @@
         <small style="color:#918993">Format gambar JPG, PNG, atau WEBP. Maksimal 700 KB.</small>
         <label>Isi produk / kode (opsional)</label><textarea id="ejProdDelivery" placeholder="Teks atau kode produk untuk buyer"></textarea>
         <label>Kategori produk</label><select id="ejProdType"><option value="digital">Produk Digital</option><option value="joki">Jasa Joki</option></select>
-        <label>Tampilkan produk di</label><select id="ejProdPlacement"><option value="home">Home</option><option value="digital">Halaman Produk Digital</option><option value="both">Home dan Produk Digital</option><option value="hidden">Jangan tampilkan dulu</option></select>
+        <div style="margin:8px 0 12px;padding:10px 12px;border:1px solid #f0d5e2;border-radius:10px;background:#fff8fb;color:#a52c68;font-size:12px;"><i class="fa-solid fa-layer-group"></i> Produk yang ditambahkan otomatis tampil di <b>Home dan Produk Digital</b>.</div>
         <button class="btn-buat" type="button" onclick="ejAddProduct()"><i class="fa-solid fa-upload"></i> Upload & Tambah Produk</button>
       </div><h2 style="margin-top:20px">Daftar Produk</h2><div id="ejProdList" class="product-grid-admin"></div>
     </section>
