@@ -369,7 +369,7 @@ async function cekStatus() {
     showStatusModal(
       "Nomor Order Kosong",
       row("Info", "Masukkan nomor order terlebih dahulu.") +
-        row("Contoh", "<code>DJ-2026-7129517</code>"),
+        row("Contoh", "<code>EJ-2026-7129517</code>"),
       "⚠️"
     );
     return;
@@ -422,7 +422,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const inp = document.getElementById("searchOrder");
   if (inp) {
-    inp.placeholder = "DJ-2026-xxxx";
+    inp.placeholder = "EJ-2026-xxxx";
     inp.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();

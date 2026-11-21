@@ -1,0 +1,25 @@
+ELZKII JOKI - FIREBASE SETUP
+
+1. Firebase Console > Authentication > Sign-in method:
+   - Enable Email/Password
+   - Enable Google
+- Email/password accounts must verify their email before login is accepted
+2. Authentication > Settings > Authorized domains:
+   - Add your deployed domain (example: your-project.vercel.app)
+3. Google Cloud OAuth client:
+   - Authorized JavaScript origins: https://YOUR-DOMAIN
+   - Confirm OAuth client ID matches the one in ej-auth.js.
+4. Realtime Database > Rules:
+   - Open FIREBASE_RULES.json, copy its contents, paste into Rules, then Publish.
+5. Deploy the complete contents of this ZIP together in one directory.
+
+ADMIN ALLOWLIST:
+- cufflistore@gmail.com
+- hengkipratamahmad@gmail.com
+
+IMPORTANT:
+- Firebase web apiKey and OAuth client ID are public client identifiers, not admin passwords.
+- Never publish service-account private keys.
+- Rules must be published before production use.
+- Buyer must sign in at least once before admin can send a delivery by email.
+- The buyer sees assigned deliveries in riwayat.html.

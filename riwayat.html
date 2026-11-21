@@ -1,60 +1,11 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transaksi - VOXY MARKET</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="maintenance-gate.js"></script>
-</head>
-<body>
-  <header class="app-header">
-    <div class="logo-area"><img src="logo.png" alt="VOXY"><span class="brand-name"><span class="brand-voxy">VOXY</span> <span class="brand-market">MARKET</span></span></div>
-  </header>
-  <main class="page">
-    <div class="order-list" id="listRiwayat"><div class="empty-state">Memuat...</div></div>
-  </main>
-    <nav class="bottom-nav">
-    <a href="home.html"><i data-lucide="home"></i>Home</a>
-    <a href="riwayat.html" class="active"><i data-lucide="receipt"></i>Transaksi</a>
-    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
-  </nav>
-  <script src="global-orders.js"></script>
-  <script>
-    lucide.createIcons();
-    function statusClass(s) {
-      s = (s || "").toLowerCase();
-      if (s.indexOf("menunggu") !== -1) return "menunggu";
-      if (s.indexOf("proses") !== -1) return "diproses";
-      if (s.indexOf("selesai") !== -1) return "selesai";
-      if (s.indexOf("tolak") !== -1) return "ditolak";
-      return "menunggu";
-    }
-    VOXY.requireAuth().then(function (user) {
-      VOXY.listenOrders(function (orders) {
-        var mine = (orders || []).filter(function (o) {
-          return o.email === user.email || o.uid === user.uid;
-        });
-        mine.sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
-        var el = document.getElementById("listRiwayat");
-        if (!mine.length) { el.innerHTML = '<div class="empty-state">Belum ada transaksi</div>'; return; }
-        el.innerHTML = mine.map(function (o) {
-          var img = o.gambar || "produk1.png";
-          var st = o.status || "Menunggu";
-          return '<a class="order-item" href="detail-transaksi.html?kode=' + encodeURIComponent(o.kode) + '">' +
-            '<img class="thumb" src="' + img + '" onerror="this.src=\'produk1.png\'">' +
-            '<div class="info"><h3>' + (o.namaProduk || o.nama || "-") + '</h3>' +
-            '<div class="meta">' + (o.kode || "") + ' · ' + VOXY.formatTanggal(o.createdAt) + '</div>' +
-            '<div class="meta" style="margin-top:4px">' + VOXY.formatRp(o.harga) +
-            ' · <span class="badge ' + statusClass(st) + '">' + st + '</span></div></div></a>';
-        }).join("");
-      });
-    });
-  </script>
-  <script src="music-player.js"></script>
-</body>
-</html>
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Riwayat Digital - ELZKII JOKI</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head><body><header class="header"><div class="brand"><img class="logo" src="logo.jpg"><div><h1>ELZKII JOKI</h1><p>Produk Digital Saya</p></div></div></header><main class="page-content"><h2>PRODUK & RIWAYAT DIGITAL</h2><p>Produk digital yang dikirim admin ke akun kamu akan muncul di sini.</p><div id="history" style="margin-top:14px">Memuat...</div></main><nav class="bottom-nav"><a class="nav-item" href="home.html">Home</a><a class="nav-item" href="antrian.html">Antrean Joki</a><a class="nav-item active" href="riwayat.html">Riwayat</a></nav><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script><script>
+const box=document.getElementById('history');
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+EJ.auth.onAuthStateChanged(async u=>{if(!u)return;try{
+ const snap=await EJ.db.ref('deliveries/'+u.uid).once('value');const data=snap.val()||{};const deliveries=Object.values(data).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+ const delivered=deliveries.map(o=>`<article style="background:#fff;border:1px solid #f2bfd8;padding:14px;border-radius:12px;margin:9px 0;color:#54223f"><b>${esc(o.title||'Produk Digital')}</b>${o.note?`<p style="white-space:pre-wrap">${esc(o.note)}</p>`:''}${o.link?`<p><a href="${esc(o.link)}" target="_blank" rel="noopener">Download / Buka Produk</a></p>`:''}<small>Dikirim: ${new Date(o.createdAt||Date.now()).toLocaleString('id-ID')}</small></article>`).join('');
+ let local=[];try{local=JSON.parse(localStorage.getItem('voxyy_digital_history')||'[]')}catch(e){}
+ const history=local.map(o=>`<article style="background:#fff;border:1px solid #f2bfd8;padding:14px;border-radius:12px;margin:9px 0;color:#54223f"><b>Order: ${esc(o.paket||'Produk Digital')}</b><p>${esc(o.kode||'')}</p><p>Rp ${Number(o.total||0).toLocaleString('id-ID')}</p><small>${esc(o.waktu||'')} · ${esc(o.status||'Menunggu konfirmasi')}</small></article>`).join('');
+ box.innerHTML='<h3>Produk yang Dikirim Admin</h3>'+(delivered||'<p>Belum ada produk digital yang dikirim ke akun ini.</p>')+'<h3 style="margin-top:22px">Riwayat Order Digital</h3>'+(history||'<p>Belum ada order digital di perangkat ini.</p>');
+ }catch(e){box.textContent='Gagal memuat riwayat. Periksa Firebase Rules.';}});
+</script></body></html>

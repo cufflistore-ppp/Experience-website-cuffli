@@ -7,8 +7,8 @@ const produk = [
     harga: 5000,
     status: "TERSEDIA",
     img: "logo-produk.jpg",
-    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    deskripsi: "Pesan melalui WhatsApp admin.",
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 2,
@@ -16,8 +16,8 @@ const produk = [
     harga: 5000,
     status: "TERSEDIA",
     img: "logo-produk.jpg",
-    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    deskripsi: "Pesan melalui WhatsApp admin.",
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 3,
@@ -25,8 +25,8 @@ const produk = [
     harga: 5000,
     status: "TERSEDIA",
     img: "logo-produk.jpg",
-    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    deskripsi: "Pesan melalui WhatsApp admin.",
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 4,
@@ -34,8 +34,8 @@ const produk = [
     harga: 5000,
     status: "TERSEDIA",
     img: "logo-produk.jpg",
-    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    deskripsi: "Pesan melalui WhatsApp admin.",
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 5,
@@ -43,8 +43,8 @@ const produk = [
     harga: 3000,
     status: "TERSEDIA",
     img: "logo-produk.jpg",
-    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    deskripsi: "Pesan melalui WhatsApp admin.",
+    fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 6,
@@ -52,8 +52,8 @@ const produk = [
     harga: 1000,
     status: "TERSEDIA",
     img: "logo-produk.jpg",
-    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 1.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    deskripsi: "Pesan melalui WhatsApp admin.",
+    fitur: ["Harga Rp 1.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 7,
@@ -61,8 +61,8 @@ const produk = [
     harga: 3000,
     status: "TERSEDIA",
     img: "logo-produk.jpg",
-    deskripsi: "Bayar QRIS dulu. Setelah transfer, konfirmasi ke admin WhatsApp.",
-    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    deskripsi: "Pesan melalui WhatsApp admin.",
+    fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   }
 ];
 
@@ -89,6 +89,7 @@ function renderProduk() {
     }
   } catch (e) {}
 
+  try { const extra = JSON.parse(localStorage.getItem("ej_products") || "[]"); extra.forEach(x => { if (!produk.some(p => String(p.id) === String(x.id))) produk.push(x); }); } catch(e) {}
   grid.innerHTML = produk.map(p => {
     const href = "pembayaran-digital.html?paket=" + encodeURIComponent(p.judul) + "&total=" + encodeURIComponent(String(p.harga));
     return `
@@ -113,10 +114,14 @@ function tambahProduk(data) {
     status: data.status || "TERSEDIA",
     img: data.img || "logo.png",
     deskripsi: data.deskripsi || "",
-    fitur: data.fitur || ["Bayar langsung QRIS"]
+    fitur: data.fitur || ["Order melalui WhatsApp"]
   });
   localStorage.setItem("voxyy_produk", JSON.stringify(produk));
   renderProduk();
 }
 
 document.addEventListener("DOMContentLoaded", renderProduk);
+
+// Produk tambahan dari Firebase Realtime Database (katalog bersama).
+async function ejLoadSharedHomeProducts(){const grid=document.getElementById('produkGrid');if(!grid||!window.EJ?.db)return;try{const snap=await EJ.db.ref('products').once('value'),v=snap.val()||{};const extras=Object.entries(v).map(([id,p])=>({id,judul:p.judul||p.nama,harga:Number(p.harga||0),img:p.img||'logo-produk.jpg',status:p.status||'TERSEDIA'}));if(!extras.length)return;const existing=new Set(Array.from(grid.querySelectorAll('[data-ej-product]')).map(x=>x.dataset.ejProduct));grid.insertAdjacentHTML('beforeend',extras.filter(p=>!existing.has(String(p.id))).map(p=>`<div class="produk-card" data-ej-product="${String(p.id).replace(/["<>]/g,'')}"><img src="${String(p.img).replace(/["<>]/g,'')}" alt="Produk"><div class="produk-info"><small>${p.status}</small><h4>${String(p.judul).replace(/[<>]/g,'')}</h4><div class="harga">${formatRpProduk(p.harga)}</div><a class="btn" href="pembayaran-digital.html?paket=${encodeURIComponent(p.judul)}&total=${p.harga}">Pesan via WhatsApp</a></div></div>`).join(''))}catch(e){console.warn('Katalog Firebase belum dapat dimuat',e)}}
+document.addEventListener('DOMContentLoaded',()=>setTimeout(ejLoadSharedHomeProducts,700));

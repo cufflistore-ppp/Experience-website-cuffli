@@ -194,7 +194,7 @@ async function tambahOrderAdmin() {
   const statusEl = document.getElementById("admStatus");
 
   const kode = (kodeEl ? kodeEl.value.trim() : "") ||
-    "DJ-2026-" + Math.floor(1000 + Math.random() * 9000) + String(Date.now()).slice(-3);
+    "EJ-2026-" + Math.floor(1000 + Math.random() * 9000) + String(Date.now()).slice(-3);
   const nama = (namaEl ? namaEl.value.trim() : "") || "Manual";
   const wa = (waEl ? waEl.value.trim() : "") || "-";
   const total = (totalEl ? totalEl.value.trim() : "") || "Rp 0";

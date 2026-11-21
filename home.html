@@ -1,293 +1,248 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <!-- Script langsung untuk mendeteksi iframe dan mencegah navigasi dobel -->
+  <script>
+    if (window.self !== window.top) {
+      document.documentElement.classList.add('in-iframe');
+    }
+  </script>
+  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VOXY MARKET</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ELZKII JOKI - Pusat Layanan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="maintenance-gate.js"></script>
+  <style>
+    .header { justify-content: space-between; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(33, 150, 243, 0.12);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 20px;
+      padding: 4px 8px 4px 6px;
+    }
+    .music-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+    }
+    .music-btn:active { transform: scale(0.92); }
+    .music-label {
+      font-size: 11px;
+      color: #90caf9;
+      font-weight: 600;
+      padding-right: 4px;
+    }
+    .user-chip {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(33, 150, 243, 0.12);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 20px;
+      padding: 3px 10px 3px 3px;
+      text-decoration: none;
+      color: #fff;
+    }
+    .user-chip.show { display: flex; }
+    .user-chip img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #2196f3;
+    }
+    .user-chip span {
+      font-size: 12px;
+      font-weight: 600;
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    /* Menambahkan kursor pointer pada logo agar terlihat bisa diklik */
+    .brand .logo {
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
 </head>
 <body>
-  <header class="app-header">
-    <div class="logo-area">
-      <img src="logo.png" alt="VOXY">
-      <span class="badge-dot" id="logoBadge"></span>
-      <span class="brand-name"><span class="brand-voxy">VOXY</span> <span class="brand-market">MARKET</span></span>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
+  <header class="header">
+    <div class="brand">
+      <!-- Logo di sini sekarang berfungsi untuk shortcut Admin jika diketuk 5x -->
+      <img src="logo.jpg" alt="ELZKII JOKI" class="logo" id="adminLogoHome" title="ELZKII JOKI">
+      <div>
+        <h1>ELZKII JOKI <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Pusat Layanan ELZKII JOKI</p>
+      </div>
     </div>
-    <div class="header-actions">
-      <button type="button" class="icon-btn music-toggle" id="btnMusic" aria-label="Putar musik" aria-pressed="false" title="Putar musik">
-        <i data-lucide="play"></i>
-      </button>
-      <button type="button" class="icon-btn" id="btnMenu" aria-label="Menu" onclick="document.getElementById('drawerBg').classList.add('show');document.getElementById('sideDrawer').classList.add('show');if(window.lucide)lucide.createIcons();"><i data-lucide="menu"></i></button>
+    <div class="header-right">
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
+      <a href="akun.html" class="user-chip" id="userChip">
+        <img src="" alt="" id="userAvatar">
+        <span id="userName"></span>
+      </a>
     </div>
   </header>
 
-
-  <div class="side-drawer-bg" id="drawerBg" onclick="this.classList.remove('show');document.getElementById('sideDrawer').classList.remove('show');"></div>
-  <div class="side-drawer" id="sideDrawer">
-    <div class="side-drawer-head">
-      <div class="logo-area">
-        <img src="logo.png" alt="">
-        <span class="brand-name"><span class="brand-voxy">VOXY</span> <span class="brand-market">MARKET</span></span>
-      </div>
-      <button type="button" class="icon-btn" id="btnCloseDrawer" onclick="document.getElementById('drawerBg').classList.remove('show');document.getElementById('sideDrawer').classList.remove('show');"><i data-lucide="x"></i></button>
-    </div>
-    <nav class="side-drawer-nav">
-      <a href="akun.html"><i data-lucide="user"></i> Akun</a>
-      <a href="riwayat.html"><i data-lucide="receipt"></i> Transaksi</a>
-      <a href="jaspost.html"><i data-lucide="send"></i> Jaspost / PM</a>
-      <a href="home.html"><i data-lucide="layout-grid"></i> Menu Layanan</a>
-      <a href="chat.html"><i data-lucide="message-circle"></i> Bantuan Admin</a>
-    </nav>
+  <div class="banner">
+    <img src="banner.jpg" alt="Selamat Datang di ELZKII JOKI" class="banner-full">
   </div>
+  <div class="top-notif" id="topNotif" style="display:none;"></div>
 
-  <main class="page home-page">
-    <div class="banner-wrap">
-      <div class="banner-track" id="bannerTrack">
-        <img src="banner.png" alt="1">
-        <img src="banner2.png" alt="2">
-        <img src="banner3.png" alt="3">
-      </div>
-      <div class="banner-dots" id="bannerDots"><span class="active"></span><span></span><span></span></div>
-    </div>
-
-    <a href="search.html" class="home-search">
-      <i data-lucide="search" style="width:18px;height:18px"></i>
-      <span>Cari produk atau layanan...</span>
+  <div class="menu-grid">
+    <a href="riwayat.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat Digital</span></a>
+    <a href="joki.html" class="menu-item">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Joki</span>
+    </a>
+    <a href="digital.html" class="menu-item">
+      <i class="fa-solid fa-box"></i>
+      <span>Produk Digital</span>
+    </a>
+    
+    <a href="https://wa.me/6281252384673" class="menu-item" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Jasa Post</span>
     </a>
 
-    <section class="menu-layanan-section" id="menuLayananSection">
-      <h2 class="menu-layanan-title">MENU LAYANAN</h2>
-      <div class="menu-layanan-grid" id="menuLayananGrid">
-        <div class="empty-state" style="grid-column:1/-1;padding:16px;font-size:12px">Memuat menu...</div>
-      </div>
-    </section>
-
-    <footer class="voxy-landing-footer home-footer-full">
-      <div class="voxy-lf-brand">
-        <img src="logo.png" alt="VOXY" data-brand="logo">
-        <div>
-          <div class="voxy-lf-name">VOXY MARKET <span class="voxy-lf-verified" title="Official">✓</span></div>
-          <div class="voxy-lf-tag">Produk Digital, Akun Premium &amp; Jasa</div>
-        </div>
-      </div>
-      <p class="voxy-lf-desc">Pusat layanan untuk order akun premium, produk digital, APK, jasa suntik, dan kebutuhan digital lainnya.</p>
-      <a href="#menuLayananSection" class="btn voxy-lf-cta voxy-lf-cta-lime">
-        <i data-lucide="package" style="width:16px;height:16px"></i> Lihat Paket
-      </a>
-      <div class="voxy-lf-sec">Bantuan</div>
-      <div class="voxy-lf-links">
-        <a href="riwayat.html">Cek Pesanan</a>
-        <a href="#menuLayananSection">Buat Pesanan</a>
-        <a href="chat.html">Chat Admin</a>
-      </div>
-      <div class="voxy-lf-sec">Layanan</div>
-      <div class="voxy-lf-links" id="footerLayananList">
-        <a href="home.html">Menu Layanan</a>
-      </div>
-      <div class="voxy-lf-copy">
-        Copyright &copy; 2026 VOXY MARKET. All rights reserved.<br>
-        Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a>
-      </div>
-    </footer>
-  </main>
-
-  <div class="fab-chat" id="fabChat" title="Chat Admin">
-    <img src="chat-admin.png" alt="Chat">
-    <span class="badge-dot" id="fabBadge"></span>
+    <a href="https://wa.me/6281252384673" class="menu-item" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Wa Joki</span>
+    </a>
+    <a href="https://wa.me/6281252384673" class="menu-item" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Wa Backup Joki</span>
+    </a>
+    <a href="pembayaran.html?paket=Nokos%20WA%20Indonesia&total=5000" class="menu-item">
+      <i class="fa-solid fa-mobile-screen"></i>
+      <span>Nokos WA Indonesia</span>
+    </a>
   </div>
 
-  <div class="laporan-sheet" id="laporanSheet">
-    <div class="laporan-panel">
-      <h3>Chat Admin</h3>
-      <p>Pilih cara menghubungi admin</p>
-      <div class="laporan-options">
-        <button type="button" class="btn" id="btnChatWeb">Chat via Website</button>
-        <button type="button" class="btn btn-wa" id="btnChatWA">Chat via WhatsApp</button>
-        <button type="button" class="btn btn-outline" id="btnChatBatal">Batal</button>
-      </div>
-    </div>
+  <section class="produk-section">
+    <h3>PRODUK DIGITAL</h3>
+    <p class="subtitle">Nokos & Jasa Logo. Order melalui WhatsApp.</p>
+    <div class="produk-grid" id="produkGrid"></div>
+  </section>
+
+  <div class="info-box">
+    <h4>Website jadi pusat proses order.</h4>
+    <p>Website dipakai untuk menerima order, pembayaran, data customer, antrian, dan status supaya proses tidak tercerai di chat.</p>
   </div>
 
-  <nav class="bottom-nav">
-    <a href="home.html" class="active"><i data-lucide="home"></i>Home</a>
-    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
-    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
+  <div style="padding:0 12px 24px;">
+    <a href="laporan.html" class="btn-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
+  </div>
+
+  <!-- Navigasi bawah ini akan otomatis disembunyikan via CSS saat berada di dalam iframe index.html -->
+  <nav class="bottom-nav nav-6">
+    <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+    <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+    <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+    <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+    <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
   </nav>
 
+  <script src="produk.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="script.js"></script>
+  <script src="music.js"></script>
   <script>
-    lucide.createIcons();
-
-    /* Drawer */
     (function () {
-      var bg = document.getElementById("drawerBg");
-      var dr = document.getElementById("sideDrawer");
-      var btn = document.getElementById("btnMenu");
-      var closeBtn = document.getElementById("btnCloseDrawer");
-      if (!bg || !dr || !btn) return;
-      function openD(e) { if (e) e.preventDefault(); bg.classList.add("show"); dr.classList.add("show"); if (window.lucide) lucide.createIcons(); }
-      function closeD(e) { if (e) e.preventDefault(); bg.classList.remove("show"); dr.classList.remove("show"); }
-      btn.addEventListener("click", openD);
-      if (closeBtn) closeBtn.addEventListener("click", closeD);
-      bg.addEventListener("click", closeD);
-    })();
-
-    var waAdmin = "";
-    var bi = 0;
-    function startBanner() {
-      setInterval(function () {
-        bi = (bi + 1) % 3;
-        var track = document.getElementById("bannerTrack");
-        if (track) track.style.transform = "translateX(-" + (bi * 100) + "%)";
-        document.querySelectorAll("#bannerDots span").forEach(function (d, i) {
-          d.classList.toggle("active", i === bi);
-        });
-      }, 3500);
-    }
-
-    function bukaLaporan() { document.getElementById("laporanSheet").classList.add("show"); }
-    function tutupLaporan() { document.getElementById("laporanSheet").classList.remove("show"); }
-    document.getElementById("laporanSheet").addEventListener("click", function (e) {
-      if (e.target === this) tutupLaporan();
-    });
-    document.getElementById("btnChatWeb").onclick = function () { location.href = "chat.html"; };
-    document.getElementById("btnChatWA").onclick = function () {
-      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY MARKET, saya mau tanya/lapor:");
-      tutupLaporan();
-    };
-    document.getElementById("btnChatBatal").onclick = tutupLaporan;
-
-    (function () {
-      var fab = document.getElementById("fabChat");
-      var y = window.innerHeight - 160;
-      var dragging = false, moved = false, sy, oy;
-      function place() {
-        fab.style.right = "14px";
-        fab.style.left = "auto";
-        fab.style.top = y + "px";
-        fab.style.bottom = "auto";
-      }
-      place();
-      function onStart(e) {
-        dragging = true; moved = false;
-        var t = e.touches ? e.touches[0] : e;
-        sy = t.clientY; oy = y;
-        e.preventDefault();
-      }
-      function onMove(e) {
-        if (!dragging) return;
-        var t = e.touches ? e.touches[0] : e;
-        var dy = t.clientY - sy;
-        if (Math.abs(dy) > 6) moved = true;
-        y = Math.max(56, Math.min(window.innerHeight - 80, oy + dy));
-        place();
-      }
-      function onEnd() {
-        if (!dragging) return;
-        dragging = false;
-        fab.classList.remove("dragging");
-        if (!moved) bukaLaporan();
-      }
-      fab.addEventListener("mousedown", onStart);
-      fab.addEventListener("touchstart", onStart, { passive: false });
-      window.addEventListener("mousemove", onMove);
-      window.addEventListener("touchmove", onMove, { passive: false });
-      window.addEventListener("mouseup", onEnd);
-      window.addEventListener("touchend", onEnd);
-    })();
-
-    function renderMenuLayanan(menus) {
-      var grid = document.getElementById("menuLayananGrid");
-      if (!grid) return;
-      var list = (menus || []).filter(function (m) {
-        return m.aktif !== false && m.aktif !== "false";
-      }).sort(function (a, b) {
-        return (Number(a.urutan) || 0) - (Number(b.urutan) || 0);
-      });
-      /* Pastikan Joki Kontak selalu ada sebagai menu (tampilan sama seperti menu lain) */
-      var hasJoki = list.some(function (m) {
-        var k = ((m.kategori || "") + " " + (m.judul || "")).toLowerCase();
-        return k.indexOf("joki") !== -1;
-      });
-      if (!hasJoki) {
-        list = list.concat([{
-          id: "_joki_default",
-          judul: "Joki Kontak",
-          subjudul: "Paket joki + Prioritas + FaceCam",
-          icon: "zap",
-          kategori: "joki",
-          urutan: 999,
-          aktif: true
-        }]);
-      }
-      if (!list.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;padding:16px;font-size:12px;color:var(--muted)">Belum ada menu layanan.<br>Admin: Panel Admin → Menu Layanan</div>';
-        return;
-      }
-      function menuHref(m) {
-        var kat = (m.kategori || "").replace(/"/g, "");
-        var katLow = kat.toLowerCase();
-        var judulLow = (m.judul || "").toLowerCase();
-        if (katLow === "joki" || katLow.indexOf("joki") !== -1 || judulLow.indexOf("joki") !== -1) {
-          return "joki.html";
+      try {
+        if (window.self === window.top) {
+          if (sessionStorage.getItem("doxy_entered") !== "1") {
+            window.location.replace("index.html");
+            return;
+          }
         }
-        var judulQ = encodeURIComponent(m.judul || kat || "Layanan");
-        var katQ = encodeURIComponent(kat);
-        return "layanan.html?kat=" + katQ + "&judul=" + judulQ;
-      }
-      grid.innerHTML = list.map(function (m) {
-        var icon = (m.icon || "package").replace(/[^a-z0-9-]/gi, "") || "package";
-        var judul = (m.judul || "Layanan").replace(/</g, "&lt;");
-        var sub = (m.subjudul || "").replace(/</g, "&lt;");
-        return (
-          '<a class="menu-layanan-btn" href="' + menuHref(m) + '">' +
-            '<span class="mlb-icon"><i data-lucide="' + icon + '"></i></span>' +
-            '<span class="mlb-text">' +
-              '<span class="mlb-title">' + judul + '</span>' +
-              (sub ? '<span class="mlb-sub">' + sub + '</span>' : '') +
-            '</span>' +
-            '<span class="mlb-arrow"><i data-lucide="chevron-right"></i></span>' +
-          '</a>'
-        );
-      }).join("");
-      var foot = document.getElementById("footerLayananList");
-      if (foot) {
-        foot.innerHTML = list.map(function (m) {
-          var judul = (m.judul || "Layanan").replace(/</g, "&lt;");
-          return '<a href="' + menuHref(m) + '">' + judul + '</a>';
-        }).join("");
-      }
-      lucide.createIcons();
-    }
+      } catch (e) {}
 
-    if (VOXY.auth) {
-      VOXY.auth.onAuthStateChanged(function (user) {
-        if (!user) { location.href = "login.html"; return; }
-        VOXY.applyBrandingToPage();
-        startBanner();
-        VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
-        VOXY.getMenuLayanan().then(function (menus) {
-          renderMenuLayanan(menus || []);
-        }).catch(function () { renderMenuLayanan([]); });
-        VOXY.listenMenuLayanan(function (menus) {
-          renderMenuLayanan(menus || []);
-        });
-        VOXY.listenUserUnread(user.uid, function (unread) {
-          ["logoBadge", "fabBadge"].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) el.classList.toggle("show", !!unread);
+      function updateUserChip() {
+        try {
+          if (typeof firebase === "undefined" || !firebase.apps.length) return;
+          const user = firebase.auth().currentUser;
+          const chip = document.getElementById("userChip");
+          const avatar = document.getElementById("userAvatar");
+          const name = document.getElementById("userName");
+          if (user && chip) {
+            chip.classList.add("show");
+            if (avatar) avatar.src = user.photoURL || "logo.png";
+            if (name) name.textContent = (user.displayName || "Akun").split(" ")[0];
+          } else if (chip) {
+            chip.classList.remove("show");
+          }
+        } catch (e) {}
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(updateUserChip, 800);
+        if (typeof firebase !== "undefined") {
+          try {
+            firebase.auth().onAuthStateChanged(updateUserChip);
+          } catch (e) {}
+        }
+
+        // Fungsi Deteksi Ketuk 5x pada Logo di Header Home
+        let tapCount = 0;
+        let tapTimer = null;
+        const adminLogoHome = document.getElementById("adminLogoHome");
+
+        if (adminLogoHome) {
+          adminLogoHome.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tapCount++;
+            if (tapTimer) clearTimeout(tapTimer);
+
+            if (tapCount >= 5) {
+              tapCount = 0;
+              // Mengirim pesan ke index.html untuk membuka modal admin
+              window.parent.postMessage({ type: "doxy-admin-open" }, "*");
+            } else {
+              tapTimer = setTimeout(function () {
+                tapCount = 0;
+              }, 700);
+            }
           });
-        });
+        }
       });
-    }
-
-
+    })();
   </script>
-  <script src="music-player.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script>
 </body>
 </html>

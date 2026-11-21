@@ -139,7 +139,7 @@ async function buatPesanan() {
   const total = document.getElementById("totalHarga")?.textContent || "Rp 5.000";
   const rand = Math.floor(1000 + Math.random() * 9000);
   const timePart = String(Date.now()).slice(-3);
-  const kode = `DJ-2026-${rand}${timePart}`;
+  const kode = `EJ-2026-${rand}${timePart}`;
 
   const isJokiOrder = String(window.orderType || "").toLowerCase().includes("joki");
   let order = {

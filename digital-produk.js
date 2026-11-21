@@ -14,7 +14,7 @@ const produkDigital = [
   fitur: [
     "Harga Rp 5.000",
     "Jasa edit video animasi anime",
-    "Bayar langsung QRIS",
+    "Order melalui WhatsApp",
     "Konfirmasi via WhatsApp"
   ]
 },
@@ -28,7 +28,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 1.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 1.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 2,
@@ -40,7 +40,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 3,
@@ -52,7 +52,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 4.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 4.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 4,
@@ -64,7 +64,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 2.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 5,
@@ -76,7 +76,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 6,
@@ -88,7 +88,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 10.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 10.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 7,
@@ -100,7 +100,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Pilih paket sesuai kebutuhan", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"],
+    fitur: ["Pilih paket sesuai kebutuhan", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"],
     variants: [
       { nama: "1 HP + 1 iPad", harga: 2000 },
       { nama: "1 HP + 1 iPad · Foto Live", harga: 4000 },
@@ -118,7 +118,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 2.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 9,
@@ -130,7 +130,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 1.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 1.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 10,
@@ -142,7 +142,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 2.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 2.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 11,
@@ -154,7 +154,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 12,
@@ -166,7 +166,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 13,
@@ -178,7 +178,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Pilih jumlah P sesuai kebutuhan", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"],
+    fitur: ["Pilih jumlah P sesuai kebutuhan", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"],
     variants: [
       { nama: "100P", harga: 1000 },
       { nama: "200P", harga: 2000 },
@@ -196,13 +196,13 @@ const produkDigital = [
     id: 14,
     slug: "jpm-by-doxy-joki",
     label: "JPM",
-    judul: "JPM by Doxy Joki",
+    judul: "JPM by ELZKII JOKI",
     deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
     harga: 2000,
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Pilih paket Grup / Saluran", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"],
+    fitur: ["Pilih paket Grup / Saluran", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"],
     variants: [
       { nama: "Grup · 10 Member", harga: 2000 },
       { nama: "Grup · 20 Member", harga: 5000 },
@@ -227,7 +227,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 16,
@@ -239,7 +239,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 17,
@@ -251,7 +251,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 5.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
   {
     id: 18,
@@ -263,7 +263,7 @@ const produkDigital = [
     status: "TERSEDIA",
     img: "logo.png",
     directPay: true,
-    fitur: ["Harga Rp 3.000", "Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   }
 ];
 
@@ -336,7 +336,7 @@ function tambahProdukDigital(data) {
     status: data.status || "TERSEDIA",
     img: data.img || "logo.png",
     directPay: true,
-    fitur: data.fitur || ["Bayar langsung QRIS", "Konfirmasi via WhatsApp"]
+    fitur: data.fitur || ["Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   });
 
   localStorage.setItem("voxyy_digital", JSON.stringify(produkDigital));

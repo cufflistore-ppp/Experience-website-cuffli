@@ -1,0 +1,30 @@
+{
+  "rules": {
+    "products": {
+      ".read": "auth != null",
+      "$productId": {
+        ".write": "auth != null && auth.token.email_verified === true && (auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com')"
+      }
+    },
+    "deliveries": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || (auth.token.email_verified === true && (auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com')))",
+        "$deliveryId": {
+          ".write": "auth != null && auth.token.email_verified === true && (auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com')"
+        }
+      }
+    },
+    "userIndex": {
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com')",
+      "$emailKey": {
+        ".write": "auth != null && newData.child('uid').val() === auth.uid && newData.child('email').val() === auth.token.email"
+      }
+    },
+    "orders": {
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com')",
+      "$orderId": {
+        ".write": "auth != null && ((auth.token.email_verified === true && (auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com')) || (!data.exists() && newData.child('uid').val() === auth.uid))"
+      }
+    }
+  }
+}
