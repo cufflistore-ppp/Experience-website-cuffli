@@ -57,6 +57,8 @@
   const api = {
     app, auth, db, ADMINS, CONFIG, GOOGLE_CLIENT_ID, isAdmin,
     loginGoogle,
+    // Alias required by the login page's Google button.
+    signInGoogle: loginGoogle,
     logout: () => auth.signOut(),
     handleRedirectResult,
     onAuthChange: callback => auth.onAuthStateChanged(callback),
