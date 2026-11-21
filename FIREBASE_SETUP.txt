@@ -1,25 +1,26 @@
-ELZKII JOKI - FIREBASE SETUP
+ELZKII JOKI — FIREBASE & GOOGLE AUTH SETUP
 
-1. Firebase Console > Authentication > Sign-in method:
-   - Enable Email/Password
-   - Enable Google
-- Email/password accounts must verify their email before login is accepted
-2. Authentication > Settings > Authorized domains:
-   - Add your deployed domain (example: your-project.vercel.app)
-3. Google Cloud OAuth client:
-   - Authorized JavaScript origins: https://YOUR-DOMAIN
-   - Confirm OAuth client ID matches the one in ej-auth.js.
-4. Realtime Database > Rules:
-   - Open FIREBASE_RULES.json, copy its contents, paste into Rules, then Publish.
-5. Deploy the complete contents of this ZIP together in one directory.
+Firebase project yang digunakan oleh seluruh website:
+- Project ID: elzikiijoki
+- Auth domain: elzikiijoki.firebaseapp.com
+- Realtime Database: https://elzikiijoki-default-rtdb.asia-southeast1.firebasedatabase.app
 
-ADMIN ALLOWLIST:
-- cufflistore@gmail.com
-- hengkipratamahmad@gmail.com
+Google OAuth Web Client ID:
+728120154992-eji5q980k5dbn6ucqri7op334uv7cj01.apps.googleusercontent.com
 
-IMPORTANT:
-- Firebase web apiKey and OAuth client ID are public client identifiers, not admin passwords.
-- Never publish service-account private keys.
-- Rules must be published before production use.
-- Buyer must sign in at least once before admin can send a delivery by email.
-- The buyer sees assigned deliveries in riwayat.html.
+PENGATURAN WAJIB DI FIREBASE CONSOLE:
+1. Authentication > Sign-in method > aktifkan Google.
+2. Authentication > Settings > Authorized domains > tambahkan domain Vercel website.
+3. Authentication > Settings > Authorized domains > pastikan elzikiijoki.firebaseapp.com tersedia.
+4. Google Cloud Console > APIs & Services > Credentials > pilih OAuth Web Client ID di atas.
+5. Authorized JavaScript origins: tambahkan https://DOMAIN-WEBSITE-VERCEL
+6. Pastikan Firebase Authentication menggunakan OAuth client yang sama.
+7. Realtime Database > Rules: gunakan FIREBASE_RULES.json yang sesuai dengan struktur database.
+8. Deploy semua file ZIP ini ke direktori yang sama.
+
+Catatan:
+- ej-auth.js adalah satu sumber konfigurasi dan login ELZKII JOKI.
+- Login Google menggunakan Firebase Authentication (GoogleAuthProvider).
+- Sesi login disimpan menggunakan LOCAL persistence agar tetap masuk saat pindah halaman/refresh.
+- Pada browser Android yang memblokir popup, login otomatis mencoba alur redirect.
+- OAuth Client ID bukan password rahasia, tetapi jangan pernah memasukkan service-account private key ke frontend.

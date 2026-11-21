@@ -13,7 +13,7 @@
     <i class="fa-solid fa-user-shield"></i> PANEL ADMIN - ELZKII JOKI
   </div>
 
-  <div class="page-content">
+  <div class="page-content" id="manualOrderSection"><h3 style="color:#2196f3;margin-bottom:10px">Manajemen Pesanan</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px"><a class="menu-item" href="admin.html?view=joki"><i class="fa-solid fa-bolt"></i><span>JOKI · Antrian & Durasi</span></a><a class="menu-item" href="admin.html?view=digital"><i class="fa-solid fa-box"></i><span>PRODUK DIGITAL · Pengiriman Web</span></a></div><p id="adminViewLabel" style="color:#9bb0c8;font-size:12px;margin-bottom:12px"></p>
     <h3 style="margin-bottom:12px;color:#2196f3;">Tambah Pesanan Manual</h3>
     
     <div class="form-section">
@@ -46,8 +46,8 @@
   </div>
 
 
-  <div class="page-content"><h3 style="color:#d91d80;margin:8px 0 12px">Kelola Produk Home</h3><div class="form-section"><label>Nama Produk</label><input id="ejProdName" placeholder="Nama produk"><label>Harga (angka)</label><input id="ejProdPrice" type="number" min="0" placeholder="5000"><label>URL / nama file gambar (opsional)</label><input id="ejProdImg" placeholder="logo-produk.jpg"><label>Isi produk / kode (opsional)</label><textarea id="ejProdDelivery" placeholder="Teks atau kode produk yang akan diberikan buyer"></textarea><label>Kategori</label><select id="ejProdType"><option value="digital">Produk Digital</option><option value="joki">Jasa Joki</option></select><button class="btn-buat" type="button" onclick="ejAddProduct()">Tambah Produk ke Katalog</button><div id="ejProdList" style="margin-top:12px"></div></div><p style="font-size:12px;color:#98647f">Produk disimpan di Firebase dan tampil pada katalog buyer setelah login.</p></div>
-  <div class="page-content"><h3 style="color:#d91d80;margin:8px 0 12px">Kirim Produk ke Buyer</h3><div class="form-section"><label>Email akun buyer</label><input id="ejDeliveryEmail" type="email" placeholder="email buyer yang sudah login"><label>Judul pengiriman</label><input id="ejDeliveryTitle" placeholder="Contoh: Produk Premium"><label>Link download (opsional)</label><input id="ejDeliveryLink" type="url" placeholder="https://..."><label>Teks / kode produk (opsional)</label><textarea id="ejDeliveryNote" placeholder="Tuliskan produk digital atau instruksi untuk buyer"></textarea><button class="btn-buat" type="button" onclick="ejSendDelivery()">Kirim ke Buyer</button></div><p style="font-size:12px;color:#98647f">Buyer harus pernah login menggunakan email tersebut agar UID akunnya dapat ditemukan.</p></div>
+  <div class="page-content" id="productManagement"><h3 style="color:#d91d80;margin:8px 0 12px">Kelola Produk Home</h3><div class="form-section"><label>Nama Produk</label><input id="ejProdName" placeholder="Nama produk"><label>Harga (angka)</label><input id="ejProdPrice" type="number" min="0" placeholder="5000"><label>URL / nama file gambar (opsional)</label><input id="ejProdImg" placeholder="logo.jpg"><label>Isi produk / kode (opsional)</label><textarea id="ejProdDelivery" placeholder="Teks atau kode produk yang akan diberikan buyer"></textarea><label>Kategori</label><select id="ejProdType"><option value="digital">Produk Digital</option><option value="joki">Jasa Joki</option></select><button class="btn-buat" type="button" onclick="ejAddProduct()">Tambah Produk ke Katalog</button><div id="ejProdList" style="margin-top:12px"></div></div><p style="font-size:12px;color:#98647f">Produk disimpan di Firebase dan tampil pada katalog buyer setelah login.</p></div>
+  <div class="page-content" id="deliveryManagement"><h3 style="color:#d91d80;margin:8px 0 12px">Kirim Produk ke Buyer</h3><div class="form-section"><label>Email akun buyer</label><input id="ejDeliveryEmail" type="email" placeholder="email buyer yang sudah login"><label>Judul pengiriman</label><input id="ejDeliveryTitle" placeholder="Contoh: Produk Premium"><label>Link download (opsional)</label><input id="ejDeliveryLink" type="url" placeholder="https://..."><label>Teks / kode produk (opsional)</label><textarea id="ejDeliveryNote" placeholder="Tuliskan produk digital atau instruksi untuk buyer"></textarea><button class="btn-buat" type="button" onclick="ejSendDelivery()">Kirim ke Buyer</button></div><p style="font-size:12px;color:#98647f">Buyer harus pernah login menggunakan email tersebut agar UID akunnya dapat ditemukan.</p></div>
   <script src="produk-admin.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -58,5 +58,6 @@
   <script src="admin.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script>
+<script src="footer.js"></script>
 </body>
 </html>

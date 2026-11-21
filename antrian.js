@@ -45,13 +45,14 @@ function findOrderByKode(orders, kode) {
 }
 
 function loadAntrianFromOrders(orders) {
-  return (orders || []).map((o, i) => ({
+  const sorted = [...(orders || [])].sort((a,b) => Number(!!(b.prioritas || b.priority)) - Number(!!(a.prioritas || a.priority)) || Number(b.createdAt || 0) - Number(a.createdAt || 0));
+  return sorted.map((o, i) => ({
     no: i + 1,
     nama:
       (o.nama || "Anonim").length > 8
         ? (o.nama || "A").substring(0, 2) + "********"
         : o.nama || "Anonim",
-    jenis: (o.paket || "Joki Kontak") + " · " + (o.status || "Belum Bayar"),
+    jenis: (o.paket || "Joki Kontak") + ((o.prioritas || o.priority) ? " · ⚡ PRIORITAS" : "") + " · " + (o.status || "Belum Bayar"),
     status:
       o.status === "Sukses" || o.status === "SELESAI"
         ? "SELESAI"

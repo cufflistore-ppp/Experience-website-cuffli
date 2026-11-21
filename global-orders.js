@@ -139,11 +139,11 @@ function initFirebase() {
           } catch (e) {}
         });
       },
-      (err) => console.error("[Voxyy] DB:", err)
+      (err) => console.error("[ELZKII] DB:", err)
     );
     return true;
   } catch (e) {
-    console.error("[Voxyy] init:", e);
+    console.error("[ELZKII] init:", e);
     return false;
   }
 }

@@ -91,7 +91,7 @@
             ${paket.fitur.map(f => `<li><i class="fa-solid fa-circle-check"></i> ${f}</li>`).join("")}
           </ul>
           <div class="harga" style="font-size:26px;">${formatRp(paket.harga)}</div>
-          <a href="pesan.html?id=${paket.id}" class="btn-pesan" style="display:block;text-align:center;text-decoration:none;margin-top:12px;">
+          <a href="pesan.html?type=joki&id=${paket.id}&hari=${paket.hari || paket.id}&total=${paket.harga}&paket=${encodeURIComponent(paket.judul)}" class="btn-pesan" style="display:block;text-align:center;text-decoration:none;margin-top:12px;">
             Pesan Sekarang
           </a>
         </div>
@@ -100,8 +100,8 @@
           <h4>Cara order</h4>
           <p>1. Klik <b>Pesan Sekarang</b><br>
           2. Isi nama store & nomor WhatsApp<br>
-          3. Bayar via QRIS<br>
-          4. Konfirmasi pembayaran<br>
+          3. Kirim order ke WhatsApp admin<br>
+          4. Admin mengonfirmasi pesanan<br>
           5. Pantau status di Antrian</p>
         </div>
       `;
@@ -114,5 +114,6 @@
 <script src="music.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script>
+<script src="footer.js"></script>
 </body>
 </html>

@@ -944,3 +944,5 @@ body{background:var(--ej-bg)!important;background-image:radial-gradient(ellipse 
 input,select,textarea{background:#fff!important;color:#48263a!important;border:1px solid #edb6d2!important}
 .bottom-nav{background:#fff!important;border-top:1px solid #f2c3da!important;box-shadow:0 -4px 16px #d94b8d15!important}.nav-item{color:#9c6c85!important}.nav-item.active{color:#e21b83!important}
 .top-notif{background:#fff0f7!important;color:#6a3150!important;border-color:#f3c3db!important}
+
+.site-footer{margin:28px 14px 96px;padding:22px 4px 12px;border-top:1px solid #1a2740;color:#71819a;font-size:clamp(12px,3vw,16px);line-height:1.8;text-align:left}.site-footer a{color:#438cff;font-weight:800;text-decoration:none}.site-footer a:hover{text-decoration:underline}.priority-tag{display:inline-flex;background:#4a2c08;color:#ffd166;border:1px solid #a66b16;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:800}

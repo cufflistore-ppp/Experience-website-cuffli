@@ -1,0 +1,1 @@
+(()=>{if(document.querySelector('.site-footer'))return;const f=document.createElement('footer');f.className='site-footer';f.innerHTML='<div>Copyright © 2026 VOXY MARKET. All rights reserved.</div><div>Created by <a href="https://dinailongdigital.vercel.app" target="_blank" rel="noopener">dinailongdigital.vercel.app</a></div>';document.body.appendChild(f);})();

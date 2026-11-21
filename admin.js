@@ -31,7 +31,14 @@ async function loadOrders() {
 
   list.dataset.loaded = "1";
 
-  const modeHint = '<p style="color:#66bb6a;font-size:12px;margin-bottom:10px;">📋 Panel Admin - Menampilkan seluruh data pesanan & bukti TF</p>';
+  const viewNow = new URLSearchParams(location.search).get("view") || "all";
+  const modeHint = `<p style="color:#66bb6a;font-size:12px;margin-bottom:10px;">📋 Panel ${viewNow === "joki" ? "JOKI" : viewNow === "digital" ? "PRODUK DIGITAL" : "SEMUA PESANAN"} · Data tersinkron Firebase</p>`;
+  const productManagementEarly = document.getElementById("productManagement");
+  const deliveryManagementEarly = document.getElementById("deliveryManagement");
+  if (productManagementEarly) productManagementEarly.style.display = viewNow === "joki" ? "none" : "block";
+  if (deliveryManagementEarly) deliveryManagementEarly.style.display = viewNow === "joki" ? "none" : "block";
+  const labelEarly = document.getElementById("adminViewLabel");
+  if (labelEarly) labelEarly.textContent = viewNow === "joki" ? "Menampilkan pesanan JOKI saja" : viewNow === "digital" ? "Menampilkan pesanan PRODUK DIGITAL saja" : "Menampilkan semua pesanan";
 
   if (!orders || orders.length === 0) {
     list.innerHTML =
@@ -40,9 +47,18 @@ async function loadOrders() {
     return;
   }
 
+  const view = new URLSearchParams(location.search).get("view") || "all";
+  const productManagement = document.getElementById("productManagement");
+  const deliveryManagement = document.getElementById("deliveryManagement");
+  if (productManagement) productManagement.style.display = view === "joki" ? "none" : "block";
+  if (deliveryManagement) deliveryManagement.style.display = view === "joki" ? "none" : "block";
+  const filteredOrders = orders.filter(o => view === "all" || (view === "joki" ? (o.jenis === "joki" || String(o.jenisOrder||"").toLowerCase().includes("joki")) : (o.jenis === "digital" || String(o.jenisOrder||"").toLowerCase().includes("digital"))));
+  const label = document.getElementById("adminViewLabel");
+  if(label) label.textContent = view === "joki" ? "Menampilkan pesanan JOKI saja" : view === "digital" ? "Menampilkan pesanan PRODUK DIGITAL saja" : "Menampilkan semua pesanan";
+  if (!filteredOrders.length) { list.innerHTML = modeHint + "<p style='color:#aaa;text-align:center;padding:20px;'>Belum ada pesanan pada kategori ini.</p>"; return; }
   list.innerHTML =
     modeHint +
-    orders
+    filteredOrders
       .map((o, i) => {
         let borderClass = "";
         if (o.status === "Sudah Bayar" || o.status === "Sukses") borderClass = "paid";
@@ -61,6 +77,11 @@ async function loadOrders() {
         
         // Ambil format joki / catatan
         const formatVal = o.formatJoki || o.catatan || "-";
+        const orderKind = o.jenis === "joki" || String(o.jenisOrder||"").toLowerCase().includes("joki") ? "JOKI" : "PRODUK DIGITAL";
+        const priorityHtml = o.prioritas || o.priority ? '<span class="priority-tag">⚡ PRIORITAS ANTRIAN</span>' : '';
+        const isJokiOrder = o.jenis === "joki" || String(o.jenisOrder||"").toLowerCase().includes("joki");
+        const durationHtml = isJokiOrder && (o.hari || o.durasiHari) ? `<br>🗓️ <b>Durasi Joki: ${escapeHtml(o.hari || o.durasiHari)} hari</b>` : "";
+        const formatHtml = isJokiOrder ? `<div style="margin-top:8px;background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;border-left:3px solid #2196f3"><span style="font-size:12px;color:#aaa">📝 Format Joki:</span><pre style="white-space:pre-wrap;font-family:inherit;margin:4px 0 6px;font-size:13px;color:#fff">${escapeHtml(formatVal)}</pre><button type="button" onclick="salinFormatJokiDariElement(this)" data-format="${escapeHtmlAttr(formatVal)}" style="background:#2196f3;color:#fff;border:0;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold"><i class="fa-solid fa-copy"></i> Salin Format</button></div>` : "";
         
         // Deteksi bukti TF dari berbagai kemungkinan nama properti (termasuk Base64 dari pembayaran.html)
         const buktiVal = o.buktiTF || o.buktiTf || o.bukti || o.buktiTransfer || o.paymentProof || o.image || o.foto || "";
@@ -87,24 +108,15 @@ async function loadOrders() {
         </span>
       </div>
       <div style="font-size:13px;line-height:1.6;">
+        <b>${orderKind}</b> ${priorityHtml}<br>
         👤 <b>${escapeHtml(o.nama || "-")}</b><br>
+        ${o.email ? `✉️ ${escapeHtml(o.email)}<br>` : ""}
         📱 ${escapeHtml(o.wa || o.whatsapp || "-")}<br>
         💰 ${escapeHtml(o.total || "-")}<br>
         📦 ${escapeHtml(o.paket || "Joki Kontak")}<br>
+        ${durationHtml}
         
-        <!-- Format Joki dengan Tombol Salin -->
-        <div style="margin-top:8px;background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;border-left:3px solid #2196f3;">
-          <span style="font-size:12px;color:#aaa;">📝 Format / Detail Joki:</span><br>
-          <pre style="white-space:pre-wrap;font-family:inherit;margin:4px 0 6px 0;font-size:13px;color:#fff;">${escapeHtml(formatVal)}</pre>
-          <button type="button" onclick="salinFormatJokiDariElement(this)" data-format="${escapeHtmlAttr(formatVal)}" style="background:#2196f3;color:#fff;border:none;padding:5px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;">
-            <i class="fa-solid fa-copy"></i> Salin Format
-          </button>
-        </div>
-
-        <!-- Bukti Transfer -->
-        <div style="margin-top:8px;">
-          ${buktiHTML}
-        </div>
+        ${formatHtml}
 
         <div style="margin-top:8px;">
           ⏰ <small style="color:#888;">${escapeHtml(o.waktu || "-")}</small>

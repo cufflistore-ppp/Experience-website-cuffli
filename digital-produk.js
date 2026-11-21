@@ -1,32 +1,15 @@
 const DIGITAL_CATALOG_VER = "6";
 
 const produkDigital = [
-{
-  id: 19,
-  slug: "jasa-edit-video-animasi-anime",
-  label: "JASA",
-  judul: "Jasa Edit Video Animasi Anime",
-  deskripsi: "Jasa edit video animasi anime. Bayar QRIS, lalu konfirmasi pesanan via WhatsApp.",
-  harga: 5000,
-  status: "TERSEDIA",
-  img: "logo.png",
-  directPay: true,
-  fitur: [
-    "Harga Rp 5.000",
-    "Jasa edit video animasi anime",
-    "Order melalui WhatsApp",
-    "Konfirmasi via WhatsApp"
-  ]
-},
   {
     id: 1,
     slug: "jasa-buk-pernomor",
     label: "JASA",
     judul: "Jasa Buk Pernomor",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 1000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 1.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -35,10 +18,10 @@ const produkDigital = [
     slug: "logo-mascot",
     label: "LOGO",
     judul: "Logo Mascot",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 3000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -47,10 +30,10 @@ const produkDigital = [
     slug: "logo-muka",
     label: "LOGO",
     judul: "Logo Muka",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 4000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 4.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -59,10 +42,10 @@ const produkDigital = [
     slug: "logo-faktor-ff",
     label: "LOGO",
     judul: "Logo Faktor FF",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 2000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 2.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -71,10 +54,10 @@ const produkDigital = [
     slug: "jasa-web-no-antrian",
     label: "JASA",
     judul: "Jasa Buat Web No Antrian",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -83,10 +66,10 @@ const produkDigital = [
     slug: "jasa-web-ada-antrian",
     label: "JASA",
     judul: "Jasa Buat Web Ada Antrian",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 10000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 10.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -95,10 +78,10 @@ const produkDigital = [
     slug: "jasa-buat-fs",
     label: "JASA",
     judul: "Jasa Buat FS",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 2000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Pilih paket sesuai kebutuhan", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"],
     variants: [
@@ -113,10 +96,10 @@ const produkDigital = [
     slug: "jasa-logo-testimoni",
     label: "JASA",
     judul: "Jasa Bikin Logo Testimoni",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 2000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 2.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -125,10 +108,10 @@ const produkDigital = [
     slug: "apk-auto-sv",
     label: "APK",
     judul: "APK Auto SV",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 1000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 1.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -137,10 +120,10 @@ const produkDigital = [
     slug: "apk-pixellab",
     label: "APK",
     judul: "APK PixelLab",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 2000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 2.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -149,10 +132,10 @@ const produkDigital = [
     slug: "web-suntik-all-sosmed",
     label: "WEB",
     judul: "Web Suntik All Sosmed",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 3000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -161,10 +144,10 @@ const produkDigital = [
     slug: "all-nokos-fresh",
     label: "NOKOS",
     judul: "All Nokos Fresh",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -173,10 +156,10 @@ const produkDigital = [
     slug: "suntik-saluran",
     label: "SUNTIK",
     judul: "Suntik Saluran",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 1000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Pilih jumlah P sesuai kebutuhan", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"],
     variants: [
@@ -197,10 +180,10 @@ const produkDigital = [
     slug: "jpm-by-doxy-joki",
     label: "JPM",
     judul: "JPM by ELZKII JOKI",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 2000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Pilih paket Grup / Saluran", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"],
     variants: [
@@ -222,10 +205,10 @@ const produkDigital = [
     slug: "murid-web",
     label: "MURID",
     judul: "Murid Web",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -234,10 +217,10 @@ const produkDigital = [
     slug: "murid-logo",
     label: "MURID",
     judul: "Murid Logo",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -246,10 +229,10 @@ const produkDigital = [
     slug: "murid-nokos",
     label: "MURID",
     judul: "Murid Nokos",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 5000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 5.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   },
@@ -258,10 +241,10 @@ const produkDigital = [
     slug: "mursun-ful-tutor",
     label: "MURID",
     judul: "Mursun Ful Tutor",
-    deskripsi: "Langsung bayar QRIS, setelah transfer konfirmasi via WhatsApp.",
+    deskripsi: "Order melalui WhatsApp admin terlebih dahulu.",
     harga: 3000,
     status: "TERSEDIA",
-    img: "logo.png",
+    img: "logo.jpg",
     directPay: true,
     fitur: ["Harga Rp 3.000", "Order melalui WhatsApp", "Konfirmasi via WhatsApp"]
   }
@@ -308,7 +291,7 @@ function renderDigitalList() {
       ? `<div class="variant-grid">` + variants.map(v =>
           `<a href="${payUrl(p.judul + " · " + v.nama, v.harga)}" class="btn-pesan variant-btn">${v.nama}<small>${formatRpDigital(v.harga)}</small></a>`
         ).join("") + `</div>`
-      : `<a href="${payUrl(p.judul, p.harga)}" class="btn-pesan">Bayar Sekarang</a>`;
+      : `<a href="${payUrl(p.judul, p.harga)}" class="btn-pesan">Pesan via WhatsApp</a>`;
 
     return `
     <div class="paket-card">
