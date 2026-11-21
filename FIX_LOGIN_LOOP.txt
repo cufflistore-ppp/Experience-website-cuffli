@@ -1,0 +1,19 @@
+PERBAIKAN ELZKII JOKI
+
+- Menghapus pemeriksaan sessionStorage "doxy_entered" yang tidak pernah diset.
+- Pemeriksaan tersebut memaksa home.html kembali ke index.html, sementara
+  listener Firebase di index.html mengarahkan pengguna terautentikasi ke
+  home.html lagi. Akibatnya terjadi loop Login <-> Home.
+- Autentikasi dan desain halaman lainnya tidak diubah.
+
+Setelah deploy, tes:
+1. Login dengan akun Firebase yang sudah terverifikasi.
+2. Pastikan masuk ke home.html.
+3. Refresh halaman Home.
+4. Buka menu lain lalu kembali ke Home.
+5. Logout lalu pastikan kembali ke Login.
+
+Catatan:
+- Google Sign-In di production juga membutuhkan domain Vercel terdaftar pada
+  Firebase Authentication > Settings > Authorized domains dan OAuth
+  Authorized JavaScript origins.

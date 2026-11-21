@@ -183,15 +183,9 @@
   <script src="music.js"></script>
   <script>
     (function () {
-      try {
-        if (window.self === window.top) {
-          if (sessionStorage.getItem("doxy_entered") !== "1") {
-            window.location.replace("index.html");
-            return;
-          }
-        }
-      } catch (e) {}
-
+      // Auth guard dikelola oleh ej-auth.js. Jangan memakai flag sessionStorage
+      // doxy_entered karena flag ini tidak pernah dibuat dan menyebabkan loop
+      // home.html -> index.html -> home.html setelah login.
       function updateUserChip() {
         try {
           if (typeof firebase === "undefined" || !firebase.apps.length) return;
