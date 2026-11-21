@@ -182,14 +182,9 @@
   <script src="music.js"></script>
   <script>
     (function () {
-      try {
-        if (window.self === window.top) {
-          if (sessionStorage.getItem("doxy_entered") !== "1") {
-            window.location.replace("index.html");
-            return;
-          }
-        }
-      } catch (e) {}
+      // Akses halaman utama dilindungi oleh ej-auth.js (Firebase Auth).
+      // Jangan memakai flag sessionStorage: flag itu membuat pengguna yang sudah login
+      // dilempar kembali ke halaman login setiap kali membuka home secara langsung.
 
       function updateUserChip() {
         try {

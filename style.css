@@ -946,3 +946,27 @@ input,select,textarea{background:#fff!important;color:#48263a!important;border:1
 .top-notif{background:#fff0f7!important;color:#6a3150!important;border-color:#f3c3db!important}
 
 .site-footer{margin:28px 14px 96px;padding:22px 4px 12px;border-top:1px solid #1a2740;color:#71819a;font-size:clamp(12px,3vw,16px);line-height:1.8;text-align:left}.site-footer a{color:#438cff;font-weight:800;text-decoration:none}.site-footer a:hover{text-decoration:underline}.priority-tag{display:inline-flex;background:#4a2c08;color:#ffd166;border:1px solid #a66b16;border-radius:20px;padding:3px 9px;font-size:11px;font-weight:800}
+
+
+/* ELZKII JOKI — sentuhan bawah konsisten putih & pink */
+.bottom-nav {
+  background: #fff7fb !important;
+  border-top: 1px solid #f3bfd9 !important;
+  box-shadow: 0 -5px 18px rgba(217, 43, 132, .12) !important;
+}
+.nav-item {
+  color: #a45b80 !important;
+}
+.nav-item.active {
+  color: #fff !important;
+  background: linear-gradient(135deg, #f56ab0, #d91e80) !important;
+  box-shadow: 0 3px 12px rgba(217, 30, 128, .25) !important;
+}
+.nav-item.active i { color: #fff !important; }
+.site-footer {
+  background: #fff7fb;
+  color: #87516e !important;
+  border-top: 1px solid #f3bfd9 !important;
+  border-radius: 14px 14px 0 0;
+}
+.site-footer a { color: #d91e80 !important; }
