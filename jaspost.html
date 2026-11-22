@@ -1,53 +1,134 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+  <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jaspost / PM Admin - VOXY MARKET</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Jasa Post — ELZKII JOKI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="maintenance-gate.js"></script>
+  <style>
+    .jp-wrap{max-width:720px;margin:0 auto;padding-bottom:100px}
+    .jp-card{background:#151a22;border:1px solid #293b57;border-radius:14px;padding:16px;margin-bottom:14px}
+    .jp-card h3{margin:0 0 10px;color:#fff}
+    .jp-notice{background:#2a2200;border:1px solid #e21b8355;border-radius:10px;padding:12px;color:#eee;font-size:12px;line-height:1.55;margin-bottom:14px}
+    .jp-notice b{color:#e21b83}
+    .jp-label{display:block;color:#e9eef5;font-size:13px;font-weight:700;margin:12px 0 7px}
+    .jp-input,.jp-select{width:100%;box-sizing:border-box;padding:13px;border-radius:10px;border:1px solid #293b57;background:#10151d;color:#fff;outline:none}
+    .jp-input:focus,.jp-select:focus{border-color:#e21b83}
+    .jp-hint{font-size:11px;color:#9bb0c8;margin:5px 0 8px}
+    .jp-format{white-space:pre-wrap;background:#10151d;border:1px solid #293b57;border-radius:10px;padding:13px;color:#e9eef5;font:13px/1.65 monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;pointer-events:none;min-height:230px}
+    .jp-photo{width:100%;max-height:300px;object-fit:contain;border-radius:10px;margin-top:10px;display:none;background:#10151d;border:1px solid #293b57}
+    .jp-submit{width:100%;border:0;border-radius:11px;padding:14px;background:#e21b83;color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+    .jp-submit:disabled{opacity:.6;cursor:wait}
+    .jp-free{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#17351f;color:#7ee69b;font-size:11px;font-weight:800}
+  </style>
 </head>
 <body>
-  <header class="app-header">
-    <button class="icon-btn" onclick="location.href='home.html'"><i data-lucide="arrow-left"></i></button>
-    <div class="logo-area"><span>Jaspost / PM</span></div>
-    <div style="width:40px"></div>
-  </header>
-  <main class="page">
-    <div class="pay-card">
-      <h2 style="margin-bottom:8px">Jasa Post / PM Admin</h2>
-      <p style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:16px">
-        Layanan jaspost tidak lewat paket otomatis. Hubungi admin langsung untuk order &amp; negosiasi.
-      </p>
-      <button type="button" class="btn" style="width:100%;margin-bottom:10px" id="btnChatWeb">
-        Chat via Website
-      </button>
-      <button type="button" class="btn btn-wa" style="width:100%" id="btnChatWA">
-        Chat via WhatsApp
-      </button>
+<header class="header">
+  <div class="brand">
+    <img src="logo.jpg" alt="ELZKII JOKI" class="logo">
+    <div><h1>ELZKII JOKI <i class="fa-solid fa-circle-check verified"></i></h1><p>Jasa Post</p></div>
+  </div>
+  <div class="header-right"></div>
+</header>
+
+<div class="page-content jp-wrap">
+  <a href="home.html" class="back"><i class="fa-solid fa-arrow-left"></i> Kembali</a>
+
+  <div class="order-header" style="margin-bottom:16px;">
+    <img src="logo.jpg" alt="Logo ELZKII JOKI" class="order-logo">
+    <div>
+      <h3>Jasa Post ELZKII🫣</h3>
+      <p>JASPOST · <span class="tag">Gratis</span> · <span class="tag aman">Aman</span></p>
     </div>
-  </main>
-  <nav class="bottom-nav">
-    <a href="home.html"><i data-lucide="home"></i>Home</a>
-    <a href="riwayat.html"><i data-lucide="receipt"></i>Transaksi</a>
-    <a href="akun.html"><i data-lucide="user"></i>Akun</a>
-  </nav>
-  <script src="global-orders.js"></script>
-  <script>
-    lucide.createIcons();
-    var waAdmin = "";
-    VOXY.requireAuth().then(function () {
-      VOXY.getSettings().then(function (s) { waAdmin = (s && s.waAdmin) || ""; });
-    });
-    document.getElementById("btnChatWeb").onclick = function () { location.href = "chat.html"; };
-    document.getElementById("btnChatWA").onclick = function () {
-      VOXY.bukaWhatsApp(waAdmin, "Halo admin VOXY, saya mau order Jaspost / PM:");
-    };
-  </script>
-  <script src="music-player.js"></script>
+  </div>
+
+  <div class="jp-card">
+    <div class="jp-notice">
+      <b>JASA POST ELZKII🫣</b><br>
+      Jasa post <strong>GRATIS</strong>. Tidak ada pembayaran. Isi data barang dan upload foto, lalu kirim konfirmasi. Data akan masuk ke <strong>Panel Admin → Jasa Post</strong>.
+    </div>
+
+    <label class="jp-label" for="jp_nama_produk">Nama Barang</label>
+    <input class="jp-input" id="jp_nama_produk" type="text" placeholder="Nama barang yang mau di-post" autocomplete="off">
+
+    <label class="jp-label" for="jp_harga">Harga Barang</label>
+    <input class="jp-input" id="jp_harga" type="text" placeholder="Harga barang untuk format posting" autocomplete="off">
+
+    <label class="jp-label" for="jp_jual_beli">Jual / Beli</label>
+    <select class="jp-select" id="jp_jual_beli">
+      <option value="">Pilih</option><option value="JUAL">JUAL</option><option value="BELI">BELI</option>
+    </select>
+
+    <label class="jp-label" for="jp_nomer">No Penjual</label>
+    <input class="jp-input" id="jp_nomer" type="tel" placeholder="08xxxxxxxxxx / 62xxxxxxxxxx" autocomplete="off">
+
+    <label class="jp-label">Format Jasa Post</label>
+    <p class="jp-hint">Format otomatis mengikuti data yang kamu isi. Format ini tidak bisa diedit atau disalin dari halaman ini.</p>
+    <div id="jp_format_preview" class="jp-format" aria-label="Format Jasa Post"></div>
+
+    <label class="jp-label" for="fotoAkun">Foto barang / akun (wajib) 📷</label>
+    <p class="jp-hint">Foto akan dikirim bersama format ke Panel Admin.</p>
+    <input class="jp-input" id="fotoAkun" type="file" accept="image/*">
+    <img id="fotoPreview" class="jp-photo" alt="Preview foto">
+  </div>
+
+  <div class="jp-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;">
+      <h3 style="margin:0">Konfirmasi Jasa Post</h3><span class="jp-free">GRATIS</span>
+    </div>
+    <p style="font-size:12px;color:#9bb0c8;line-height:1.5;margin-top:0;">Tidak ada checkout, tidak ada pembayaran, dan tidak diarahkan ke Joki. Setelah dikirim, kamu tetap berada di halaman Jasa Post.</p>
+    <button class="jp-submit" id="btnSubmitJaspost" type="button">Konfirmasi Jasa Post</button>
+  </div>
+</div>
+
+<nav class="bottom-nav nav-7">
+  <a href="riwayat.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a>
+  <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+  <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+  <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
+  <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+  <a href="tentang.html" class="nav-item"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+  <a href="akun.html" class="nav-item"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+</nav>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="global-orders.js"></script>
+<script src="global-jaspost.js"></script>
+<script src="footer.js"></script>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  function formatJaspost(namaBarang,harga,jualBeli,noPenjual){
+    return `FORMAT JASPOST ELZKII🫣\n\nNAMA BARANG: ${namaBarang||""}\nHARGA: ${harga||""}\nJUAL/BELI: ${jualBeli||""}\nMC: ELZKII STR\nNO PENJUAL: ${noPenjual||""}\n\nNOTE: WA ADMIN CUMAN ADA 1 DANA ADMIN TIDAK PERNAH OPEN OWN ATAU PT\n\n#PROSESAMANJIKAPAKAIMC\n\nTERIMAKASIH`;
+  }
+  function updatePreview(){
+    $("jp_format_preview").textContent=formatJaspost($("jp_nama_produk").value.trim(),$("jp_harga").value.trim(),$("jp_jual_beli").value,$("jp_nomer").value.trim());
+  }
+  ["jp_nama_produk","jp_harga","jp_jual_beli","jp_nomer"].forEach(id=>{ $(id).addEventListener("input",updatePreview); $(id).addEventListener("change",updatePreview); });
+  $("fotoAkun").addEventListener("change",function(){const f=this.files?.[0],p=$("fotoPreview");if(f){p.src=URL.createObjectURL(f);p.style.display="block";}else p.style.display="none";});
+  function compress(file,max=1280,quality=.78){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s);}const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);resolve(c.toDataURL("image/jpeg",quality));};img.onerror=reject;img.src=e.target.result;};r.onerror=reject;r.readAsDataURL(file);});}
+  $("btnSubmitJaspost").addEventListener("click",async function(){
+    const nama=$("jp_nama_produk").value.trim(), harga=$("jp_harga").value.trim(), jb=$("jp_jual_beli").value, nomor=$("jp_nomer").value.trim(), foto=$("fotoAkun").files?.[0];
+    if(!nama||!harga||!jb||!nomor||!foto){alert("Lengkapi nama barang, harga, jual/beli, nomor penjual, dan foto.");return;}
+    if(nomor.replace(/\D/g,"").length<8){alert("Nomor penjual belum valid.");return;}
+    const btn=this;btn.disabled=true;btn.textContent="Mengirim Jasa Post...";
+    try{
+      const uid=firebase.auth?.currentUser?.uid||"";
+      if(!uid){alert("Silakan login terlebih dahulu agar Jasa Post bisa dikirim.");btn.disabled=false;btn.textContent="Konfirmasi Jasa Post";return;}
+      const kode="JP-"+Date.now().toString().slice(-10), format=formatJaspost(nama,harga,jb,nomor), photoData=await compress(foto);
+      const item={kode,namaBarang:nama,harga,jualBeli:jb,mc:"ELZKII STR",noPenjual:nomor,format,photoData,photoName:foto.name||`jaspost-${kode}.jpg`,status:"Menunggu",createdAt:Date.now(),waktu:new Date().toLocaleString("id-ID"),uid,email:firebase.auth.currentUser.email||""};
+      const result=await window.ElzkiiJaspost.add(item);if(!result?.ok)throw new Error(result.error||"Gagal menyimpan");
+      alert("Jasa Post berhasil dikirim. Tunggu konfirmasi admin.");
+      $("jp_nama_produk").value="";$("jp_harga").value="";$("jp_jual_beli").value="";$("jp_nomer").value="";$("fotoAkun").value="";$("fotoPreview").style.display="none";updatePreview();
+    }catch(e){console.error(e);alert("Gagal mengirim Jasa Post. Coba lagi.");}
+    btn.disabled=false;btn.textContent="Konfirmasi Jasa Post";
+  });
+  updatePreview();
+})();
+</script>
 </body>
 </html>
