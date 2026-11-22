@@ -28,7 +28,7 @@
 
   const isAdmin = user =>
     !!user && user.emailVerified === true &&
-    ADMINS.includes(String(user.email || "").toLowerCase());
+    ADMINS.includes(String(user.email || "").trim().toLowerCase());
 
   async function loginGoogle() {
     await persistenceReady;
