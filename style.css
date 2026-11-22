@@ -1069,3 +1069,18 @@ body :is(.badge,.tag,.status,.top-notif,.notif,.alert){background:#fff0f7!import
 
 /* Produk Digital memakai grid katalog yang sama dengan Home */
 #digitalList.produk-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+
+/* ===== FIX: JASA POST + JOKI WHITE/PINK ===== */
+.jp-card{background:#fff!important;color:#71304f!important;border-color:#f3c5dd!important;box-shadow:0 5px 16px rgba(226,27,131,.08)!important}
+.jp-card h3{color:#b91568!important}
+.jp-notice{background:#fff0f7!important;color:#71304f!important;border-color:#f3c5dd!important}
+.jp-label{color:#71304f!important}
+.jp-input,.jp-select{background:#fff!important;color:#48263a!important;border-color:#edb6d2!important}
+.jp-format{background:#fff7fb!important;color:#71304f!important;border-color:#f3c5dd!important}
+.jp-photo{background:#fff7fb!important;border-color:#f3c5dd!important}
+.jp-hint{color:#a66b88!important}
+.warning-box,.warning-box.red{background:#fff0f7!important;border:1px solid #e21b83!important;color:#b91568!important;box-shadow:0 4px 12px rgba(226,27,131,.10)!important}
+.warning-box i{color:#e21b83!important}
+.marquee{background:#fff0f7!important}
+.marquee span{color:#d71920!important;text-shadow:0 0 1px rgba(215,25,32,.25)!important;font-weight:900!important}

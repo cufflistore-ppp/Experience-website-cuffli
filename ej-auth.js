@@ -68,6 +68,15 @@
   };
   window.ELZKIIAuth = api;
   // Legacy global used by the existing order scripts; keep only ELZKII naming for auth.
+  api.whenReady = function(timeout=5000){
+    return new Promise(resolve=>{
+      if (auth.currentUser) return resolve(auth.currentUser);
+      let done=false;
+      const finish=u=>{if(done)return;done=true;try{unsub&&unsub();}catch(e){}resolve(u||null)};
+      const unsub=auth.onAuthStateChanged(u=>finish(u));
+      setTimeout(()=>finish(auth.currentUser), timeout);
+    });
+  };
   window.EJ = api;
 
   const page = (location.pathname.split("/").pop() || "index.html").toLowerCase();

@@ -9,16 +9,16 @@
   <link rel="stylesheet" href="style.css">
   <style>
     .jp-wrap{max-width:720px;margin:0 auto;padding-bottom:100px}
-    .jp-card{background:#151a22;border:1px solid #293b57;border-radius:14px;padding:16px;margin-bottom:14px}
-    .jp-card h3{margin:0 0 10px;color:#fff}
-    .jp-notice{background:#2a2200;border:1px solid #e21b8355;border-radius:10px;padding:12px;color:#eee;font-size:12px;line-height:1.55;margin-bottom:14px}
+    .jp-card{background:#fff;border:1px solid #f3c5dd;border-radius:14px;padding:16px;margin-bottom:14px}
+    .jp-card h3{margin:0 0 10px;color:#b91568}
+    .jp-notice{background:#fff0f7;border:1px solid #f3c5dd;border-radius:10px;padding:12px;color:#71304f;font-size:12px;line-height:1.55;margin-bottom:14px}
     .jp-notice b{color:#e21b83}
-    .jp-label{display:block;color:#e9eef5;font-size:13px;font-weight:700;margin:12px 0 7px}
-    .jp-input,.jp-select{width:100%;box-sizing:border-box;padding:13px;border-radius:10px;border:1px solid #293b57;background:#10151d;color:#fff;outline:none}
+    .jp-label{display:block;color:#71304f;font-size:13px;font-weight:700;margin:12px 0 7px}
+    .jp-input,.jp-select{width:100%;box-sizing:border-box;padding:13px;border-radius:10px;border:1px solid #293b57;background:#fff;color:#48263a;outline:none}
     .jp-input:focus,.jp-select:focus{border-color:#e21b83}
-    .jp-hint{font-size:11px;color:#9bb0c8;margin:5px 0 8px}
-    .jp-format{white-space:pre-wrap;background:#10151d;border:1px solid #293b57;border-radius:10px;padding:13px;color:#e9eef5;font:13px/1.65 monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;pointer-events:none;min-height:230px}
-    .jp-photo{width:100%;max-height:300px;object-fit:contain;border-radius:10px;margin-top:10px;display:none;background:#10151d;border:1px solid #293b57}
+    .jp-hint{font-size:11px;color:#a66b88;margin:5px 0 8px}
+    .jp-format{white-space:pre-wrap;background:#fff7fb;border:1px solid #f3c5dd;border-radius:10px;padding:13px;color:#71304f;font:13px/1.65 monospace;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;pointer-events:none;min-height:230px}
+    .jp-photo{width:100%;max-height:300px;object-fit:contain;border-radius:10px;margin-top:10px;display:none;background:#fff7fb;border:1px solid #f3c5dd}
     .jp-submit{width:100%;border:0;border-radius:11px;padding:14px;background:#e21b83;color:#fff;font-weight:800;font-size:14px;cursor:pointer}
     .jp-submit:disabled{opacity:.6;cursor:wait}
     .jp-free{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#17351f;color:#7ee69b;font-size:11px;font-weight:800}
@@ -78,7 +78,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;">
       <h3 style="margin:0">Konfirmasi Jasa Post</h3><span class="jp-free">GRATIS</span>
     </div>
-    <p style="font-size:12px;color:#9bb0c8;line-height:1.5;margin-top:0;">Tidak ada checkout, tidak ada pembayaran, dan tidak diarahkan ke Joki. Setelah dikirim, kamu tetap berada di halaman Jasa Post.</p>
+    <p style="font-size:12px;color:#a66b88;line-height:1.5;margin-top:0;">Tidak ada checkout, tidak ada pembayaran, dan tidak diarahkan ke Joki. Setelah dikirim, kamu tetap berada di halaman Jasa Post.</p>
     <button class="jp-submit" id="btnSubmitJaspost" type="button">Konfirmasi Jasa Post</button>
   </div>
 </div>
@@ -96,6 +96,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="ej-auth.js"></script>
 <script src="global-orders.js"></script>
 <script src="global-jaspost.js"></script>
 <script src="footer.js"></script>
@@ -117,10 +118,11 @@
     if(nomor.replace(/\D/g,"").length<8){alert("Nomor penjual belum valid.");return;}
     const btn=this;btn.disabled=true;btn.textContent="Mengirim Jasa Post...";
     try{
-      const uid=firebase.auth?.currentUser?.uid||"";
-      if(!uid){alert("Silakan login terlebih dahulu agar Jasa Post bisa dikirim.");btn.disabled=false;btn.textContent="Konfirmasi Jasa Post";return;}
+      const user=await (window.EJ?.whenReady ? window.EJ.whenReady() : Promise.resolve(firebase.auth?.currentUser));
+      const uid=user?.uid||firebase.auth?.currentUser?.uid||"";
+      if(!uid){alert("Sesi login belum siap. Tunggu sebentar lalu coba lagi.");btn.disabled=false;btn.textContent="Konfirmasi Jasa Post";return;}
       const kode="JP-"+Date.now().toString().slice(-10), format=formatJaspost(nama,harga,jb,nomor), photoData=await compress(foto);
-      const item={kode,namaBarang:nama,harga,jualBeli:jb,mc:"ELZKII STR",noPenjual:nomor,format,photoData,photoName:foto.name||`jaspost-${kode}.jpg`,status:"Menunggu",createdAt:Date.now(),waktu:new Date().toLocaleString("id-ID"),uid,email:firebase.auth.currentUser.email||""};
+      const item={kode,namaBarang:nama,harga,jualBeli:jb,mc:"ELZKII STR",noPenjual:nomor,format,photoData,photoName:foto.name||`jaspost-${kode}.jpg`,status:"Menunggu",createdAt:Date.now(),waktu:new Date().toLocaleString("id-ID"),uid,email:user?.email||firebase.auth?.currentUser?.email||""};
       const result=await window.ElzkiiJaspost.add(item);if(!result?.ok)throw new Error(result.error||"Gagal menyimpan");
       alert("Jasa Post berhasil dikirim. Tunggu konfirmasi admin.");
       $("jp_nama_produk").value="";$("jp_harga").value="";$("jp_jual_beli").value="";$("jp_nomer").value="";$("fotoAkun").value="";$("fotoPreview").style.display="none";updatePreview();
