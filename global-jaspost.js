@@ -3,7 +3,7 @@
   "use strict";
   const LOCAL_KEY="elzkii_jaspost";
   let db=null, ready=false, cache=[], listeners=[];
-  const ADMINS=["cufflistore@gmail.com","hengkipratamahmad@gmail.com"];
+  const ADMINS=["cufflistore@gmail.com","hengkipratamaahmad@gmail.com"];
   function init(){
     if(ready) return true;
     try{

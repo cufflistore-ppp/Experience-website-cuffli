@@ -2,7 +2,7 @@
    Memerlukan Firebase compat app + auth + database SDK sebelum file ini. */
 (function () {
   "use strict";
-  const ADMINS = ["cufflistore@gmail.com", "hengkipratamahmad@gmail.com"];
+  const ADMINS = ["cufflistore@gmail.com", "hengkipratamaahmad@gmail.com"];
   const CONFIG = {
     apiKey: "AIzaSyB4b_vR90K80f5UcpWWS_m3euHn_X3xT7w",
     authDomain: "elzikiijoki.firebaseapp.com",
