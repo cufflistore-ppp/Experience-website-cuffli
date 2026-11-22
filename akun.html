@@ -116,7 +116,7 @@
           photo +
           '<div class="akun-name">' + escapeHtml(user.displayName || "Pengguna") + "</div>" +
           '<div class="akun-email">' + escapeHtml(user.email || "-") + "</div>" +
-          (((window.EJ && EJ.isAdmin && EJ.isAdmin(user)) || ["cufflistore@gmail.com","hengkipratamahmad@gmail.com"].includes(String(user.email || "").trim().toLowerCase()))
+          ((window.ELZKIIAuth && typeof window.ELZKIIAuth.isAdminEmail === "function" && window.ELZKIIAuth.isAdminEmail(user.email))
             ? '<a class="btn-google" style="margin:12px 0 0;text-decoration:none" href="admin.html"><i class="fa-solid fa-user-shield"></i> Menuju Panel Admin</a>'
             : '');
         btnG.style.display = "none";

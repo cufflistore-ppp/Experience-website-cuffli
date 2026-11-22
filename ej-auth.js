@@ -27,9 +27,11 @@
   // page load: storage initialization can hang in some mobile browser contexts.
   const persistenceReady = Promise.resolve();
 
-  const isAdmin = user =>
-    !!user && user.emailVerified === true &&
-    ADMINS.includes(String(user.email || "").trim().toLowerCase());
+  const isAdminEmail = email =>
+    ADMINS.includes(String(email || "").trim().toLowerCase());
+  // Admin access is controlled by the explicit Google-email allowlist.
+  // Do not hide/deny an allowlisted admin because Firebase reports emailVerified differently.
+  const isAdmin = user => !!user && isAdminEmail(user.email);
 
   async function loginGoogle() {
     await persistenceReady;
@@ -56,7 +58,7 @@
   }
 
   const api = {
-    app, auth, db, ADMINS, CONFIG, GOOGLE_CLIENT_ID, isAdmin,
+    app, auth, db, ADMINS, CONFIG, GOOGLE_CLIENT_ID, isAdmin, isAdminEmail,
     loginGoogle,
     // Alias required by the login page's Google button.
     signInGoogle: loginGoogle,
