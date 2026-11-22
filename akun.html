@@ -115,7 +115,10 @@
         body.innerHTML =
           photo +
           '<div class="akun-name">' + escapeHtml(user.displayName || "Pengguna") + "</div>" +
-          '<div class="akun-email">' + escapeHtml(user.email || "-") + "</div>" + ((window.EJ && EJ.isAdmin && EJ.isAdmin(user)) || ["cufflistore@gmail.com","hengkipratamahmad@gmail.com"].includes(String(user.email || "").trim().toLowerCase())) ? '<a class="btn-google" style="margin:12px 0 0;text-decoration:none" href="admin.html"><i class="fa-solid fa-user-shield"></i> Menuju Panel Admin</a>' : '');
+          '<div class="akun-email">' + escapeHtml(user.email || "-") + "</div>" +
+          (((window.EJ && EJ.isAdmin && EJ.isAdmin(user)) || ["cufflistore@gmail.com","hengkipratamahmad@gmail.com"].includes(String(user.email || "").trim().toLowerCase()))
+            ? '<a class="btn-google" style="margin:12px 0 0;text-decoration:none" href="admin.html"><i class="fa-solid fa-user-shield"></i> Menuju Panel Admin</a>'
+            : '');
         btnG.style.display = "none";
         btnL.style.display = "block";
       } else {
@@ -166,23 +169,24 @@
       }
     });
 
-    document.addEventListener("DOMContentLoaded", async function () {
+    document.addEventListener("DOMContentLoaded", function () {
       if (window.ELZKIIAuth) {
-        try {
-          await window.ELZKIIAuth.handleRedirectResult();
-        } catch (e) {}
+        // Attach auth observer first; don't leave the account UI waiting on redirect handling.
+        window.ELZKIIAuth.onAuthChange(renderUser);
+        window.ELZKIIAuth.handleRedirectResult().catch(function (e) {
+          console.warn("[ELZKII AKUN] Redirect result:", e);
+        });
         try {
           const err = sessionStorage.getItem("elzkii_auth_err");
           if (err) {
             sessionStorage.removeItem("elzkii_auth_err");
             let hint = err;
             if (/unauthorized-domain/i.test(err)) {
-              hint = "Domain belum diizinkan di Firebase Authorized domains.\nTambah: " + location.hostname;
+              hint = "Domain belum diizinkan di Firebase Authorized domains.\\nTambah: " + location.hostname;
             }
             alert("Login gagal: " + hint);
           }
         } catch (e) {}
-        window.ELZKIIAuth.onAuthChange(renderUser);
       } else {
         renderUser(null);
       }

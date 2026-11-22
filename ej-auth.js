@@ -23,8 +23,9 @@
   const app = firebase.app();
   const auth = firebase.auth();
   const db = firebase.database();
-  const persistenceReady = auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(err => { console.error("[ELZKII AUTH] Persistence:", err); });
+  // Firebase Web Auth defaults to LOCAL persistence. Avoid setting it on every
+  // page load: storage initialization can hang in some mobile browser contexts.
+  const persistenceReady = Promise.resolve();
 
   const isAdmin = user =>
     !!user && user.emailVerified === true &&
