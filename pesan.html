@@ -137,8 +137,8 @@
         <label>Nama Barang</label>
         <input type="text" id="jp_nama_produk" placeholder="Nama barang yang mau di-post" required>
 
-        <label>Harga</label>
-        <input type="text" id="jp_harga" placeholder="Contoh: Rp 25.000" required>
+        <label>Harga Barang</label>
+        <input type="text" id="jp_harga" placeholder="Harga barang untuk format posting" required>
 
         <label>Jual / Beli</label>
         <select id="jp_jual_beli" required>
@@ -166,8 +166,8 @@
       </div>
     </div>
 
-    <div class="ringkasan">
-      <h4>Ringkasan Order</h4>
+    <div class="ringkasan" id="ringkasanOrder">
+      <h4 id="ringkasanTitle">Ringkasan Order</h4>
       <div class="row"><span id="namaPaketRow">Joki Kontak</span><span>Paket</span><span id="hargaPaket">Rp 5.000</span></div>
       <div class="row total"><span>Total</span><span id="totalHarga">Rp 5.000</span></div>
       <button class="btn-buat" id="btnSubmitOrder" onclick="buatPesanan()">Kirim ke WhatsApp</button>
@@ -178,7 +178,7 @@
 
         <nav class="bottom-nav nav-7">
     <a href="riwayat.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a>
-    <a href="joki.html" class="nav-item active"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+    <span class="nav-item active" aria-current="page"><i class="fa-solid fa-camera"></i><span>Jasa Post</span></span>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
     <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
     <a href="antrian.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
@@ -287,7 +287,9 @@
         const addon = document.getElementById("addonSection");
         if (addon) addon.style.display = "none";
         const btn = document.getElementById("btnSubmitOrder");
-        if (btn) btn.textContent = "Kirim Gratis";
+        if (btn) btn.textContent = "Konfirmasi Jasa Post";
+        const summary = document.getElementById("ringkasanOrder");
+        if (summary) { summary.querySelector("#ringkasanTitle").textContent = "Konfirmasi Jasa Post"; summary.querySelector(".row").style.display = "none"; summary.querySelector(".row.total").style.display = "none"; }
       } else if (type === "produk") {
         // Load produk digital
         if (typeof loadProdukDigital === "function") loadProdukDigital();
@@ -316,7 +318,7 @@
             const totalEl = document.getElementById("totalHarga");
             if (totalEl) totalEl.textContent = "GRATIS";
             const btn = document.getElementById("btnSubmitOrder");
-            if (btn) btn.textContent = "Kirim Gratis";
+            if (btn) btn.textContent = "Konfirmasi Jasa Post";
           } else {
             // Paket Views + Kontak & Premium Kontak → sama seperti joki
             // Sembunyikan addon (karena harga fixed)
@@ -363,7 +365,7 @@
         const btn = document.getElementById("btnSubmitOrder");
 
         if (!namaProduk || !harga || !jualBeli || !nomer) {
-          showNiceAlert("Lengkapi nama barang, harga, jual/beli, dan nomor penjual.");
+          showNiceAlert("Lengkapi nama barang, harga barang, jual/beli, dan nomor penjual.");
           return;
         }
         if (!fotoInput || !fotoInput.files || !fotoInput.files[0]) {
@@ -413,10 +415,10 @@
           } else {
             alert("Jasa Post gratis berhasil dikirim dan masuk ke Panel Admin.");
           }
-          setTimeout(() => { window.location.href = "antrian.html"; }, 900);
+          if (btn) { btn.disabled = false; btn.textContent = "Konfirmasi Jasa Post"; }
         } catch (e) {
           console.error(e);
-          if (btn) { btn.disabled = false; btn.textContent = "Kirim Gratis"; }
+          if (btn) { btn.disabled = false; btn.textContent = "Konfirmasi Jasa Post"; }
           showNiceAlert("Gagal mengirim Jasa Post. Pastikan kamu sudah login dan koneksi internet aktif.");
         }
         return;
