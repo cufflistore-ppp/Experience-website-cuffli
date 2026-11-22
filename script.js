@@ -114,7 +114,7 @@ function updateTotal() {
 async function buatPesanan() {
   const nama = document.getElementById("nama")?.value?.trim() || "";
   const wa = document.getElementById("wa")?.value?.trim() || "";
-  let catatan = document.getElementById("catatan")?.value || "";
+  let catatan = (typeof formatPushKontak === "function") ? formatPushKontak(nama, wa) : (document.getElementById("catatan")?.value || "");
 
   // Validasi field wajib untuk Joki Kontak
   if (!nama || !wa) {
@@ -124,16 +124,6 @@ async function buatPesanan() {
   if (wa.replace(/\D/g, "").length < 10) {
     showSiteModal("Nomor WhatsApp tidak valid. Masukkan minimal 10 digit.", "warning");
     return;
-  }
-
-  // Auto replace placeholder
-  if (catatan.includes("NAMA STORE")) {
-    catatan = catatan.replace(/NAMA STORE/g, nama);
-  }
-  if (catatan.includes("628…") || catatan.includes("628...")) {
-    let nomor = wa.replace(/^0/, "62").replace(/\D/g, "");
-    if (nomor.length < 10) nomor = "628xxxxxxxxxx";
-    catatan = catatan.replace(/628…|628\.\.\./g, nomor);
   }
 
   const total = document.getElementById("totalHarga")?.textContent || "Rp 5.000";

@@ -40,6 +40,20 @@
     #formJaspost label {
       margin-top: 10px;
     }
+    .format-protected {
+      white-space: pre-wrap;
+      background: #10151d;
+      border: 1px solid #293b57;
+      border-radius: 10px;
+      padding: 13px;
+      color: #e9eef5;
+      font: 13px/1.65 monospace;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -webkit-touch-callout: none;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -87,16 +101,12 @@
         <label>Nomor WhatsApp</label>
         <input type="tel" id="wa" placeholder="08xxxxxxxxxx" required>
 
-        <label>Catatan (Format Teks Push Kontak)</label>
+        <label>Format Teks Push Kontak</label>
         <p style="font-size:12px; color:#e21b83; margin:4px 0 8px;">
-          * Tinggal ganti <b>NAMA STORE</b> dan nomor WhatsApp saja. Jangan hapus formatnya.
+          Format otomatis. Isi <b>Nama Store</b> dan <b>Nomor WhatsApp</b> di atas, lalu format di bawah akan berubah otomatis. Format ini tidak bisa diedit atau disalin.
         </p>
-        <textarea id="catatan" rows="7">SV BUYER FRESH ELZKII😘
-
-SV ; NAMA STORE
-Wa.me/628...
-
-#NAMBAH VIEW SW + KONTAK + BUYER + SELER</textarea>
+        <div id="catatanPreview" class="format-protected" aria-label="Format Teks Push Kontak"></div>
+        <textarea id="catatan" aria-hidden="true" tabindex="-1" style="display:none"></textarea>
       </div>
 
       <div class="form-section" id="addonSection">
@@ -191,8 +201,29 @@ Wa.me/628...
       }
     });
 
-    // Support Joki (default), Produk Views/Premium (sama seperti joki), dan Jasa Post (form khusus)
+    function formatPushKontak(nama, wa) {
+      const store = (nama || "NAMA STORE").trim() || "NAMA STORE";
+      let digits = String(wa || "").replace(/\D/g, "");
+      if (digits.startsWith("0")) digits = "62" + digits.slice(1);
+      const nomor = digits || "628...";
+      return `SV BUYER FRESH ELZKII😘\n\nSV ; ${store}\nWa.me/${nomor}\n\n#NAMBAH VIEW SW + KONTAK + BUYER + SELER`;
+    }
+
+    function updateFormatPreview() {
+      const nama = document.getElementById("nama")?.value || "";
+      const wa = document.getElementById("wa")?.value || "";
+      const format = formatPushKontak(nama, wa);
+      const preview = document.getElementById("catatanPreview");
+      const hidden = document.getElementById("catatan");
+      if (preview) preview.textContent = format;
+      if (hidden) hidden.value = format;
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
+      ["nama", "wa"].forEach(id => {
+        document.getElementById(id)?.addEventListener("input", updateFormatPreview);
+      });
+      updateFormatPreview();
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "joki";
       const id = parseInt(params.get("id") || "1", 10);

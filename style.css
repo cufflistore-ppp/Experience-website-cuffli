@@ -1066,3 +1066,6 @@ body :is(.badge,.tag,.status,.top-notif,.notif,.alert){background:#fff0f7!import
 .site-footer{background:#fff!important;color:#a66b88!important;border-color:#f3c5dd!important}
 /* Hapus efek gelap/biru yang berasal dari inline style dan komponen lama */
 [style*="background:#0"],[style*="background: #0"],[style*="background:#1"],[style*="background: #1"],[style*="background-color:#0"],[style*="background-color: #0"],[style*="background-color:#1"],[style*="background-color: #1"]{background:#fff!important}
+
+/* Produk Digital memakai grid katalog yang sama dengan Home */
+#digitalList.produk-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }

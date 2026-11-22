@@ -15,21 +15,21 @@ function renderDigitalList(items) {
   const list = document.getElementById("digitalList");
   if (!list) return;
   if (!items.length) {
-    list.innerHTML = '<div style="text-align:center;padding:24px 10px;color:#aaa;font-size:12px;">Belum ada produk.</div>';
+    list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px 10px;color:#aaa;font-size:12px;">Belum ada produk.</div>';
     return;
   }
   list.innerHTML = items.map(p => {
     const judul = escDigital(p.judul || p.nama || "Produk");
-    const desc = escDigital(p.delivery || p.deskripsi || "");
-    const img = escDigital(p.img || "logo.jpg");
-    return `<article class="paket-card" data-ej-product="${escDigital(p.id)}">
-      <img src="${img}" alt="${judul}" onerror="this.src='logo.jpg'" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;margin-bottom:8px">
-      <span class="paket-label">PRODUK</span>
-      <h3>${judul}</h3>
-      ${desc ? `<p>${desc}</p>` : ""}
-      <div class="harga">${formatRpDigital(p.harga)}</div>
-      <a class="btn-pesan" href="${payUrl(p.judul || p.nama || "Produk", p.harga)}">Pesan via WhatsApp</a>
-    </article>`;
+    const href = payUrl(p.judul || p.nama || "Produk", p.harga);
+    return `<div class="produk-card" data-ej-product="${escDigital(p.id)}">
+      <img src="${escDigital(p.img || "logo.jpg")}" alt="${judul}" onerror="this.src='logo.jpg'">
+      <div class="produk-info">
+        <small style="color:#b91568;font-size:10px;">${escDigital(p.status || "TERSEDIA")}</small>
+        <h4>${judul}</h4>
+        <div class="harga">${formatRpDigital(p.harga)}</div>
+        <a href="${href}" class="btn">Pesan via WhatsApp</a>
+      </div>
+    </div>`;
   }).join("");
 }
 
