@@ -1,4 +1,4 @@
-const JOKI_CATALOG_VER = "11";
+const JOKI_CATALOG_VER = "12"; // Khusus halaman Joki; Jasa Post tidak memakai katalog ini.
 const HARGA_JOKI = {1:500,2:1000,3:2000,4:3000,5:4000,6:5000,7:6000,8:7000};
 const paketJoki = Object.entries(HARGA_JOKI).map(([hari,harga])=>({id:Number(hari),label:`${hari} HARI`,judul:`Joki ${harga>=1000?(harga/1000).toLocaleString("id-ID")+"K":harga+"P"} · ${hari} Hari`,deskripsi:`Tambah view SW + kontak + buyer + seller selama ${hari} hari.`,hari:Number(hari),harga,fitur:["Tambah view SW + kontak + buyer + seller",`Durasi ${hari} hari`,"Order dikirim ke WhatsApp dan masuk panel admin"]}));
 function formatRp(n){return "Rp "+Number(n).toLocaleString("id-ID");}
