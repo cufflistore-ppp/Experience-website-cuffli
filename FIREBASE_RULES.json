@@ -31,6 +31,12 @@
       "$reportId": {
         ".write": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com') || (!data.exists() && newData.child('uid').val() === auth.uid))"
       }
+    },
+    "jaspost": {
+      ".read": "auth != null && auth.token.email_verified === true && (auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com')",
+      "$jaspostId": {
+        ".write": "auth != null && auth.token.email_verified === true && ((auth.token.email === 'cufflistore@gmail.com' || auth.token.email === 'hengkipratamahmad@gmail.com') || (!data.exists() && newData.child('uid').val() === auth.uid))"
+      }
     }
   }
 }

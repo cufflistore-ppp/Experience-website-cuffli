@@ -126,35 +126,41 @@
     <!-- ========== FORM JASA POST ========== -->
     <div id="formJaspost" style="display:none;">
       <div class="form-section">
-        <h4><span class="step">1</span> Format Jasa Post</h4>
+        <h4><span class="step">1</span> Jasa Post Gratis</h4>
 
         <div class="jaspost-notice">
-          <span class="title">jasa post by voxy💥</span>
-          <b>Jasa Post Voxy All Produk</b><br>
-          MC: <code>voxy stor</code> (post sini mc sini)
+          <span class="title">JASA POST ELZKII🫣</span>
+          <b>Gratis, tidak ada biaya.</b><br>
+          Isi data barang + foto, lalu format otomatis dibuat sesuai format resmi ELZKII.
         </div>
 
-        <label>nama produk👜</label>
-        <input type="text" id="jp_nama_produk" placeholder="Nama produk yang mau di-post" required>
+        <label>Nama Barang</label>
+        <input type="text" id="jp_nama_produk" placeholder="Nama barang yang mau di-post" required>
 
-        <label>spek 📈</label>
-        <textarea id="jp_spek" rows="3" placeholder="Spesifikasi produk / akun" required></textarea>
+        <label>Harga</label>
+        <input type="text" id="jp_harga" placeholder="Contoh: Rp 25.000" required>
 
-        <label>nomer wa seller</label>
+        <label>Jual / Beli</label>
+        <select id="jp_jual_beli" required>
+          <option value="">Pilih</option>
+          <option value="JUAL">JUAL</option>
+          <option value="BELI">BELI</option>
+        </select>
+
+        <label>No Penjual</label>
         <input type="tel" id="jp_nomer" placeholder="08xxxxxxxxxx / 62xxxxxxxxxx" required>
 
-        <label>Nama kamu (opsional)</label>
-        <input type="text" id="jp_nama" placeholder="Nama / store kamu">
-
-        <label>MC</label>
-        <input type="text" id="jp_mc" value="voxy stor (post sini mc sini)" readonly style="background:#ffffff;color:#e21b83;">
+        <label>Format Jasa Post</label>
+        <p class="field-hint">Format di bawah otomatis mengikuti data yang kamu isi dan tidak bisa diedit.</p>
+        <div id="jp_format_preview" class="format-protected"></div>
+        <textarea id="jp_format_hidden" aria-hidden="true" tabindex="-1" style="display:none"></textarea>
 
         <div class="jaspost-notice" style="margin-top:14px;">
-          💥 <b>jasa post voxy all produk</b> — GRATIS. Isi lengkap + foto, lalu kirim. Langsung masuk ke bot Telegram.
+          💥 <b>Jasa post gratis.</b> Tidak ada pembayaran. Setelah dikirim, data + foto langsung masuk ke halaman <b>Jasa Post</b> di Panel Admin.
         </div>
 
-        <label style="margin-top:14px;">Foto produk / akun (wajib) 📷</label>
-        <p class="field-hint">Wajib upload foto. Data + foto langsung dikirim ke admin Telegram saat kamu tekan <b>Kirim Gratis</b>.</p>
+        <label style="margin-top:14px;">Foto barang / akun (wajib) 📷</label>
+        <p class="field-hint">Foto akan disimpan bersama format agar admin bisa melihat, download, dan membagikannya.</p>
         <input type="file" id="fotoAkun" accept="image/*" required>
         <img id="fotoPreview" class="foto-preview" alt="Preview foto">
       </div>
@@ -184,6 +190,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
+  <script src="global-jaspost.js"></script>
   <script src="joki-produk.js"></script>
   <script src="telegram.js"></script>
     <script src="script.js"></script>
@@ -219,11 +226,40 @@
       if (hidden) hidden.value = format;
     }
 
+    function formatJaspost(namaBarang, harga, jualBeli, noPenjual) {
+      return `FORMAT JASPOST ELZKII🫣\n\nNAMA BARANG: ${namaBarang || ""}\nHARGA: ${harga || ""}\nJUAL/BELI: ${jualBeli || ""}\nMC: ELZKII STR\nNO PENJUAL: ${noPenjual || ""}\n\nNOTE: WA ADMIN CUMAN ADA 1 DANA ADMIN TIDAK PERNAH OPEN OWN ATAU PT\n\n#PROSESAMANJIKAPAKAIMC\n\nTERIMAKASIH`;
+    }
+
+    async function compressImageFile(file, maxKB=520, maxW=900, maxH=900) {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const r = new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file);
+      });
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image(); i.onload=()=>resolve(i); i.onerror=reject; i.src=dataUrl;
+      });
+      let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+      const scale=Math.min(1, maxW/w, maxH/h); w=Math.max(1,Math.round(w*scale)); h=Math.max(1,Math.round(h*scale));
+      const c=document.createElement("canvas"); c.width=w; c.height=h; const ctx=c.getContext("2d"); ctx.drawImage(img,0,0,w,h);
+      let quality=.84, out=c.toDataURL("image/jpeg",quality);
+      while(out.length/1024>maxKB && quality>.45){ quality-=.07; out=c.toDataURL("image/jpeg",quality); }
+      return {data:out,type:"image/jpeg"};
+    }
+
+    function updateJaspostPreview(){
+      const out=document.getElementById("jp_format_preview");
+      const hidden=document.getElementById("jp_format_hidden");
+      if(!out) return;
+      const text=formatJaspost(document.getElementById("jp_nama_produk")?.value?.trim(), document.getElementById("jp_harga")?.value?.trim(), document.getElementById("jp_jual_beli")?.value?.trim(), document.getElementById("jp_nomer")?.value?.trim());
+      out.textContent=text; if(hidden) hidden.value=text;
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
       ["nama", "wa"].forEach(id => {
         document.getElementById(id)?.addEventListener("input", updateFormatPreview);
       });
       updateFormatPreview();
+      ["jp_nama_produk","jp_harga","jp_jual_beli","jp_nomer"].forEach(id => { document.getElementById(id)?.addEventListener("input", updateJaspostPreview); document.getElementById(id)?.addEventListener("change", updateJaspostPreview); });
+      updateJaspostPreview();
       const params = new URLSearchParams(window.location.search);
       const type = params.get("type") || "joki";
       const id = parseInt(params.get("id") || "1", 10);
@@ -237,10 +273,10 @@
       if (type === "jaspost") {
         window.isJaspost = true;
         window.orderType = "Jasa Post";
-        window.orderPaketName = "Jasa Post Voxy All Produk";
+        window.orderPaketName = "Jasa Post Gratis";
         baseHarga = 0;
-        document.getElementById("paketJudul").textContent = "Jasa Post by Voxy 💥";
-        document.getElementById("namaPaketRow").textContent = "Jasa Post Voxy All Produk";
+        document.getElementById("paketJudul").textContent = "Jasa Post ELZKII🫣";
+        document.getElementById("namaPaketRow").textContent = "Jasa Post Gratis";
         document.getElementById("hargaPaket").textContent = "GRATIS";
         const totalEl = document.getElementById("totalHarga");
         if (totalEl) totalEl.textContent = "GRATIS";
@@ -271,7 +307,7 @@
           if (isJasaPost) {
             window.isJaspost = true;
             window.orderType = "Jasa Post";
-            window.orderPaketName = "Jasa Post Voxy All Produk";
+            window.orderPaketName = "Jasa Post Gratis";
             baseHarga = 0;
             document.getElementById("formStandar").style.display = "none";
             document.getElementById("formJaspost").style.display = "block";
@@ -320,98 +356,69 @@
     window.buatPesanan = async function() {
       if (window.isJaspost) {
         const namaProduk = document.getElementById("jp_nama_produk")?.value?.trim() || "";
-        const spek = document.getElementById("jp_spek")?.value?.trim() || "";
+        const harga = document.getElementById("jp_harga")?.value?.trim() || "";
+        const jualBeli = document.getElementById("jp_jual_beli")?.value?.trim() || "";
         const nomer = document.getElementById("jp_nomer")?.value?.trim() || "";
-        const nama = document.getElementById("jp_nama")?.value?.trim() || namaProduk || "Customer";
-        const mc = document.getElementById("jp_mc")?.value?.trim() || "voxy stor (post sini mc sini)";
         const fotoInput = document.getElementById("fotoAkun");
         const btn = document.getElementById("btnSubmitOrder");
 
-        if (!namaProduk || !spek || !nomer) {
-          showNiceAlert("Lengkapi field wajib: nama produk, spek, dan nomor WA seller.");
+        if (!namaProduk || !harga || !jualBeli || !nomer) {
+          showNiceAlert("Lengkapi nama barang, harga, jual/beli, dan nomor penjual.");
           return;
         }
         if (!fotoInput || !fotoInput.files || !fotoInput.files[0]) {
-          showNiceAlert("Wajib upload foto produk/akun terlebih dahulu.");
+          showNiceAlert("Wajib upload foto barang/akun terlebih dahulu.");
           return;
         }
 
-        const catatan = `jasa post by ELZKII JOKI💥
-
-nama produk👜: ${namaProduk}
-spek 📈: ${spek}
-nomer wa seller: ${nomer}
-mc: ${mc}
-
-jasa post voxy all produk`;
-
+        const format = formatJaspost(namaProduk, harga, jualBeli, nomer);
+        const photo = await compressImageFile(fotoInput.files[0], 520, 900, 900);
         const rand = Math.floor(1000 + Math.random() * 9000);
         const timePart = String(Date.now()).slice(-3);
-        const kode = `EJ-2026-${rand}${timePart}`;
+        const kode = `EJ-JP-2026-${rand}${timePart}`;
 
-        if (btn) {
-          btn.disabled = true;
-          btn.textContent = "Mengirim...";
-        }
+        if (btn) { btn.disabled = true; btn.textContent = "Mengirim..."; }
 
-        const pesan = `
-📣 <b>JASA POST GRATIS - ELZKII JOKI</b>
-
-🆔 Kode: <code>${kode}</code>
-👤 Nama: <b>${nama}</b>
-👜 Produk: <b>${namaProduk}</b>
-📈 Spek: ${spek}
-📱 WA Seller: <b>${nomer}</b>
-🏷️ MC: ${mc}
-💰 Biaya: <b>GRATIS</b>
-📊 Status: <b>Masuk Antrian</b>
-⏰ ${new Date().toLocaleString("id-ID")}
-        `.trim();
-
-        try {
-          if (typeof kirimTelegram === "function") {
-            await kirimTelegram(pesan);
-          }
-          if (typeof kirimFotoTelegram === "function" && fotoInput.files[0]) {
-            await kirimFotoTelegram(
-              fotoInput.files[0],
-              `Foto Jasa Post - ${kode}\n${namaProduk}\n${nomer}`
-            );
-          }
-        } catch (e) {
-          console.warn("Gagal kirim Telegram jasa post:", e);
-        }
-
-        const order = {
+        const item = {
           kode,
-          nama,
-          wa: nomer,
-          catatan,
-          total: "GRATIS",
-          paket: window.orderPaketName || "Jasa Post Voxy All Produk",
-          status: "Proses",
-          waktu: new Date().toLocaleString("id-ID"),
-          isJaspost: true,
+          namaBarang: namaProduk,
+          harga,
+          jualBeli,
+          mc: "ELZKII STR",
+          noPenjual: nomer,
+          note: "WA ADMIN CUMAN ADA 1 DANA ADMIN TIDAK PERNAH OPEN OWN ATAU PT",
+          format,
+          photoData: photo.data,
+          photoName: fotoInput.files[0].name || `jaspost-${kode}.jpg`,
+          photoType: photo.type || "image/jpeg",
+          status: "Menunggu",
           createdAt: Date.now(),
-          finalAmount: 0
+          waktu: new Date().toLocaleString("id-ID")
         };
 
-        if (window.VoxyyOrders && typeof window.VoxyyOrders.addOrder === "function") {
-          await window.VoxyyOrders.addOrder(order);
-        } else {
-          let orders = JSON.parse(localStorage.getItem("voxyy_orders") || "[]");
-          orders.unshift(order);
-          localStorage.setItem("voxyy_orders", JSON.stringify(orders));
-        }
-        localStorage.setItem("voxyy_saved_kode", kode);
+        try {
+          if (window.EJ?.auth?.currentUser) {
+            item.uid = window.EJ.auth.currentUser.uid;
+            item.email = window.EJ.auth.currentUser.email || "";
+          }
+          if (!window.ElzkiiJaspost || typeof window.ElzkiiJaspost.add !== "function") {
+            throw new Error("Modul Jasa Post belum siap.");
+          }
+          const result = await window.ElzkiiJaspost.add(item);
+          if (!result?.ok) throw new Error(result?.error || "Gagal menyimpan Jasa Post.");
 
-        if (typeof window.showSiteModal === "function") {
-          window.showSiteModal("Jasa post gratis sudah dikirim ke admin Telegram.", "success");
+          localStorage.setItem("elzkii_last_jaspost", kode);
+          if (typeof window.showSiteModal === "function") {
+            window.showSiteModal("Jasa Post gratis berhasil dikirim dan masuk ke Panel Admin.", "success");
+          } else {
+            alert("Jasa Post gratis berhasil dikirim dan masuk ke Panel Admin.");
+          }
+          setTimeout(() => { window.location.href = "antrian.html"; }, 900);
+        } catch (e) {
+          console.error(e);
+          if (btn) { btn.disabled = false; btn.textContent = "Kirim Gratis"; }
+          showNiceAlert("Gagal mengirim Jasa Post. Pastikan kamu sudah login dan koneksi internet aktif.");
         }
-
-        setTimeout(function() {
-          window.location.href = "antrian.html";
-        }, 900);
         return;
       }
 

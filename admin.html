@@ -29,6 +29,7 @@
     <a class="drawer-link active" href="#orders" data-admin-view="orders"><i class="fa-solid fa-receipt"></i> Pesanan</a>
     <a class="drawer-link" href="#products" data-admin-view="products"><i class="fa-solid fa-box-open"></i> Setting Produk</a>
     <a class="drawer-link" href="#delivery" data-admin-view="delivery"><i class="fa-solid fa-paper-plane"></i> Kirim Produk</a>
+    <a class="drawer-link" href="#jaspost" data-admin-view="jaspost"><i class="fa-solid fa-camera"></i> Jasa Post</a>
     <a class="drawer-link" href="#reports" data-admin-view="reports"><i class="fa-solid fa-triangle-exclamation"></i> Cek Laporan</a>
   </aside>
 
@@ -59,6 +60,17 @@
     </section>
 
 
+    <section class="admin-section" id="view-jaspost" hidden><h2>Jasa Post Gratis</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <p id="adminJaspostCount" style="color:#918993;font-size:12px;margin:0;">0 jasa post</p>
+        <select id="adminJaspostFilter" style="width:auto;min-width:150px;padding:9px 12px;border-radius:9px;">
+          <option value="all">Semua status</option><option value="Menunggu">Menunggu</option><option value="Proses">Proses</option><option value="Selesai">Selesai</option>
+        </select>
+      </div>
+      <div style="padding:10px 12px;border:1px solid #f0d5e2;border-radius:10px;background:#fff8fb;color:#a52c68;font-size:12px;margin-bottom:12px;"><i class="fa-solid fa-circle-info"></i> Jasa Post gratis. Format dapat disalin, foto dapat di-download, dan tombol Bagikan mencoba membagikan <b>foto + format</b> sekaligus.</div>
+      <div id="adminJaspostList"></div>
+    </section>
+
     <section class="admin-section" id="view-reports" hidden><h2>Cek Laporan Transaksi</h2>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
         <p id="adminReportsCount" style="color:#918993;font-size:12px;margin:0;">0 laporan</p>
@@ -79,9 +91,9 @@
 
   <script src="produk.js"></script><script src="digital-produk.js"></script><script src="produk-admin.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-  <script src="global-orders.js"></script><script src="global-reports.js"></script><script src="script.js"></script><script src="admin.js"></script><script src="laporan-admin.js"></script>
+  <script src="global-orders.js"></script><script src="global-jaspost.js"></script><script src="global-reports.js"></script><script src="script.js"></script><script src="admin.js"></script><script src="jaspost-admin.js"></script><script src="laporan-admin.js"></script>
   <script src="ej-auth.js"></script><script src="footer.js"></script>
   <script>
-    (()=>{const drawer=document.getElementById('adminDrawer'),overlay=document.getElementById('adminOverlay');const close=()=>{drawer.classList.remove('open');overlay.classList.remove('show')};document.getElementById('adminMenuToggle').addEventListener('click',()=>{drawer.classList.toggle('open');overlay.classList.toggle('show')});overlay.addEventListener('click',close);const initialView=new URLSearchParams(location.search).get('view');if(initialView==='reports'){document.querySelectorAll('[data-admin-view]').forEach(x=>x.classList.toggle('active',x.dataset.adminView==='reports'));['orders','products','delivery','reports'].forEach(k=>document.getElementById('view-'+k).hidden=k!=='reports');if(window.ejLoadReports)ejLoadReports()}document.querySelectorAll('[data-admin-view]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const v=a.dataset.adminView;['orders','products','delivery','reports'].forEach(k=>document.getElementById('view-'+k).hidden=k!==v);document.querySelectorAll('[data-admin-view]').forEach(x=>x.classList.toggle('active',x===a));close();if(v==='products'&&window.ejRenderProducts)ejRenderProducts();if(v==='reports'&&window.ejLoadReports)ejLoadReports()}));})();
+    (()=>{const drawer=document.getElementById('adminDrawer'),overlay=document.getElementById('adminOverlay');const close=()=>{drawer.classList.remove('open');overlay.classList.remove('show')};document.getElementById('adminMenuToggle').addEventListener('click',()=>{drawer.classList.toggle('open');overlay.classList.toggle('show')});overlay.addEventListener('click',close);const initialView=new URLSearchParams(location.search).get('view');if(initialView==='reports'||initialView==='jaspost'){document.querySelectorAll('[data-admin-view]').forEach(x=>x.classList.toggle('active',x.dataset.adminView===initialView));['orders','products','delivery','reports','jaspost'].forEach(k=>document.getElementById('view-'+k).hidden=k!==initialView);if(initialView==='reports'&&window.ejLoadReports)ejLoadReports();if(initialView==='jaspost'&&window.ejLoadJaspost)ejLoadJaspost()}document.querySelectorAll('[data-admin-view]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const v=a.dataset.adminView;['orders','products','delivery','reports','jaspost'].forEach(k=>document.getElementById('view-'+k).hidden=k!==v);document.querySelectorAll('[data-admin-view]').forEach(x=>x.classList.toggle('active',x===a));close();if(v==='products'&&window.ejRenderProducts)ejRenderProducts();if(v==='reports'&&window.ejLoadReports)ejLoadReports();if(v==='jaspost'&&window.ejLoadJaspost)ejLoadJaspost()}));})();
   </script>
 </body></html>
