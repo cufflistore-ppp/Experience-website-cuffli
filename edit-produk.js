@@ -75,21 +75,9 @@ function getFirebaseStorage() {
   if (!firebase.apps.length || typeof firebase.storage !== "function") throw new Error("Firebase Storage belum aktif.");
   return firebase.storage();
 }
-async function ensureVideoAdminAuth() {
-  if (typeof firebase === "undefined" || typeof firebase.auth !== "function") throw new Error("Firebase Authentication belum dimuat.");
-  if (!firebase.apps.length && window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG);
-  const auth = firebase.auth();
-  const allowed = ["cufflistore@gmail.com", "hengkipratamaahmad@gmail.com"];
-  let user = auth.currentUser;
-  if (!user) user = (await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())).user;
-  const email = String(user && user.email || "").toLowerCase();
-  if (!allowed.includes(email)) throw new Error("Akun Google ini bukan admin yang diizinkan upload video.");
-  return user;
-}
 function uploadProductVideo(file, cat, productId) {
   return new Promise(async (resolve, reject) => {
     try {
-      await ensureVideoAdminAuth();
       const storage = getFirebaseStorage();
       const safeName = String(file.name || "video.mp4").replace(/[^a-zA-Z0-9._-]/g, "_");
       const ref = storage.ref(`product-videos/${cat}/${productId}_${Date.now()}_${safeName}`);

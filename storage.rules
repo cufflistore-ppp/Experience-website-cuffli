@@ -2,8 +2,8 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /product-videos/{category}/{fileName} {
+      // Video can be viewed by visitors; upload does not require Google sign-in.
       allow read: if true;
-      // Anyone can upload a video up to 100 MB.
       allow write: if request.resource != null
                    && request.resource.size <= 104857600
                    && request.resource.contentType.matches('video/.*');
