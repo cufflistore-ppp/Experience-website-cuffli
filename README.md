@@ -1,36 +1,10 @@
-# VOXY MARKET (Flat Structure)
+# Doxy
 
-Semua file di root — **tanpa** folder `js/`, `css/`, `assets/`.
+## Upload video produk (maksimal 100 MB)
 
-## Path di kode
-- CSS: `style.css`
-- JS: `global-orders.js`
-- Gambar: `logo.png`, `banner.png`, `qris.jpg`, dll.
+1. Firebase Console → Storage → Rules. Salin isi file `storage.rules` dari folder ini dan klik Publish.
+2. Pastikan Firebase Storage sudah diaktifkan pada project `doxyjoki-5605a`.
+3. Panel Edit Produk: pilih video dari HP/PC (maks. 100 MB), lalu klik Simpan. Jika diminta, login Google dengan email admin `cufflistore@gmail.com` atau `hengkipratamaahmad@gmail.com`.
+4. Upload memakai Firebase Storage resumable; URL video disimpan otomatis pada produk.
 
-## Fitur Chat / Laporan
-1. Tombol bulat kanan bawah (gambar chat) → pilih **Website** atau **WhatsApp**
-2. Chat via website → masuk panel admin (tab **Chat User**)
-3. Admin balas → di sisi user muncul **badge merah** di logo / ikon chat
-
-## Firebase Rules (tambah path chat)
-```json
-"chat": {
-  "$uid": {
-    ".read": "auth != null && (auth.uid == $uid || root.child('admins').child(auth.uid).exists() || auth.token.email == 'emailwebvixy@gmail.com' || auth.token.email == 'voxymarket98@gmail.com')",
-    ".write": "auth != null"
-  }
-}
-```
-Atau longgarkan sementara untuk testing: `"chat": { ".read": "auth != null", ".write": "auth != null" }`
-
-## Deploy Vercel
-Upload folder ini → Static Site → Done.
-
-
-## Maintenance Mode (OFF / ON)
-- Kontrol ON/OFF tersedia di Dashboard `admin.html`.
-- Status global tersimpan di Realtime Database: `settings/maintenance`.
-- `online: false` menampilkan halaman offline VOXY MARKET17 untuk seluruh halaman publik.
-- `online: true` mengembalikan tampilan website setelah hitung mundur 3 detik.
-- Halaman `admin.html`, `admin-joki-harga.html`, dan `admin-kelola.html` dikecualikan agar admin tetap dapat mengelola website.
-- File `maintenance-gate.js` dipasang pada semua halaman publik.
+Rules Storage membatasi ukuran secara server-side maksimal 104.857.600 byte (100 MiB), hanya file video, dan hanya dua email admin tersebut yang boleh upload atau menghapus.

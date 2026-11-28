@@ -1,22 +1,22 @@
 /**
- * ELZKII JOKI - Antrian & Admin Global (Firebase)
+ * DOXY JOKI - Antrian & Admin Global (Firebase)
  * authDomain = firebaseapp.com (stabil). Login Google pakai GIS (tanpa redirect).
  */
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyB4b_vR90K80f5UcpWWS_m3euHn_X3xT7w",
-  authDomain: "elzikiijoki.firebaseapp.com",
-  databaseURL: "https://elzikiijoki-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "elzikiijoki",
-  storageBucket: "elzikiijoki.firebasestorage.app",
-  messagingSenderId: "226591865660",
-  appId: "1:226591865660:web:08f67a832338500a237c39",
-  measurementId: "G-VL9RXPECJR"
+  apiKey: "AIzaSyCtjrrkTeXpCobS2z-7ykN8A9XpO0dPfx4",
+  authDomain: "doxyjoki-5605a.firebaseapp.com",
+  databaseURL: "https://doxyjoki-5605a-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "doxyjoki-5605a",
+  storageBucket: "doxyjoki-5605a.firebasestorage.app",
+  messagingSenderId: "356197387717",
+  appId: "1:356197387717:web:1bb5526f11b54cb52c8fac",
+  measurementId: "G-ZC0NC8C1TF"
 };
 
 /**
  * Web Client ID dari Google Cloud (bukan apiKey).
  * Cara ambil:
- * 1. https://console.cloud.google.com/apis/credentials?project=ELZKII JOKI-5605a
+ * 1. https://console.cloud.google.com/apis/credentials?project=doxyjoki-5605a
  * 2. OAuth 2.0 Client IDs → "Web client (auto created by Google Service)"
  * 3. Copy Client ID (bentuk: xxxxx.apps.googleusercontent.com)
  * 4. Tempel di bawah
@@ -25,13 +25,13 @@ const FIREBASE_CONFIG = {
  * Authorized JavaScript origins → Add domain Vercel kamu, contoh:
  *   https://NAMA-SITE-KAMU.vercel.app
  * Authorized redirect URIs → Add:
- *   https://ELZKII JOKI-5605a.firebaseapp.com/__/auth/handler
+ *   https://doxyjoki-5605a.firebaseapp.com/__/auth/handler
  *   https://NAMA-SITE-KAMU.vercel.app
  *
  * Firebase Console → Authentication → Settings → Authorized domains:
  *   Tambah juga domain Vercel (xxx.vercel.app)
  */
-const GOOGLE_WEB_CLIENT_ID = "728120154992-eji5q980k5dbn6ucqri7op334uv7cj01.apps.googleusercontent.com";
+const GOOGLE_WEB_CLIENT_ID = "442340334430-h7utbdqjrscmn44ehmgd7unh3teaijrh.apps.googleusercontent.com";
 
 const LOCAL_ORDERS_KEY = "voxyy_orders";
 let _db = null;
@@ -139,11 +139,11 @@ function initFirebase() {
           } catch (e) {}
         });
       },
-      (err) => console.error("[ELZKII] DB:", err)
+      (err) => console.error("[Voxyy] DB:", err)
     );
     return true;
   } catch (e) {
-    console.error("[ELZKII] init:", e);
+    console.error("[Voxyy] init:", e);
     return false;
   }
 }
@@ -199,9 +199,7 @@ async function addOrder(order) {
   initFirebase();
   if (!_db) return { ok: true, mode: "local" };
   try {
-    const payload = stripMeta(order);
-    if (firebase.auth && firebase.auth().currentUser) { payload.uid = firebase.auth().currentUser.uid; payload.email = firebase.auth().currentUser.email || ""; }
-    await _db.ref("orders/" + kodeKey(order.kode)).set(payload);
+    await _db.ref("orders/" + kodeKey(order.kode)).set(stripMeta(order));
     return { ok: true, mode: "global" };
   } catch (e) {
     return { ok: false, mode: "local", error: String(e) };

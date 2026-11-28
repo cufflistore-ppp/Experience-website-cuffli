@@ -1,4 +1,796 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Masuk - ELZKII JOKI</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(145deg,#fff7fb,#ffd8eb);font-family:Arial,sans-serif;color:#612342}.auth{width:min(420px,100%);background:#fff;border:1px solid #f5b6d5;border-radius:25px;padding:27px;box-shadow:0 18px 50px #c92c7924}.logo{display:block;width:105px;height:105px;object-fit:cover;border-radius:22px;margin:0 auto 14px}.auth h1{text-align:center;color:#df2785;margin:5px 0}.auth p{text-align:center;color:#98647e;font-size:13px;margin:0 0 22px}.tabs{display:flex;background:#fff0f7;border-radius:12px;padding:4px;margin-bottom:16px}.tabs button{flex:1;border:0;border-radius:9px;padding:11px;background:transparent;color:#a44c79;font-weight:bold}.tabs button.active{background:#e52b8b;color:white}label{display:block;font-size:13px;font-weight:bold;margin:12px 0 6px}input{width:100%;padding:13px;border:1px solid #edbfd6;border-radius:10px;font-size:15px;outline-color:#e52b8b}.primary,.google{width:100%;padding:14px;border:0;border-radius:11px;font-weight:bold;margin-top:14px;cursor:pointer}.primary{background:linear-gradient(90deg,#f45da9,#d91e80);color:white}.google{background:white;border:1px solid #e7c6d7;color:#5d2944}.msg{min-height:20px;text-align:center;color:#c21e6e;font-size:12px;margin-top:10px}.hidden{display:none}</style></head><body><main class="auth"><img class="logo" src="logo.jpg" alt="ELZKII JOKI"><h1>ELZKII JOKI</h1><p>Masuk untuk melanjutkan ke layanan kami</p><div class="tabs"><button id="loginTab" class="active" type="button">Login</button><button id="registerTab" type="button">Register</button></div><form id="authForm"><label>Email</label><input id="email" type="email" autocomplete="email" required placeholder="nama@email.com"><label>Password</label><input id="password" type="password" minlength="6" autocomplete="current-password" required placeholder="Minimal 6 karakter"><button class="primary" id="submitBtn">Login</button></form><button class="google" id="googleBtn"><i class="fa-brands fa-google"></i> Lanjutkan dengan Google</button><div class="msg" id="msg" role="status"></div></main><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script><script>
-let mode='login';const msg=document.getElementById('msg');function setMode(m){mode=m;document.getElementById('loginTab').classList.toggle('active',m==='login');document.getElementById('registerTab').classList.toggle('active',m==='register');document.getElementById('submitBtn').textContent=m==='login'?'Login':'Buat Akun';document.getElementById('password').autocomplete=m==='login'?'current-password':'new-password';msg.textContent=''}document.getElementById('loginTab').onclick=()=>setMode('login');document.getElementById('registerTab').onclick=()=>setMode('register');document.getElementById('authForm').onsubmit=async e=>{e.preventDefault();msg.textContent='Memproses...';try{const email=document.getElementById('email').value.trim(),pw=document.getElementById('password').value;if(mode==='login'){const cred=await EJ.signInEmail(email,pw);if(!cred.user.emailVerified){await EJ.auth.signOut();msg.textContent='Verifikasi email terlebih dahulu melalui tautan yang dikirim ke email kamu.';return;}}else {const cred=await EJ.registerEmail(email,pw);await cred.user.sendEmailVerification();await EJ.auth.signOut();msg.textContent='Akun dibuat. Buka email untuk verifikasi, lalu login kembali.';return;}location.replace('home.html')}catch(err){msg.textContent=err.message}};document.getElementById('googleBtn').onclick=async()=>{msg.textContent='Menghubungkan ke Google...';try{const user=await ELZKIIAuth.loginGoogle();if(user)location.replace('home.html')}catch(err){msg.textContent=err.message}};EJ.auth.onAuthStateChanged(u=>{if(u&&u.emailVerified)location.replace('home.html')});
-</script><script src="footer.js"></script>
-</body></html>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Doxy Joki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      background: #050a14;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #fff;
+    }
+
+    /* ===== INTRO ===== */
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #050a14;
+    }
+    #intro.done { display: none; }
+    .intro-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(33, 150, 243, 0.28), transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13, 71, 161, 0.22), transparent 50%),
+        radial-gradient(ellipse 50% 30% at 20% 70%, rgba(30, 136, 229, 0.18), transparent 45%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.85; }
+      50% { opacity: 1; }
+    }
+    .logo-wrap {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin-bottom: 24px;
+      z-index: 2;
+    }
+    .logo-ring {
+      position: absolute;
+      inset: -14px;
+      border-radius: 28px;
+      border: 2px solid rgba(33, 150, 243, 0.45);
+      box-shadow: 0 0 36px rgba(33, 150, 243, 0.4);
+      animation: spin 8s linear infinite;
+    }
+    .logo-ring::before {
+      content: "";
+      position: absolute;
+      inset: -8px;
+      border-radius: 32px;
+      border: 1px solid rgba(100, 181, 246, 0.3);
+      animation: spin 12s linear infinite reverse;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .logo-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 22px;
+      object-fit: cover;
+      background: #0d1220;
+      box-shadow: 0 0 40px rgba(33, 150, 243, 0.55);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-shadow: 0 0 24px rgba(33, 150, 243, 0.7);
+      margin-bottom: 6px;
+      z-index: 2;
+    }
+    .sub {
+      font-size: 11px;
+      color: #90caf9;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      z-index: 2;
+    }
+    .progress-wrap {
+      width: 210px;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      z-index: 2;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #1565c0, #42a5f5, #90caf9);
+      border-radius: 4px;
+      box-shadow: 0 0 12px rgba(66, 165, 245, 0.7);
+      transition: width 0.12s linear;
+    }
+    .percent {
+      font-size: 13px;
+      color: #64b5f6;
+      font-weight: 600;
+      margin-bottom: 12px;
+      z-index: 2;
+    }
+    .status {
+      font-size: 12px;
+      color: #90caf9;
+      opacity: 0.85;
+      z-index: 2;
+      min-height: 18px;
+    }
+
+    /* ===== APP SHELL ===== */
+    #app {
+      display: none;
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      position: relative;
+    }
+    #app.show { display: block; }
+
+    #frame {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 58px;
+      width: 100%;
+      height: calc(100% - 58px);
+      height: calc(100dvh - 58px);
+      border: 0;
+      background: #0a0e18;
+      transition: top 0.2s, bottom 0.2s, height 0.2s;
+    }
+
+    .music-fab {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(13, 18, 32, 0.92);
+      border: 1px solid rgba(33, 150, 243, 0.45);
+      border-radius: 24px;
+      padding: 4px 10px 4px 4px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+    }
+    .music-fab button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .music-fab span {
+      font-size: 12px;
+      color: #90caf9;
+      font-weight: 600;
+      padding-right: 4px;
+    }
+
+    /* ===== ADMIN TOP BAR ===== */
+    .admin-top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 52px;
+      background: #0c1218;
+      border-bottom: 1px solid #1a2740;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 9999;
+    }
+    .admin-top-bar.show {
+      display: flex;
+    }
+    .admin-top-bar button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      background: #0d1220;
+      color: #90caf9;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .admin-top-bar button:hover {
+      background: #1976d2;
+      color: #fff;
+    }
+    .admin-top-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    /* ===== CUSTOM MODAL INPUT KODE ADMIN ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
+      background: rgba(5, 10, 20, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      width: 90%;
+      max-width: 320px;
+      background: #0d1220;
+      border: 1px solid rgba(33, 150, 243, 0.45);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 20px rgba(33, 150, 243, 0.2);
+      text-align: center;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .modal-title i { color: #42a5f5; }
+    .modal-sub {
+      font-size: 12px;
+      color: #90caf9;
+      margin-bottom: 20px;
+    }
+    .modal-box input {
+      width: 100%;
+      background: #050a14;
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 15px;
+      text-align: center;
+      letter-spacing: 2px;
+      outline: none;
+      margin-bottom: 20px;
+      transition: border-color 0.2s;
+    }
+    .modal-box input:focus {
+      border-color: #42a5f5;
+      box-shadow: 0 0 10px rgba(66, 165, 245, 0.3);
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel {
+      background: rgba(255,255,255,0.06);
+      color: #90caf9;
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,0.12); }
+    .btn-submit {
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.4);
+    }
+    .btn-submit:hover { opacity: 0.9; }
+
+    /* ===== SHELL NAV ===== */
+    .shell-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #0c1218;
+      border-top: 1px solid #1a2740;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 0;
+      z-index: 9998;
+      padding: 6px 2px calc(6px + env(safe-area-inset-bottom, 0px));
+    }
+    .shell-nav a {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      color: #7a9bb0;
+      text-decoration: none;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 6px 2px;
+      border-radius: 16px;
+      transition: all 0.2s;
+    }
+    .shell-nav a i {
+      font-size: 15px;
+      margin-bottom: 1px;
+      color: inherit;
+    }
+    .shell-nav a span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      line-height: 1.15;
+    }
+    .shell-nav a.active {
+      color: #fff !important;
+      font-weight: 700;
+      background: linear-gradient(180deg, #42a5f5 0%, #1e88e5 40%, #0d47a1 100%) !important;
+      box-shadow: 0 0 12px rgba(33, 150, 243, 0.5) !important;
+      border-radius: 18px;
+      padding: 8px 6px;
+    }
+    .shell-nav a.active i {
+      color: #fff !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- INTRO -->
+  <div id="intro">
+    <div class="intro-bg"></div>
+    <div class="logo-wrap">
+      <div class="logo-ring"></div>
+      <img src="logo.jpg" alt="Doxy Joki" class="logo-img">
+    </div>
+    <div class="title">DOXY JOKI</div>
+    <div class="sub">Initializing Elite Service System</div>
+    <div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
+    <div class="percent" id="percent">0%</div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <!-- PERSISTENT AUDIO -->
+  <audio id="bgMusic" loop preload="auto" autoplay muted playsinline>
+    <source src="music.mp3" type="audio/mpeg">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
+  <!-- APP SHELL -->
+  <div id="app">
+    <div class="music-fab" id="musicFab">
+      <button type="button" id="musicToggle" title="Pause / Play">
+        <i class="fa-solid fa-pause" id="musicIcon"></i>
+      </button>
+      <span>Lagu</span>
+    </div>
+
+    <div id="adminTopBar" class="admin-top-bar">
+      <button type="button" id="adminBackBtn" title="Kembali"><i class="fa-solid fa-arrow-left"></i></button>
+      <span class="admin-top-title">ADMIN PANEL</span>
+      <button type="button" id="adminCloseBtn" title="Keluar"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div id="adminModal" class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-title"><i class="fa-solid fa-lock"></i> Akses Admin</div>
+        <div class="modal-sub">Masukkan kode akses sistem</div>
+        <input type="password" id="adminCodeInput" placeholder="DOXY-2026" autocomplete="off">
+        <div class="modal-buttons">
+          <button type="button" id="adminCancelBtn" class="btn-cancel">Batal</button>
+          <button type="button" id="adminSubmitBtn" class="btn-submit">Masuk</button>
+        </div>
+      </div>
+    </div>
+    <iframe id="frame" src="about:blank" title="Doxy Joki" allow="autoplay"></iframe>
+
+    <nav class="shell-nav" id="shellNav">
+      <a href="joki.html" data-page="joki.html"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
+      <a href="digital.html" data-page="digital.html"><i class="fa-solid fa-box"></i><span>Digital</span></a>
+      <a href="home.html" data-page="home.html" class="active"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <a href="antrian.html" data-page="antrian.html"><i class="fa-solid fa-clock"></i><span>Antrian</span></a>
+      <a href="tentang.html" data-page="tentang.html"><i class="fa-solid fa-circle-info"></i><span>Tentang</span></a>
+      <a href="akun.html" data-page="akun.html"><i class="fa-solid fa-user"></i><span>Akun</span></a>
+    </nav>
+  </div>
+  <script>
+    (function () {
+      const intro = document.getElementById("intro");
+      const app = document.getElementById("app");
+      const bar = document.getElementById("bar");
+      const percentEl = document.getElementById("percent");
+      const statusEl = document.getElementById("status");
+      const music = document.getElementById("bgMusic");
+      const icon = document.getElementById("musicIcon");
+      const frame = document.getElementById("frame");
+      const nav = document.getElementById("shellNav");
+      const musicFab = document.getElementById("musicFab");
+
+      // Elemen Modal & Top Bar Admin
+      const adminModal = document.getElementById("adminModal");
+      const adminCodeInput = document.getElementById("adminCodeInput");
+      const adminCancelBtn = document.getElementById("adminCancelBtn");
+      const adminSubmitBtn = document.getElementById("adminSubmitBtn");
+      const adminTopBar = document.getElementById("adminTopBar");
+      const adminBackBtn = document.getElementById("adminBackBtn");
+      const adminCloseBtn = document.getElementById("adminCloseBtn");
+
+      let wantMusic = sessionStorage.getItem("doxy_music_playing") !== "0";
+      let isAdminMode = false;
+
+      music.loop = true;
+      music.volume = 0.55;
+      music.setAttribute("playsinline", "");
+      music.setAttribute("webkit-playsinline", "");
+
+      function setIcon(playing) {
+        if (icon) icon.className = playing ? "fa-solid fa-pause" : "fa-solid fa-play";
+      }
+
+      function kickPlay() {
+        if (!wantMusic) return;
+        try {
+          music.muted = false;
+          music.volume = 0.55;
+          const p = music.play();
+          if (p && p.then) {
+            p.then(function () {
+              setIcon(true);
+            }).catch(function () {
+              music.muted = true;
+              music.play().then(function () {
+                setTimeout(function () {
+                  music.muted = false;
+                  music.volume = 0.55;
+                  setIcon(true);
+                }, 50);
+              }).catch(function () {
+                setIcon(false);
+              });
+            });
+          }
+        } catch (e) {}
+      }
+
+      function playMusic() {
+        wantMusic = true;
+        sessionStorage.setItem("doxy_music_playing", "1");
+        kickPlay();
+      }
+
+      function pauseMusic() {
+        wantMusic = false;
+        sessionStorage.setItem("doxy_music_playing", "0");
+        try { music.pause(); } catch (e) {}
+        setIcon(false);
+      }
+
+      function navigate(page) {
+        if (!page) return;
+        if (page.indexOf("http") === 0) {
+          window.open(page, "_blank");
+          return;
+        }
+        const cleanPage = page.split("#")[0];
+        frame.src = cleanPage;
+        
+        if (!isAdminMode) {
+          nav.querySelectorAll("a").forEach(function (a) {
+            const p = (a.getAttribute("data-page") || "").split("?")[0];
+            const base = cleanPage.split("?")[0];
+            a.classList.toggle("active", base === p);
+          });
+        }
+        if (wantMusic) kickPlay();
+      }
+
+      function enterApp() {
+        sessionStorage.setItem("doxy_entered", "1");
+        intro.classList.add("done");
+        app.classList.add("show");
+        navigate("home.html");
+
+        if (wantMusic) {
+          sessionStorage.setItem("doxy_music_playing", "1");
+          kickPlay();
+          setTimeout(kickPlay, 200);
+          setTimeout(kickPlay, 600);
+          setTimeout(kickPlay, 1200);
+          setTimeout(kickPlay, 2500);
+        } else {
+          setIcon(false);
+        }
+      }
+
+      try {
+        music.muted = true;
+        music.play().catch(function () {});
+      } catch (e) {}
+
+      if (sessionStorage.getItem("doxy_entered") === "1") {
+        enterApp();
+      } else {
+        let progress = 0;
+        const tick = setInterval(function () {
+          if (progress >= 100) {
+            clearInterval(tick);
+            bar.style.width = "100%";
+            percentEl.textContent = "100%";
+            statusEl.textContent = "Selesai";
+            setTimeout(enterApp, 200);
+            return;
+          }
+          progress += Math.random() * 5 + 2.5;
+          if (progress > 100) progress = 100;
+          bar.style.width = progress + "%";
+          percentEl.textContent = Math.floor(progress) + "%";
+        }, 65);
+      }
+
+      function unlock() {
+        if (wantMusic) kickPlay();
+      }
+      document.addEventListener("touchstart", unlock, { passive: true });
+      document.addEventListener("click", unlock);
+
+      document.getElementById("musicToggle").addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (wantMusic && !music.paused) pauseMusic();
+        else playMusic();
+      });
+
+      function openAdminModal() {
+        adminCodeInput.value = "";
+        adminModal.classList.add("show");
+        setTimeout(function() { adminCodeInput.focus(); }, 100);
+      }
+
+      function closeAdminModal() {
+        adminModal.classList.remove("show");
+      }
+
+      adminCancelBtn.addEventListener("click", closeAdminModal);
+      adminModal.addEventListener("click", function(e) {
+        if (e.target === adminModal) closeAdminModal();
+      });
+
+      function submitAdminCode() {
+        const val = adminCodeInput.value.trim();
+        if (val === "DOXY-2026") {
+          closeAdminModal();
+          enterAdminMode();
+        } else {
+          alert("Kode akses salah!");
+          adminCodeInput.value = "";
+          adminCodeInput.focus();
+        }
+      }
+
+      adminSubmitBtn.addEventListener("click", submitAdminCode);
+      adminCodeInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          submitAdminCode();
+        }
+      });
+
+      // Masuk ke Mode Admin
+      function enterAdminMode() {
+        isAdminMode = true;
+        nav.style.display = "none";
+        musicFab.style.display = "none";
+        
+        adminTopBar.classList.add("show");
+
+        frame.style.top = "52px";
+        frame.style.bottom = "0";
+        frame.style.height = "calc(100% - 52px)";
+        frame.style.height = "calc(100dvh - 52px)";
+
+        navigate("admin.html");
+      }
+
+      // Keluar dari Mode Admin
+      function exitAdminMode() {
+        isAdminMode = false;
+        nav.style.display = "flex";
+        musicFab.style.display = "flex";
+
+        adminTopBar.classList.remove("show");
+
+        frame.style.top = "0";
+        frame.style.bottom = "58px";
+        frame.style.height = "calc(100% - 58px)";
+        frame.style.height = "calc(100dvh - 58px)";
+
+        navigate("home.html");
+      }
+
+      adminBackBtn.addEventListener("click", function() {
+        try {
+          if (frame.contentWindow && frame.contentWindow.history.length > 1) {
+            frame.contentWindow.history.back();
+          } else {
+            exitAdminMode();
+          }
+        } catch (e) {
+          exitAdminMode();
+        }
+      });
+
+      adminCloseBtn.addEventListener("click", function() {
+        exitAdminMode();
+      });
+
+      music.addEventListener("ended", function () {
+        music.currentTime = 0;
+        if (wantMusic) music.play().catch(function () {});
+      });
+      music.addEventListener("play", function () {
+        if (wantMusic && !music.muted) setIcon(true);
+      });
+
+      nav.addEventListener("click", function (e) {
+        const a = e.target.closest("a");
+        if (!a) return;
+        e.preventDefault();
+        navigate(a.getAttribute("data-page"));
+      });
+
+      // Menerima pesan dari dalam iframe (ketukan 5x pada logo di halaman dalam/home.html)
+      window.addEventListener("message", function (e) {
+        // Hanya terima navigasi/admin dari iframe pada origin website yang sama.
+        if (e.origin !== window.location.origin) return;
+        if (!e.data) return;
+        if (e.data.type === "doxy-admin-open") {
+          openAdminModal();
+        } else if ((e.data.type === "doxy-nav" || e.data.type === "voxyy-nav") && e.data.href) {
+          navigate(e.data.href);
+        } else if (typeof e.data === "string" && e.data.indexOf(".html") !== -1) {
+          navigate(e.data);
+        }
+      });
+    })();
+  </script>
+
+  <!-- Maintenance shell lock -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script>
+  (function () {
+    var KEY = "voxyy_maintenance";
+    var current = null;
+
+    function isOn() {
+      try { return localStorage.getItem(KEY) === "1"; } catch (e) { return false; }
+    }
+
+    function paint(on, animate) {
+      if (current === on) return;
+      current = on;
+      var el = document.getElementById("shellMaint");
+      if (on) {
+        if (!el) {
+          el = document.createElement("div");
+          el.id = "shellMaint";
+          el.innerHTML = '<div class="sm-card">' +
+            '<img src="logo.jpg" alt="Doxy" onerror="this.src=\'logo-produk.jpg\'">' +
+            '<div class="sm-badge"><i class="fa-solid fa-shield-halved"></i></div>' +
+            '<div class="sm-label">Maintenance</div>' +
+            '<h2>Doxy sedang<br>maintenance</h2>' +
+            '<p class="sm-sub">Mohon maaf atas ketidaknyamanan anda</p>' +
+            '<p class="sm-thanks">Terima kasih telah menunggu, kami akan segera online.</p>' +
+            '</div>';
+          document.body.appendChild(el);
+          void el.offsetWidth;
+        }
+        el.classList.remove("out");
+        el.classList.add("on");
+        document.documentElement.classList.add("shell-maint");
+      } else if (el) {
+        el.classList.remove("on");
+        el.classList.add("out");
+        document.documentElement.classList.remove("shell-maint");
+        setTimeout(function () {
+          var x = document.getElementById("shellMaint");
+          if (x) x.remove();
+        }, 380);
+      }
+    }
+
+    // styles
+    var st = document.createElement("style");
+    st.textContent = [
+      "html.shell-maint, html.shell-maint body { overflow:hidden !important; }",
+      "#shellMaint { position:fixed; inset:0; z-index:999999; display:flex; align-items:center; justify-content:center; padding:24px;",
+      "background: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(33,150,243,0.18), transparent 55%), #0a0e18;",
+      "opacity:0; transition: opacity .35s ease; }",
+      "#shellMaint.on { opacity:1; }",
+      "#shellMaint.out { opacity:0; }",
+      "#shellMaint .sm-card { background:#10182a; border:1px solid #1a2740; border-radius:20px; padding:32px 24px; text-align:center; max-width:380px; width:100%;",
+      "box-shadow:0 20px 50px rgba(0,0,0,.45); animation: smIn .45s ease both; }",
+      "#shellMaint.out .sm-card { animation: smOut .35s ease both; }",
+      "@keyframes smIn { from { opacity:0; transform:translateY(18px) scale(.96);} to { opacity:1; transform:none;} }",
+      "@keyframes smOut { from { opacity:1; } to { opacity:0; transform:translateY(12px) scale(.97);} }",
+      "#shellMaint img { width:72px; height:72px; border-radius:16px; object-fit:cover; margin:0 auto 14px; display:block; border:2px solid rgba(33,150,243,.4); box-shadow:0 0 20px rgba(33,150,243,.35); }",
+      "#shellMaint .sm-badge { width:44px; height:44px; margin:0 auto 10px; border-radius:50%; background:rgba(33,150,243,.15); color:#64b5f6; display:flex; align-items:center; justify-content:center; font-size:18px; }",
+      "#shellMaint .sm-label { font-size:13px; color:#90caf9; margin-bottom:8px; }",
+      "#shellMaint h2 { font-size:26px; font-weight:800; color:#fff; line-height:1.25; margin:0 0 14px; }",
+      "#shellMaint .sm-sub { color:#aaa; font-size:14px; margin:0 0 10px; }",
+      "#shellMaint .sm-thanks { color:#64b5f6; font-size:13px; margin:0; font-weight:500; }"
+    ].join("");
+    document.head.appendChild(st);
+
+    paint(isOn(), false);
+
+    window.addEventListener("storage", function (e) {
+      if (e.key === KEY) paint(e.newValue === "1", true);
+    });
+
+    function bindFirebase() {
+      try {
+        if (typeof firebase === "undefined") return;
+        if (!firebase.apps.length && window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
+          firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG);
+        }
+        if (!firebase.apps.length) return;
+        firebase.database().ref("settings/maintenance").on("value", function (snap) {
+          var on = snap.exists() ? !!snap.val() : false;
+          try { localStorage.setItem(KEY, on ? "1" : "0"); } catch (e) {}
+          paint(on, true);
+        });
+      } catch (e) {}
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bindFirebase);
+    } else {
+      bindFirebase();
+    }
+  })();
+  </script>
+
+</body>
+</html>

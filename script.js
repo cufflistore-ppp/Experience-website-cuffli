@@ -114,7 +114,7 @@ function updateTotal() {
 async function buatPesanan() {
   const nama = document.getElementById("nama")?.value?.trim() || "";
   const wa = document.getElementById("wa")?.value?.trim() || "";
-  let catatan = (typeof formatPushKontak === "function") ? formatPushKontak(nama, wa) : (document.getElementById("catatan")?.value || "");
+  let catatan = document.getElementById("catatan")?.value || "";
 
   // Validasi field wajib untuk Joki Kontak
   if (!nama || !wa) {
@@ -126,10 +126,20 @@ async function buatPesanan() {
     return;
   }
 
+  // Auto replace placeholder
+  if (catatan.includes("NAMA STORE")) {
+    catatan = catatan.replace(/NAMA STORE/g, nama);
+  }
+  if (catatan.includes("628…") || catatan.includes("628...")) {
+    let nomor = wa.replace(/^0/, "62").replace(/\D/g, "");
+    if (nomor.length < 10) nomor = "628xxxxxxxxxx";
+    catatan = catatan.replace(/628…|628\.\.\./g, nomor);
+  }
+
   const total = document.getElementById("totalHarga")?.textContent || "Rp 5.000";
   const rand = Math.floor(1000 + Math.random() * 9000);
   const timePart = String(Date.now()).slice(-3);
-  const kode = `EJ-2026-${rand}${timePart}`;
+  const kode = `DJ-2026-${rand}${timePart}`;
 
   const isJokiOrder = String(window.orderType || "").toLowerCase().includes("joki");
   let order = {
@@ -171,82 +181,41 @@ async function buatPesanan() {
 }
 
 // ========== LAPORAN ==========
-async function compressLaporanImage(file) {
-  return new Promise((resolve, reject) => {
-    if (!file || !file.type.startsWith("image/")) return resolve(null);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        const maxSide = 1200;
-        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.72));
-      };
-      img.onerror = () => reject(new Error("Foto tidak dapat dibaca."));
-      img.src = reader.result;
-    };
-    reader.onerror = () => reject(new Error("Foto tidak dapat dibaca."));
-    reader.readAsDataURL(file);
-  });
-}
-
 async function kirimLaporan() {
-  const noPesanan = document.getElementById("noPesanan")?.value.trim() || "-";
-  const judul = document.getElementById("judulLaporan")?.value.trim() || "-";
-  const deskripsi = document.getElementById("deskripsiLaporan")?.value.trim() || "-";
+  const noPesanan = document.getElementById("noPesanan")?.value || "-";
+  const judul = document.getElementById("judulLaporan")?.value || "-";
+  const deskripsi = document.getElementById("deskripsiLaporan")?.value || "-";
   const fileInput = document.getElementById("fotoLaporan");
+
+  if (!judul || judul === "-" || !deskripsi || deskripsi === "-") {
+    if (typeof showSiteModal === "function") {
+      showSiteModal("Isi judul dan deskripsi laporan terlebih dahulu.", "warning");
+    } else {
+      alert("Isi judul dan deskripsi laporan terlebih dahulu.");
+    }
+    return;
+  }
+
+  const data = { noPesanan, judul, deskripsi };
   const files = fileInput ? Array.from(fileInput.files).slice(0, 3) : [];
 
-  if (noPesanan === "-" || judul === "-" || deskripsi === "-") {
-    showSiteModal("Nomor pesanan, judul, dan deskripsi wajib diisi.", "warning");
-    return;
-  }
-  if (files.some(f => f.size > 5 * 1024 * 1024)) {
-    showSiteModal("Ukuran setiap foto maksimal 5 MB.", "warning");
-    return;
-  }
-  if (!window.VoxyyReports || typeof window.VoxyyReports.addReport !== "function") {
-    showSiteModal("Fitur laporan belum siap. Silakan muat ulang halaman.", "warning");
-    return;
+  // Tetap coba kirim ke Telegram jika ada
+  if (typeof kirimLaporanKeTelegram === "function") {
+    try { await kirimLaporanKeTelegram(data, files); } catch (e) {}
   }
 
-  const btn = document.querySelector("#formLaporan .btn-kirim");
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...'; }
-
-  try {
-    const photos = [];
-    for (const file of files) {
-      const dataUrl = await compressLaporanImage(file);
-      if (dataUrl) photos.push({ name: file.name, type: "image/jpeg", data: dataUrl });
-    }
-
-    const user = window.EJ && window.EJ.auth ? window.EJ.auth.currentUser : null;
-    const result = await window.VoxyyReports.addReport({
-      noPesanan,
-      judul,
-      deskripsi,
-      photos,
-      status: "Menunggu",
-      uid: user ? user.uid : "",
-      email: user ? (user.email || "") : "",
-      createdAt: Date.now()
-    });
-
-    if (!result || !result.ok) throw new Error(result && result.error ? result.error : "Gagal menyimpan laporan");
-    localStorage.setItem("elzkii_last_report_id", result.id || "");
-    showSiteModal("Laporan berhasil dikirim. Admin sekarang dapat melihatnya di Panel Admin.", "success");
-    document.getElementById("formLaporan")?.reset?.();
-  } catch (e) {
-    console.error("Gagal kirim laporan:", e);
-    showSiteModal("Laporan gagal dikirim. Coba lagi beberapa saat.", "warning");
-  } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Laporan'; }
-  }
+  // Langsung buka WhatsApp admin dengan isi laporan
+  const adminWA = "6285190843300";
+  const pesan =
+    `*LAPORAN TRANSAKSI - DOXY JOKI*\n\n` +
+    `Nomor Pesanan: ${noPesanan}\n` +
+    `Judul: ${judul}\n` +
+    `Deskripsi:\n${deskripsi}\n\n` +
+    (files.length ? `(Ada ${files.length} foto pendukung - kirim manual jika perlu)\n` : "") +
+    `Dikirim dari website Doxy Joki.`;
+  const url = `https://wa.me/${adminWA}?text=${encodeURIComponent(pesan)}`;
+  if (window.top) window.top.location.href = url;
+  else window.location.href = url;
 }
 
 // ========== Custom Animated Modal ==========
@@ -300,3 +269,194 @@ window.showSiteModal = showSiteModal;
 window.showNiceAlert = function(msg) {
   showSiteModal(msg, "warning");
 };
+
+
+/* ========== MAINTENANCE MODE ========== */
+const DOXY_ADMIN_WA = "6285190843300";
+const MAINT_KEY = "voxyy_maintenance";
+let _maintListening = false;
+let _maintCurrent = null; // null | true | false
+
+function isAdminPage() {
+  try {
+    const path = (location.pathname || "").toLowerCase();
+    const page = (location.href || "").toLowerCase();
+    return path.includes("admin.html") || page.includes("admin.html") || path.includes("edit-produk");
+  } catch (e) {
+    return false;
+  }
+}
+
+function readMaintLocal() {
+  try {
+    return localStorage.getItem(MAINT_KEY) === "1";
+  } catch (e) {
+    return false;
+  }
+}
+
+function writeMaintLocal(on) {
+  try {
+    localStorage.setItem(MAINT_KEY, on ? "1" : "0");
+  } catch (e) {}
+}
+
+function buildMaintOverlay() {
+  const overlay = document.createElement("div");
+  overlay.id = "maintenanceOverlay";
+  overlay.setAttribute("aria-live", "polite");
+  overlay.innerHTML = `
+    <div class="maint-wrap">
+      <div class="maint-card">
+        <img class="maint-logo" src="logo.jpg" alt="Doxy Joki" onerror="this.onerror=null;this.src='logo-produk.jpg'">
+        <div class="maint-badge"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="maint-label">Maintenance</div>
+        <h2 class="maint-title">Doxy sedang<br>maintenance</h2>
+        <p class="maint-sub">Mohon maaf atas ketidaknyamanan anda</p>
+        <p class="maint-thanks">Terima kasih telah menunggu, kami akan segera online.</p>
+      </div>
+    </div>
+  `;
+  return overlay;
+}
+
+function showMaintenance(animated) {
+  if (isAdminPage()) return;
+  document.documentElement.classList.add("is-maintenance");
+  document.body.classList.add("is-maintenance");
+
+  let overlay = document.getElementById("maintenanceOverlay");
+  if (!overlay) {
+    overlay = buildMaintOverlay();
+    document.body.appendChild(overlay);
+    // force reflow then show
+    void overlay.offsetWidth;
+  }
+  // always clean enter
+  overlay.classList.remove("maint-out");
+  if (animated !== false) {
+    overlay.classList.add("maint-in");
+  } else {
+    overlay.classList.add("maint-show");
+  }
+  // Hide underlying UI
+  try {
+    document.body.style.overflow = "hidden";
+  } catch (e) {}
+}
+
+function hideMaintenance(animated) {
+  document.documentElement.classList.remove("is-maintenance");
+  document.body.classList.remove("is-maintenance");
+  const overlay = document.getElementById("maintenanceOverlay");
+  if (!overlay) {
+    try { document.body.style.overflow = ""; } catch (e) {}
+    return;
+  }
+  if (animated === false) {
+    overlay.remove();
+    try { document.body.style.overflow = ""; } catch (e) {}
+    return;
+  }
+  overlay.classList.remove("maint-in", "maint-show");
+  overlay.classList.add("maint-out");
+  setTimeout(() => {
+    const el = document.getElementById("maintenanceOverlay");
+    if (el) el.remove();
+    try { document.body.style.overflow = ""; } catch (e) {}
+  }, 380);
+}
+
+function applyMaintenance(on, animated) {
+  const next = !!on;
+  if (_maintCurrent === next) {
+    // ensure overlay exists if needed
+    if (next && !document.getElementById("maintenanceOverlay") && !isAdminPage()) {
+      showMaintenance(false);
+    }
+    return;
+  }
+  _maintCurrent = next;
+  writeMaintLocal(next);
+  if (next) showMaintenance(animated !== false);
+  else hideMaintenance(animated !== false);
+}
+
+async function fetchMaintFromFirebase() {
+  try {
+    if (typeof firebase === "undefined") return null;
+    if (!firebase.apps || !firebase.apps.length) {
+      if (window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
+        try { firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG); } catch (e) {}
+      }
+    }
+    if (!firebase.apps || !firebase.apps.length) return null;
+    const snap = await firebase.database().ref("settings/maintenance").once("value");
+    if (!snap.exists()) return null;
+    return !!snap.val();
+  } catch (e) {
+    return null;
+  }
+}
+
+function startMaintRealtime() {
+  if (_maintListening || isAdminPage()) return;
+  _maintListening = true;
+
+  // localStorage cross-tab
+  window.addEventListener("storage", (e) => {
+    if (e.key === MAINT_KEY) {
+      applyMaintenance(e.newValue === "1", true);
+    }
+  });
+
+  // Firebase realtime
+  try {
+    if (typeof firebase === "undefined") return;
+    if (!firebase.apps || !firebase.apps.length) {
+      if (window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
+        try { firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG); } catch (e) {}
+      }
+    }
+    if (!firebase.apps || !firebase.apps.length) return;
+    firebase.database().ref("settings/maintenance").on("value", (snap) => {
+      const on = snap.exists() ? !!snap.val() : false;
+      applyMaintenance(on, true);
+    }, (err) => {
+      console.warn("[maint] firebase listen:", err);
+    });
+  } catch (e) {
+    console.warn("[maint] realtime:", e);
+  }
+}
+
+async function checkSiteMaintenance() {
+  if (isAdminPage()) return;
+  // immediate local
+  applyMaintenance(readMaintLocal(), false);
+  // then firebase
+  const remote = await fetchMaintFromFirebase();
+  if (remote !== null) applyMaintenance(remote, true);
+  startMaintRealtime();
+}
+
+// boot
+(function bootMaintenance() {
+  const run = () => {
+    try { checkSiteMaintenance(); } catch (e) {}
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", run);
+  } else {
+    run();
+  }
+  // fallback poll (slow) if firebase listener fails
+  setInterval(async () => {
+    if (isAdminPage()) return;
+    const remote = await fetchMaintFromFirebase();
+    if (remote !== null) applyMaintenance(remote, true);
+  }, 30000);
+})();
+
+window.applyMaintenance = applyMaintenance;
+window.checkSiteMaintenance = checkSiteMaintenance;

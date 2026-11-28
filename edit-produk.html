@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <script src="iframe-nav.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Produk - Doxy Joki</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .page-head h2 {
+      font-size: 18px;
+      color: #2196f3;
+      margin: 0;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .admin-tab {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #1a2740;
+      background: #10182a;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .admin-tab.active {
+      background: #2196f3;
+      color: #0a0e18;
+      border-color: #2196f3;
+    }
+    .produk-admin-card {
+      background: #10182a;
+      border: 1px solid #1a2740;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .produk-admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .produk-admin-actions button {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-edit { background: #2196f3; color: #fff; }
+    .btn-del { background: #333; color: #ff6666; }
+    .btn-add-produk {
+      background: linear-gradient(90deg, #2196f3, #1565c0);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .form-produk-edit {
+      background: #0d1220;
+      border: 1px solid #1a2740;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .form-produk-edit.show { display: block; }
+    .form-produk-edit label {
+      display: block;
+      font-size: 12px;
+      color: #90caf9;
+      margin: 8px 0 4px;
+    }
+    .form-produk-edit input,
+    .form-produk-edit select,
+    .form-produk-edit textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #1a2740;
+      background: #10182a;
+      color: #fff;
+      font-size: 14px;
+    }
+    .form-produk-edit .form-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .btn-back-admin {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #90caf9;
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-content">
+    <a href="admin.html" class="btn-back-admin"><i class="fa-solid fa-arrow-left"></i> Kembali ke Panel Admin</a>
+
+    <div class="page-head">
+      <i class="fa-solid fa-box-open" style="color:#2196f3;font-size:22px;"></i>
+      <h2>Kelola Produk</h2>
+    </div>
+    <p style="color:#aaa;font-size:13px;margin-bottom:14px;">Tambah, ubah, atau hapus produk. Pilih lokasi tampil: Home atau Digital.</p>
+
+    <div class="admin-tabs">
+      <button type="button" class="admin-tab active" data-cat="home">Home</button>
+      <button type="button" class="admin-tab" data-cat="digital">Digital</button>
+    </div>
+
+    <button type="button" class="btn-add-produk" id="btnTambahProduk">
+      <i class="fa-solid fa-plus"></i> Tambah Produk
+    </button>
+
+    <div class="form-produk-edit" id="formProdukEdit">
+      <input type="hidden" id="editProdukId">
+      <input type="hidden" id="editProdukCat">
+      <label>Judul Produk</label>
+      <input type="text" id="editJudul" placeholder="Nama produk">
+      <label>Harga (angka saja)</label>
+      <input type="number" id="editHarga" placeholder="5000" min="0">
+      <label>Status</label>
+      <select id="editStatus">
+        <option value="TERSEDIA">TERSEDIA</option>
+        <option value="HABIS">HABIS</option>
+      </select>
+      <label>Lokasi Tampil</label>
+      <select id="editLokasi">
+        <option value="home">Home</option>
+        <option value="digital">Digital / Produk Digital</option>
+      </select>
+      <label>Deskripsi</label>
+      <textarea id="editDeskripsi" rows="2" placeholder="Deskripsi singkat"></textarea>
+      <label>Foto Produk (upload file)</label>
+      <input type="file" id="editImgFile" accept="image/*" style="margin-bottom:8px;">
+      <input type="hidden" id="editImg">
+      <div id="editImgPreviewWrap" style="display:none;margin-top:6px;">
+        <img id="editImgPreview" src="" alt="Preview" style="max-width:120px;max-height:120px;border-radius:8px;border:1px solid #1a2740;object-fit:cover;">
+      </div>
+      <p style="font-size:11px;color:#666;margin-top:4px;">Pilih file gambar dari HP/PC. Kosongkan jika pakai logo default.</p>
+      <label>Video Produk (upload langsung, maksimal 100 MB)</label>
+      <input type="file" id="editVideoFile" accept="video/mp4,video/webm,video/ogg,video/quicktime" style="margin-bottom:8px;">
+      <input type="hidden" id="editVideo">
+      <div id="editVideoPreviewWrap" style="display:none;margin-top:8px;">
+        <video id="editVideoPreview" controls playsinline style="width:100%;max-width:320px;max-height:220px;border-radius:10px;background:#000;border:1px solid #1a2740;"></video>
+        <p id="editVideoInfo" style="font-size:11px;color:#90caf9;margin-top:4px;"></p>
+        <label style="display:flex;align-items:center;gap:8px;color:#ff8a80;font-size:12px;margin-top:6px;"><input type="checkbox" id="editHapusVideo" style="width:auto;"> Hapus video produk yang terpasang</label>
+      </div>
+      <div id="videoUploadStatus" style="display:none;font-size:12px;color:#90caf9;margin-top:8px;"></div>
+      <div class="form-actions">
+        <button type="button" class="btn-buat" id="btnSimpanProduk"><i class="fa-solid fa-save"></i> Simpan</button>
+        <button type="button" class="status-btn btn-delete" id="btnBatalProduk">Batal</button>
+      </div>
+    </div>
+
+    <div id="listProdukAdmin"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script src="global-orders.js"></script>
+  <script src="produk.js"></script>
+  <script src="digital-produk.js"></script>
+  <script src="edit-produk.js"></script>
+</body>
+</html>

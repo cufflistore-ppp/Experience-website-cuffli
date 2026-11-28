@@ -1,6 +1,6 @@
 /**
  * Dipakai di halaman konten yang dibuka di dalam iframe shell[span_1](start_span)[span_1](end_span).
- * - Sembunyikan navigasi ganda
+ * - Sembunyikan nav & music ganda[span_2](start_span)[span_2](end_span)
  * - Intercept link internal → parent shell[span_3](start_span)[span_3](end_span)
  * - Jangan redirect ke intro saat di iframe[span_4](start_span)[span_4](end_span)
  */
@@ -26,7 +26,9 @@
   style.textContent = [
     "html.in-iframe .bottom-nav,",
     "html.in-iframe .music-controls,",
-    "html.in-iframe #musicControls {",
+    "html.in-iframe #musicControls,",
+    "html.in-iframe .music-fab,",
+    "html.in-iframe audio#bgMusic {",
     "  display: none !important;",
     "  visibility: hidden !important;",
     "}",
@@ -34,6 +36,16 @@
     "html.in-iframe .page-content { padding-bottom: 20px !important; }"
   ].join("\n");
   document.documentElement.appendChild(style);
+
+  // Pause audio lokal di halaman konten (kalau ada) biar tidak dobel[span_6](start_span)[span_6](end_span)
+  function muteLocalAudio() {
+    var a = document.getElementById("bgMusic");
+    if (a) {
+      try { a.pause(); a.muted = true; a.volume = 0; } catch (e) {}
+    }
+  }
+  muteLocalAudio();
+  document.addEventListener("DOMContentLoaded", muteLocalAudio);
 
   // Intercept klik link internal tanpa mematikan event listener tombol persegi[span_7](start_span)[span_7](end_span)
   document.addEventListener("click", function (e) {

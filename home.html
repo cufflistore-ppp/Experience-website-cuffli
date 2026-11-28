@@ -10,7 +10,7 @@
   <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ELZKII JOKI - Pusat Layanan</title>
+  <title>Doxy Joki - Pusat Layanan</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -20,7 +20,37 @@
       align-items: center;
       gap: 10px;
     }
-.user-chip {
+    .music-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(33, 150, 243, 0.12);
+      border: 1px solid rgba(33, 150, 243, 0.3);
+      border-radius: 20px;
+      padding: 4px 8px 4px 6px;
+    }
+    .music-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #1976d2, #0d47a1);
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.4);
+    }
+    .music-btn:active { transform: scale(0.92); }
+    .music-label {
+      font-size: 11px;
+      color: #90caf9;
+      font-weight: 600;
+      padding-right: 4px;
+    }
+    .user-chip {
       display: none;
       align-items: center;
       gap: 6px;
@@ -37,7 +67,7 @@
       height: 28px;
       border-radius: 50%;
       object-fit: cover;
-      border: 1.5px solid #e21b83;
+      border: 1.5px solid #2196f3;
     }
     .user-chip span {
       font-size: 12px;
@@ -55,17 +85,28 @@
   </style>
 </head>
 <body>
-<header class="header">
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
+  <header class="header">
     <div class="brand">
       <!-- Logo di sini sekarang berfungsi untuk shortcut Admin jika diketuk 5x -->
-      <img src="logo.jpg" alt="ELZKII JOKI" class="logo" id="adminLogoHome" title="ELZKII JOKI">
+      <img src="logo.jpg" alt="Doxy Joki" class="logo" id="adminLogoHome" title="Doxy Joki">
       <div>
-        <h1>ELZKII JOKI <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>Pusat Layanan ELZKII JOKI</p>
+        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Pusat Layanan Doxy Joki</p>
       </div>
     </div>
     <div class="header-right">
-<a href="akun.html" class="user-chip" id="userChip">
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
+      <a href="akun.html" class="user-chip" id="userChip">
         <img src="" alt="" id="userAvatar">
         <span id="userName"></span>
       </a>
@@ -73,12 +114,11 @@
   </header>
 
   <div class="banner">
-    <img src="banner.jpg" alt="Selamat Datang di ELZKII JOKI" class="banner-full">
+    <img src="banner.jpg" alt="Selamat Datang di Doxy Joki" class="banner-full">
   </div>
   <div class="top-notif" id="topNotif" style="display:none;"></div>
 
   <div class="menu-grid">
-    <a href="riwayat.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat Digital</span></a>
     <a href="joki.html" class="menu-item">
       <i class="fa-solid fa-shield-halved"></i>
       <span>Joki</span>
@@ -87,20 +127,29 @@
       <i class="fa-solid fa-box"></i>
       <span>Produk Digital</span>
     </a>
+    
+    <a href="https://wa.me/6285190843300" class="menu-item" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Jasa Post</span>
+    </a>
 
-    <a href="https://wa.me/6281252384673" class="menu-item" target="_blank">
+    <a href="https://wa.me/6285190843300" class="menu-item" target="_blank">
       <i class="fa-brands fa-whatsapp"></i>
       <span>Wa Joki</span>
     </a>
-    <a href="jaspost.html" class="menu-item">
-      <i class="fa-solid fa-bullhorn"></i>
-      <span>Jasa Post</span>
+    <a href="https://wa.me/6285190843300" class="menu-item" target="_blank">
+      <i class="fa-brands fa-whatsapp"></i>
+      <span>Chat Admin</span>
+    </a>
+    <a href="pembayaran.html?paket=Nokos%20WA%20Indonesia&total=5000" class="menu-item">
+      <i class="fa-solid fa-mobile-screen"></i>
+      <span>Nokos WA Indonesia</span>
     </a>
   </div>
 
   <section class="produk-section">
     <h3>PRODUK DIGITAL</h3>
-    <p class="subtitle">Semua produk dari katalog admin. Order melalui WhatsApp.</p>
+    <p class="subtitle">Nokos & Jasa Logo. Bayar QRIS, lalu konfirmasi via WhatsApp.</p>
     <div class="produk-grid" id="produkGrid"></div>
   </section>
 
@@ -114,8 +163,7 @@
   </div>
 
   <!-- Navigasi bawah ini akan otomatis disembunyikan via CSS saat berada di dalam iframe index.html -->
-  <nav class="bottom-nav nav-7">
-    <a href="riwayat.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a>
+  <nav class="bottom-nav nav-6">
     <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
     <a href="home.html" class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></a>
@@ -130,11 +178,18 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script src="global-orders.js"></script>
   <script src="script.js"></script>
-<script>
+  <script src="music.js"></script>
+  <script>
     (function () {
-      // Auth guard dikelola oleh ej-auth.js. Jangan memakai flag sessionStorage
-      // doxy_entered karena flag ini tidak pernah dibuat dan menyebabkan loop
-      // home.html -> index.html -> home.html setelah login.
+      try {
+        if (window.self === window.top) {
+          if (sessionStorage.getItem("doxy_entered") !== "1") {
+            window.location.replace("index.html");
+            return;
+          }
+        }
+      } catch (e) {}
+
       function updateUserChip() {
         try {
           if (typeof firebase === "undefined" || !firebase.apps.length) return;
@@ -186,8 +241,5 @@
       });
     })();
   </script>
-
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script>
-<script src="footer.js"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@
   <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tentang - ELZKII JOKI</title>
+  <title>Tentang - Doxy Joki Elite</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
@@ -26,17 +26,17 @@
       border: 2px solid rgba(0,229,160,0.35);
       box-shadow: 0 6px 20px rgba(33, 150, 243, 0.15);
       margin-bottom: 12px;
-      background: #f3c5dd;
+      background: #1e2a45;
     }
     .about-hero h2 {
       font-size: 20px;
-      color: #b91568;
+      color: #0d47a1;
       margin: 0 0 4px;
       font-weight: 800;
     }
     .about-hero .badge-elite {
       display: inline-block;
-      background: linear-gradient(135deg, #e21b83, #b91568);
+      background: linear-gradient(135deg, #2196f3, #1565c0);
       color: #0a0e1a;
       font-size: 11px;
       font-weight: 800;
@@ -46,8 +46,8 @@
       margin-bottom: 10px;
     }
     .about-card {
-      background: #ffffff;
-      border: 1px solid #f3c5dd;
+      background: #12182a;
+      border: 1px solid #1e2a45;
       border-radius: 14px;
       padding: 16px;
       margin-bottom: 18px;
@@ -57,9 +57,9 @@
     }
     .about-card p { margin: 0 0 10px; }
     .about-card p:last-child { margin-bottom: 0; }
-    .about-card strong { color: #b91568; }
+    .about-card strong { color: #0d47a1; }
     .section-title {
-      color: #b91568;
+      color: #0d47a1;
       font-size: 14px;
       font-weight: 700;
       margin: 0 0 6px;
@@ -77,8 +77,8 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      background: #ffffff;
-      border: 1px solid #f3c5dd;
+      background: #12182a;
+      border: 1px solid #1e2a45;
       border-radius: 12px;
       padding: 14px 14px;
       margin-bottom: 10px;
@@ -87,7 +87,7 @@
       transition: border-color 0.2s, background 0.2s;
     }
     .contact-item:active {
-      border-color: #b9156866;
+      border-color: #0d47a166;
       background: #322800;
     }
     .contact-item .icon-wrap {
@@ -100,8 +100,8 @@
       font-size: 20px;
       flex-shrink: 0;
     }
-    .contact-item .icon-wrap.wa { background: #fff0f7; color: #e21b83; }
-    .contact-item .icon-wrap.channel { background: #fff0f7; color: #e21b83; }
+    .contact-item .icon-wrap.wa { background: #075e5433; color: #25d366; }
+    .contact-item .icon-wrap.channel { background: #075e5433; color: #25d366; }
     .contact-item strong {
       display: block;
       font-size: 14px;
@@ -121,17 +121,28 @@
   </style>
 </head>
 <body>
-<header class="header">
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
+  <header class="header">
     <div class="brand">
-      <img src="logo.jpg" class="logo" alt="ELZKII JOKI">
+      <img src="logo.jpg" class="logo" alt="Doxy Joki">
       <div>
-        <h1>ELZKII JOKI <i class="fa-solid fa-circle-check verified"></i></h1>
-        <p>ELZKII JOKI</p>
+        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
+        <p>Doxy Joki Elite</p>
       </div>
     </div>
   
     <div class="header-right">
-</div>
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
+    </div>
   </header>
 
   <div class="top-notif" id="topNotif" style="display:none;"></div>
@@ -139,16 +150,16 @@
   <div class="page-content">
     <!-- Hero -->
     <div class="about-hero">
-      <img src="logo.jpg" alt="ELZKII JOKI" onerror="this.style.background='#f3c5dd'">
+      <img src="logo.jpg" alt="Doxy Joki Elite" onerror="this.style.background='#1e2a45'">
       <div class="badge-elite">ELITE</div>
-      <h2>ELZKII JOKI</h2>
+      <h2>Doxy Joki Elite</h2>
       <p style="color:#aaa;font-size:13px;margin:0;">Joki Kontak & Produk Digital Terpercaya</p>
     </div>
 
     <!-- Tentang -->
     <div class="about-card">
       <p>
-        <strong>ELZKII JOKI</strong> adalah pusat layanan joki kontak dan produk digital yang dirancang agar proses order, pembayaran, serta pemantauan antrian jadi lebih rapi dan terpusat di satu website.
+        <strong>Doxy Joki Elite</strong> adalah pusat layanan joki kontak dan produk digital yang dirancang agar proses order, pembayaran, serta pemantauan antrian jadi lebih rapi dan terpusat di satu website.
       </p>
       <p>
         Kami fokus pada layanan <strong>Joki Kontak</strong>, <strong>Paket Views + Kontak</strong>, dengan sistem order yang jelas, konfirmasi pembayaran via bot, serta status antrian yang bisa dipantau kapan saja.
@@ -157,7 +168,7 @@
         Semua transaksi diproses secara profesional. Gunakan jasa admin / MC resmi agar terhindar dari penipuan.
       </p>
       <p>
-        Sejak awal beroperasi, ELZKII JOKI berkomitmen memberikan pelayanan yang transparan, cepat, dan aman. Setiap order yang masuk akan langsung tercatat di sistem, sehingga kamu tidak perlu khawatir kehilangan data atau status pesanan.
+        Sejak awal beroperasi, Doxy Joki Elite berkomitmen memberikan pelayanan yang transparan, cepat, dan aman. Setiap order yang masuk akan langsung tercatat di sistem, sehingga kamu tidak perlu khawatir kehilangan data atau status pesanan.
       </p>
       <p>
         Kami memahami kebutuhan seller, store, maupun personal yang ingin meningkatkan views status, memperluas jangkauan kontak, atau mempromosikan akun secara lebih luas. Karena itu, kami menyediakan berbagai paket yang bisa disesuaikan dengan kebutuhan dan budget kamu.
@@ -166,7 +177,7 @@
 
     <!-- Kenapa pilih kami -->
     <div class="section-title" style="margin-top:8px;">
-      <i class="fa-solid fa-star"></i> Kenapa Pilih ELZKII JOKI?
+      <i class="fa-solid fa-star"></i> Kenapa Pilih Doxy Joki Elite?
     </div>
     <div class="about-card">
       <p>
@@ -175,7 +186,7 @@
       </p>
       <p>
         <strong>2. Pembayaran Aman & Otomatis</strong><br>
-        Pemesanan dilanjutkan langsung melalui WhatsApp admin. Ikuti instruksi admin untuk menyelesaikan order.
+        Sistem pembayaran menggunakan QRIS dinamis. Setelah bayar, kamu bisa langsung konfirmasi dan status akan diperbarui oleh admin.
       </p>
       <p>
         <strong>3. Status Antrian Real-time</strong><br>
@@ -203,15 +214,15 @@
         <strong>Langkah 2</strong> — Isi data yang diminta dengan lengkap dan benar (nama, nomor WhatsApp, format push, atau data akun).
       </p>
       <p>
-        <strong>Langkah 3</strong> — Kirim pesanan ke WhatsApp admin untuk konfirmasi dan instruksi selanjutnya.
+        <strong>Langkah 3</strong> — Lakukan pembayaran melalui QRIS yang muncul di halaman pembayaran.
       </p>
       <p>
-        <strong>Langkah 4</strong> — Setelah admin mengonfirmasi, pesanan masuk ke antrian dan mulai diproses. Produk digital akan dikirim melalui akun website.
+        <strong>Langkah 4</strong> — Setelah transfer, klik konfirmasi bayar. Order akan masuk antrian dan diproses admin.
       </p>
       <p>
         <strong>Langkah 5</strong> — Pantau status pesanan di halaman Antrian menggunakan kode order kamu.
       </p>
-      <p style="margin-top:8px;color:#e21b83;">
+      <p style="margin-top:8px;color:#2196f3;">
         ⚠️ Pastikan hanya order melalui website resmi. Jangan transfer ke rekening pribadi yang tidak tercantum di sistem.
       </p>
     </div>
@@ -220,35 +231,38 @@
     <div class="section-title">
       <i class="fa-solid fa-headset"></i> Hubungi Kami
     </div>
-    <p class="section-sub">CS WhatsApp dan Saluran resmi ELZKII JOKI.</p>
+    <p class="section-sub">CS WhatsApp dan Saluran resmi Doxy Joki Elite.</p>
 
     <div class="contact-list">
-      <a href="https://wa.me/6282364307699" class="contact-item" target="_blank" rel="noopener">
+      <!-- WA CS Utama -->
+      <a href="https://wa.me/6285190843300" class="contact-item" target="_blank" rel="noopener">
         <div class="icon-wrap wa"><i class="fa-brands fa-whatsapp"></i></div>
-        <div><strong>WhatsApp Admin</strong><small>Hubungi admin ELZKII JOKI</small></div>
+        <div>
+          <strong>WhatsApp CS</strong>
+          <small>0851-9084-3300</small>
+        </div>
         <i class="fa-solid fa-chevron-right arrow"></i>
       </a>
-      <a href="https://whatsapp.com/channel/0029Vb8sxoQ3GJOydf8BtR08" class="contact-item" target="_blank" rel="noopener">
+
+      <!-- Saluran WA -->
+      <a href="https://whatsapp.com/channel/0029Vb93w5nIt5s3imv6N33R" class="contact-item" target="_blank" rel="noopener">
         <div class="icon-wrap channel"><i class="fa-solid fa-bullhorn"></i></div>
-        <div><strong>Saluran WhatsApp 1</strong><small>Info dan pengumuman ELZKII JOKI</small></div>
-        <i class="fa-solid fa-chevron-right arrow"></i>
-      </a>
-      <a href="https://whatsapp.com/channel/0029Vb8xhHx1HsppwtRaTr3P" class="contact-item" target="_blank" rel="noopener">
-        <div class="icon-wrap channel"><i class="fa-solid fa-bullhorn"></i></div>
-        <div><strong>Saluran WhatsApp 2</strong><small>Info dan pengumuman ELZKII JOKI</small></div>
+        <div>
+          <strong>Saluran Resmi Doxy Joki</strong>
+          <small>Ikuti info, promo & pengumuman</small>
+        </div>
         <i class="fa-solid fa-chevron-right arrow"></i>
       </a>
     </div>
 
     <p style="text-align:center;color:#666;font-size:11px;margin-top:20px;line-height:1.5;">
-      © ELZKII JOKI · Order hanya melalui website resmi
+      © Doxy Joki Elite · Order hanya melalui website resmi
     </p>
   </div>
 
   <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
 
-  <nav class="bottom-nav nav-7">
-    <a href="riwayat.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a>
+  <nav class="bottom-nav nav-6">
     <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
     <a href="digital.html" class="nav-item"><i class="fa-solid fa-box"></i><span>Digital</span></a>
     <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
@@ -258,7 +272,6 @@
   </nav>
 
   <script src="script.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script>
-<script src="footer.js"></script>
+  <script src="music.js"></script>
 </body>
 </html>

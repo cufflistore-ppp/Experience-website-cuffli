@@ -4,7 +4,7 @@
   <script src="iframe-nav.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Produk Digital - ELZKII JOKI</title>
+  <title>Produk Digital - Doxy Joki</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -15,17 +15,29 @@
     document.documentElement.classList.add('in-iframe');
   }
 </script>
-<header class="header">
+
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="music.m4a" type="audio/mp4">
+  </audio>
+
+  <header class="header">
     <div class="brand">
-      <img src="logo.jpg" alt="ELZKII JOKI" class="logo">
+      <img src="logo.jpg" alt="Doxy Joki" class="logo">
       <div>
-        <h1>ELZKII JOKI <i class="fa-solid fa-circle-check verified"></i></h1>
+        <h1>Doxy Joki <i class="fa-solid fa-circle-check verified"></i></h1>
         <p>Produk Digital</p>
       </div>
     </div>
   
     <div class="header-right">
-</div>
+      <div class="music-controls" id="musicControls">
+        <button type="button" class="music-btn" id="musicToggle" title="Pause / Play lagu">
+          <i class="fa-solid fa-pause" id="musicIcon"></i>
+        </button>
+        <span class="music-label">Lagu</span>
+      </div>
+    </div>
   </header>
 
   <div class="top-notif" id="topNotif" style="display:none;"></div>
@@ -33,15 +45,14 @@
   <div class="page-content">
     <div class="badge">PRODUK DIGITAL</div>
     <h2 class="page-title">Produk Digital.</h2>
-    <p class="page-desc">Pilih produk, kirim pesanan ke WhatsApp admin, lalu produk digital dikirim melalui akun website setelah diproses.</p>
+    <p class="page-desc">Pilih produk, bayar QRIS, lalu konfirmasi ke admin WhatsApp.</p>
 
-    <div id="digitalList" class="produk-grid"></div>
+    <div id="digitalList"></div>
   </div>
 
   <a href="laporan.html" class="floating-laporan"><i class="fa-solid fa-exclamation-circle"></i> Laporan</a>
 
-    <nav class="bottom-nav nav-7">
-    <a href="riwayat.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Riwayat</span></a>
+    <nav class="bottom-nav nav-6">
     <a href="joki.html" class="nav-item"><i class="fa-solid fa-shield-halved"></i><span>Joki</span></a>
     <a href="digital.html" class="nav-item active"><i class="fa-solid fa-box"></i><span>Digital</span></a>
     <a href="home.html" class="nav-item"><i class="fa-solid fa-house"></i><span>Home</span></a>
@@ -52,7 +63,6 @@
 
   <script src="digital-produk.js"></script>
   <script src="script.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script><script src="ej-auth.js"></script>
-<script src="footer.js"></script>
+<script src="music.js"></script>
 </body>
 </html>

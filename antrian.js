@@ -45,14 +45,13 @@ function findOrderByKode(orders, kode) {
 }
 
 function loadAntrianFromOrders(orders) {
-  const sorted = [...(orders || [])].sort((a,b) => Number(!!(b.prioritas || b.priority)) - Number(!!(a.prioritas || a.priority)) || Number(b.createdAt || 0) - Number(a.createdAt || 0));
-  return sorted.map((o, i) => ({
+  return (orders || []).map((o, i) => ({
     no: i + 1,
     nama:
       (o.nama || "Anonim").length > 8
         ? (o.nama || "A").substring(0, 2) + "********"
         : o.nama || "Anonim",
-    jenis: (o.paket || "Joki Kontak") + ((o.prioritas || o.priority) ? " · ⚡ PRIORITAS" : "") + " · " + (o.status || "Belum Bayar"),
+    jenis: (o.paket || "Joki Kontak") + " · " + (o.status || "Belum Bayar"),
     status:
       o.status === "Sukses" || o.status === "SELESAI"
         ? "SELESAI"
@@ -122,11 +121,11 @@ async function renderAntrian() {
   const configured = window.VoxyyOrders && window.VoxyyOrders.isGlobalConfigured && window.VoxyyOrders.isGlobalConfigured();
   if (configured) {
     modeBadge.innerHTML =
-      '<span style="background:#fff0f7;color:#e21b83;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global (Realtime)</span> <span>' +
+      '<span style="background:#0d3d1a;color:#66bb6a;padding:3px 8px;border-radius:6px;font-weight:600;">🌐 Antrian Global (Realtime)</span> <span>' +
       (orders.length || 0) + ' pesanan · sinkron antar HP</span>';
   } else {
     modeBadge.innerHTML =
-      '<span style="background:#fff0f7;color:#ffb74d;padding:3px 8px;border-radius:6px;font-weight:600;">⚙️ Setup Firebase</span> <span>Isi FIREBASE_CONFIG di global-orders.js (gratis) agar antar-HP sinkron</span>';
+      '<span style="background:#3d2a0d;color:#ffb74d;padding:3px 8px;border-radius:6px;font-weight:600;">⚙️ Setup Firebase</span> <span>Isi FIREBASE_CONFIG di global-orders.js (gratis) agar antar-HP sinkron</span>';
   }
 
   if (data.length === 0) {
@@ -200,8 +199,8 @@ function ensureStatusModal() {
       }
       .status-modal-box {
         position: relative;
-        background: #ffffff;
-        border: 1px solid #f3c5dd;
+        background: #10182a;
+        border: 1px solid #1a2740;
         border-radius: 16px;
         padding: 22px 16px 16px;
         width: 100%;
@@ -225,8 +224,8 @@ function ensureStatusModal() {
       }
       .status-modal-body {
         text-align: left;
-        background: #ffffff;
-        border: 1px solid #f3c5dd;
+        background: #0a0e18;
+        border: 1px solid #1a2740;
         border-radius: 12px;
         padding: 10px 12px;
         margin-bottom: 14px;
@@ -238,7 +237,7 @@ function ensureStatusModal() {
         gap: 8px;
         align-items: start;
         padding: 7px 0;
-        border-bottom: 1px solid #f3c5dd;
+        border-bottom: 1px solid #1a2740;
       }
       .status-row:last-child { border-bottom: none; }
       .status-row .k {
@@ -257,14 +256,14 @@ function ensureStatusModal() {
       .status-row .v code {
         font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
         font-size: 12px;
-        background: #ffffff;
-        border: 1px solid #f3c5dd;
+        background: #10182a;
+        border: 1px solid #1a2740;
         padding: 2px 6px;
         border-radius: 6px;
         color: #90caf9;
       }
-      .status-row .v.sukses { color: #e21b83; }
-      .status-row .v.proses { color: #f08abd; }
+      .status-row .v.sukses { color: #66bb6a; }
+      .status-row .v.proses { color: #42a5f5; }
       .status-row .v.belum { color: #ffb74d; }
       .status-note {
         margin-top: 8px;
@@ -274,7 +273,7 @@ function ensureStatusModal() {
       }
       .status-modal-btn {
         width: 100%;
-        background: linear-gradient(135deg, #e21b83, #b91568);
+        background: linear-gradient(135deg, #2196f3, #1565c0);
         color: #fff;
         border: none;
         border-radius: 10px;
@@ -284,8 +283,8 @@ function ensureStatusModal() {
         cursor: pointer;
       }
       .antrian-empty {
-        background: #ffffff;
-        border: 1px dashed #f3c5dd;
+        background: #10182a;
+        border: 1px dashed #1a2740;
         border-radius: 14px;
         padding: 28px 16px;
         text-align: center;
@@ -370,7 +369,7 @@ async function cekStatus() {
     showStatusModal(
       "Nomor Order Kosong",
       row("Info", "Masukkan nomor order terlebih dahulu.") +
-        row("Contoh", "<code>EJ-2026-7129517</code>"),
+        row("Contoh", "<code>DJ-2026-7129517</code>"),
       "⚠️"
     );
     return;
@@ -423,7 +422,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const inp = document.getElementById("searchOrder");
   if (inp) {
-    inp.placeholder = "EJ-2026-xxxx";
+    inp.placeholder = "DJ-2026-xxxx";
     inp.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
