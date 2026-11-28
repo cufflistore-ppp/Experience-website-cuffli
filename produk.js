@@ -119,4 +119,25 @@ function tambahProduk(data) {
   renderProduk();
 }
 
-document.addEventListener("DOMContentLoaded", renderProduk);
+document.addEventListener("DOMContentLoaded", function () {
+  renderProduk();
+  // Katalog bersama: perubahan dari panel admin ditarik dari Realtime Database.
+  try {
+    if (typeof firebase !== "undefined") {
+      if (!firebase.apps.length && window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
+        firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG);
+      }
+      if (firebase.apps.length) {
+        firebase.database().ref("settings/products/home").on("value", function (snap) {
+          const remote = snap.val();
+          if (Array.isArray(remote) && remote.length) {
+            produk.length = 0;
+            remote.forEach(item => produk.push(item));
+            try { localStorage.setItem("voxyy_produk", JSON.stringify(remote)); } catch (e) {}
+            renderProduk();
+          }
+        }, function (err) { console.warn("Katalog Home Firebase tidak dapat dibaca:", err); });
+      }
+    }
+  } catch (err) { console.warn("Katalog Home Firebase:", err); }
+});

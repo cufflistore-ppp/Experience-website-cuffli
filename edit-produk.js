@@ -110,7 +110,7 @@ function getProdukList(cat) {
   return [];
 }
 
-function saveProdukList(cat, list) {
+async function saveProdukList(cat, list) {
   const key = cat === "digital" ? PRODUK_DIGITAL_KEY : PRODUK_HOME_KEY;
   localStorage.setItem(key, JSON.stringify(list || []));
   if (cat === "digital") {
@@ -119,15 +119,21 @@ function saveProdukList(cat, list) {
     try { localStorage.setItem("voxyy_produk", JSON.stringify(list || [])); } catch (e) {}
   }
   try {
+    if (typeof firebase === "undefined") throw new Error("Firebase SDK belum dimuat.");
     if (typeof firebase !== "undefined") {
       if (!firebase.apps.length && window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
         firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG);
       }
       if (firebase.apps.length) {
-        firebase.database().ref("settings/products/" + cat).set(list || []);
+        await firebase.database().ref("settings/products/" + cat).set(list || []);
+      } else {
+        throw new Error("Firebase belum terinisialisasi.");
       }
     }
-  } catch (e) {}
+  } catch (e) {
+    console.error("Gagal menyimpan katalog ke Firebase:", e);
+    throw e;
+  }
 }
 
 function renderProdukAdmin() {
@@ -237,7 +243,7 @@ async function simpanProduk() {
 
   if (idRaw && oldCat !== lokasi) {
     let oldList = getProdukList(oldCat).filter((x) => Number(x.id) !== Number(idRaw));
-    saveProdukList(oldCat, oldList);
+    await saveProdukList(oldCat, oldList);
   }
 
   let list = getProdukList(lokasi);
@@ -295,6 +301,7 @@ async function simpanProduk() {
       status,
       deskripsi,
       img,
+      video,
       fitur: ["Bayar langsung QRIS", "Konfirmasi via WhatsApp"],
       directPay: true,
       label: "JASA",
@@ -302,7 +309,14 @@ async function simpanProduk() {
     });
   }
 
-  saveProdukList(lokasi, list);
+  try {
+    await saveProdukList(lokasi, list);
+  } catch (err) {
+    alert("Produk gagal disimpan ke Firebase. Periksa koneksi dan Database Rules. " + (err.message || ""));
+    const saveBtn = document.getElementById("btnSimpanProduk");
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> Simpan'; }
+    return;
+  }
   currentProdukCat = lokasi;
   document.querySelectorAll(".admin-tab").forEach((t) => {
     t.classList.toggle("active", t.dataset.cat === lokasi);
