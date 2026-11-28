@@ -70,25 +70,50 @@ function setVideoUploadStatus(message, show = true) {
   el.textContent = message || ""; el.style.display = show ? "block" : "none";
 }
 function getFirebaseStorage() {
-  if (typeof firebase === "undefined") throw new Error("Firebase belum dimuat.");
-  if (!firebase.apps.length && window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG);
-  if (!firebase.apps.length || typeof firebase.storage !== "function") throw new Error("Firebase Storage belum aktif.");
-  return firebase.storage();
+  if (typeof firebase === "undefined") throw new Error("Firebase SDK belum dimuat.");
+  if (!firebase.apps.length && window.VoxyyOrders && window.VoxyyOrders.FIREBASE_CONFIG) {
+    firebase.initializeApp(window.VoxyyOrders.FIREBASE_CONFIG);
+  }
+  if (!firebase.apps.length || typeof firebase.storage !== "function") {
+    throw new Error("Firebase Storage SDK belum aktif. Pastikan firebase-storage-compat.js dimuat.");
+  }
+  const app = firebase.app();
+  const bucket = app.options && app.options.storageBucket;
+  if (!bucket) throw new Error("storageBucket belum diatur pada konfigurasi Firebase.");
+  return firebase.storage(app, `gs://${bucket}`);
 }
+
 function uploadProductVideo(file, cat, productId) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
+    let task;
+    let settled = false;
+    const fail = (err) => {
+      if (settled) return;
+      settled = true;
+      const code = err && err.code ? ` (${err.code})` : "";
+      const message = err && err.message ? err.message : "Upload dihentikan tanpa keterangan.";
+      reject(new Error(message + code));
+    };
     try {
       const storage = getFirebaseStorage();
       const safeName = String(file.name || "video.mp4").replace(/[^a-zA-Z0-9._-]/g, "_");
       const ref = storage.ref(`product-videos/${cat}/${productId}_${Date.now()}_${safeName}`);
-      const task = ref.put(file, { contentType: file.type || "video/mp4" });
-      task.on("state_changed", snapshot => {
+      setVideoUploadStatus(`Mengunggah video: 0% (0 KB / ${formatFileSize(file.size)})`);
+      task = ref.put(file, { contentType: file.type || "video/mp4" });
+      task.on("state_changed", (snapshot) => {
         const pct = snapshot.totalBytes ? Math.round(snapshot.bytesTransferred / snapshot.totalBytes * 100) : 0;
         setVideoUploadStatus(`Mengunggah video: ${pct}% (${formatFileSize(snapshot.bytesTransferred)} / ${formatFileSize(snapshot.totalBytes)})`);
-      }, reject, async () => {
-        try { resolve(await task.snapshot.ref.getDownloadURL()); } catch (err) { reject(err); }
+      }, fail, async () => {
+        if (settled) return;
+        try {
+          const url = await task.snapshot.ref.getDownloadURL();
+          settled = true;
+          resolve(url);
+        } catch (err) { fail(err); }
       });
-    } catch (err) { reject(err); }
+      // Force the resumable task to run instead of leaving it paused.
+      if (task && typeof task.resume === "function") task.resume();
+    } catch (err) { fail(err); }
   });
 }
 
@@ -258,7 +283,7 @@ async function simpanProduk() {
       setVideoUploadStatus("Video berhasil di-upload. Menyimpan produk...");
     } catch (err) {
       console.error(err);
-      alert("Upload video gagal. Pastikan Firebase Storage aktif dan rules sudah dipasang. " + (err.message || ""));
+      alert("Upload video gagal. Periksa Firebase Storage, bucket, koneksi, dan Storage Rules. Detail: " + (err.message || "Tidak diketahui"));
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-save"></i> Simpan'; }
       setVideoUploadStatus("Upload gagal. Produk belum disimpan.");
       return;
